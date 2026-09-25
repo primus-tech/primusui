@@ -15,29 +15,29 @@ PUIRoleplay.DropdownOptions = {
         ["d"] = "Do Not Show"
     },
     walkups = {
-        ["a"] = "Welcomes Walk-Ups",
-        ["b"] = "No Walk-Ups",
-        ["c"] = "Guild Only",
+        ["a"] = "Welcome",
+        ["b"] = "None",
+        ["c"] = "Guild",
         ["d"] = "Do Not Show"
     },
     injury = {
         ["a"] = "Acceptable",
-        ["b"] = "Ask First",
+        ["b"] = "Ask",
         ["c"] = "No",
         ["d"] = "Do Not Show"
     },
     romance = {
         ["a"] = "Looking",
-        ["b"] = "In A Relationship",
-        ["c"] = "Open Relationship",
-        ["d"] = "Committed",
-        ["e"] = "Ask First",
+        ["b"] = "Partnered",
+        ["c"] = "Open",
+        ["d"] = "Single",
+        ["e"] = "Ask",
         ["f"] = "No",
         ["g"] = "Do Not Show"
     },
     death = {
         ["a"] = "Acceptable",
-        ["b"] = "Ask First",
+        ["b"] = "Ask",
         ["c"] = "No",
         ["d"] = "Do Not Show"
     }

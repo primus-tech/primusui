@@ -439,7 +439,7 @@ function Sheet:BuildFrame()
         experience = { "a", "b", "c", "d" },
         walkups    = { "a", "b", "c", "d" },
         injury     = { "a", "b", "c", "d" },
-        romance    = { "a", "b", "c", "d", "e", "f", "g" },
+        romance    = { "a", "d", "c", "b", "e", "f", "g" },
         death      = { "a", "b", "c", "d" }
     }
     
