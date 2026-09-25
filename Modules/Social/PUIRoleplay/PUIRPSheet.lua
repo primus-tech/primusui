@@ -420,7 +420,7 @@ function Sheet:BuildFrame()
     end
     
     ----------------------------------------------------------------------------
-    -- Panel 2: RP Style & Preferences
+    -- Panel 2: RP Style & Preferences (Clean Spacious Layout)
     ----------------------------------------------------------------------------
     local p2 = CreateFrame("Frame", nil, contentBox)
     p2:SetAllPoints(contentBox)
@@ -432,58 +432,191 @@ function Sheet:BuildFrame()
         "Roleplay Experience Level:",
         "Walk-Up Preferences:",
         "Combat Injury Tolerance:",
-        "Romance / Relationship Status:",
+        "Romance / Relationship Preferences:",
         "Character Death Willingness:"
+    }
+    local styleKeyOrder = {
+        experience = { "a", "b", "c", "d" },
+        walkups    = { "a", "b", "c", "d" },
+        injury     = { "a", "b", "c", "d" },
+        romance    = { "a", "b", "c", "d", "e", "f", "g" },
+        death      = { "a", "b", "c", "d" }
     }
     
     p2.buttons = {}
+    local currentY = -10
+    
     for i, key in ipairs(styleKeys) do
-        local lbl = p2:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        lbl:SetPoint("TOPLEFT", p2, "TOPLEFT", 16, -12 - (i - 1) * 72)
+        local card = Create1PxBackdrop(p2, 0.05, 0.05, 0.07, 0.8, 0.18, 0.20, 0.24, 1.0)
+        local isRomance = (key == "romance")
+        local cardHeight = isRomance and 74 or 50
+        
+        card:SetWidth(412)
+        card:SetHeight(cardHeight)
+        card:SetPoint("TOPLEFT", p2, "TOPLEFT", 12, currentY)
+        
+        local lbl = card:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        lbl:SetPoint("TOPLEFT", card, "TOPLEFT", 8, -6)
         lbl:SetText("|cff00e5ff" .. styleLabels[i] .. "|r")
         
         local options = PUIRoleplay.DropdownOptions[key] or {}
-        local optRow = CreateFrame("Frame", nil, p2)
-        optRow:SetWidth(400)
-        optRow:SetHeight(38)
-        optRow:SetPoint("TOPLEFT", lbl, "BOTTOMLEFT", 0, -4)
+        local order = styleKeyOrder[key] or {}
         
-        local col = 0
-        for optKey, optText in pairs(options) do
-            local optBtn = CreateFrame("Button", nil, optRow)
-            optBtn:SetWidth(125)
-            optBtn:SetHeight(20)
-            optBtn:SetPoint("TOPLEFT", optRow, "TOPLEFT", math.mod(col, 3) * 130, -math.floor(col / 3) * 22)
-            optBtn:SetBackdrop({
-                bgFile = "Interface\\Buttons\\WHITE8X8",
-                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                tile = false, tileSize = 0, edgeSize = 1,
-                insets = { left = 1, right = 1, top = 1, bottom = 1 }
-            })
-            optBtn:SetBackdropColor(0.08, 0.08, 0.12, 0.95)
-            optBtn:SetBackdropBorderColor(0.30, 0.35, 0.42, 1.0)
-            
-            local btnText = optBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            btnText:SetPoint("CENTER", optBtn, "CENTER", 0, 0)
-            btnText:SetText(optText)
-            btnText:SetTextColor(0.90, 0.90, 0.95)
-            optBtn.text = btnText
-            optBtn.styleKey = key
-            optBtn.optKey = optKey
-            
-            optBtn:SetScript("OnClick", function()
-                if isViewingSelf then
-                    local profile = PUIRoleplay:GetMyProfile()
-                    profile[this.styleKey] = this.optKey
-                    profile.keyT = PUIRoleplay:GenerateKey()
-                    PUIRoleplay:SaveMyProfile(profile)
-                    Sheet:Refresh()
+        if isRomance then
+            -- Romance: Row 1 (4 buttons)
+            for col = 1, 4 do
+                local optKey = order[col]
+                local optText = options[optKey]
+                if optKey and optText then
+                    local optBtn = CreateFrame("Button", nil, card)
+                    optBtn:SetWidth(95)
+                    optBtn:SetHeight(20)
+                    optBtn:SetPoint("TOPLEFT", card, "TOPLEFT", 8 + (col - 1) * 99, -24)
+                    optBtn:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, tileSize = 0, edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    })
+                    optBtn:SetBackdropColor(0.06, 0.06, 0.09, 0.95)
+                    optBtn:SetBackdropBorderColor(0.25, 0.25, 0.32, 1.0)
+                    
+                    local btnText = optBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+                    btnText:SetPoint("CENTER", optBtn, "CENTER", 0, 0)
+                    btnText:SetText(optText)
+                    optBtn.text = btnText
+                    optBtn.styleKey = key
+                    optBtn.optKey = optKey
+                    
+                    optBtn:SetScript("OnEnter", function()
+                        if this.isSelected ~= true then
+                            this:SetBackdropColor(0.12, 0.14, 0.20, 1.0)
+                            this:SetBackdropBorderColor(0.0, 0.65, 0.90, 0.8)
+                        end
+                    end)
+                    optBtn:SetScript("OnLeave", function()
+                        if this.isSelected ~= true then
+                            this:SetBackdropColor(0.06, 0.06, 0.09, 0.95)
+                            this:SetBackdropBorderColor(0.25, 0.25, 0.32, 1.0)
+                        end
+                    end)
+                    optBtn:SetScript("OnClick", function()
+                        if isViewingSelf then
+                            local profile = PUIRoleplay:GetMyProfile()
+                            profile[this.styleKey] = this.optKey
+                            profile.keyT = PUIRoleplay:GenerateKey()
+                            PUIRoleplay:SaveMyProfile(profile)
+                            Sheet:Refresh()
+                        end
+                    end)
+                    
+                    table.insert(p2.buttons, optBtn)
                 end
-            end)
-            
-            table.insert(p2.buttons, optBtn)
-            col = col + 1
+            end
+            -- Romance: Row 2 (3 buttons)
+            for col = 1, 3 do
+                local optKey = order[4 + col]
+                local optText = options[optKey]
+                if optKey and optText then
+                    local optBtn = CreateFrame("Button", nil, card)
+                    optBtn:SetWidth(128)
+                    optBtn:SetHeight(20)
+                    optBtn:SetPoint("TOPLEFT", card, "TOPLEFT", 8 + (col - 1) * 133, -48)
+                    optBtn:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, tileSize = 0, edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    })
+                    optBtn:SetBackdropColor(0.06, 0.06, 0.09, 0.95)
+                    optBtn:SetBackdropBorderColor(0.25, 0.25, 0.32, 1.0)
+                    
+                    local btnText = optBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+                    btnText:SetPoint("CENTER", optBtn, "CENTER", 0, 0)
+                    btnText:SetText(optText)
+                    optBtn.text = btnText
+                    optBtn.styleKey = key
+                    optBtn.optKey = optKey
+                    
+                    optBtn:SetScript("OnEnter", function()
+                        if this.isSelected ~= true then
+                            this:SetBackdropColor(0.12, 0.14, 0.20, 1.0)
+                            this:SetBackdropBorderColor(0.0, 0.65, 0.90, 0.8)
+                        end
+                    end)
+                    optBtn:SetScript("OnLeave", function()
+                        if this.isSelected ~= true then
+                            this:SetBackdropColor(0.06, 0.06, 0.09, 0.95)
+                            this:SetBackdropBorderColor(0.25, 0.25, 0.32, 1.0)
+                        end
+                    end)
+                    optBtn:SetScript("OnClick", function()
+                        if isViewingSelf then
+                            local profile = PUIRoleplay:GetMyProfile()
+                            profile[this.styleKey] = this.optKey
+                            profile.keyT = PUIRoleplay:GenerateKey()
+                            PUIRoleplay:SaveMyProfile(profile)
+                            Sheet:Refresh()
+                        end
+                    end)
+                    
+                    table.insert(p2.buttons, optBtn)
+                end
+            end
+        else
+            -- 4 Buttons in 1 Row
+            for col = 1, 4 do
+                local optKey = order[col]
+                local optText = options[optKey]
+                if optKey and optText then
+                    local optBtn = CreateFrame("Button", nil, card)
+                    optBtn:SetWidth(95)
+                    optBtn:SetHeight(20)
+                    optBtn:SetPoint("TOPLEFT", card, "TOPLEFT", 8 + (col - 1) * 99, -24)
+                    optBtn:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, tileSize = 0, edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    })
+                    optBtn:SetBackdropColor(0.06, 0.06, 0.09, 0.95)
+                    optBtn:SetBackdropBorderColor(0.25, 0.25, 0.32, 1.0)
+                    
+                    local btnText = optBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+                    btnText:SetPoint("CENTER", optBtn, "CENTER", 0, 0)
+                    btnText:SetText(optText)
+                    optBtn.text = btnText
+                    optBtn.styleKey = key
+                    optBtn.optKey = optKey
+                    
+                    optBtn:SetScript("OnEnter", function()
+                        if this.isSelected ~= true then
+                            this:SetBackdropColor(0.12, 0.14, 0.20, 1.0)
+                            this:SetBackdropBorderColor(0.0, 0.65, 0.90, 0.8)
+                        end
+                    end)
+                    optBtn:SetScript("OnLeave", function()
+                        if this.isSelected ~= true then
+                            this:SetBackdropColor(0.06, 0.06, 0.09, 0.95)
+                            this:SetBackdropBorderColor(0.25, 0.25, 0.32, 1.0)
+                        end
+                    end)
+                    optBtn:SetScript("OnClick", function()
+                        if isViewingSelf then
+                            local profile = PUIRoleplay:GetMyProfile()
+                            profile[this.styleKey] = this.optKey
+                            profile.keyT = PUIRoleplay:GenerateKey()
+                            PUIRoleplay:SaveMyProfile(profile)
+                            Sheet:Refresh()
+                        end
+                    end)
+                    
+                    table.insert(p2.buttons, optBtn)
+                end
+            end
         end
+        
+        currentY = currentY - cardHeight - 8
     end
     
     ----------------------------------------------------------------------------
