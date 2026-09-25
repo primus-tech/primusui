@@ -162,6 +162,20 @@ local function CreateBankSlot(parent, index)
     return slot
 end
 
+-- Helper to safely get the player inventory slot ID for a bank bag (1..6 -> Bags 5..10)
+local function GetBankBagInvSlot(bagIndex)
+    local bagID = bagIndex + 4
+    if ContainerIDToInventoryID then
+        local invSlot = ContainerIDToInventoryID(bagID)
+        if invSlot and invSlot > 0 then return invSlot end
+    end
+    if BankButtonIDToInvSlotID then
+        local invSlot = BankButtonIDToInvSlotID(bagIndex, 1)
+        if invSlot and invSlot > 0 then return invSlot end
+    end
+    return nil
+end
+
 -- =========================================================================
 -- BANK BAG SLOT FACTORY (Bags 5 to 10)
 -- =========================================================================
@@ -190,7 +204,7 @@ local function CreateBankBagSlot(parent, bagIndex)
 
     slot:SetScript("OnClick", function()
         if not isBankOpen then return end
-        local invSlot = 67 + bagIndex -- Inventory slots 68 to 73
+        local invSlot = GetBankBagInvSlot(bagIndex)
         local numSlotsPurchased, isFull = GetNumBankSlots()
 
         if bagIndex > (numSlotsPurchased or 0) then
@@ -215,28 +229,30 @@ local function CreateBankBagSlot(parent, bagIndex)
                 end
             end
         else
-            if CursorHasItem() then
-                PutItemInBag(invSlot)
-            else
-                PickupBagFromSlot(invSlot)
+            if invSlot then
+                if CursorHasItem() then
+                    PutItemInBag(invSlot)
+                else
+                    PickupBagFromSlot(invSlot)
+                end
             end
         end
     end)
 
     slot:SetScript("OnDragStart", function()
         if not isBankOpen then return end
-        local invSlot = 67 + bagIndex
+        local invSlot = GetBankBagInvSlot(bagIndex)
         local numSlotsPurchased = GetNumBankSlots()
-        if bagIndex <= (numSlotsPurchased or 0) then
+        if invSlot and bagIndex <= (numSlotsPurchased or 0) then
             PickupBagFromSlot(invSlot)
         end
     end)
 
     slot:SetScript("OnReceiveDrag", function()
         if not isBankOpen then return end
-        local invSlot = 67 + bagIndex
+        local invSlot = GetBankBagInvSlot(bagIndex)
         local numSlotsPurchased = GetNumBankSlots()
-        if bagIndex <= (numSlotsPurchased or 0) then
+        if invSlot and bagIndex <= (numSlotsPurchased or 0) then
             PutItemInBag(invSlot)
         end
     end)
@@ -244,14 +260,14 @@ local function CreateBankBagSlot(parent, bagIndex)
     slot:SetScript("OnEnter", function()
         GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
         local numSlotsPurchased = isBankOpen and GetNumBankSlots() or 0
-        local invSlot = 67 + bagIndex
+        local invSlot = GetBankBagInvSlot(bagIndex)
 
         if isBankOpen and bagIndex > (numSlotsPurchased or 0) then
             local cost = GetBankSlotCost(numSlotsPurchased)
             GameTooltip:SetText(BANK_BAG_PURCHASE or "Purchase Bank Slot", 1.0, 0.82, 0.0)
             GameTooltip:AddLine(string.format("Cost: %s", Utils.FormatMoney(cost)), 1.0, 1.0, 1.0)
             GameTooltip:Show()
-        elseif isBankOpen then
+        elseif isBankOpen and invSlot then
             local hasItem = GameTooltip:SetInventoryItem("player", invSlot)
             if not hasItem then
                 GameTooltip:SetText(BANK_BAG or "Bank Bag Slot", 1.0, 1.0, 1.0)
@@ -308,9 +324,9 @@ function PUIBank:ScanLiveBank()
     local bags = {}
     for bagIndex = 1, 6 do
         local bagID = bagIndex + 4 -- Bags 5..10
-        local invSlot = 67 + bagIndex
-        local bagTexture = GetInventoryItemTexture("player", invSlot)
-        local bagLink = GetInventoryItemLink("player", invSlot)
+        local invSlot = GetBankBagInvSlot(bagIndex)
+        local bagTexture = invSlot and GetInventoryItemTexture("player", invSlot)
+        local bagLink = invSlot and GetInventoryItemLink("player", invSlot)
         local numSlots = GetContainerNumSlots(bagID) or 0
 
         bags[bagIndex] = {
@@ -464,8 +480,8 @@ function PUIBank:UpdateBankSlots()
 
             if isBankOpen then
                 if bagIdx <= purchasedSlots then
-                    local invSlot = 67 + bagIdx
-                    local tex = GetInventoryItemTexture("player", invSlot)
+                    local invSlot = GetBankBagInvSlot(bagIdx)
+                    local tex = invSlot and GetInventoryItemTexture("player", invSlot)
                     if tex then
                         bagBtn.icon:SetTexture(tex)
                         bagBtn.icon:Show()
