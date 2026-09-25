@@ -376,7 +376,7 @@ function PUIRoleplay:OnEnable()
         PUIRoleplay.Comms:JoinRPChannel()
     end)
     
-    -- Target & Mouseover Updates
+    -- Target Updates
     Primus.Events:Register("PLAYER_TARGET_CHANGED", self, function()
         if PUIRoleplay.Glance then
             PUIRoleplay.Glance:UpdateTarget()
@@ -384,16 +384,10 @@ function PUIRoleplay:OnEnable()
         if UnitIsPlayer("target") and not UnitIsUnit("target", "player") then
             local name = UnitName("target")
             if name then
-                PUIRoleplay.Comms:SendRequest("T", name)
-            end
-        end
-    end)
-
-    Primus.Events:Register("UPDATE_MOUSEOVER_UNIT", self, function()
-        if UnitIsPlayer("mouseover") and not UnitIsUnit("mouseover", "player") then
-            local name = UnitName("mouseover")
-            if name then
-                PUIRoleplay.Comms:SendRequest("M", name)
+                local charData = PUIRoleplay:GetCharacterData(name)
+                if not charData or not charData.keyT then
+                    PUIRoleplay.Comms:SendRequest("T", name)
+                end
             end
         end
     end)

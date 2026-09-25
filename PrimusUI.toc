@@ -21,6 +21,7 @@ Core\Anim\Anim.lua
 Core\Widgets\Widgets.lua
 Core\Keybind\Keybind.lua
 Core\Console\Console.lua
+Core\Comm\ChatThrottleLib.lua
 Core\Comm\Comm.lua
 Core\State\State.lua
 Core\Config\Options.lua

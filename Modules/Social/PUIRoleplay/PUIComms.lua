@@ -13,9 +13,12 @@ PUIRoleplay.Comms = Comms
 local channelName = "TTRP"
 local minChatLevel = 10
 local timeBetweenPings = 30
-local timeOfLastSend = 0
-local lastRequestType = nil
-local lastPlayerName = nil
+
+-- Throttling & Deduplication State
+local lastRequestTimes = {}  -- [playerName .. "_" .. requestType] = timestamp
+local lastDataSentTime = {}  -- [dataPrefix] = timestamp
+local globalLastSendTime = 0
+local lastPingSentTime = 0
 
 -- Wire protocol data keys matching TurtleRP 1-to-1
 local dataKeys = {
@@ -68,7 +71,7 @@ function Comms:CanChat()
     return false
 end
 
-function Comms:SendChannelMessage(message)
+function Comms:SendChannelMessage(message, priority)
     local chanNumber = GetChannelName(channelName)
     if not chanNumber or chanNumber == 0 then
         chanNumber = GetChannelName(string.lower(channelName))
@@ -86,8 +89,9 @@ function Comms:SendChannelMessage(message)
     if not chanNumber or chanNumber == 0 then return end
 
     local encoded = self:DrunkEncode(message)
+    local prio = priority or "BULK"
     if _G.ChatThrottleLib then
-        _G.ChatThrottleLib:SendChatMessage("NORMAL", channelName, encoded, "CHANNEL", nil, chanNumber)
+        _G.ChatThrottleLib:SendChatMessage(prio, channelName, encoded, "CHANNEL", nil, chanNumber)
     else
         SendChatMessage(encoded, "CHANNEL", nil, chanNumber)
     end
@@ -112,12 +116,8 @@ function Comms:JoinRPChannel()
         JoinChannelByName(channelName)
     end
     
-    -- Send initial announcement pings
-    Primus.Time:After(1.5, function()
-        Comms:SendPing("A")
-    end, PUIRoleplay)
-
-    Primus.Time:After(6.0, function()
+    -- Send initial announcement pings spaced safely
+    Primus.Time:After(3.0, function()
         Comms:SendPing("A")
     end, PUIRoleplay)
 end
@@ -127,6 +127,19 @@ end
 --------------------------------------------------------------------------------
 function Comms:SendPing(pingType)
     if not self:CanChat() then return end
+    
+    local curTime = time()
+    -- If TurtleRP is running its own ping loop, don't duplicate periodic pings
+    if _G.TurtleRP and _G.TurtleRP.canChat and _G.TurtleRP.canChat() and pingType == "P" then
+        return
+    end
+
+    -- Throttle ping broadcasts to minimum 15s interval
+    if (curTime - lastPingSentTime) < 15 and pingType == "P" then
+        return
+    end
+    lastPingSentTime = curTime
+
     local pType = pingType or "P"
     local zoneText = GetZoneText() or ""
     local msg = pType .. zoneText
@@ -145,7 +158,7 @@ function Comms:SendPing(pingType)
         msg = msg .. "~false~false~1.1.0"
     end
     
-    self:SendChannelMessage(msg)
+    self:SendChannelMessage(msg, "NORMAL")
 end
 
 function Comms:StartPingTicker()
@@ -177,7 +190,7 @@ local function SplitString(str, delimiter, targetTable)
 end
 
 --------------------------------------------------------------------------------
--- Request Dispatcher (M, T, D)
+-- Request Dispatcher (M, T, D) with Anti-Flood Deduplication
 --------------------------------------------------------------------------------
 function Comms:SendRequest(requestType, playerName)
     if not self:CanChat() or not playerName or playerName == "" or playerName == UnitName("player") then
@@ -185,18 +198,26 @@ function Comms:SendRequest(requestType, playerName)
     end
     
     local curTime = time()
-    if (curTime - timeOfLastSend >= 2) or (lastRequestType ~= requestType) or (lastPlayerName ~= playerName) then
-        timeOfLastSend = curTime
-        lastRequestType = requestType
-        lastPlayerName = playerName
-        
-        local charInfo = PUIRoleplay:GetCharacterData(playerName)
-        local key = charInfo and charInfo["key" .. requestType]
-        if key and key ~= "" then
-            self:SendChannelMessage(requestType .. ":" .. playerName .. "~" .. key)
-        else
-            self:SendChannelMessage(requestType .. ":" .. playerName .. "~NO_KEY")
-        end
+    -- Global throttle: minimum 1.5s between ANY request sent to the channel
+    if (curTime - globalLastSendTime) < 1.5 then
+        return
+    end
+    
+    -- Per-player per-request-type cooldown: 45 seconds
+    local reqKey = playerName .. "_" .. requestType
+    if lastRequestTimes[reqKey] and (curTime - lastRequestTimes[reqKey]) < 45 then
+        return
+    end
+    
+    lastRequestTimes[reqKey] = curTime
+    globalLastSendTime = curTime
+    
+    local charInfo = PUIRoleplay:GetCharacterData(playerName)
+    local key = charInfo and charInfo["key" .. requestType]
+    if key and key ~= "" then
+        self:SendChannelMessage(requestType .. ":" .. playerName .. "~" .. key, "BULK")
+    else
+        self:SendChannelMessage(requestType .. ":" .. playerName .. "~NO_KEY", "BULK")
     end
 end
 
@@ -235,6 +256,13 @@ end
 -- Chunking Outbound Data (>200 chars)
 --------------------------------------------------------------------------------
 function Comms:SendData(dataPrefix)
+    local curTime = time()
+    -- Throttle outbound responses: don't broadcast the same data type more than once every 4 seconds
+    if lastDataSentTime[dataPrefix] and (curTime - lastDataSentTime[dataPrefix]) < 4 then
+        return
+    end
+    lastDataSentTime[dataPrefix] = curTime
+
     local payload = self:BuildPayload(dataPrefix)
     local myInfo = PUIRoleplay:GetMyProfile()
     local myKey = myInfo["key" .. dataPrefix] or "PUI10"
@@ -255,7 +283,7 @@ function Comms:SendData(dataPrefix)
     local totalChunks = table.getn(chunks)
     for i = 1, totalChunks do
         local packet = dataPrefix .. "R:p~" .. myKey .. "~" .. i .. "~" .. totalChunks .. "~" .. chunks[i]
-        self:SendChannelMessage(packet)
+        self:SendChannelMessage(packet, "BULK")
     end
 end
 
@@ -368,12 +396,7 @@ function Comms:ProcessPing(sender, msg)
     else
         charData["zone"] = zoneText
     end
-    
-    -- Automatically request basic profile info (M) if missing
-    if not charData.full_name or charData.full_name == "" or not charData.keyM then
-        Comms:SendRequest("M", sender)
-    end
 
-    -- Trigger directory and map pin updates
+    -- Trigger directory and map pin updates (NO automatic M request here to prevent channel flooding)
     PUIRoleplay:OnPingReceived(sender)
 end

@@ -33,8 +33,8 @@ function Tooltip:EnhancePlayerTooltip(unit)
     local isSelf = (playerName == UnitName("player"))
     local charData = isSelf and PUIRoleplay:GetMyProfile() or PUIRoleplay:GetCharacterData(playerName)
     
-    -- Request fresh M data if another player
-    if not isSelf then
+    -- Request fresh M data if missing
+    if not isSelf and (not charData or not charData.keyM or not charData.full_name or charData.full_name == "") then
         PUIRoleplay.Comms:SendRequest("M", playerName)
     end
     
