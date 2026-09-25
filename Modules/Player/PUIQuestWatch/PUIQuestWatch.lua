@@ -696,11 +696,9 @@ function PUIQuestWatch:Initialize()
 end
 
 -- Slash Commands
-if Primus.Console then
-    Primus.Console:RegisterCommand("quest", function(args)
-        args = args or ""
-        local cmd, rest = string.gfind(args, "(%S+)%s*(.*)")()
-        cmd = string.lower(cmd or "")
+if Primus.Console and Primus.Console.RegisterSubCommand then
+    Primus.Console:RegisterSubCommand("quest", function(argParam, parts)
+        local cmd = string.lower(argParam or "")
 
         if cmd == "clear" then
             PUIQuestWatch:ClearAllTracked()
