@@ -257,6 +257,45 @@ function Directory:BuildFrame()
                 this:SetBackdropColor(0.0, 0.35, 0.55, 0.6)
                 this:SetBackdropBorderColor(0.0, 0.7, 1.0, 1.0)
             end
+            
+            if this.targetPlayerName then
+                local isSelf = (this.targetPlayerName == UnitName("player"))
+                local data = isSelf and PUIRoleplay:GetMyProfile() or PUIRoleplay:GetCharacterData(this.targetPlayerName)
+                if data then
+                    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+                    local fullName = (data.full_name and data.full_name ~= "") and data.full_name or this.targetPlayerName
+                    local colorHex = data.class_color or "FFFFFF"
+                    GameTooltip:AddLine("|cff" .. colorHex .. fullName .. "|r (|cff888888" .. this.targetPlayerName .. "|r)")
+                    
+                    local isOnline = isSelf or PUIRoleplay:IsPlayerOnline(this.targetPlayerName)
+                    local isIC = (data.currently_ic == "1")
+                    local statusStr = ""
+                    if not isOnline then
+                        statusStr = "|cff777788Offline|r"
+                    elseif isIC then
+                        statusStr = "|cff00ff88In Character (IC)|r"
+                    else
+                        statusStr = "|cffffaa00Out of Character (OOC)|r"
+                    end
+                    GameTooltip:AddLine("Status: " .. statusStr, 1, 1, 1)
+                    
+                    local race = (data.race and data.race ~= "") and data.race or (isSelf and UnitRace("player") or "")
+                    local class = (data.class and data.class ~= "") and data.class or (isSelf and UnitClass("player") or "")
+                    if race ~= "" or class ~= "" then
+                        GameTooltip:AddLine(race .. " " .. class, 0.8, 0.8, 0.8)
+                    end
+                    local zone = (isSelf and (GetZoneText() or "")) or data.zone or ""
+                    if zone ~= "" then
+                        GameTooltip:AddLine("Zone: |cffffffff" .. zone .. "|r", 0.7, 0.7, 0.7)
+                    end
+                    if data.ic_pronouns and data.ic_pronouns ~= "" then
+                        GameTooltip:AddLine("Pronouns: |cffffffff" .. data.ic_pronouns .. "|r", 0.6, 0.6, 0.6)
+                    end
+                    GameTooltip:AddLine(" ")
+                    GameTooltip:AddLine("|cff00ccffClick|r to preview RP Profile flyout.", 0.2, 0.8, 0.2)
+                    GameTooltip:Show()
+                end
+            end
         end)
         
         row:SetScript("OnLeave", function()
@@ -267,6 +306,7 @@ function Directory:BuildFrame()
                 this:SetBackdropColor(0.04, 0.04, 0.05, (math.mod(i, 2) == 0) and 0.85 or 0.45)
                 this:SetBackdropBorderColor(0.14, 0.14, 0.17, 1.0)
             end
+            GameTooltip:Hide()
         end)
         
         row:SetScript("OnClick", function()
@@ -755,10 +795,16 @@ function Directory:RefreshFlyout()
     if not flyout or not Directory.selectedPlayer then return end
     
     local name = Directory.selectedPlayer
-    local data = (name == UnitName("player")) and PUIRoleplay:GetMyProfile() or PUIRoleplay:GetCharacterData(name)
+    local isSelf = (name == UnitName("player"))
+    local data = isSelf and PUIRoleplay:GetMyProfile() or PUIRoleplay:GetCharacterData(name)
     if not data then return end
     
     flyout.isRefreshing = true
+    
+    local _, pClass = UnitClass("player")
+    local pRace = UnitRace("player") or ""
+    local myZone = GetZoneText() or ""
+    if myZone == "" then myZone = GetMinimapZoneText() or GetRealZoneText() or "" end
     
     -- Header fields
     local iconIdx = tonumber(data.icon) or 0
@@ -768,8 +814,8 @@ function Directory:RefreshFlyout()
         flyout.avatarTex:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
     end
     
-    local colorHex = data.class_color or "FFFFFF"
-    local fullName = data.full_name or name
+    local colorHex = data.class_color or (isSelf and PUIRoleplay.ClassData and PUIRoleplay.ClassData[pClass] and PUIRoleplay.ClassData[pClass][4]) or "FFFFFF"
+    local fullName = (data.full_name and data.full_name ~= "") and data.full_name or name
     flyout.nameStr:SetText("|cff" .. colorHex .. fullName .. "|r")
     
     local title = data.title or ""
@@ -779,11 +825,16 @@ function Directory:RefreshFlyout()
         flyout.titleStr:SetText("|cff888888" .. name .. "|r")
     end
     
-    local race = data.race or ""
-    local class = data.class or ""
-    flyout.raceClassStr:SetText(race .. " " .. class)
+    local race = (data.race and data.race ~= "") and data.race or (isSelf and pRace or "")
+    local class = (data.class and data.class ~= "") and data.class or (isSelf and pClass or "")
+    local zone = (isSelf and myZone ~= "") and myZone or (data.zone or "")
+    local raceClassDisplay = (race ~= "" or class ~= "") and (race .. " " .. class) or ""
+    if zone ~= "" then
+        raceClassDisplay = raceClassDisplay .. " |cff888888(|r|cffffffff" .. zone .. "|r|cff888888)|r"
+    end
+    flyout.raceClassStr:SetText(raceClassDisplay)
     
-    local isOnline = PUIRoleplay:IsPlayerOnline(name)
+    local isOnline = isSelf or PUIRoleplay:IsPlayerOnline(name)
     local isIC = (data.currently_ic == "1")
     if not isOnline then
         flyout.statusPill:SetBackdropColor(0.25, 0.25, 0.28, 0.9)
@@ -868,20 +919,28 @@ function Directory:RefreshList(filterText)
     local settings = PUIRoleplay:GetSettings() or {}
     local showNSFW = (settings.show_nsfw == "1" or settings.show_nsfw == 1)
     
+    local playerName = UnitName("player")
+    local myZone = GetZoneText() or ""
+    if myZone == "" then myZone = GetMinimapZoneText() or GetRealZoneText() or "" end
+    
     local matched = {}
     local totalFound = 0
     local onlineCount = 0
+    local hasPlayer = false
     
     for name, data in pairs(allChars) do
         if data and (showNSFW or data.nsfw == "0" or data.nsfw == "" or data.nsfw == nil) then
             totalFound = totalFound + 1
-            local isOnline = PUIRoleplay:IsPlayerOnline(name)
+            local isSelf = (name == playerName)
+            if isSelf then hasPlayer = true end
+            
+            local isOnline = isSelf or PUIRoleplay:IsPlayerOnline(name)
             if isOnline then onlineCount = onlineCount + 1 end
             
-            local fullName = data.full_name or name
-            local zone = data.zone or ""
-            local class = data.class or ""
-            local classColor = data.class_color or "FFFFFF"
+            local fullName = (data.full_name and data.full_name ~= "") and data.full_name or name
+            local zone = isSelf and ((myZone ~= "") and myZone or (data.zone or "")) or (data.zone or "")
+            local class = (data.class and data.class ~= "") and data.class or (isSelf and UnitClass("player") or "")
+            local classColor = data.class_color or (isSelf and PUIRoleplay.ClassData and PUIRoleplay.ClassData[UnitClass("player")] and PUIRoleplay.ClassData[UnitClass("player")][4]) or "FFFFFF"
             local isIC = (data.currently_ic == "1")
             
             -- Status category: 1 = IC (Online), 2 = OOC (Online), 3 = Offline
@@ -902,6 +961,32 @@ function Directory:RefreshList(filterText)
                     zone = zone
                 })
             end
+        end
+    end
+    
+    -- Always inject current player if not already in known_characters
+    if not hasPlayer and playerName then
+        local myProf = PUIRoleplay:GetMyProfile() or {}
+        local _, pClass = UnitClass("player")
+        local pRace = UnitRace("player") or ""
+        local colorHex = (PUIRoleplay.ClassData and PUIRoleplay.ClassData[pClass] and PUIRoleplay.ClassData[pClass][4]) or "FFFFFF"
+        local myFullName = (myProf.full_name and myProf.full_name ~= "") and myProf.full_name or playerName
+        local isIC = (myProf.currently_ic == "1")
+        local currentZone = (myZone ~= "") and myZone or "Unknown"
+        
+        if query == "" or string.find(string.lower(playerName), query) or string.find(string.lower(myFullName), query) or string.find(string.lower(currentZone), query) or (pClass and string.find(string.lower(pClass), query)) then
+            table.insert(matched, {
+                rawName = playerName,
+                fullName = myFullName,
+                class = pClass or "",
+                classColor = colorHex,
+                isIC = isIC,
+                isOnline = true,
+                statusRank = isIC and 1 or 2,
+                zone = currentZone
+            })
+            totalFound = totalFound + 1
+            onlineCount = onlineCount + 1
         end
     end
     
@@ -979,6 +1064,9 @@ function Directory:UpdateScroll(offset)
     local f = self:BuildFrame()
     f.currentOffset = offset or 0
     local matched = f.matchedItems or {}
+    local playerName = UnitName("player")
+    local myZone = GetZoneText() or ""
+    if myZone == "" then myZone = GetMinimapZoneText() or GetRealZoneText() or "" end
     
     for i = 1, VISIBLE_ROWS do
         local row = f.rows[i]
@@ -1015,7 +1103,11 @@ function Directory:UpdateScroll(offset)
             end
             row.nameTxt:SetText(displayName)
             
-            row.zoneTxt:SetText(item.zone ~= "" and item.zone or "|cff555555Unknown|r")
+            local displayZone = item.zone
+            if item.rawName == playerName and (not displayZone or displayZone == "" or displayZone == "Unknown") then
+                displayZone = myZone
+            end
+            row.zoneTxt:SetText((displayZone and displayZone ~= "") and displayZone or "|cff555555Unknown|r")
             row:Show()
         else
             row.targetPlayerName = nil
