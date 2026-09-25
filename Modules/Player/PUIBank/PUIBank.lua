@@ -557,6 +557,25 @@ function PUIBank:CreateBankUI()
     bankFrame:SetFrameStrata("HIGH")
     bankFrame:Hide()
 
+    if bankFrame.closeButton then
+        bankFrame.closeButton:SetScript("OnClick", function()
+            if isBankOpen then
+                CloseBankFrame()
+            end
+            bankFrame:Hide()
+        end)
+    end
+
+    bankFrame:SetScript("OnHide", function()
+        if isBankOpen then
+            isBankOpen = false
+            CloseBankFrame()
+        end
+    end)
+
+    -- Register with UISpecialFrames so Escape key closes it
+    table.insert(UISpecialFrames, bankFrame:GetName())
+
     -- Search EditBox
     local searchBox = CreateFrame("EditBox", "Primus_PUIBankSearchBox", bankFrame)
     searchBox:SetWidth(140)
@@ -672,12 +691,14 @@ function PUIBank:OnInitialize()
 end
 
 function PUIBank:OnEnable()
-    -- Hook Bank Events & Suppress Blizzard Legacy BankFrame
+    -- Hook Bank Events & Keep BankFrame visible off-screen for C-engine UseContainerItem routing
     Events:Register("BANKFRAME_OPENED", "PUIBank", function()
         isBankOpen = true
         if BankFrame then
-            BankFrame:Hide()
-            BankFrame:UnregisterAllEvents()
+            BankFrame:SetAlpha(0)
+            BankFrame:ClearAllPoints()
+            BankFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -2000, 2000)
+            BankFrame:Show()
         end
         if not bankFrame then PUIBank:CreateBankUI() end
         bankFrame:Show()
@@ -686,6 +707,9 @@ function PUIBank:OnEnable()
 
     Events:Register("BANKFRAME_CLOSED", "PUIBank", function()
         isBankOpen = false
+        if BankFrame then
+            BankFrame:Hide()
+        end
         if bankFrame then bankFrame:Hide() end
     end)
 
@@ -712,5 +736,8 @@ function PUIBank:OnDisable()
     Events:UnregisterOwner("PUIBank")
     if bankFrame and bankFrame:IsShown() then
         bankFrame:Hide()
+    end
+    if BankFrame then
+        BankFrame:Hide()
     end
 end
