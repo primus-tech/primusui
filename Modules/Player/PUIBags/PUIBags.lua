@@ -31,10 +31,11 @@ local bagsDB = DB:RegisterNamespace("PUIBags", {
     showBagTray = true, -- Toggleable 5 equipped bag tray
 })
 
-local bagFrame     = nil
-local bagSlots     = {}
-local bagTraySlots = {}
-local searchFilter = ""
+local bagFrame         = nil
+local bagSlots         = {}
+local bagTraySlots     = {}
+local searchFilter     = ""
+local highlightedBagID = nil
 
 -- Quality Color borders
 local QUALITY_COLORS = {
@@ -109,16 +110,37 @@ local function CreateBagTraySlot(parent, bagID)
     slot:RegisterForDrag("LeftButton")
 
     slot:SetScript("OnClick", function()
-        if bagID == 0 then
-            return
-        end
-        local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
-        if invSlot then
-            if CursorHasItem() then
-                PutItemInBag(invSlot)
-            else
-                PickupBagFromSlot(invSlot)
+        if IsShiftKeyDown() then
+            -- Shift-Click: Pick up or swap the bag!
+            if bagID == 0 then
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIBags]: The backpack cannot be unequipped.", "ffbb33"))
+                return
             end
+            local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
+            if invSlot then
+                if CursorHasItem() then
+                    PutItemInBag(invSlot)
+                else
+                    PickupBagFromSlot(invSlot)
+                end
+            end
+        else
+            -- Plain Click: Highlight bag space or place bag if holding one on cursor
+            if CursorHasItem() and bagID > 0 then
+                local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
+                if invSlot then
+                    PutItemInBag(invSlot)
+                    return
+                end
+            end
+
+            -- Toggle highlight for this bag in the unified window
+            if highlightedBagID == bagID then
+                highlightedBagID = nil
+            else
+                highlightedBagID = bagID
+            end
+            PUIBags:UpdateBagSlots()
         end
     end)
 
@@ -142,7 +164,9 @@ local function CreateBagTraySlot(parent, bagID)
         GameTooltip:SetOwner(this, "ANCHOR_LEFT")
         if bagID == 0 then
             GameTooltip:SetText("Backpack (16 Slots)", 1.0, 0.82, 0.0)
-            GameTooltip:AddLine("Your default inventory container.", 0.7, 0.7, 0.7)
+            GameTooltip:AddLine("Your primary inventory container.", 0.7, 0.7, 0.7)
+            GameTooltip:AddLine(" ", 1, 1, 1)
+            GameTooltip:AddLine("|cffffd100Left-Click:|r Highlight backpack slots", 1.0, 1.0, 1.0)
             GameTooltip:Show()
         else
             local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
@@ -150,9 +174,15 @@ local function CreateBagTraySlot(parent, bagID)
                 local hasItem = GetInventoryItemTexture("player", invSlot)
                 if hasItem then
                     GameTooltip:SetInventoryItem("player", invSlot)
+                    GameTooltip:AddLine(" ", 1, 1, 1)
+                    GameTooltip:AddLine("|cffffd100Left-Click:|r Highlight this bag's slots", 1.0, 1.0, 1.0)
+                    GameTooltip:AddLine("|cffffd100Shift-Click / Drag:|r Pick up or swap bag", 1.0, 1.0, 1.0)
                 else
                     GameTooltip:SetText(string.format("Bag Slot %d", bagID), 1.0, 0.82, 0.0)
                     GameTooltip:AddLine("Empty bag slot. Drag a bag here to equip it.", 0.7, 0.7, 0.7)
+                    GameTooltip:AddLine(" ", 1, 1, 1)
+                    GameTooltip:AddLine("|cffffd100Left-Click:|r Highlight this bag's slots", 1.0, 1.0, 1.0)
+                    GameTooltip:AddLine("|cffffd100Shift-Click / Drag:|r Place or equip bag", 1.0, 1.0, 1.0)
                 end
                 GameTooltip:Show()
             end
@@ -186,10 +216,17 @@ local function UpdateBagTray()
         slot:ClearAllPoints()
         slot:SetPoint("LEFT", bagFrame.bagTray, "LEFT", bagID * 32, 0)
 
-        if bagID == 0 then
+        local isSelected = (highlightedBagID == bagID)
+        local isAnySelected = (highlightedBagID ~= nil)
+        local baseAlpha = (isAnySelected and not isSelected) and 0.45 or 1.0
+
+        if isSelected then
+            -- Bright highlight border on selected bag button
+            slot:SetBackdropBorderColor(1.0, 0.85, 0.10, 1)
+        elseif bagID == 0 then
             slot.icon:SetTexture("Interface\\Buttons\\Button-Backpack-Up")
             slot.icon:Show()
-            slot:SetBackdropBorderColor(0.85, 0.70, 0.20, 1)
+            slot:SetBackdropBorderColor(0.85, 0.70, 0.20, baseAlpha)
         else
             local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
             local texture = invSlot and GetInventoryItemTexture("player", invSlot)
@@ -199,14 +236,14 @@ local function UpdateBagTray()
                 local quality = GetInventoryItemQuality and GetInventoryItemQuality("player", invSlot)
                 if quality and QUALITY_COLORS[quality] then
                     local c = QUALITY_COLORS[quality]
-                    slot:SetBackdropBorderColor(c.r, c.g, c.b, 1)
+                    slot:SetBackdropBorderColor(c.r, c.g, c.b, baseAlpha)
                 else
-                    slot:SetBackdropBorderColor(0.2, 0.6, 1.0, 1)
+                    slot:SetBackdropBorderColor(0.2, 0.6, 1.0, baseAlpha)
                 end
             else
                 slot.icon:SetTexture("Interface\\PaperDoll\\UI-PaperDoll-Slot-Bag")
                 slot.icon:Show()
-                slot:SetBackdropBorderColor(0.25, 0.25, 0.30, 1)
+                slot:SetBackdropBorderColor(0.25, 0.25, 0.30, baseAlpha)
             end
         end
         slot:Show()
@@ -380,23 +417,31 @@ function PUIBags:UpdateBagSlots()
                         slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
                     end
 
-                    -- Search filtering
+                    -- Calculate slot visibility & opacity based on highlightedBagID and searchFilter
+                    local slotAlpha = 1.0
+                    if highlightedBagID ~= nil and bagID ~= highlightedBagID then
+                        slotAlpha = 0.20
+                    end
                     if searchFilter ~= "" and itemLink then
                         local itemName = GetItemInfo(itemLink)
                         if itemName and not string.find(string.lower(itemName), string.lower(searchFilter)) then
-                            slotBtn:SetAlpha(0.2)
-                        else
-                            slotBtn:SetAlpha(1.0)
+                            slotAlpha = 0.20
                         end
-                    else
-                        slotBtn:SetAlpha(1.0)
                     end
+                    slotBtn:SetAlpha(slotAlpha)
                 else
                     freeSlots = freeSlots + 1
                     slotBtn.icon:Hide()
                     slotBtn.count:Hide()
                     slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
-                    slotBtn:SetAlpha(searchFilter ~= "" and 0.2 or 1.0)
+
+                    local slotAlpha = 1.0
+                    if highlightedBagID ~= nil and bagID ~= highlightedBagID then
+                        slotAlpha = 0.20
+                    elseif searchFilter ~= "" then
+                        slotAlpha = 0.20
+                    end
+                    slotBtn:SetAlpha(slotAlpha)
                 end
 
                 slotBtn:Show()
@@ -477,6 +522,7 @@ function PUIBags:OnInitialize()
         if MainMenuBarBackpackButton then
             MainMenuBarBackpackButton:SetChecked(0)
         end
+        highlightedBagID = nil
     end)
 
     -- Header Controls: Search EditBox
