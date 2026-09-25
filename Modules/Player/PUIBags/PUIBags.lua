@@ -92,6 +92,7 @@ local function CreateBagTraySlot(parent, bagID)
     slot:SetBackdrop(Media:Fetch("border", "1Pixel"))
     slot:SetBackdropColor(0.08, 0.08, 0.10, 0.9)
     slot:SetBackdropBorderColor(0.3, 0.3, 0.35, 1)
+    slot:SetPoint("LEFT", parent, "LEFT", bagID * 32, 0)
 
     local icon = slot:CreateTexture(slot:GetName() .. "Icon", "BORDER")
     icon:SetPoint("TOPLEFT", slot, "TOPLEFT", 1, -1)
@@ -109,7 +110,6 @@ local function CreateBagTraySlot(parent, bagID)
 
     slot:SetScript("OnClick", function()
         if bagID == 0 then
-            -- Backpack cannot be unequipped
             return
         end
         local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
@@ -173,33 +173,40 @@ local function UpdateBagTray()
     local showTray = bagsDB:Get("showBagTray", true)
     if not showTray then
         bagFrame.bagTray:Hide()
+        for bagID = 0, 4 do
+            if bagTraySlots[bagID] then bagTraySlots[bagID]:Hide() end
+        end
         return
     end
 
     bagFrame.bagTray:Show()
 
     for bagID = 0, 4 do
-        local slot = bagTraySlots[bagID]
-        if not slot then
-            slot = CreateBagTraySlot(bagFrame.bagTray, bagID)
-            slot:SetPoint("LEFT", bagFrame.bagTray, "LEFT", bagID * 32, 0)
-        end
+        local slot = bagTraySlots[bagID] or CreateBagTraySlot(bagFrame.bagTray, bagID)
+        slot:ClearAllPoints()
+        slot:SetPoint("LEFT", bagFrame.bagTray, "LEFT", bagID * 32, 0)
 
         if bagID == 0 then
             slot.icon:SetTexture("Interface\\Buttons\\Button-Backpack-Up")
             slot.icon:Show()
-            slot:SetBackdropBorderColor(0.8, 0.65, 0.2, 1)
+            slot:SetBackdropBorderColor(0.85, 0.70, 0.20, 1)
         else
             local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
             local texture = invSlot and GetInventoryItemTexture("player", invSlot)
             if texture then
                 slot.icon:SetTexture(texture)
                 slot.icon:Show()
-                slot:SetBackdropBorderColor(0.2, 0.6, 1.0, 1)
+                local quality = GetInventoryItemQuality and GetInventoryItemQuality("player", invSlot)
+                if quality and QUALITY_COLORS[quality] then
+                    local c = QUALITY_COLORS[quality]
+                    slot:SetBackdropBorderColor(c.r, c.g, c.b, 1)
+                else
+                    slot:SetBackdropBorderColor(0.2, 0.6, 1.0, 1)
+                end
             else
                 slot.icon:SetTexture("Interface\\PaperDoll\\UI-PaperDoll-Slot-Bag")
                 slot.icon:Show()
-                slot:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+                slot:SetBackdropBorderColor(0.25, 0.25, 0.30, 1)
             end
         end
         slot:Show()
@@ -738,6 +745,11 @@ function PUIBags:OnEnable()
     end)
     Events:Register("PLAYER_MONEY", "PUIBags", function()
         UpdateMoneyDisplay()
+    end)
+    Events:Register("UNIT_INVENTORY_CHANGED", "PUIBags", function(unit)
+        if unit == "player" and bagFrame and bagFrame:IsShown() then
+            PUIBags:UpdateBagSlots()
+        end
     end)
     Events:Register("BANKFRAME_OPENED", "PUIBags", function()
         if bagFrame and not bagFrame:IsShown() then
