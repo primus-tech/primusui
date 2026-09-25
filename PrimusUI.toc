@@ -1,0 +1,124 @@
+## Interface: 11200
+## Title: PrimusUI
+## Notes: Modular, High-Performance UI Suite for Vanilla WoW 1.12.1
+## Author: Primus
+## Version: 1.0.0
+## SavedVariables: PrimusGlobalDB
+## SavedVariablesPerCharacter: PrimusCharDB
+
+# =========================================================================
+# CORE FOUNDATION (Tier 1)
+# =========================================================================
+Core\Bootstrap\Bootstrap.lua
+Core\Utils\Utils.lua
+Core\Memory\Memory.lua
+Core\Debug\Debug.lua
+Core\Time\Time.lua
+Core\Events\Events.lua
+Core\DB\DB.lua
+Core\Media\Media.lua
+Core\Anim\Anim.lua
+Core\Widgets\Widgets.lua
+Core\Keybind\Keybind.lua
+Core\Console\Console.lua
+Core\Comm\Comm.lua
+Core\State\State.lua
+Core\Config\Options.lua
+
+# =========================================================================
+# UTILITY & META-UI MODULES (Tier 2 & 3)
+# =========================================================================
+Modules\Utility\PUIMover\PUIMover.lua
+Modules\Utility\PUIDock\PUIDock.lua
+Modules\Utility\PUIFastLoot\PUIFastLoot.lua
+Modules\Utility\PUIAutoMechanics\PUIAutoMechanics.lua
+Modules\Utility\PUIItemCompare\PUIItemCompare.lua
+Modules\Utility\PUIMinimapOrbit\PUIMinimapOrbit.lua
+Modules\Utility\PUIMailbox\PUIMailbox.lua
+Modules\Utility\PUIMerchant\PUIMerchant.lua
+Modules\Utility\PUIInspect\PUIInspect.lua
+
+# =========================================================================
+# GATHERING & PROFESSIONS (Tier 3)
+# =========================================================================
+Modules\Gathering\PUIGathering\PUIGathering.lua
+Modules\Professions\PUIProfessions\PUIProfessions.lua
+
+# =========================================================================
+# COMBAT & HUD ENGINES (Tier 2)
+# =========================================================================
+Modules\Combat\PUICombatLog\PUICombatLog.lua
+Modules\Combat\PUICombatAuras\PUICombatAuras.lua
+Modules\Combat\PUIThreat\PUIThreat.lua
+Modules\Combat\PUIHealComm\PUIHealComm.lua
+Modules\Combat\PUICastBar\PUICastBar.lua
+Modules\Combat\PUICooldowns\PUICooldowns.lua
+Modules\Combat\PUIRange\PUIRange.lua
+Modules\Combat\PUITactical\PUITactical.lua
+Modules\HUD\PUIAuras\PUIAuras.lua
+Modules\HUD\PUIHud\PUIWings.lua
+Modules\HUD\PUIHud\PUIMiniBars.lua
+Modules\HUD\PUIHud\PUIActiveAssist.lua
+Modules\HUD\PUIHud\PUITimers.lua
+Modules\HUD\PUIHud\PUITriage.lua
+Modules\HUD\PUIHud\PUIHud.lua
+
+# =========================================================================
+# UNIT FRAME PRIMITIVES & SUITE (Tier 2 & 3)
+# =========================================================================
+Modules\Units\PUIUnitBase\PUIUnitBase.lua
+Modules\Units\PUIUnitFrames\PUIUnitFrames.lua
+
+# =========================================================================
+# ACTION BARS & PUIHOTBARS (Tier 2)
+# =========================================================================
+Modules\Bars\PUIHotbars\PUIButtons.lua
+Modules\Bars\PUIHotbars\PUIXPBar.lua
+Modules\Bars\PUIHotbars\PUIMicroBags.lua
+Modules\Bars\PUIHotbars\PUIHotbars.lua
+
+# =========================================================================
+# PLAYER & CHARACTER MODULES (Tier 3)
+# =========================================================================
+Modules\Player\PUIBags\PUIBags.lua
+Modules\Player\PUIBank\PUIBank.lua
+Modules\Player\PUICharacterSheet\PUICharacterSheet.lua
+Modules\Player\PUIItemStats\PUIItemStats.lua
+Modules\Player\PUIVendor\PUIVendor.lua
+Modules\Player\PUIReagents\PUIReagents.lua
+Modules\Player\PUITalents\PUITalents.lua
+Modules\Player\PUISpellbook\PUISpellbook.lua
+
+# =========================================================================
+# SOCIAL & COMMUNICATION (Tier 3)
+# =========================================================================
+Modules\Social\PUIMessenger\PUIMessenger.lua
+Modules\Social\PUIChat\PUIChat.lua
+Modules\Social\PUIMasterLoot\PUIMasterLoot.lua
+Modules\Social\PUIRoleplay\PUIConstants.lua
+Modules\Social\PUIRoleplay\PUIComms.lua
+Modules\Social\PUIRoleplay\PUIRPSheet.lua
+Modules\Social\PUIRoleplay\PUIGlance.lua
+Modules\Social\PUIRoleplay\PUITooltip.lua
+Modules\Social\PUIRoleplay\PUIDirectory.lua
+Modules\Social\PUIRoleplay\PUIEmotes.lua
+Modules\Social\PUIRoleplay\PUITray.lua
+Modules\Social\PUIRoleplay\PUIRoleplay.lua
+
+# =========================================================================
+# CLASS NUANCE SUITE (Tier 3)
+# =========================================================================
+Modules\Classes\PUIRogue\PUIRogue.lua
+Modules\Classes\PUIPriest\PUIPriest.lua
+Modules\Classes\PUIHunter\PUIHunter.lua
+Modules\Classes\PUIShaman\PUIShaman.lua
+Modules\Classes\PUIPaladin\PUIPaladin.lua
+Modules\Classes\PUIWarrior\PUIWarrior.lua
+Modules\Classes\PUIDruid\PUIDruid.lua
+Modules\Classes\PUIWarlock\PUIWarlock.lua
+Modules\Classes\PUIMage\PUIMage.lua
+
+# =========================================================================
+# MASTER ANCHOR ENTRY
+# =========================================================================
+PrimusUI.lua
