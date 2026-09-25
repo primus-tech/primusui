@@ -70,8 +70,8 @@ function Sheet:BuildFrame()
     if sheetFrame then return sheetFrame end
     
     local f = CreateFrame("Frame", "Primus_PUIRoleplay_Sheet", UIParent)
-    f:SetWidth(450)
-    f:SetHeight(560)
+    f:SetWidth(460)
+    f:SetHeight(600)
     f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     f:SetFrameStrata("HIGH")
     f:EnableMouse(true)
@@ -116,10 +116,11 @@ function Sheet:BuildFrame()
     
     -- Character Summary Header Area
     local headerArea = CreateFrame("Frame", nil, f)
-    headerArea:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -36)
-    headerArea:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, -36)
-    headerArea:SetHeight(74)
+    headerArea:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -34)
+    headerArea:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, -34)
+    headerArea:SetHeight(94)
     
+    -- Avatar Icon
     local iconBtn = CreateFrame("Button", nil, headerArea)
     iconBtn:SetWidth(48)
     iconBtn:SetHeight(48)
@@ -151,9 +152,17 @@ function Sheet:BuildFrame()
     end)
     f.iconBtn = iconBtn
     
-    -- Character Full Name EditBox/Text
-    local nameEB = CreateStyledEditBox(headerArea, 220, 22)
-    nameEB:SetPoint("TOPLEFT", iconBtn, "TOPRIGHT", 10, 0)
+    local iconSubLabel = headerArea:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    iconSubLabel:SetPoint("TOP", iconBtn, "BOTTOM", 0, -2)
+    iconSubLabel:SetText("|cff666677[Avatar]|r")
+
+    -- Character Full Name EditBox/Text with Label
+    local nameLabel = headerArea:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    nameLabel:SetPoint("TOPLEFT", iconBtn, "TOPRIGHT", 12, 0)
+    nameLabel:SetText("|cff00e5ffRoleplay Full Name:|r")
+    
+    local nameEB = CreateStyledEditBox(headerArea, 210, 18)
+    nameEB:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 0, -2)
     nameEB:SetScript("OnTextChanged", function()
         if isViewingSelf and f.isRefreshing ~= true then
             local profile = PUIRoleplay:GetMyProfile()
@@ -164,9 +173,13 @@ function Sheet:BuildFrame()
     end)
     f.nameEB = nameEB
     
-    -- Title / Suffix EditBox
-    local titleEB = CreateStyledEditBox(headerArea, 220, 20)
-    titleEB:SetPoint("TOPLEFT", nameEB, "BOTTOMLEFT", 0, -4)
+    -- Title / Suffix EditBox with Label
+    local titleLabel = headerArea:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    titleLabel:SetPoint("TOPLEFT", nameEB, "BOTTOMLEFT", 0, -3)
+    titleLabel:SetText("|cffaaaaaaTitle / Epithet:|r")
+    
+    local titleEB = CreateStyledEditBox(headerArea, 210, 18)
+    titleEB:SetPoint("TOPLEFT", titleLabel, "BOTTOMLEFT", 0, -2)
     titleEB:SetScript("OnTextChanged", function()
         if isViewingSelf and f.isRefreshing ~= true then
             local profile = PUIRoleplay:GetMyProfile()
@@ -178,16 +191,24 @@ function Sheet:BuildFrame()
     f.titleEB = titleEB
     
     -- Race & Class Label
+    local raceClassLabel = headerArea:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    raceClassLabel:SetPoint("TOPLEFT", iconSubLabel, "BOTTOMLEFT", -2, -6)
+    raceClassLabel:SetText("|cff888899Class & Race:|r")
+    
     local raceClassText = headerArea:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    raceClassText:SetPoint("TOPLEFT", titleEB, "BOTTOMLEFT", 2, -4)
+    raceClassText:SetPoint("LEFT", raceClassLabel, "RIGHT", 4, 0)
     raceClassText:SetText("Human Paladin")
     f.raceClassText = raceClassText
     
-    -- IC / OOC Status Pill Toggle
+    -- IC / OOC Status Pill Toggle with Label
+    local statusLabel = headerArea:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    statusLabel:SetPoint("TOPRIGHT", headerArea, "TOPRIGHT", -4, 0)
+    statusLabel:SetText("|cff888899Status:|r")
+    
     local icBtn = CreateFrame("Button", nil, headerArea)
-    icBtn:SetWidth(68)
+    icBtn:SetWidth(90)
     icBtn:SetHeight(24)
-    icBtn:SetPoint("TOPRIGHT", headerArea, "TOPRIGHT", -4, -4)
+    icBtn:SetPoint("TOPRIGHT", statusLabel, "BOTTOMRIGHT", 0, -3)
     icBtn:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -217,9 +238,9 @@ function Sheet:BuildFrame()
     local tabs = {}
     for i = 1, 4 do
         local tab = CreateFrame("Button", nil, f)
-        tab:SetWidth(104)
+        tab:SetWidth(106)
         tab:SetHeight(24)
-        tab:SetPoint("TOPLEFT", f, "TOPLEFT", 10 + (i - 1) * 108, -114)
+        tab:SetPoint("TOPLEFT", f, "TOPLEFT", 10 + (i - 1) * 110, -134)
         tab:SetBackdrop({
             bgFile = "Interface\\Buttons\\WHITE8X8",
             edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -242,7 +263,7 @@ function Sheet:BuildFrame()
     
     -- Content Container
     local contentBox = Create1PxBackdrop(f, 0.05, 0.05, 0.07, 0.95, 0.22, 0.22, 0.26, 1.0)
-    contentBox:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -138)
+    contentBox:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -158)
     contentBox:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -10, 10)
     f.contentBox = contentBox
     
@@ -253,13 +274,13 @@ function Sheet:BuildFrame()
     p1:SetAllPoints(contentBox)
     f.panel1 = p1
     
-    -- Pronouns
-    local prLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    prLabel:SetPoint("TOPLEFT", p1, "TOPLEFT", 12, -10)
-    prLabel:SetText("|cff00e5ffPronouns (IC / OOC):|r")
+    -- Pronouns (IC and OOC labeled separately)
+    local icPrLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    icPrLabel:SetPoint("TOPLEFT", p1, "TOPLEFT", 12, -8)
+    icPrLabel:SetText("|cff00e5ffIC Pronouns:|r")
     
-    local icPrEB = CreateStyledEditBox(p1, 95, 20)
-    icPrEB:SetPoint("TOPLEFT", prLabel, "BOTTOMLEFT", 0, -3)
+    local icPrEB = CreateStyledEditBox(p1, 196, 20)
+    icPrEB:SetPoint("TOPLEFT", icPrLabel, "BOTTOMLEFT", 0, -2)
     icPrEB:SetScript("OnTextChanged", function()
         if isViewingSelf and f.isRefreshing ~= true then
             local profile = PUIRoleplay:GetMyProfile()
@@ -270,8 +291,12 @@ function Sheet:BuildFrame()
     end)
     p1.icPrEB = icPrEB
     
-    local oocPrEB = CreateStyledEditBox(p1, 95, 20)
-    oocPrEB:SetPoint("LEFT", icPrEB, "RIGHT", 8, 0)
+    local oocPrLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    oocPrLabel:SetPoint("TOPLEFT", p1, "TOPLEFT", 220, -8)
+    oocPrLabel:SetText("|cff00e5ffOOC Pronouns:|r")
+
+    local oocPrEB = CreateStyledEditBox(p1, 196, 20)
+    oocPrEB:SetPoint("TOPLEFT", oocPrLabel, "BOTTOMLEFT", 0, -2)
     oocPrEB:SetScript("OnTextChanged", function()
         if isViewingSelf and f.isRefreshing ~= true then
             local profile = PUIRoleplay:GetMyProfile()
@@ -284,11 +309,11 @@ function Sheet:BuildFrame()
     
     -- IC Info
     local icInfoLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    icInfoLabel:SetPoint("TOPLEFT", icPrEB, "BOTTOMLEFT", 0, -8)
-    icInfoLabel:SetText("|cff55ff88IC Summary / Status:|r")
+    icInfoLabel:SetPoint("TOPLEFT", icPrEB, "BOTTOMLEFT", 0, -6)
+    icInfoLabel:SetText("|cff55ff88IC Current Status / Summary:|r")
     
     local icInfoEB = CreateStyledEditBox(p1, 404, 20)
-    icInfoEB:SetPoint("TOPLEFT", icInfoLabel, "BOTTOMLEFT", 0, -3)
+    icInfoEB:SetPoint("TOPLEFT", icInfoLabel, "BOTTOMLEFT", 0, -2)
     icInfoEB:SetScript("OnTextChanged", function()
         if isViewingSelf and f.isRefreshing ~= true then
             local profile = PUIRoleplay:GetMyProfile()
@@ -301,11 +326,11 @@ function Sheet:BuildFrame()
     
     -- OOC Info
     local oocInfoLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    oocInfoLabel:SetPoint("TOPLEFT", icInfoEB, "BOTTOMLEFT", 0, -8)
-    oocInfoLabel:SetText("|cffff9933OOC Notes / Boundary Info:|r")
+    oocInfoLabel:SetPoint("TOPLEFT", icInfoEB, "BOTTOMLEFT", 0, -6)
+    oocInfoLabel:SetText("|cffff9933OOC Notes / RP Boundaries:|r")
     
     local oocInfoEB = CreateStyledEditBox(p1, 404, 20)
-    oocInfoEB:SetPoint("TOPLEFT", oocInfoLabel, "BOTTOMLEFT", 0, -3)
+    oocInfoEB:SetPoint("TOPLEFT", oocInfoLabel, "BOTTOMLEFT", 0, -2)
     oocInfoEB:SetScript("OnTextChanged", function()
         if isViewingSelf and f.isRefreshing ~= true then
             local profile = PUIRoleplay:GetMyProfile()
@@ -318,7 +343,7 @@ function Sheet:BuildFrame()
     
     -- At-A-Glance Cards Section Header
     local glanceHeader = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    glanceHeader:SetPoint("TOPLEFT", oocInfoEB, "BOTTOMLEFT", 0, -12)
+    glanceHeader:SetPoint("TOPLEFT", oocInfoEB, "BOTTOMLEFT", 0, -10)
     glanceHeader:SetText("|cffffd100AT A GLANCE (3 Visual Traits):|r")
     
     -- 3 Glance Cards
@@ -327,7 +352,7 @@ function Sheet:BuildFrame()
         local card = Create1PxBackdrop(p1, 0.06, 0.06, 0.08, 0.95, 0.28, 0.28, 0.35, 1.0)
         card:SetWidth(404)
         card:SetHeight(52)
-        card:SetPoint("TOPLEFT", glanceHeader, "BOTTOMLEFT", 0, -6 - (i - 1) * 58)
+        card:SetPoint("TOPLEFT", glanceHeader, "BOTTOMLEFT", 0, -4 - (i - 1) * 56)
         
         local gBtn = CreateFrame("Button", nil, card)
         gBtn:SetWidth(38)
@@ -414,7 +439,7 @@ function Sheet:BuildFrame()
     p2.buttons = {}
     for i, key in ipairs(styleKeys) do
         local lbl = p2:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        lbl:SetPoint("TOPLEFT", p2, "TOPLEFT", 16, -14 - (i - 1) * 72)
+        lbl:SetPoint("TOPLEFT", p2, "TOPLEFT", 16, -12 - (i - 1) * 72)
         lbl:SetText("|cff00e5ff" .. styleLabels[i] .. "|r")
         
         local options = PUIRoleplay.DropdownOptions[key] or {}
@@ -522,7 +547,7 @@ function Sheet:BuildFrame()
     -- Profile Switcher Section (Self Only)
     local profHeader = p4:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     profHeader:SetPoint("TOPLEFT", p4, "TOPLEFT", 14, -10)
-    profHeader:SetText("|cff00e5ffCharacter Profile Slots:|r")
+    profHeader:SetText("|cff00e5ffCharacter Profile Slots (Saved to Character):|r")
     p4.profHeader = profHeader
     
     p4.profBtns = {}
@@ -768,90 +793,71 @@ function Sheet:OpenIconPicker(onSelectCallback)
         
         local title = p:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         title:SetPoint("TOPLEFT", p, "TOPLEFT", 12, -10)
-        title:SetText("|cff00ccffSELECT ICON|r")
+        title:SetText("|cff00ccffSelect Profile / Trait Icon|r")
         
         local close = CreateFrame("Button", nil, p)
-        close:SetWidth(18)
-        close:SetHeight(18)
-        close:SetPoint("TOPRIGHT", p, "TOPRIGHT", -6, -6)
+        close:SetWidth(16)
+        close:SetHeight(16)
+        close:SetPoint("TOPRIGHT", p, "TOPRIGHT", -8, -8)
         close:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
         close:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
         close:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight")
         close:SetScript("OnClick", function() p:Hide() end)
         
         -- Filter box
-        local searchEB = CreateStyledEditBox(p, 356, 20)
-        searchEB:SetPoint("TOPLEFT", p, "TOPLEFT", 12, -28)
-        p.searchEB = searchEB
+        local filterEB = CreateStyledEditBox(p, 356, 20)
+        filterEB:SetPoint("TOPLEFT", p, "TOPLEFT", 12, -28)
         
-        -- Icon grid buttons (6 rows x 8 cols = 48 icons per page)
-        local iconGrid = {}
-        for r = 1, 6 do
-            for c = 1, 8 do
-                local idx = (r - 1) * 8 + c
-                local btn = CreateFrame("Button", nil, p)
-                btn:SetWidth(38)
-                btn:SetHeight(38)
-                btn:SetPoint("TOPLEFT", searchEB, "BOTTOMLEFT", (c - 1) * 44, -10 - (r - 1) * 42)
-                btn:SetBackdrop({
-                    bgFile = "Interface\\Buttons\\WHITE8X8",
-                    edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    tile = false, tileSize = 0, edgeSize = 1,
-                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
-                })
-                btn:SetBackdropColor(0, 0, 0, 1)
-                btn:SetBackdropBorderColor(0.25, 0.25, 0.3, 1)
+        -- Icons Grid Scrollbox
+        local scrollBg = Create1PxBackdrop(p, 0.03, 0.03, 0.05, 1.0, 0.2, 0.2, 0.25, 1.0)
+        scrollBg:SetPoint("TOPLEFT", filterEB, "BOTTOMLEFT", 0, -6)
+        scrollBg:SetPoint("BOTTOMRIGHT", p, "BOTTOMRIGHT", -12, 12)
+        
+        local scroll = CreateFrame("ScrollFrame", "Primus_PUIRoleplay_IconScroll", p, "UIPanelScrollFrameTemplate")
+        scroll:SetPoint("TOPLEFT", scrollBg, "TOPLEFT", 4, -4)
+        scroll:SetPoint("BOTTOMRIGHT", scrollBg, "BOTTOMRIGHT", -24, 4)
+        
+        local container = CreateFrame("Frame", nil, scroll)
+        container:SetWidth(320)
+        container:SetHeight(1200)
+        scroll:SetScrollChild(container)
+        
+        p.buttons = {}
+        local col = 0
+        local row = 0
+        for i = 1, 120 do
+            local iconFile = PUIRoleplay.Icons[i]
+            if iconFile then
+                local b = CreateFrame("Button", nil, container)
+                b:SetWidth(32)
+                b:SetHeight(32)
+                b:SetPoint("TOPLEFT", container, "TOPLEFT", col * 36, -row * 36)
                 
-                local tex = btn:CreateTexture(nil, "ARTWORK")
-                tex:SetPoint("TOPLEFT", btn, "TOPLEFT", 1, -1)
-                tex:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -1, 1)
-                btn.tex = tex
+                local tex = b:CreateTexture(nil, "ARTWORK")
+                tex:SetAllPoints(b)
+                tex:SetTexture("Interface\\Icons\\" .. iconFile)
+                b.tex = tex
+                b.iconIndex = i
                 
-                btn:SetScript("OnClick", function()
-                    if this.iconIndex and iconPickerFrame.callback then
-                        iconPickerFrame.callback(this.iconIndex)
+                b:SetScript("OnClick", function()
+                    if p.callback then
+                        p.callback(this.iconIndex)
                     end
-                    iconPickerFrame:Hide()
+                    p:Hide()
                 end)
-                table.insert(iconGrid, btn)
+                
+                table.insert(p.buttons, b)
+                col = col + 1
+                if col >= 8 then
+                    col = 0
+                    row = row + 1
+                end
             end
         end
-        p.iconGrid = iconGrid
-        
-        searchEB:SetScript("OnTextChanged", function()
-            Sheet:UpdateIconGrid(this:GetText() or "")
-        end)
         
         iconPickerFrame = p
     end
     
     iconPickerFrame.callback = onSelectCallback
     iconPickerFrame:Show()
-    iconPickerFrame.searchEB:SetText("")
-    Sheet:UpdateIconGrid("")
-end
-
-function Sheet:UpdateIconGrid(searchTerm)
-    if not iconPickerFrame then return end
-    local query = string.lower(searchTerm or "")
-    local matched = {}
-    
-    for idx, iconName in ipairs(PUIRoleplay.Icons) do
-        if query == "" or string.find(string.lower(iconName), query) then
-            table.insert(matched, idx)
-            if table.getn(matched) >= 48 then break end
-        end
-    end
-    
-    for i, btn in ipairs(iconPickerFrame.iconGrid) do
-        local iconIdx = matched[i]
-        if iconIdx then
-            btn.iconIndex = iconIdx
-            btn.tex:SetTexture("Interface\\Icons\\" .. PUIRoleplay.Icons[iconIdx])
-            btn:Show()
-        else
-            btn.iconIndex = nil
-            btn:Hide()
-        end
-    end
 end
