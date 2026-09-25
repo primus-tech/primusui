@@ -4,7 +4,7 @@
     
     Virtualizes Blizzard's Micro Menu buttons and Bag & Keyring slots into
     dockable, movable containers with pure scaling, 1-pixel borders,
-    and configurable Single Bag (One-Bag) compact mode.
+    Zen combat state integration, and Single Bag (One-Bag) suppression.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -14,8 +14,9 @@ if not Primus then return end
 local PUIHotbars = Primus.PUIHotbars or {}
 Primus.PUIHotbars = PUIHotbars
 
-local Media   = Primus.Media
-local DB      = Primus.DB
+local Media    = Primus.Media
+local DB       = Primus.DB
+local Hider    = Primus.Hider
 local PUIMover = Primus.PUIMover
 
 local microAnchor = nil
@@ -71,6 +72,16 @@ function PUIHotbars:BuildMicroBar()
         microAnchor:Hide()
     end
 
+    -- Register with Core Hider for dynamic Zen combat fading
+    Hider = Primus.Hider or Hider
+    if Hider and Hider.RegisterDynamic then
+        Hider:RegisterDynamic(microAnchor, "MicroMenu", {
+            mode = "fade",
+            fadeOnCombat = true,
+            enableHoverPeek = true,
+        })
+    end
+
     self.microAnchor = microAnchor
     return microAnchor
 end
@@ -80,16 +91,17 @@ end
 -- =========================================================================
 
 function PUIHotbars:BuildBagBar()
+    Hider = Primus.Hider or Hider
     local hotbarsDB = DB:GetNamespace("PUIHotbars")
     local isSingleBag = hotbarsDB and hotbarsDB:Get("singleBag", false)
     local showKeyring = hotbarsDB and hotbarsDB:Get("showKeyring", true)
 
     local bagList = {
-        { name = "MainMenuBarBackpackButton", w = 37, h = 37, isBag = true, showInSingle = true },
-        { name = "CharacterBag0Slot",         w = 37, h = 37, isBag = true, showInSingle = false },
-        { name = "CharacterBag1Slot",         w = 37, h = 37, isBag = true, showInSingle = false },
-        { name = "CharacterBag2Slot",         w = 37, h = 37, isBag = true, showInSingle = false },
-        { name = "CharacterBag3Slot",         w = 37, h = 37, isBag = true, showInSingle = false },
+        { name = "MainMenuBarBackpackButton", w = 37, h = 37, isBag = true,  showInSingle = true },
+        { name = "CharacterBag0Slot",         w = 37, h = 37, isBag = true,  showInSingle = false },
+        { name = "CharacterBag1Slot",         w = 37, h = 37, isBag = true,  showInSingle = false },
+        { name = "CharacterBag2Slot",         w = 37, h = 37, isBag = true,  showInSingle = false },
+        { name = "CharacterBag3Slot",         w = 37, h = 37, isBag = true,  showInSingle = false },
         { name = "KeyRingButton",             w = 18, h = 39, isBag = false, showInSingle = showKeyring },
     }
 
@@ -102,18 +114,27 @@ function PUIHotbars:BuildBagBar()
         local shouldShow = true
         if isSingleBag then
             shouldShow = info.showInSingle
+        elseif info.name == "KeyRingButton" then
+            shouldShow = showKeyring
         end
 
+        local btn = _G[info.name]
         if shouldShow then
+            -- Unsuppress if previously in Graveyard
+            if Hider and Hider.Unsuppress and Hider:IsSuppressed(btn) then
+                Hider:Unsuppress(btn, UIParent)
+            end
             table.insert(activeButtons, info)
             if totalW > 0 then
                 totalW = totalW + spacing
             end
             totalW = totalW + info.w
         else
-            local hiddenBtn = _G[info.name]
-            if hiddenBtn then
-                hiddenBtn:Hide()
+            -- Suppress permanently into the Graveyard to block Blizzard BAG_UPDATE loops
+            if Hider and Hider.Suppress and btn then
+                Hider:Suppress(btn)
+            elseif btn then
+                btn:Hide()
             end
         end
     end
@@ -122,7 +143,7 @@ function PUIHotbars:BuildBagBar()
 
     if not bagAnchor then
         bagAnchor = CreateFrame("Frame", "Primus_PUIHotbars_BagBar", UIParent)
-        bagAnchor:SetWidth(totalW)
+        bagAnchor:SetWidth(totalW > 0 and totalW or 37)
         bagAnchor:SetHeight(totalH)
         bagAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -6, 68)
         local mover = PUIMover or Primus.PUIMover
@@ -130,7 +151,7 @@ function PUIHotbars:BuildBagBar()
             mover:Register(bagAnchor, "PUIHotbars_Bags", "PUIHotbars: Bag Bar", "BARS")
         end
     else
-        bagAnchor:SetWidth(totalW)
+        bagAnchor:SetWidth(totalW > 0 and totalW or 37)
         bagAnchor:SetHeight(totalH)
     end
 
@@ -148,7 +169,7 @@ function PUIHotbars:BuildBagBar()
             curX = curX + info.w + spacing
 
             if info.isBag then
-                -- 1-Pixel Border Overlay
+                -- 1-Pixel Border Overlay for Bag Slots
                 if not btn._primusBorder then
                     local b = CreateFrame("Frame", nil, btn)
                     b:SetAllPoints(btn)
@@ -169,6 +190,26 @@ function PUIHotbars:BuildBagBar()
                     if type(icon.SetPoint) == "function" then
                         icon:SetPoint("TOPLEFT", btn, "TOPLEFT", 1, -1)
                         icon:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -1, 1)
+                    end
+                end
+            else
+                -- KeyRing Button Aspect-Ratio & Texture Atlas Normalization
+                if btn:GetName() == "KeyRingButton" then
+                    local normal = btn:GetNormalTexture()
+                    if normal and type(normal.SetTexCoord) == "function" then
+                        normal:SetTexCoord(0.0, 0.5625, 0.0, 0.609375)
+                    end
+                    local pushed = btn:GetPushedTexture()
+                    if pushed and type(pushed.SetTexCoord) == "function" then
+                        pushed:SetTexCoord(0.0, 0.5625, 0.0, 0.609375)
+                    end
+                    local highlight = btn:GetHighlightTexture()
+                    if highlight and type(highlight.SetTexCoord) == "function" then
+                        highlight:SetTexCoord(0.0, 0.5625, 0.0, 0.609375)
+                    end
+                    if KeyRingButtonItemAnim then
+                        KeyRingButtonItemAnim:ClearAllPoints()
+                        KeyRingButtonItemAnim:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 0, 0)
                     end
                 end
             end
@@ -203,6 +244,15 @@ function PUIHotbars:BuildBagBar()
         bagAnchor:Show()
     else
         bagAnchor:Hide()
+    end
+
+    -- Register with Core Hider for dynamic Zen combat fading
+    if Hider and Hider.RegisterDynamic then
+        Hider:RegisterDynamic(bagAnchor, "BagBar", {
+            mode = "fade",
+            fadeOnCombat = true,
+            enableHoverPeek = true,
+        })
     end
 
     self.bagAnchor = bagAnchor

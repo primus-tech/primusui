@@ -3,17 +3,20 @@
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides intelligent state-driven interface focus transitions:
-    - Smoothly fades non-essential peripheral clutter during combat.
+    - Smoothly fades or hides non-essential peripheral clutter during combat.
     - Strictly enforces the Action Bar Permanence Rule (rotational ability bars never hide).
     - Supports Hover-to-Peek for instant 3.0s temporary reveal of faded elements.
-    - Seamlessly integrates with Primus.Anim easing engine.
+    - Seamlessly delegates frame management and registration to Primus.Hider.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
 local Primus = _G.Primus
 if not Primus then return end
 
-local State   = Primus.State
+local State   = Primus.State or {}
+Primus.State  = State
+
+local Hider   = Primus.Hider
 local DB      = Primus.DB
 local Events  = Primus.Events
 local Anim    = Primus.Anim
@@ -37,112 +40,166 @@ local stateDB = DB:RegisterNamespace("Zen", {
 })
 
 local inCombat = false
-local peekTimers = {}
-local hookedFrames = {}
 
--- Retrieve target elements to manage
-local function GetManagedFrames()
-    local frames = {}
+-- Register or update default peripheral frames in Hider
+local function SyncStandardFrames()
+    if not Hider or not Hider.RegisterDynamic then return end
+
+    local combatAlpha = stateDB:Get("combatAlpha", 0.0)
+    local idleAlpha   = stateDB:Get("idleAlpha", 1.0)
+    local duration    = stateDB:Get("fadeDuration", 0.25)
+    local peekTime    = stateDB:Get("peekDuration", 3.0)
 
     -- 1. Minimap & Zone Header
     if stateDB:Get("fadeMinimap", true) then
-        if MinimapCluster then table.insert(frames, { frame = MinimapCluster, key = "Minimap" })
-        elseif Minimap then table.insert(frames, { frame = Minimap, key = "Minimap" }) end
+        local mm = MinimapCluster or Minimap
+        if mm then
+            Hider:RegisterDynamic(mm, "Minimap", {
+                mode = "fade",
+                fadeOnCombat = true,
+                combatAlpha = combatAlpha,
+                idleAlpha = idleAlpha,
+                fadeDuration = duration,
+                peekDuration = peekTime,
+                enableHoverPeek = true,
+            })
+        end
+    else
+        Hider:UnregisterDynamic("Minimap")
+        local mm = MinimapCluster or Minimap
+        if mm then mm:SetAlpha(idleAlpha) end
     end
 
     -- 2. Quest Objective Tracker
     if stateDB:Get("fadeQuestTracker", true) then
-        if QuestWatchFrame then table.insert(frames, { frame = QuestWatchFrame, key = "QuestWatch" }) end
+        if QuestWatchFrame then
+            Hider:RegisterDynamic(QuestWatchFrame, "QuestWatch", {
+                mode = "fade",
+                fadeOnCombat = true,
+                combatAlpha = combatAlpha,
+                idleAlpha = idleAlpha,
+                fadeDuration = duration,
+                peekDuration = peekTime,
+                enableHoverPeek = true,
+            })
+        end
+    else
+        Hider:UnregisterDynamic("QuestWatch")
+        if QuestWatchFrame then QuestWatchFrame:SetAlpha(idleAlpha) end
     end
 
     -- 3. Micro Menu Bar (PUIHotbars)
-    if stateDB:Get("fadeMicroMenu", true) then
-        local microBar = _G["Primus_PUIHotbars_MicroBar"]
-        if microBar and microBar:IsShown() then
-            table.insert(frames, { frame = microBar, key = "MicroMenu" })
-        end
+    local microBar = _G["Primus_PUIHotbars_MicroBar"]
+    if microBar and stateDB:Get("fadeMicroMenu", true) then
+        Hider:RegisterDynamic(microBar, "MicroMenu", {
+            mode = "fade",
+            fadeOnCombat = true,
+            combatAlpha = combatAlpha,
+            idleAlpha = idleAlpha,
+            fadeDuration = duration,
+            peekDuration = peekTime,
+            enableHoverPeek = true,
+        })
+    elseif microBar then
+        Hider:UnregisterDynamic("MicroMenu")
+        microBar:SetAlpha(idleAlpha)
     end
 
     -- 4. Bag Bar (PUIHotbars)
-    if stateDB:Get("fadeBagBar", true) then
-        local bagBar = _G["Primus_PUIHotbars_BagBar"]
-        if bagBar and bagBar:IsShown() then
-            table.insert(frames, { frame = bagBar, key = "BagBar" })
-        end
+    local bagBar = _G["Primus_PUIHotbars_BagBar"]
+    if bagBar and stateDB:Get("fadeBagBar", true) then
+        Hider:RegisterDynamic(bagBar, "BagBar", {
+            mode = "fade",
+            fadeOnCombat = true,
+            combatAlpha = combatAlpha,
+            idleAlpha = idleAlpha,
+            fadeDuration = duration,
+            peekDuration = peekTime,
+            enableHoverPeek = true,
+        })
+    elseif bagBar then
+        Hider:UnregisterDynamic("BagBar")
+        bagBar:SetAlpha(idleAlpha)
     end
 
-    -- 5. Chat Frames Inactive Dimming
+    -- 5. Chat Frame 1
     if stateDB:Get("fadeChat", true) then
-        if ChatFrame1 and ChatFrame1:IsShown() then
-            table.insert(frames, { frame = ChatFrame1, key = "Chat1" })
+        if ChatFrame1 then
+            Hider:RegisterDynamic(ChatFrame1, "Chat1", {
+                mode = "fade",
+                fadeOnCombat = true,
+                combatAlpha = combatAlpha,
+                idleAlpha = idleAlpha,
+                fadeDuration = duration,
+                peekDuration = peekTime,
+                enableHoverPeek = true,
+            })
         end
+    else
+        Hider:UnregisterDynamic("Chat1")
+        if ChatFrame1 then ChatFrame1:SetAlpha(idleAlpha) end
     end
 
     -- 6. Corner Legacy Frames (Optional)
     if stateDB:Get("fadeCornerFrames", false) then
-        if PlayerFrame and PlayerFrame:IsShown() then table.insert(frames, { frame = PlayerFrame, key = "PlayerFrame" }) end
-        if TargetFrame and TargetFrame:IsShown() then table.insert(frames, { frame = TargetFrame, key = "TargetFrame" }) end
+        if PlayerFrame then
+            Hider:RegisterDynamic(PlayerFrame, "PlayerFrame", {
+                mode = "fade",
+                fadeOnCombat = true,
+                combatAlpha = combatAlpha,
+                idleAlpha = idleAlpha,
+                fadeDuration = duration,
+                peekDuration = peekTime,
+                enableHoverPeek = true,
+            })
+        end
+        if TargetFrame then
+            Hider:RegisterDynamic(TargetFrame, "TargetFrame", {
+                mode = "fade",
+                fadeOnCombat = true,
+                combatAlpha = combatAlpha,
+                idleAlpha = idleAlpha,
+                fadeDuration = duration,
+                peekDuration = peekTime,
+                enableHoverPeek = true,
+            })
+        end
+    else
+        Hider:UnregisterDynamic("PlayerFrame")
+        Hider:UnregisterDynamic("TargetFrame")
+        if PlayerFrame then PlayerFrame:SetAlpha(idleAlpha) end
+        if TargetFrame then TargetFrame:SetAlpha(idleAlpha) end
     end
-
-    return frames
 end
 
 -- Peek / Wake Up a Faded Frame temporarily
 function State:PeekFrame(frame, key)
-    if not frame then return end
-    key = key or tostring(frame)
-
-    -- Cancel existing peek timer
-    if peekTimers[key] then
-        peekTimers[key] = nil
+    if Hider and Hider.PeekFrame then
+        Hider:PeekFrame(frame, key)
     end
-
-    -- Fade in smoothly
-    Anim:Fade(frame, 0.15, frame:GetAlpha() or 0, 1.0)
-
-    -- Schedule fade out if still in combat
-    peekTimers[key] = GetTime() + stateDB:Get("peekDuration", 3.0)
-end
-
--- Hook Hover-to-Peek mouseover handlers
-local function HookHoverToPeek(fEntry)
-    local frame = fEntry.frame
-    local key = fEntry.key
-    if not frame or hookedFrames[key] then return end
-    hookedFrames[key] = true
-
-    if frame.EnableMouse then
-        frame:EnableMouse(true)
-    end
-
-    local origEnter = frame:GetScript("OnEnter")
-    frame:SetScript("OnEnter", function()
-        if origEnter then origEnter() end
-        if inCombat and stateDB:Get("enabled", true) then
-            State:PeekFrame(frame, key)
-        end
-    end)
 end
 
 -- Apply State Transition (Combat vs Out of Combat)
 function State:ApplyState(force)
-    if not stateDB:Get("enabled", true) and not force then return end
+    SyncStandardFrames()
 
-    local targetAlpha = inCombat and stateDB:Get("combatAlpha", 0.0) or stateDB:Get("idleAlpha", 1.0)
-    local duration = stateDB:Get("fadeDuration", 0.25)
-    local managed = GetManagedFrames()
-    local count = table.getn(managed)
+    local isEnabled = stateDB:Get("enabled", true)
+    if not isEnabled and not force then return end
 
-    for i = 1, count do
-        local entry = managed[i]
-        local f = entry.frame
-        if f then
-            HookHoverToPeek(entry)
-            local curAlpha = f:GetAlpha() or 1.0
-            if math.abs(curAlpha - targetAlpha) > 0.05 then
-                Anim:Fade(f, duration, curAlpha, targetAlpha)
-            end
-        end
+    local hasTarget = UnitExists and (UnitExists("target") and true or false) or false
+    local isResting = IsResting and (IsResting() and true or false) or false
+
+    if Hider and Hider.ApplyDynamicState then
+        Hider:ApplyDynamicState({
+            inCombat = inCombat,
+            hasTarget = hasTarget,
+            isResting = isResting,
+            enabled = isEnabled,
+        })
+    end
+
+    if Events and Events.Fire then
+        Events:Fire("UI_COMBAT_STATE_CHANGED", inCombat)
     end
 end
 
@@ -158,34 +215,13 @@ function State:OnExitCombat()
     self:ApplyState()
 end
 
--- Ticker for Peek Expirations & Mouse Proximity (0.1s)
-local function PeekTicker()
-    if not inCombat or not stateDB:Get("enabled", true) then return end
-
-    local now = GetTime()
-    local duration = stateDB:Get("fadeDuration", 0.25)
-    local combatAlpha = stateDB:Get("combatAlpha", 0.0)
-
-    for key, expireTime in pairs(peekTimers) do
-        if now >= expireTime then
-            peekTimers[key] = nil
-            local managed = GetManagedFrames()
-            local count = table.getn(managed)
-            for i = 1, count do
-                if managed[i].key == key and managed[i].frame then
-                    local f = managed[i].frame
-                    Anim:Fade(f, duration, f:GetAlpha() or 1.0, combatAlpha)
-                end
-            end
-        end
-    end
-end
-
 -- =========================================================================
 -- INITIALIZATION
 -- =========================================================================
 
 function State:OnInitialize()
+    Hider = Primus.Hider
+
     Events:Register("PLAYER_REGEN_DISABLED", self, function()
         State:OnEnterCombat()
     end)
@@ -195,12 +231,15 @@ function State:OnInitialize()
     end)
 
     Events:Register("PLAYER_ENTERING_WORLD", self, function()
-        inCombat = UnitAffectingCombat("player") and true or false
+        inCombat = UnitAffectingCombat and (UnitAffectingCombat("player") and true or false) or false
         State:ApplyState(true)
     end)
 
-    -- Periodic Peek Monitor
-    Time:Every(0.1, PeekTicker)
+    Events:Register("PLAYER_TARGET_CHANGED", self, function()
+        if stateDB:Get("enabled", true) then
+            State:ApplyState()
+        end
+    end)
 
     -- Register Subcommand under Master Console
     if Console and Console.RegisterSubCommand then
@@ -218,8 +257,6 @@ function State:OnInitialize()
                 DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("Commands: /pui zen toggle", "ffd100"))
             end
         end, "Zen Focus Engine (/pui zen [toggle])")
-
-        
     end
 end
 

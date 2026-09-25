@@ -24,6 +24,7 @@ Core\Console\Console.lua
 Core\Comm\ChatThrottleLib.lua
 Core\Comm\Comm.lua
 Core\State\State.lua
+Core\Hider\Hider.lua
 Core\Config\Options.lua
 
 # =========================================================================

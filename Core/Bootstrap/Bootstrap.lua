@@ -54,6 +54,7 @@ Primus.Keybind   = Primus.Keybind or {}
 Primus.Console   = Primus.Console or {}
 Primus.Comm      = Primus.Comm or {}
 Primus.State     = Primus.State or {}
+Primus.Hider     = Primus.Hider or {}
 Primus.Options   = Primus.Options or {}
 
 -- Public Registration API (The Flare Protocol)
