@@ -51,6 +51,8 @@ local hotbarsDB = DB:RegisterNamespace("PUIHotbars", {
     showPet = true,
     showMicro = true,
     showBags = true,
+    singleBag = false,
+    showKeyring = true,
     showXPBar = true,
 
     -- Dynamic Matrix Rows & Columns
@@ -598,12 +600,24 @@ local function BuildHotbarsOptionsPanel(parent)
     end)
     cbBags:SetPoint("TOPLEFT", cbMicro, "BOTTOMLEFT", 0, -4)
 
+    local cbSingleBag = Widgets:CreateCheckButton(p, "Single Bag Mode (Backpack Only)", hotbarsDB:Get("singleBag", false), function(checked)
+        hotbarsDB:Set("singleBag", checked)
+        PUIHotbars:ApplyLayout()
+    end)
+    cbSingleBag:SetPoint("TOPLEFT", cbBags, "BOTTOMLEFT", 14, -2)
+
+    local cbKeyring = Widgets:CreateCheckButton(p, "Show Keyring in Single Bag Mode", hotbarsDB:Get("showKeyring", true), function(checked)
+        hotbarsDB:Set("showKeyring", checked)
+        PUIHotbars:ApplyLayout()
+    end)
+    cbKeyring:SetPoint("TOPLEFT", cbSingleBag, "BOTTOMLEFT", 0, -2)
+
     -- Sizing & Tints
     local sSize = Widgets:CreateSlider(p, "Button Size", 24, 48, 2, hotbarsDB:Get("buttonSize", 36), function(val)
         hotbarsDB:Set("buttonSize", val)
         PUIHotbars:ApplyLayout()
     end)
-    sSize:SetPoint("TOPLEFT", cbBags, "BOTTOMLEFT", 0, -12)
+    sSize:SetPoint("TOPLEFT", cbKeyring, "BOTTOMLEFT", -14, -12)
 
     local sSpacing = Widgets:CreateSlider(p, "Button Spacing", 0, 10, 1, hotbarsDB:Get("buttonSpacing", 4), function(val)
         hotbarsDB:Set("buttonSpacing", val)

@@ -3,7 +3,8 @@
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Virtualizes Blizzard's Micro Menu buttons and Bag & Keyring slots into
-    dockable, movable containers with pure scaling and 1-pixel borders.
+    dockable, movable containers with pure scaling, 1-pixel borders,
+    and configurable Single Bag (One-Bag) compact mode.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -75,27 +76,48 @@ function PUIHotbars:BuildMicroBar()
 end
 
 -- =========================================================================
--- BAG BAR VIRTUALIZATION & PURE SCALING
+-- BAG BAR VIRTUALIZATION & SINGLE BAG (ONE-BAG) MODE
 -- =========================================================================
 
 function PUIHotbars:BuildBagBar()
     local hotbarsDB = DB:GetNamespace("PUIHotbars")
+    local isSingleBag = hotbarsDB and hotbarsDB:Get("singleBag", false)
+    local showKeyring = hotbarsDB and hotbarsDB:Get("showKeyring", true)
 
     local bagList = {
-        { name = "MainMenuBarBackpackButton", w = 37, h = 37, isBag = true },
-        { name = "CharacterBag0Slot",         w = 37, h = 37, isBag = true },
-        { name = "CharacterBag1Slot",         w = 37, h = 37, isBag = true },
-        { name = "CharacterBag2Slot",         w = 37, h = 37, isBag = true },
-        { name = "CharacterBag3Slot",         w = 37, h = 37, isBag = true },
-        { name = "KeyRingButton",             w = 18, h = 39, isBag = false },
+        { name = "MainMenuBarBackpackButton", w = 37, h = 37, isBag = true, showInSingle = true },
+        { name = "CharacterBag0Slot",         w = 37, h = 37, isBag = true, showInSingle = false },
+        { name = "CharacterBag1Slot",         w = 37, h = 37, isBag = true, showInSingle = false },
+        { name = "CharacterBag2Slot",         w = 37, h = 37, isBag = true, showInSingle = false },
+        { name = "CharacterBag3Slot",         w = 37, h = 37, isBag = true, showInSingle = false },
+        { name = "KeyRingButton",             w = 18, h = 39, isBag = false, showInSingle = showKeyring },
     }
 
     local spacing = 4
+    local activeButtons = {}
     local totalW = 0
+
     for i = 1, 6 do
-        totalW = totalW + bagList[i].w
-        if i < 6 then totalW = totalW + spacing end
+        local info = bagList[i]
+        local shouldShow = true
+        if isSingleBag then
+            shouldShow = info.showInSingle
+        end
+
+        if shouldShow then
+            table.insert(activeButtons, info)
+            if totalW > 0 then
+                totalW = totalW + spacing
+            end
+            totalW = totalW + info.w
+        else
+            local hiddenBtn = _G[info.name]
+            if hiddenBtn then
+                hiddenBtn:Hide()
+            end
+        end
     end
+
     local totalH = 39
 
     if not bagAnchor then
@@ -113,8 +135,9 @@ function PUIHotbars:BuildBagBar()
     end
 
     local curX = 0
-    for i = 1, 6 do
-        local info = bagList[i]
+    local numActive = table.getn(activeButtons)
+    for idx = 1, numActive do
+        local info = activeButtons[idx]
         local btn = _G[info.name]
         if btn then
             btn:SetParent(bagAnchor)
@@ -152,6 +175,28 @@ function PUIHotbars:BuildBagBar()
 
             btn:Show()
         end
+    end
+
+    -- Hook Backpack Click in Single Bag Mode to toggle all inventory bags
+    if not PUIHotbars._backpackHooked and MainMenuBarBackpackButton then
+        PUIHotbars._backpackHooked = true
+        local orig_OnClick = MainMenuBarBackpackButton:GetScript("OnClick")
+        MainMenuBarBackpackButton:SetScript("OnClick", function()
+            local cfg = DB:GetNamespace("PUIHotbars")
+            if cfg and cfg:Get("singleBag", false) then
+                if IsBagOpen(0) and IsBagOpen(1) and IsBagOpen(2) and IsBagOpen(3) and IsBagOpen(4) then
+                    CloseAllBags()
+                else
+                    OpenAllBags()
+                end
+            else
+                if orig_OnClick then
+                    orig_OnClick()
+                else
+                    ToggleBackpack()
+                end
+            end
+        end)
     end
 
     if hotbarsDB and hotbarsDB:Get("showBags", true) then
