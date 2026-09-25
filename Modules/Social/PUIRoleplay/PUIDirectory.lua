@@ -15,6 +15,9 @@ local mapPins = {}
 local VISIBLE_ROWS = 15
 local ROW_HEIGHT = 23
 
+Directory.sortField = "status"
+Directory.sortAsc = true
+
 --------------------------------------------------------------------------------
 -- Build Directory UI Window
 --------------------------------------------------------------------------------
@@ -144,7 +147,7 @@ function Directory:BuildFrame()
     end)
     f.searchEB = searchEB
     
-    -- Table Header
+    -- Sortable Table Header Row
     local headerRow = CreateFrame("Frame", nil, f)
     headerRow:SetPoint("TOPLEFT", searchEB, "BOTTOMLEFT", 0, -6)
     headerRow:SetPoint("TOPRIGHT", f, "TOPRIGHT", -12, -64)
@@ -155,20 +158,60 @@ function Directory:BuildFrame()
         tile = false, tileSize = 0, edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
-    headerRow:SetBackdropColor(0.09, 0.10, 0.12, 1.0)
+    headerRow:SetBackdropColor(0.08, 0.09, 0.12, 1.0)
     headerRow:SetBackdropBorderColor(0.18, 0.20, 0.24, 1.0)
     
-    local hStatus = headerRow:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    hStatus:SetPoint("LEFT", headerRow, "LEFT", 8, 0)
-    hStatus:SetText("Status")
+    -- Helper to create Sortable Header Buttons
+    local function CreateSortHeaderButton(name, width, text, fieldKey)
+        local btn = CreateFrame("Button", name, headerRow)
+        btn:SetHeight(18)
+        btn:SetWidth(width)
+        btn:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false, tileSize = 0, edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        btn:SetBackdropColor(0.05, 0.06, 0.08, 0.8)
+        btn:SetBackdropBorderColor(0.16, 0.18, 0.22, 1.0)
+        
+        local fontStr = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        fontStr:SetPoint("LEFT", btn, "LEFT", 6, 0)
+        fontStr:SetText(text)
+        btn.text = fontStr
+        btn.fieldKey = fieldKey
+        
+        btn:SetScript("OnEnter", function()
+            this:SetBackdropColor(0.12, 0.16, 0.24, 1.0)
+            this:SetBackdropBorderColor(0.0, 0.70, 0.95, 0.9)
+        end)
+        btn:SetScript("OnLeave", function()
+            this:SetBackdropColor(0.05, 0.06, 0.08, 0.8)
+            this:SetBackdropBorderColor(0.16, 0.18, 0.22, 1.0)
+        end)
+        btn:SetScript("OnClick", function()
+            if Directory.sortField == this.fieldKey then
+                Directory.sortAsc = not Directory.sortAsc
+            else
+                Directory.sortField = this.fieldKey
+                Directory.sortAsc = true
+            end
+            Directory:RefreshList()
+        end)
+        return btn
+    end
     
-    local hName = headerRow:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    hName:SetPoint("LEFT", headerRow, "LEFT", 100, 0)
-    hName:SetText("Adventurer / Roleplay Name")
+    local btnStatus = CreateSortHeaderButton(nil, 88, "Status", "status")
+    btnStatus:SetPoint("LEFT", headerRow, "LEFT", 2, 0)
+    f.btnStatus = btnStatus
     
-    local hZone = headerRow:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    hZone:SetPoint("LEFT", headerRow, "LEFT", 330, 0)
-    hZone:SetText("Current Zone")
+    local btnName = CreateSortHeaderButton(nil, 234, "Adventurer / RP Name", "name")
+    btnName:SetPoint("LEFT", btnStatus, "RIGHT", 4, 0)
+    f.btnName = btnName
+    
+    local btnZone = CreateSortHeaderButton(nil, 160, "Current Zone", "zone")
+    btnZone:SetPoint("LEFT", btnName, "RIGHT", 4, 0)
+    f.btnZone = btnZone
     
     -- Scroll Frame / Rows Container
     f.currentOffset = 0
@@ -177,7 +220,7 @@ function Directory:BuildFrame()
     
     for i = 1, VISIBLE_ROWS do
         local row = CreateFrame("Button", nil, f)
-        row:SetWidth(480)
+        row:SetWidth(496)
         row:SetHeight(ROW_HEIGHT)
         row:SetPoint("TOPLEFT", headerRow, "BOTTOMLEFT", 0, -(i - 1) * (ROW_HEIGHT + 1) - 2)
         row:SetBackdrop({
@@ -191,17 +234,19 @@ function Directory:BuildFrame()
         
         local statusTxt = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         statusTxt:SetPoint("LEFT", row, "LEFT", 8, 0)
+        statusTxt:SetWidth(84)
+        statusTxt:SetJustifyH("LEFT")
         row.statusTxt = statusTxt
         
         local nameTxt = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        nameTxt:SetPoint("LEFT", row, "LEFT", 100, 0)
-        nameTxt:SetWidth(220)
+        nameTxt:SetPoint("LEFT", row, "LEFT", 96, 0)
+        nameTxt:SetWidth(230)
         nameTxt:SetJustifyH("LEFT")
         row.nameTxt = nameTxt
         
         local zoneTxt = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        zoneTxt:SetPoint("LEFT", row, "LEFT", 330, 0)
-        zoneTxt:SetWidth(145)
+        zoneTxt:SetPoint("LEFT", row, "LEFT", 334, 0)
+        zoneTxt:SetWidth(155)
         zoneTxt:SetJustifyH("LEFT")
         row.zoneTxt = zoneTxt
         
@@ -219,7 +264,14 @@ function Directory:BuildFrame()
                     
                     local isOnline = PUIRoleplay:IsPlayerOnline(this.targetPlayerName)
                     local isIC = (data.currently_ic == "1")
-                    local statusStr = (isOnline and "|cff00ff66Online|r" or "|cff888888Offline|r") .. " - " .. (isIC and "|cff40af6fIn Character (IC)|r" or "|cffd3681eOut of Character (OOC)|r")
+                    local statusStr = ""
+                    if not isOnline then
+                        statusStr = "|cff777788Offline|r"
+                    elseif isIC then
+                        statusStr = "|cff00ff88In Character (IC)|r"
+                    else
+                        statusStr = "|cffffaa00Out of Character (OOC)|r"
+                    end
                     GameTooltip:AddLine("Status: " .. statusStr, 1, 1, 1)
                     
                     if data.race and data.race ~= "" or data.class and data.class ~= "" then
@@ -325,6 +377,12 @@ function Directory:RefreshList(filterText)
             local classColor = data.class_color or "FFFFFF"
             local isIC = (data.currently_ic == "1")
             
+            -- Status category: 1 = IC (Online), 2 = OOC (Online), 3 = Offline
+            local statusRank = 3
+            if isOnline then
+                statusRank = isIC and 1 or 2
+            end
+            
             if query == "" or string.find(string.lower(name), query) or string.find(string.lower(fullName), query) or string.find(string.lower(zone), query) or string.find(string.lower(class), query) then
                 table.insert(matched, {
                     rawName = name,
@@ -333,21 +391,65 @@ function Directory:RefreshList(filterText)
                     classColor = classColor,
                     isIC = isIC,
                     isOnline = isOnline,
+                    statusRank = statusRank,
                     zone = zone
                 })
             end
         end
     end
     
-    -- Sort: Online players first, then alphabetically by RP/Character name
+    -- Dynamic Field Sorting (Status, Name, Zone)
     table.sort(matched, function(a, b)
-        if a.isOnline ~= b.isOnline then
-            return a.isOnline
+        if Directory.sortField == "status" then
+            if a.statusRank ~= b.statusRank then
+                if Directory.sortAsc then
+                    return a.statusRank < b.statusRank
+                else
+                    return a.statusRank > b.statusRank
+                end
+            end
+            return string.lower(a.fullName ~= "" and a.fullName or a.rawName) < string.lower(b.fullName ~= "" and b.fullName or b.rawName)
+        elseif Directory.sortField == "name" then
+            local nameA = string.lower(a.fullName ~= "" and a.fullName or a.rawName)
+            local nameB = string.lower(b.fullName ~= "" and b.fullName or b.rawName)
+            if nameA ~= nameB then
+                if Directory.sortAsc then
+                    return nameA < nameB
+                else
+                    return nameA > nameB
+                end
+            end
+            return a.statusRank < b.statusRank
+        elseif Directory.sortField == "zone" then
+            local zoneA = string.lower(a.zone or "")
+            local zoneB = string.lower(b.zone or "")
+            if zoneA ~= zoneB then
+                if zoneA == "" then return false end
+                if zoneB == "" then return true end
+                if Directory.sortAsc then
+                    return zoneA < zoneB
+                else
+                    return zoneA > zoneB
+                end
+            end
+            return string.lower(a.fullName ~= "" and a.fullName or a.rawName) < string.lower(b.fullName ~= "" and b.fullName or b.rawName)
         end
-        return string.lower(a.fullName or a.rawName) < string.lower(b.fullName or b.rawName)
+        return a.statusRank < b.statusRank
     end)
     
     f.matchedItems = matched
+    
+    -- Update Header Column Sort Indicators
+    local function GetSortArrow(field)
+        if Directory.sortField == field then
+            return Directory.sortAsc and " |cff00e5ff▲|r" or " |cff00e5ff▼|r"
+        end
+        return ""
+    end
+    
+    if f.btnStatus then f.btnStatus.text:SetText("Status" .. GetSortArrow("status")) end
+    if f.btnName then f.btnName.text:SetText("Adventurer / RP Name" .. GetSortArrow("name")) end
+    if f.btnZone then f.btnZone.text:SetText("Current Zone" .. GetSortArrow("zone")) end
     
     -- Update stats
     if f.totalText then
@@ -379,9 +481,16 @@ function Directory:UpdateScroll(offset)
         if item then
             row.targetPlayerName = item.rawName
             
-            local dot = item.isOnline and "|cff00ff66●|r" or "|cff555566○|r"
-            local icBadge = item.isIC and "|cff40af6f[IC]|r" or "|cffd3681e[OOC]|r"
-            row.statusTxt:SetText(dot .. " " .. icBadge)
+            -- Explicit Status: IC, OOC, or Offline
+            local statusText = ""
+            if not item.isOnline then
+                statusText = "|cff777788○ Offline|r"
+            elseif item.isIC then
+                statusText = "|cff00ff88● IC|r"
+            else
+                statusText = "|cffffaa00● OOC|r"
+            end
+            row.statusTxt:SetText(statusText)
             
             local colorHex = item.classColor or "FFFFFF"
             local displayName = "|cff" .. colorHex .. item.fullName .. "|r"
