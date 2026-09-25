@@ -524,6 +524,33 @@ function PUIMover:SetCategoryFilter(category)
     UpdateDockSelectionDisplay()
 end
 
+-- Clamp a frame so it never extends outside UIParent viewport
+function PUIMover:ClampFrameToScreen(frame)
+    if not frame or not frame.GetRight or not frame.GetLeft or not UIParent or not UIParent.GetWidth then return end
+    local screenW = UIParent:GetWidth()
+    local screenH = UIParent:GetHeight()
+    if not screenW or screenW <= 0 then return end
+
+    local right = frame:GetRight()
+    local left = frame:GetLeft()
+
+    if right and right > screenW then
+        local overflow = right - screenW + 6
+        local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
+        if point then
+            frame:ClearAllPoints()
+            frame:SetPoint(point, relativeTo or UIParent, relativePoint or point, (xOfs or 0) - overflow, yOfs or 0)
+        end
+    elseif left and left < 0 then
+        local underflow = -left + 6
+        local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
+        if point then
+            frame:ClearAllPoints()
+            frame:SetPoint(point, relativeTo or UIParent, relativePoint or point, (xOfs or 0) + underflow, yOfs or 0)
+        end
+    end
+end
+
 -- Refresh a specific frame or all frame mover overlays when resized dynamically
 function PUIMover:UpdateFrame(frameOrKey)
     if not frameOrKey then return end
@@ -537,6 +564,7 @@ function PUIMover:UpdateFrame(frameOrKey)
         end
     end
     if key and registeredFrames[key] and moverOverlays[key] then
+        self:ClampFrameToScreen(registeredFrames[key].frame)
         SyncOverlayToFrame(moverOverlays[key], registeredFrames[key].frame, key)
     end
 end
@@ -545,6 +573,7 @@ function PUIMover:RefreshOverlays()
     for key, entry in pairs(registeredFrames) do
         local overlay = moverOverlays[key]
         if overlay and entry.frame then
+            self:ClampFrameToScreen(entry.frame)
             SyncOverlayToFrame(overlay, entry.frame, key)
         end
     end
@@ -568,6 +597,7 @@ function PUIMover:RestorePosition(key)
         if entry.frame.SetUserPlaced then
             entry.frame:SetUserPlaced(true)
         end
+        self:ClampFrameToScreen(entry.frame)
     end
 end
 

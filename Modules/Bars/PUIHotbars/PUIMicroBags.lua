@@ -145,6 +145,9 @@ function PUIHotbars:BuildBagBar()
         bagAnchor = CreateFrame("Frame", "Primus_PUIHotbars_BagBar", UIParent)
         bagAnchor:SetWidth(totalW > 0 and totalW or 37)
         bagAnchor:SetHeight(totalH)
+        bagAnchor:SetFrameStrata("MEDIUM")
+        bagAnchor:SetFrameLevel(2)
+        bagAnchor:SetAlpha(1.0)
         bagAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -6, 68)
         local mover = PUIMover or Primus.PUIMover
         if mover and mover.Register then
@@ -153,6 +156,13 @@ function PUIHotbars:BuildBagBar()
     else
         bagAnchor:SetWidth(totalW > 0 and totalW or 37)
         bagAnchor:SetHeight(totalH)
+        bagAnchor:SetFrameStrata("MEDIUM")
+        bagAnchor:SetFrameLevel(2)
+        bagAnchor:SetAlpha(1.0)
+        local mover = PUIMover or Primus.PUIMover
+        if mover and mover.ClampFrameToScreen then
+            mover:ClampFrameToScreen(bagAnchor)
+        end
     end
 
     local curX = 0
@@ -192,6 +202,14 @@ function PUIHotbars:BuildBagBar()
                         icon:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -1, 1)
                     end
                 end
+
+                -- Refresh bag slot display & backdrop texture
+                if btn:GetName() ~= "MainMenuBarBackpackButton" and PaperDollItemSlotButton_Update then
+                    local origThis = this
+                    this = btn
+                    PaperDollItemSlotButton_Update()
+                    this = origThis
+                end
             else
                 -- KeyRing Button Aspect-Ratio & Texture Atlas Normalization
                 if btn:GetName() == "KeyRingButton" then
@@ -214,6 +232,7 @@ function PUIHotbars:BuildBagBar()
                 end
             end
 
+            btn:SetAlpha(1.0)
             btn:Show()
         end
     end
