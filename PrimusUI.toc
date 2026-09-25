@@ -90,6 +90,7 @@ Modules\Player\PUIVendor\PUIVendor.lua
 Modules\Player\PUIReagents\PUIReagents.lua
 Modules\Player\PUITalents\PUITalents.lua
 Modules\Player\PUISpellbook\PUISpellbook.lua
+Modules\Player\PUIQuestWatch\PUIQuestWatch.lua
 
 # =========================================================================
 # SOCIAL & COMMUNICATION (Tier 3)
