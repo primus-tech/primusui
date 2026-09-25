@@ -162,15 +162,17 @@ local function SplitString(str, delimiter, targetTable)
     for k in pairs(result) do result[k] = nil end
     if not str or str == "" then return result end
     
-    local pattern = "(.-)" .. delimiter
-    local lastPos = 1
-    local s, e, cap = string.find(str, pattern, 1)
-    while s do
-        table.insert(result, cap)
-        lastPos = e + 1
-        s, e, cap = string.find(str, pattern, lastPos)
+    local from = 1
+    local delim_from, delim_to = string.find(str, delimiter, from, true)
+    local i = 1
+    while delim_from do
+        result[i] = string.sub(str, from, delim_from - 1)
+        i = i + 1
+        from = delim_to + 1
+        delim_from, delim_to = string.find(str, delimiter, from, true)
     end
-    table.insert(result, string.sub(str, lastPos))
+    result[i] = string.sub(str, from)
+    table.setn(result, i)
     return result
 end
 
@@ -264,7 +266,7 @@ local msgSplitTable = {}
 local pingSplitTable = {}
 
 function Comms:OnChatMessage(msg, sender)
-    if not msg or not sender then return end
+    if not msg or not sender or sender == "" then return end
     
     local decoded = self:DrunkDecode(msg)
     local colonStart = string.find(decoded, ":")
@@ -287,7 +289,7 @@ function Comms:OnChatMessage(msg, sender)
                         self:SendData(dataPrefix)
                     end
                 end
-            elseif string.sub(dataPrefix, 2, 2) == "R" then
+            elseif (targetName == "p" or string.sub(dataPrefix, -1) == "R") and (dataPrefix == "MR" or dataPrefix == "TR" or dataPrefix == "DR") then
                 -- Response packet (MR, TR, DR)
                 self:ProcessResponse(dataPrefix, sender, decoded)
             end
@@ -310,8 +312,12 @@ function Comms:ProcessResponse(dataPrefix, sender, msg)
     -- parts: [1]="" (before first ~), [2]=key, [3]=chunkIndex, [4]=totalChunks, [5..N]=payload
     
     local key = parts[2]
-    local chunkIdx = tonumber(parts[3]) or 1
-    local totalChunks = tonumber(parts[4]) or 1
+    local chunkIdx = tonumber(parts[3])
+    local totalChunks = tonumber(parts[4])
+    
+    if not key or key == "" or not chunkIdx or not totalChunks then
+        return
+    end
     
     local charData = PUIRoleplay:GetOrCreateCharacterData(sender)
     if not charData["temp" .. dataPrefix] or chunkIdx == 1 then
@@ -321,9 +327,9 @@ function Comms:ProcessResponse(dataPrefix, sender, msg)
     local totalParts = table.getn(parts)
     local chunkPayload = ""
     for i = 5, totalParts do
-        chunkPayload = chunkPayload .. parts[i] .. (i == totalParts and "" or "~")
+        chunkPayload = chunkPayload .. (parts[i] or "") .. (i == totalParts and "" or "~")
     end
-    charData["temp" .. dataPrefix] = charData["temp" .. dataPrefix] .. chunkPayload
+    charData["temp" .. dataPrefix] = (charData["temp" .. dataPrefix] or "") .. chunkPayload
     
     -- When all chunks received, parse and store into character record
     if chunkIdx == totalChunks then
