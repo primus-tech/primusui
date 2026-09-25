@@ -640,22 +640,46 @@ function Sheet:BuildFrame()
     local bioScrollBg = Create1PxBackdrop(p3, 0.04, 0.04, 0.07, 0.95, 0.28, 0.28, 0.35, 1.0)
     bioScrollBg:SetPoint("TOPLEFT", p3, "TOPLEFT", 10, -26)
     bioScrollBg:SetPoint("BOTTOMRIGHT", p3, "BOTTOMRIGHT", -10, 10)
+    bioScrollBg:EnableMouse(true)
     
     local scrollBox = CreateFrame("ScrollFrame", "Primus_PUIRoleplay_BioScroll", p3, "UIPanelScrollFrameTemplate")
     scrollBox:SetPoint("TOPLEFT", bioScrollBg, "TOPLEFT", 4, -4)
     scrollBox:SetPoint("BOTTOMRIGHT", bioScrollBg, "BOTTOMRIGHT", -24, 4)
+    scrollBox:EnableMouse(true)
     
     local bioEB = CreateFrame("EditBox", nil, scrollBox)
     bioEB:SetWidth(380)
-    bioEB:SetHeight(340)
+    bioEB:SetHeight(1000)
     bioEB:SetMultiLine(true)
     bioEB:SetMaxLetters(1000)
+    bioEB:EnableMouse(true)
     bioEB:SetAutoFocus(false)
     bioEB:SetFontObject(GameFontHighlight)
     bioEB:SetTextColor(1.0, 1.0, 1.0, 1.0)
     bioEB:SetTextInsets(6, 6, 6, 6)
     scrollBox:SetScrollChild(bioEB)
     p3.bioEB = bioEB
+    
+    scrollBox:SetScript("OnMouseDown", function()
+        if isViewingSelf then bioEB:SetFocus() end
+    end)
+    bioScrollBg:SetScript("OnMouseDown", function()
+        if isViewingSelf then bioEB:SetFocus() end
+    end)
+    bioEB:SetScript("OnMouseDown", function()
+        if isViewingSelf then this:SetFocus() end
+    end)
+    bioEB:SetScript("OnCursorChanged", function()
+        local arg1, arg2, arg3, arg4 = arg1, arg2, arg3, arg4
+        if ScrollingEdit_OnCursorChanged then
+            ScrollingEdit_OnCursorChanged(arg1, arg2, arg3, arg4)
+        end
+    end)
+    bioEB:SetScript("OnUpdate", function()
+        if ScrollingEdit_OnUpdate then
+            ScrollingEdit_OnUpdate(arg1, scrollBox)
+        end
+    end)
     
     bioEB:SetScript("OnTextChanged", function()
         local len = string.len(this:GetText() or "")
@@ -721,21 +745,39 @@ function Sheet:BuildFrame()
     local notesScrollBg = Create1PxBackdrop(p4, 0.04, 0.04, 0.07, 0.95, 0.28, 0.28, 0.35, 1.0)
     notesScrollBg:SetPoint("TOPLEFT", notesHeader, "BOTTOMLEFT", 0, -6)
     notesScrollBg:SetPoint("BOTTOMRIGHT", p4, "BOTTOMRIGHT", -10, 10)
+    notesScrollBg:EnableMouse(true)
     
     local notesScroll = CreateFrame("ScrollFrame", "Primus_PUIRoleplay_NotesScroll", p4, "UIPanelScrollFrameTemplate")
     notesScroll:SetPoint("TOPLEFT", notesScrollBg, "TOPLEFT", 4, -4)
     notesScroll:SetPoint("BOTTOMRIGHT", notesScrollBg, "BOTTOMRIGHT", -24, 4)
+    notesScroll:EnableMouse(true)
     
     local notesEB = CreateFrame("EditBox", nil, notesScroll)
     notesEB:SetWidth(380)
-    notesEB:SetHeight(260)
+    notesEB:SetHeight(800)
     notesEB:SetMultiLine(true)
+    notesEB:EnableMouse(true)
     notesEB:SetAutoFocus(false)
     notesEB:SetFontObject(GameFontHighlight)
     notesEB:SetTextColor(1.0, 1.0, 1.0, 1.0)
     notesEB:SetTextInsets(6, 6, 6, 6)
     notesScroll:SetScrollChild(notesEB)
     p4.notesEB = notesEB
+    
+    notesScroll:SetScript("OnMouseDown", function() notesEB:SetFocus() end)
+    notesScrollBg:SetScript("OnMouseDown", function() notesEB:SetFocus() end)
+    notesEB:SetScript("OnMouseDown", function() this:SetFocus() end)
+    notesEB:SetScript("OnCursorChanged", function()
+        local arg1, arg2, arg3, arg4 = arg1, arg2, arg3, arg4
+        if ScrollingEdit_OnCursorChanged then
+            ScrollingEdit_OnCursorChanged(arg1, arg2, arg3, arg4)
+        end
+    end)
+    notesEB:SetScript("OnUpdate", function()
+        if ScrollingEdit_OnUpdate then
+            ScrollingEdit_OnUpdate(arg1, notesScroll)
+        end
+    end)
     
     notesEB:SetScript("OnTextChanged", function()
         if f.isRefreshing ~= true then
@@ -862,8 +904,10 @@ function Sheet:Refresh()
     end
     
     -- Panel 3: Bio
-    f.panel3.bioEB:SetText(charData.description or "")
+    local bioDesc = charData.description or ""
+    f.panel3.bioEB:SetText(bioDesc)
     f.panel3.bioEB:SetTextColor(1.0, 1.0, 1.0, 1.0)
+    f.panel3.charCount:SetText(string.len(bioDesc) .. " / 1000")
     
     -- Panel 4: Notes & Profiles
     local activeSlot = PUIRoleplay:GetActiveProfileSlot()
