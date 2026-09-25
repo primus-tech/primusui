@@ -3,7 +3,8 @@
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides a modern unified bag window for bags 0–4 with item search,
-    quality-colored borders, free slot counter, and auto-sorting.
+    quality-colored borders, free slot counter, equipped bag bar tray (with hide/show toggle),
+    and live Gold/Silver/Copper money display.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -23,14 +24,16 @@ local Events   = Primus.Events
 local PUIMover = Primus.PUIMover
 
 local bagsDB = DB:RegisterNamespace("PUIBags", {
-    enabled  = true,
-    cols     = 8,
-    slotSize = 34,
-    spacing  = 4,
+    enabled     = true,
+    cols        = 8,
+    slotSize    = 34,
+    spacing     = 4,
+    showBagTray = true, -- Toggleable 5 equipped bag tray
 })
 
 local bagFrame     = nil
 local bagSlots     = {}
+local bagTraySlots = {}
 local searchFilter = ""
 
 -- Quality Color borders
@@ -42,6 +45,159 @@ local QUALITY_COLORS = {
     [4] = { r = 0.6, g = 0.2, b = 0.9 }, -- Epic (Purple)
     [5] = { r = 1.0, g = 0.5, b = 0.0 }, -- Legendary (Orange)
 }
+
+-- =========================================================================
+-- MONEY DISPLAY HELPER
+-- =========================================================================
+
+local function UpdateMoneyDisplay()
+    if not bagFrame or not bagFrame.moneyText then return end
+
+    local copper = GetMoney() or 0
+    local gold = math.floor(copper / 10000)
+    local silver = math.floor(Utils.Mod(copper, 10000) / 100)
+    local cop = Utils.Mod(copper, 100)
+
+    local moneyStr = ""
+    if gold > 0 then
+        moneyStr = moneyStr .. string.format("%d|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:2:0|t ", gold)
+    end
+    if silver > 0 or gold > 0 then
+        moneyStr = moneyStr .. string.format("%d|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:2:0|t ", silver)
+    end
+    moneyStr = moneyStr .. string.format("%d|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:2:0|t", cop)
+
+    bagFrame.moneyText:SetText(moneyStr)
+end
+
+-- =========================================================================
+-- EQUIPPED BAG TRAY SLOTS (Bags 0 to 4)
+-- =========================================================================
+
+local function CreateBagTraySlot(parent, bagID)
+    local slot = CreateFrame("Button", "Primus_PUIBagTraySlot_" .. bagID, parent)
+    slot:SetWidth(28)
+    slot:SetHeight(28)
+    slot:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    slot:SetBackdropColor(0.08, 0.08, 0.10, 0.9)
+    slot:SetBackdropBorderColor(0.3, 0.3, 0.35, 1)
+
+    local icon = slot:CreateTexture(slot:GetName() .. "Icon", "BORDER")
+    icon:SetPoint("TOPLEFT", slot, "TOPLEFT", 1, -1)
+    icon:SetPoint("BOTTOMRIGHT", slot, "BOTTOMRIGHT", -1, 1)
+    icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+    slot.icon = icon
+
+    local highlight = slot:CreateTexture(nil, "HIGHLIGHT")
+    highlight:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
+    highlight:SetBlendMode("ADD")
+    highlight:SetAllPoints(slot)
+
+    slot:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    slot:RegisterForDrag("LeftButton")
+
+    slot:SetScript("OnClick", function()
+        if bagID == 0 then
+            -- Backpack cannot be unequipped
+            return
+        end
+        local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
+        if invSlot then
+            if CursorHasItem() then
+                PutItemInBag(invSlot)
+            else
+                PickupBagFromSlot(invSlot)
+            end
+        end
+    end)
+
+    slot:SetScript("OnDragStart", function()
+        if bagID == 0 then return end
+        local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
+        if invSlot then
+            PickupBagFromSlot(invSlot)
+        end
+    end)
+
+    slot:SetScript("OnReceiveDrag", function()
+        if bagID == 0 then return end
+        local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
+        if invSlot then
+            PutItemInBag(invSlot)
+        end
+    end)
+
+    slot:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(this, "ANCHOR_LEFT")
+        if bagID == 0 then
+            GameTooltip:SetText("Backpack (16 Slots)", 1.0, 0.82, 0.0)
+            GameTooltip:AddLine("Your default inventory container.", 0.7, 0.7, 0.7)
+            GameTooltip:Show()
+        else
+            local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
+            if invSlot then
+                local hasItem = GetInventoryItemTexture("player", invSlot)
+                if hasItem then
+                    GameTooltip:SetInventoryItem("player", invSlot)
+                else
+                    GameTooltip:SetText(string.format("Bag Slot %d", bagID), 1.0, 0.82, 0.0)
+                    GameTooltip:AddLine("Empty bag slot. Drag a bag here to equip it.", 0.7, 0.7, 0.7)
+                end
+                GameTooltip:Show()
+            end
+        end
+    end)
+
+    slot:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+
+    bagTraySlots[bagID] = slot
+    return slot
+end
+
+local function UpdateBagTray()
+    if not bagFrame or not bagFrame.bagTray then return end
+
+    local showTray = bagsDB:Get("showBagTray", true)
+    if not showTray then
+        bagFrame.bagTray:Hide()
+        return
+    end
+
+    bagFrame.bagTray:Show()
+
+    for bagID = 0, 4 do
+        local slot = bagTraySlots[bagID]
+        if not slot then
+            slot = CreateBagTraySlot(bagFrame.bagTray, bagID)
+            slot:SetPoint("LEFT", bagFrame.bagTray, "LEFT", bagID * 32, 0)
+        end
+
+        if bagID == 0 then
+            slot.icon:SetTexture("Interface\\Buttons\\Button-Backpack-Up")
+            slot.icon:Show()
+            slot:SetBackdropBorderColor(0.8, 0.65, 0.2, 1)
+        else
+            local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
+            local texture = invSlot and GetInventoryItemTexture("player", invSlot)
+            if texture then
+                slot.icon:SetTexture(texture)
+                slot.icon:Show()
+                slot:SetBackdropBorderColor(0.2, 0.6, 1.0, 1)
+            else
+                slot.icon:SetTexture("Interface\\PaperDoll\\UI-PaperDoll-Slot-Bag")
+                slot.icon:Show()
+                slot:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+            end
+        end
+        slot:Show()
+    end
+end
+
+-- =========================================================================
+-- CONTAINER ITEM SLOTS
+-- =========================================================================
 
 -- Create single clean container slot button (Zero Blizzard ContainerTemplate dependency)
 local function CreateBagSlot(parent, index)
@@ -134,17 +290,31 @@ local function CreateBagSlot(parent, index)
     return slot
 end
 
--- Refresh bag slot items and dynamic grid layout
+-- Refresh bag slot items, bag tray, and dynamic grid layout
 function PUIBags:UpdateBagSlots()
     if not bagFrame or not bagFrame:IsShown() then return end
 
     local cols = bagsDB:Get("cols") or 8
     local size = bagsDB:Get("slotSize") or 34
     local spacing = bagsDB:Get("spacing") or 4
+    local showTray = bagsDB:Get("showBagTray", true)
 
     local slotIndex = 0
     local freeSlots = 0
     local totalSlots = 0
+
+    -- Update Bag Tray
+    UpdateBagTray()
+
+    -- Adjust Slot Container vertical anchor based on Bag Tray visibility
+    bagFrame.slotContainer:ClearAllPoints()
+    if showTray then
+        bagFrame.slotContainer:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -62)
+        bagFrame.slotContainer:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 32)
+    else
+        bagFrame.slotContainer:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -32)
+        bagFrame.slotContainer:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 32)
+    end
 
     for bagID = 0, 4 do
         local numSlots = GetContainerNumSlots(bagID)
@@ -223,19 +393,26 @@ function PUIBags:UpdateBagSlots()
         end
     end
 
-    -- Dynamically resize bag window to fit active slots
+    -- Dynamically resize bag window to fit active slots and panels
     if totalSlots > 0 then
         local rows = math.ceil(totalSlots / cols)
-        local panelWidth = cols * (size + spacing) + 20
-        local panelHeight = rows * (size + spacing) + 60
+        local gridWidth = cols * (size + spacing) - spacing
+        local panelWidth = math.max(gridWidth + 20, 260)
+        local gridHeight = rows * (size + spacing)
+        local extraHeight = (showTray and 62 or 32) + 36 -- Top padding + bottom footer
+        local panelHeight = gridHeight + extraHeight
+
         bagFrame:SetWidth(panelWidth)
         bagFrame:SetHeight(panelHeight)
     end
 
-    -- Update info text
+    -- Update info text (Free Slots)
     if bagFrame.infoText then
         bagFrame.infoText:SetText(string.format("Free: %d / %d", freeSlots, totalSlots))
     end
+
+    -- Update Money Display
+    UpdateMoneyDisplay()
 end
 
 -- Toggle Bags
@@ -249,9 +426,23 @@ function PUIBags:Toggle()
     end
 end
 
+-- Toggle Bag Tray (Equipped Bags 0-4)
+function PUIBags:ToggleBagTray()
+    local cur = bagsDB:Get("showBagTray", true)
+    bagsDB:Set("showBagTray", not cur)
+    if bagFrame and bagFrame.trayToggleBtn then
+        bagFrame.trayToggleBtn:SetBackdropBorderColor(not cur and 0.8 or 0.3, not cur and 0.65 or 0.3, not cur and 0.2 or 0.35, 1)
+    end
+    self:UpdateBagSlots()
+end
+
+-- =========================================================================
+-- INITIALIZATION & UI CONSTRUCTION
+-- =========================================================================
+
 function PUIBags:OnInitialize()
     -- Create Unified Bag Frame
-    bagFrame = Widgets:CreatePanel(UIParent, "PUIBags", 324, 200)
+    bagFrame = Widgets:CreatePanel(UIParent, "PUIBags", 324, 240)
     bagFrame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -50, 100)
     bagFrame:Hide()
 
@@ -270,11 +461,11 @@ function PUIBags:OnInitialize()
         end
     end)
 
-    -- Search EditBox
+    -- Header Controls: Search EditBox
     local searchBox = CreateFrame("EditBox", "Primus_PUIBagSearchBox", bagFrame)
-    searchBox:SetWidth(130)
+    searchBox:SetWidth(120)
     searchBox:SetHeight(18)
-    searchBox:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -28)
+    searchBox:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -8)
     searchBox:SetBackdrop(Media:Fetch("border", "1Pixel"))
     searchBox:SetBackdropColor(0.05, 0.05, 0.05, 0.8)
     searchBox:SetBackdropBorderColor(0.3, 0.3, 0.35, 1)
@@ -297,17 +488,59 @@ function PUIBags:OnInitialize()
         PUIBags:UpdateBagSlots()
     end)
 
-    -- Free Space Text
+    -- Bag Tray Toggle Button (Header)
+    local trayToggleBtn = CreateFrame("Button", "Primus_PUIBagTrayToggleBtn", bagFrame)
+    trayToggleBtn:SetWidth(18)
+    trayToggleBtn:SetHeight(18)
+    trayToggleBtn:SetPoint("LEFT", searchBox, "RIGHT", 6, 0)
+    trayToggleBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    trayToggleBtn:SetBackdropColor(0.08, 0.08, 0.10, 0.9)
+    local isTrayShown = bagsDB:Get("showBagTray", true)
+    trayToggleBtn:SetBackdropBorderColor(isTrayShown and 0.8 or 0.3, isTrayShown and 0.65 or 0.3, isTrayShown and 0.2 or 0.35, 1)
+
+    local trayIcon = trayToggleBtn:CreateTexture(nil, "ARTWORK")
+    trayIcon:SetPoint("TOPLEFT", trayToggleBtn, "TOPLEFT", 1, -1)
+    trayIcon:SetPoint("BOTTOMRIGHT", trayToggleBtn, "BOTTOMRIGHT", -1, 1)
+    trayIcon:SetTexture("Interface\\Buttons\\Button-Backpack-Up")
+    trayIcon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+
+    trayToggleBtn:SetScript("OnClick", function()
+        PUIBags:ToggleBagTray()
+    end)
+    trayToggleBtn:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(this, "ANCHOR_TOP")
+        GameTooltip:SetText("Toggle Bag Bar", 1.0, 0.82, 0.0)
+        GameTooltip:AddLine("Show or hide the 5 equipped bag slots (Backpack + Bags 1-4).", 0.7, 0.7, 0.7)
+        GameTooltip:Show()
+    end)
+    trayToggleBtn:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    bagFrame.trayToggleBtn = trayToggleBtn
+
+    -- Free Space Text (Header Right)
     local infoText = bagFrame:CreateFontString(nil, "OVERLAY")
     infoText:SetFont(Media:Fetch("font", "Default"), 10, "OUTLINE")
-    infoText:SetPoint("TOPRIGHT", bagFrame, "TOPRIGHT", -10, -32)
+    infoText:SetPoint("TOPRIGHT", bagFrame, "TOPRIGHT", -26, -11)
     infoText:SetTextColor(0.8, 0.8, 0.8)
     bagFrame.infoText = infoText
 
+    -- Bag Tray Container Frame
+    local bagTray = CreateFrame("Frame", "Primus_PUIBagTrayContainer", bagFrame)
+    bagTray:SetHeight(30)
+    bagTray:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -30)
+    bagTray:SetPoint("TOPRIGHT", bagFrame, "TOPRIGHT", -10, -30)
+    bagFrame.bagTray = bagTray
+
+    -- Pre-create the 5 bag tray slots
+    for b = 0, 4 do
+        CreateBagTraySlot(bagTray, b)
+    end
+
     -- Container for slot grid
     local slotContainer = CreateFrame("Frame", nil, bagFrame)
-    slotContainer:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -52)
-    slotContainer:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 10)
+    slotContainer:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -62)
+    slotContainer:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 32)
     bagFrame.slotContainer = slotContainer
 
     -- Pre-instantiate initial 80 slots in grid
@@ -322,6 +555,29 @@ function PUIBags:OnInitialize()
         slot:SetPoint("TOPLEFT", slotContainer, "TOPLEFT", col * (size + spacing), -(row * (size + spacing)))
         slot:Hide()
     end
+
+    -- Footer: Money Display Frame
+    local moneyFrame = CreateFrame("Frame", "Primus_PUIBagMoneyFrame", bagFrame)
+    moneyFrame:SetHeight(22)
+    moneyFrame:SetPoint("BOTTOMLEFT", bagFrame, "BOTTOMLEFT", 10, 6)
+    moneyFrame:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 6)
+
+    local moneyText = moneyFrame:CreateFontString(nil, "OVERLAY")
+    moneyText:SetFont(Media:Fetch("font", "Default"), 11, "OUTLINE")
+    moneyText:SetPoint("RIGHT", moneyFrame, "RIGHT", 0, 0)
+    moneyText:SetTextColor(1, 1, 1)
+    bagFrame.moneyText = moneyText
+
+    moneyFrame:EnableMouse(true)
+    moneyFrame:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(this, "ANCHOR_TOPRIGHT")
+        GameTooltip:SetText("Player Currency", 1.0, 0.82, 0.0)
+        GameTooltip:AddLine(Utils.FormatMoney(GetMoney() or 0), 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    moneyFrame:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
 
     local mover = PUIMover or Primus.PUIMover
     if mover and mover.Register then
@@ -362,7 +618,7 @@ function PUIBags:RegisterOptionsFlare()
 
     Options:RegisterModuleOptions("PUIBags", "Player", {
         title = "PUIBags: Unified Inventory",
-        description = "Single-window inventory frame with item search, quality borders, and auto-sorting.",
+        description = "Single-window inventory frame with item search, quality borders, bag bar tray, and money display.",
         fields = {
             {
                 key = "enabled",
@@ -373,6 +629,17 @@ function PUIBags:RegisterOptionsFlare()
                 set = function(val)
                     bagsDB:Set("enabled", val)
                     if val then PUIBags:OnEnable() else PUIBags:OnDisable() end
+                end,
+            },
+            {
+                key = "showBagTray",
+                label = "Show Equipped Bags Bar (Bags 0-4)",
+                type = "checkbox",
+                default = true,
+                get = function() return bagsDB:Get("showBagTray", true) end,
+                set = function(val)
+                    bagsDB:Set("showBagTray", val)
+                    if bagFrame then PUIBags:UpdateBagSlots() end
                 end,
             },
             {
@@ -420,6 +687,9 @@ function PUIBags:OnEnable()
         if bagFrame and bagFrame:IsShown() then
             PUIBags:UpdateBagSlots()
         end
+    end)
+    Events:Register("PLAYER_MONEY", "PUIBags", function()
+        UpdateMoneyDisplay()
     end)
     Events:Register("BANKFRAME_OPENED", "PUIBags", function()
         if bagFrame and not bagFrame:IsShown() then
