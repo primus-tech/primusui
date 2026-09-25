@@ -1,14 +1,16 @@
 --[[
-    PrimusLib: Bulletproof Diagnostic & Auto-Popup Error Catcher
+    PrimusLib: Bulletproof Diagnostic, Suppression Engine & Tabbed Error Catcher
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Commands: /error, /errors, /bug, /bugs, /err
     Features:
     1. Intercepts all Lua errors, syntax warnings, and Blizzard message() calls.
-    2. Automatic pop-up window immediately on error with full call stack trace.
-    3. Multi-line selectable editbox with 1-click 'Copy / Select All' for Ctrl+C / Cmd+C.
-    4. Loop deduplication to protect FPS and memory on rapid repeat errors.
-    5. Error history navigation (< Previous, Next >), Clear, and 1-Click Reload UI.
+    2. Suppression Engine: checks against errors already in the log to suppress repeat auto-popups & FPS lag.
+    3. Tabbed Interface:
+       - Tab 1: Single Error Inspector (Details, Stack Trace, Occurrence Count, Next/Prev navigation)
+       - Tab 2: Full Error Log (Aggregated chronological transcript of all unique errors)
+    4. 1-Click 'Copy / Select All' button for instant Ctrl+C / Cmd+C export.
+    5. Error history navigation, Clear All (resets suppression cache), and 1-Click Reload UI.
     6. Suppresses default Blizzard ScriptErrors dialog.
 --]]
 
@@ -23,12 +25,16 @@ local Utils = Primus.Utils
 
 Debug.errorLog = {}
 Debug.capturedErrors = {}
+Debug.errorMap = {}
+Debug.totalErrorOccurrences = 0
 Debug.currentIndex = 1
+Debug.activeTab = 1
 Debug.logCount = 0
 Debug.maxLogs = 100
 Debug.logLevel = 1
 Debug.errorFrame = nil
 Debug.autoPopup = true
+Debug.lastVisualRefresh = 0
 
 local LEVEL_COLORS = {
     [1] = "ff4444", -- Error (Red)
@@ -55,6 +61,17 @@ local function DetectAddonName(str)
     if addon then return addon end
     if string.find(str, "FrameXML") then return "Blizzard FrameXML" end
     return "Custom Script"
+end
+
+-- Normalize error string & stack for duplicate suppression signature
+local function NormalizeErrorSignature(msg, stack)
+    local cleanMsg = string.gsub(tostring(msg or ""), "%s+", " ")
+    -- Strip memory address hex pointers (e.g. 0x1234abcd) so addresses don't break grouping
+    cleanMsg = string.gsub(cleanMsg, "0x%x+", "0xHEX")
+    
+    local cleanStack = string.gsub(tostring(stack or ""), "0x%x+", "0xHEX")
+    local sigStack = string.sub(cleanStack, 1, 300)
+    return cleanMsg .. "||" .. sigStack
 end
 
 -- Record and format an error in the legacy log
@@ -117,7 +134,7 @@ function Debug:Dump(t, maxDepth, currentDepth)
 end
 
 -- =========================================================================
--- GLOBAL ERROR CATCHER & AUTOMATIC POP-UP INSPECTOR
+-- GLOBAL ERROR CATCHER, SUPPRESSION ENGINE & TABBED POP-UP INSPECTOR
 -- =========================================================================
 
 -- Show Error Popup Window immediately
@@ -133,26 +150,35 @@ function Debug:ShowErrorPopup()
     end
 end
 
--- Capture and record a Lua error
+-- Capture and record a Lua error with automatic suppression
 function Debug:CaptureError(msg, stack)
     msg = tostring(msg or "Unknown script error")
     stack = tostring(stack or (debugstack and debugstack(2, 20, 20) or ""))
     local timeStr = date("%H:%M:%S")
 
-    -- Check for repeat error to deduplicate and protect FPS/memory
-    local numErrors = table.getn(self.capturedErrors)
-    for i = 1, numErrors do
-        local existing = self.capturedErrors[i]
-        if existing.msg == msg and existing.stack == stack then
-            existing.count = existing.count + 1
-            existing.lastSeen = timeStr
-            if self.errorFrame and self.errorFrame:IsShown() and self.currentIndex == i then
+    self.totalErrorOccurrences = (self.totalErrorOccurrences or 0) + 1
+    local sig = NormalizeErrorSignature(msg, stack)
+
+    -- Suppression Engine: check if this error signature was already caught
+    if not self.errorMap then self.errorMap = {} end
+    local existing = self.errorMap[sig]
+    if existing then
+        -- Duplicate error: increment count, update timestamp, and SUPPRESS auto-popup
+        existing.count = existing.count + 1
+        existing.lastSeen = timeStr
+
+        -- Rate-limited GUI refresh (max 1/sec) if error frame is currently visible
+        if self.errorFrame and self.errorFrame:IsShown() then
+            local now = GetTime()
+            if (now - (self.lastVisualRefresh or 0)) >= 1.0 then
+                self.lastVisualRefresh = now
                 self:RefreshErrorFrame()
             end
-            return
         end
+        return
     end
 
+    -- New Unique Error: Register and categorize
     local addon = DetectAddonName(msg)
     if addon == "Unknown" or addon == "Custom Script" then
         addon = DetectAddonName(stack)
@@ -165,209 +191,36 @@ function Debug:CaptureError(msg, stack)
         lastSeen = timeStr,
         count = 1,
         addon = addon,
+        sig = sig,
     }
 
+    self.errorMap[sig] = entry
     table.insert(self.capturedErrors, entry)
     self.currentIndex = table.getn(self.capturedErrors)
 
-    -- Auto Pop-Up the Error Inspector Window immediately
+    -- Auto Pop-Up the Error Inspector Window immediately for new unique errors
     if self.autoPopup then
         self:ShowErrorPopup()
+    else
+        if self.errorFrame and self.errorFrame:IsShown() then
+            self:RefreshErrorFrame()
+        end
     end
 end
 
--- Create the Error Inspector GUI window
-function Debug:CreateErrorFrame()
-    if self.errorFrame then return self.errorFrame end
-
-    local parent = UIParent or WorldFrame
-    local f = CreateFrame("Frame", "Primus_ErrorFrame", parent)
-    f:SetWidth(600)
-    f:SetHeight(420)
-    f:SetPoint("CENTER", parent, "CENTER", 0, 50)
-    f:SetFrameStrata("FULLSCREEN_DIALOG")
-    f:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true, tileSize = 32, edgeSize = 32,
-        insets = { left = 11, right = 12, top = 12, bottom = 11 }
-    })
-    f:SetMovable(true)
-    f:EnableMouse(true)
-    f:RegisterForDrag("LeftButton")
-    f:SetScript("OnDragStart", function() this:StartMoving() end)
-    f:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
-    f:Hide()
-
-    -- Allow ESC key to close error popup
-    if UISpecialFrames then
-        table.insert(UISpecialFrames, "Primus_ErrorFrame")
-    end
-
-    -- Title Bar Header
-    local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    title:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -16)
-    title:SetText("|cffff4444Primus Error Catcher|r |cffaaaaaa// Script Error Inspector|r")
-    f.titleText = title
-
-    local closeX = CreateFrame("Button", nil, f)
-    closeX:SetWidth(24)
-    closeX:SetHeight(24)
-    closeX:SetPoint("TOPRIGHT", f, "TOPRIGHT", -12, -12)
-    closeX:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
-    closeX:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
-    closeX:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight")
-    closeX:SetScript("OnClick", function() f:Hide() end)
-
-    -- Status Subheader
-    local statusText = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    statusText:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
-    statusText:SetText("No errors captured.")
-    f.statusText = statusText
-
-    local countText = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    countText:SetPoint("TOPRIGHT", f, "TOPRIGHT", -40, -18)
-    countText:SetText("")
-    f.countText = countText
-
-    -- ScrollFrame & EditBox Container
-    local editContainer = CreateFrame("Frame", nil, f)
-    editContainer:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -56)
-    editContainer:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -16, 44)
-    editContainer:SetBackdrop({
-        bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        tile = true, tileSize = 16, edgeSize = 16,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 }
-    })
-    editContainer:SetBackdropColor(0.04, 0.04, 0.06, 0.95)
-    editContainer:SetBackdropBorderColor(0.3, 0.3, 0.4, 1.0)
-
-    local scroll = CreateFrame("ScrollFrame", "Primus_ErrorScrollFrame", editContainer, "UIPanelScrollFrameTemplate")
-    scroll:SetPoint("TOPLEFT", editContainer, "TOPLEFT", 8, -8)
-    scroll:SetPoint("BOTTOMRIGHT", editContainer, "BOTTOMRIGHT", -28, 8)
-
-    local editBox = CreateFrame("EditBox", "Primus_ErrorEditBox", scroll)
-    editBox:SetWidth(520)
-    editBox:SetHeight(280)
-    editBox:SetMultiLine(true)
-    editBox:SetAutoFocus(false)
-    editBox:SetMaxLetters(99999)
-    editBox:SetFontObject(GameFontHighlightSmall)
-    editBox:SetTextColor(0.95, 0.95, 0.95, 1.0)
-    editBox:SetScript("OnEscapePressed", function() f:Hide() end)
-    editBox:SetScript("OnTextChanged", function()
-        local s = this:GetParent()
-        if s and s.UpdateScrollChildRect then
-            s:UpdateScrollChildRect()
-        end
-    end)
-    scroll:SetScrollChild(editBox)
-    f.editBox = editBox
-    f.scroll = scroll
-
-    -- Bottom Controls Footer
-    local prevBtn = CreateFrame("Button", "Primus_ErrorPrevBtn", f, "UIPanelButtonTemplate")
-    prevBtn:SetWidth(80)
-    prevBtn:SetHeight(22)
-    prevBtn:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 16, 14)
-    prevBtn:SetText("< Previous")
-    prevBtn:SetScript("OnClick", function()
-        if Debug.currentIndex > 1 then
-            Debug.currentIndex = Debug.currentIndex - 1
-            Debug:RefreshErrorFrame()
-            if editBox then editBox:SetFocus() editBox:HighlightText() end
-        end
-    end)
-    f.prevBtn = prevBtn
-
-    local nextBtn = CreateFrame("Button", "Primus_ErrorNextBtn", f, "UIPanelButtonTemplate")
-    nextBtn:SetWidth(80)
-    nextBtn:SetHeight(22)
-    nextBtn:SetPoint("LEFT", prevBtn, "RIGHT", 4, 0)
-    nextBtn:SetText("Next >")
-    nextBtn:SetScript("OnClick", function()
-        if Debug.currentIndex < table.getn(Debug.capturedErrors) then
-            Debug.currentIndex = Debug.currentIndex + 1
-            Debug:RefreshErrorFrame()
-            if editBox then editBox:SetFocus() editBox:HighlightText() end
-        end
-    end)
-    f.nextBtn = nextBtn
-
-    -- 1-Click Copy / Select All Button
-    local copyBtn = CreateFrame("Button", "Primus_ErrorCopyBtn", f, "UIPanelButtonTemplate")
-    copyBtn:SetWidth(130)
-    copyBtn:SetHeight(22)
-    copyBtn:SetPoint("LEFT", nextBtn, "RIGHT", 8, 0)
-    copyBtn:SetText("Copy / Select All")
-    copyBtn:SetScript("OnClick", function()
-        editBox:SetFocus()
-        editBox:HighlightText()
-        if DEFAULT_CHAT_FRAME then
-            DEFAULT_CHAT_FRAME:AddMessage("|cff69ccf0[Primus Errors]: Text highlighted! Press Ctrl+C (Cmd+C) to copy.|r")
-        end
-    end)
-
-    -- Clear All Button
-    local clearBtn = CreateFrame("Button", "Primus_ErrorClearBtn", f, "UIPanelButtonTemplate")
-    clearBtn:SetWidth(80)
-    clearBtn:SetHeight(22)
-    clearBtn:SetPoint("LEFT", copyBtn, "RIGHT", 8, 0)
-    clearBtn:SetText("Clear All")
-    clearBtn:SetScript("OnClick", function()
-        Debug:ClearErrors()
-    end)
-
-    -- Reload UI Button
-    local reloadBtn = CreateFrame("Button", "Primus_ErrorReloadBtn", f, "UIPanelButtonTemplate")
-    reloadBtn:SetWidth(80)
-    reloadBtn:SetHeight(22)
-    reloadBtn:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -85, 14)
-    reloadBtn:SetText("Reload UI")
-    reloadBtn:SetScript("OnClick", function() ReloadUI() end)
-
-    -- Close Button
-    local closeMain = CreateFrame("Button", "Primus_ErrorCloseBtn", f, "UIPanelButtonTemplate")
-    closeMain:SetWidth(65)
-    closeMain:SetHeight(22)
-    closeMain:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -16, 14)
-    closeMain:SetText("Close")
-    closeMain:SetScript("OnClick", function() f:Hide() end)
-
-    self.errorFrame = f
-    return f
-end
-
--- Refresh error view
-function Debug:RefreshErrorFrame()
-    local f = self:CreateErrorFrame()
-    if not f then return end
-
+-- Generate single error report string
+function Debug:GenerateSingleErrorReport(index)
     local total = table.getn(self.capturedErrors)
-    if total == 0 then
-        f.titleText:SetText("|cffff4444Primus Error Catcher|r |cffaaaaaa// No Errors|r")
-        f.statusText:SetText("|cff888888No Lua errors captured in this session. All clear!|r")
-        f.countText:SetText("")
-        f.editBox:SetText("No errors captured.")
-        f.prevBtn:Disable()
-        f.nextBtn:Disable()
-        return
+    if total == 0 or not self.capturedErrors[index] then
+        return "No errors captured in this session. All clear!"
     end
 
-    if self.currentIndex < 1 then self.currentIndex = 1 end
-    if self.currentIndex > total then self.currentIndex = total end
-
-    local entry = self.capturedErrors[self.currentIndex]
-    f.titleText:SetText(string.format("|cffff4444Primus Error Catcher|r |cffaaaaaa// Error %d of %d|r", self.currentIndex, total))
-    f.statusText:SetText(string.format("Source: |cff69ccf0%s|r  |  Time: |cffffffff%s|r", entry.addon, entry.lastSeen))
-    f.countText:SetText(string.format("Occurrences: |cffffcc00%d|r", entry.count))
-
+    local entry = self.capturedErrors[index]
     local _, pClass = UnitClass("player")
     local pLevel = UnitLevel("player") or 60
     local pZone = GetZoneText() or "Unknown"
 
-    local report = string.format([[============================================================
+    return string.format([[============================================================
   PRIMUS ERROR REPORT [Error %d of %d]
 ============================================================
 Date/Time   : %s (First Seen: %s, Occurrences: %d)
@@ -382,22 +235,372 @@ Client      : WoW 1.12.1 (Interface 11200)
 ------------------------------------------------------------
 [CALL STACK]:
 %s
-============================================================]], self.currentIndex, total, entry.lastSeen, entry.firstSeen, entry.count, entry.addon, pLevel, pClass or "Unknown", pZone, entry.msg, entry.stack)
-
-    f.editBox:SetText(report)
-
-    if self.currentIndex > 1 then f.prevBtn:Enable() else f.prevBtn:Disable() end
-    if self.currentIndex < total then f.nextBtn:Enable() else f.nextBtn:Disable() end
+============================================================]], index, total, entry.lastSeen, entry.firstSeen, entry.count, entry.addon, pLevel, pClass or "Unknown", pZone, entry.msg, entry.stack)
 end
 
--- Clear all captured errors
+-- Generate full aggregated session log string
+function Debug:GenerateFullLogReport()
+    local total = table.getn(self.capturedErrors)
+    if total == 0 then
+        return "No errors captured in this session. All clear!"
+    end
+
+    local _, pClass = UnitClass("player")
+    local pLevel = UnitLevel("player") or 60
+    local pZone = GetZoneText() or "Unknown"
+
+    local out = {}
+    table.insert(out, "================================================================================")
+    table.insert(out, "  PRIMUS ERROR CATCHER - FULL SESSION ERROR LOG")
+    table.insert(out, string.format("  Total Unique Errors: %d  |  Total Occurrences: %d", total, self.totalErrorOccurrences or total))
+    table.insert(out, string.format("  Player: Level %d %s (Zone: %s) | Client: WoW 1.12.1 (11200)", pLevel, pClass or "Unknown", pZone))
+    table.insert(out, "================================================================================\n")
+
+    for i = 1, total do
+        local entry = self.capturedErrors[i]
+        table.insert(out, string.format("[ERROR #%d of %d] ----------------------------------------------------", i, total))
+        table.insert(out, string.format("Source     : %s", entry.addon or "Unknown"))
+        table.insert(out, string.format("First Seen : %s", entry.firstSeen or "Unknown"))
+        table.insert(out, string.format("Last Seen  : %s", entry.lastSeen or "Unknown"))
+        table.insert(out, string.format("Occurrences: %d (Duplicates Suppressed: %d)", entry.count or 1, (entry.count or 1) - 1))
+        table.insert(out, "\n[MESSAGE]:")
+        table.insert(out, entry.msg or "")
+        table.insert(out, "\n[CALL STACK]:")
+        table.insert(out, entry.stack or "")
+        table.insert(out, "\n--------------------------------------------------------------------------------\n")
+    end
+
+    return table.concat(out, "\n")
+end
+
+-- Create the Error Inspector GUI window with Tabs
+function Debug:CreateErrorFrame()
+    if self.errorFrame then return self.errorFrame end
+
+    local parent = UIParent or WorldFrame
+    local f = CreateFrame("Frame", "Primus_ErrorFrame", parent)
+    f:SetWidth(640)
+    f:SetHeight(460)
+    f:SetPoint("CENTER", parent, "CENTER", 0, 40)
+    f:SetFrameStrata("FULLSCREEN_DIALOG")
+    f:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    f:SetBackdropColor(0.06, 0.06, 0.09, 0.96)
+    f:SetBackdropBorderColor(0.25, 0.25, 0.30, 1.0)
+    f:SetMovable(true)
+    f:EnableMouse(true)
+    f:RegisterForDrag("LeftButton")
+    f:SetScript("OnDragStart", function() this:StartMoving() end)
+    f:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
+    f:Hide()
+
+    -- Allow ESC key to close error popup
+    if UISpecialFrames then
+        table.insert(UISpecialFrames, "Primus_ErrorFrame")
+    end
+
+    -- Title Bar Header
+    local titleBar = CreateFrame("Frame", nil, f)
+    titleBar:SetPoint("TOPLEFT", f, "TOPLEFT", 1, -1)
+    titleBar:SetPoint("TOPRIGHT", f, "TOPRIGHT", -1, -1)
+    titleBar:SetHeight(28)
+    titleBar:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 0,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    titleBar:SetBackdropColor(0.12, 0.12, 0.16, 1.0)
+
+    local title = titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    title:SetPoint("LEFT", titleBar, "LEFT", 10, 0)
+    title:SetText("|cffff4444PRIMUS ERROR CATCHER|r |cffaaaaaa// Script Diagnostic Engine|r")
+    f.titleText = title
+
+    local suppBadge = titleBar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    suppBadge:SetPoint("RIGHT", titleBar, "RIGHT", -34, 0)
+    suppBadge:SetText("|cff00ff88[Suppression Active]|r")
+    f.suppBadge = suppBadge
+
+    local closeX = CreateFrame("Button", nil, titleBar)
+    closeX:SetWidth(18)
+    closeX:SetHeight(18)
+    closeX:SetPoint("RIGHT", titleBar, "RIGHT", -6, 0)
+    closeX:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
+    closeX:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
+    closeX:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight")
+    closeX:SetScript("OnClick", function() f:Hide() end)
+
+    -- Tab System Navigation (Below Title Bar)
+    local tab1 = CreateFrame("Button", "Primus_ErrorTab1", f)
+    tab1:SetWidth(150)
+    tab1:SetHeight(22)
+    tab1:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -34)
+    tab1:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    local t1Text = tab1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    t1Text:SetPoint("CENTER", tab1, "CENTER", 0, 0)
+    t1Text:SetText("Single Error")
+    tab1.text = t1Text
+    tab1:SetScript("OnClick", function() Debug:SelectTab(1) end)
+    f.tab1 = tab1
+
+    local tab2 = CreateFrame("Button", "Primus_ErrorTab2", f)
+    tab2:SetWidth(150)
+    tab2:SetHeight(22)
+    tab2:SetPoint("LEFT", tab1, "RIGHT", 6, 0)
+    tab2:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    local t2Text = tab2:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    t2Text:SetPoint("CENTER", tab2, "CENTER", 0, 0)
+    t2Text:SetText("Full Error Log")
+    tab2.text = t2Text
+    tab2:SetScript("OnClick", function() Debug:SelectTab(2) end)
+    f.tab2 = tab2
+
+    -- Status Subheader Line
+    local statusText = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    statusText:SetPoint("TOPLEFT", f, "TOPLEFT", 14, -62)
+    statusText:SetText("No errors captured.")
+    f.statusText = statusText
+
+    local countText = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    countText:SetPoint("TOPRIGHT", f, "TOPRIGHT", -14, -62)
+    countText:SetText("")
+    f.countText = countText
+
+    -- ScrollFrame & EditBox Container
+    local editContainer = CreateFrame("Frame", nil, f)
+    editContainer:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -80)
+    editContainer:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 44)
+    editContainer:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    editContainer:SetBackdropColor(0.03, 0.03, 0.05, 0.98)
+    editContainer:SetBackdropBorderColor(0.20, 0.20, 0.24, 1.0)
+
+    local scroll = CreateFrame("ScrollFrame", "Primus_ErrorScrollFrame", editContainer, "UIPanelScrollFrameTemplate")
+    scroll:SetPoint("TOPLEFT", editContainer, "TOPLEFT", 6, -6)
+    scroll:SetPoint("BOTTOMRIGHT", editContainer, "BOTTOMRIGHT", -26, 6)
+    scroll:EnableMouse(true)
+
+    local editBox = CreateFrame("EditBox", "Primus_ErrorEditBox", scroll)
+    editBox:SetWidth(580)
+    editBox:SetHeight(2000)
+    editBox:SetMultiLine(true)
+    editBox:SetAutoFocus(false)
+    editBox:EnableMouse(true)
+    editBox:SetMaxLetters(999999)
+    editBox:SetFontObject(GameFontHighlightSmall)
+    editBox:SetTextColor(0.95, 0.95, 0.95, 1.0)
+    editBox:SetTextInsets(4, 4, 4, 4)
+    editBox:SetScript("OnEscapePressed", function() f:Hide() end)
+    editBox:SetScript("OnTextChanged", function()
+        if ScrollingEdit_OnTextChanged then
+            ScrollingEdit_OnTextChanged(scroll)
+        end
+    end)
+    editBox:SetScript("OnCursorChanged", function()
+        local arg1, arg2, arg3, arg4 = arg1, arg2, arg3, arg4
+        if ScrollingEdit_OnCursorChanged then
+            ScrollingEdit_OnCursorChanged(arg1, arg2, arg3, arg4)
+        end
+    end)
+    editBox:SetScript("OnUpdate", function()
+        if ScrollingEdit_OnUpdate then
+            ScrollingEdit_OnUpdate(scroll)
+        end
+    end)
+
+    scroll:SetScript("OnMouseDown", function() editBox:SetFocus() end)
+    editContainer:SetScript("OnMouseDown", function() editBox:SetFocus() end)
+    scroll:SetScrollChild(editBox)
+    f.editBox = editBox
+    f.scroll = scroll
+
+    -- Bottom Controls Footer
+    local prevBtn = CreateFrame("Button", "Primus_ErrorPrevBtn", f, "UIPanelButtonTemplate")
+    prevBtn:SetWidth(85)
+    prevBtn:SetHeight(22)
+    prevBtn:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 12, 12)
+    prevBtn:SetText("< Previous")
+    prevBtn:SetScript("OnClick", function()
+        if Debug.currentIndex > 1 then
+            Debug.currentIndex = Debug.currentIndex - 1
+            Debug:RefreshErrorFrame()
+            if editBox then editBox:SetFocus() editBox:HighlightText() end
+        end
+    end)
+    f.prevBtn = prevBtn
+
+    local nextBtn = CreateFrame("Button", "Primus_ErrorNextBtn", f, "UIPanelButtonTemplate")
+    nextBtn:SetWidth(85)
+    nextBtn:SetHeight(22)
+    nextBtn:SetPoint("LEFT", prevBtn, "RIGHT", 6, 0)
+    nextBtn:SetText("Next >")
+    nextBtn:SetScript("OnClick", function()
+        if Debug.currentIndex < table.getn(Debug.capturedErrors) then
+            Debug.currentIndex = Debug.currentIndex + 1
+            Debug:RefreshErrorFrame()
+            if editBox then editBox:SetFocus() editBox:HighlightText() end
+        end
+    end)
+    f.nextBtn = nextBtn
+
+    -- 1-Click Copy / Select All Button
+    local copyBtn = CreateFrame("Button", "Primus_ErrorCopyBtn", f, "UIPanelButtonTemplate")
+    copyBtn:SetWidth(135)
+    copyBtn:SetHeight(22)
+    copyBtn:SetPoint("LEFT", nextBtn, "RIGHT", 8, 0)
+    copyBtn:SetText("Copy / Select All")
+    copyBtn:SetScript("OnClick", function()
+        editBox:SetFocus()
+        editBox:HighlightText()
+        if DEFAULT_CHAT_FRAME then
+            local mode = (Debug.activeTab == 2) and "Full Error Log" or "Single Error Report"
+            DEFAULT_CHAT_FRAME:AddMessage("|cff69ccf0[Primus Errors]: " .. mode .. " highlighted! Press Ctrl+C (Cmd+C) to copy.|r")
+        end
+    end)
+    f.copyBtn = copyBtn
+
+    -- Clear All Button
+    local clearBtn = CreateFrame("Button", "Primus_ErrorClearBtn", f, "UIPanelButtonTemplate")
+    clearBtn:SetWidth(85)
+    clearBtn:SetHeight(22)
+    clearBtn:SetPoint("LEFT", copyBtn, "RIGHT", 8, 0)
+    clearBtn:SetText("Clear All")
+    clearBtn:SetScript("OnClick", function()
+        Debug:ClearErrors()
+    end)
+
+    -- Reload UI Button
+    local reloadBtn = CreateFrame("Button", "Primus_ErrorReloadBtn", f, "UIPanelButtonTemplate")
+    reloadBtn:SetWidth(80)
+    reloadBtn:SetHeight(22)
+    reloadBtn:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -80, 12)
+    reloadBtn:SetText("Reload UI")
+    reloadBtn:SetScript("OnClick", function() ReloadUI() end)
+
+    -- Close Button
+    local closeMain = CreateFrame("Button", "Primus_ErrorCloseBtn", f, "UIPanelButtonTemplate")
+    closeMain:SetWidth(65)
+    closeMain:SetHeight(22)
+    closeMain:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 12)
+    closeMain:SetText("Close")
+    closeMain:SetScript("OnClick", function() f:Hide() end)
+
+    self.errorFrame = f
+    self:SelectTab(1)
+    return f
+end
+
+-- Select Active Tab (1 = Single Error, 2 = Full Log)
+function Debug:SelectTab(tabIndex)
+    self.activeTab = tabIndex
+    local f = self:CreateErrorFrame()
+    if not f then return end
+
+    if tabIndex == 1 then
+        f.tab1:SetBackdropColor(0.18, 0.20, 0.26, 1.0)
+        f.tab1:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
+        f.tab1.text:SetTextColor(0.0, 0.90, 1.0)
+
+        f.tab2:SetBackdropColor(0.08, 0.08, 0.12, 0.95)
+        f.tab2:SetBackdropBorderColor(0.25, 0.25, 0.30, 1.0)
+        f.tab2.text:SetTextColor(0.70, 0.70, 0.75)
+
+        f.prevBtn:Show()
+        f.nextBtn:Show()
+        f.copyBtn:SetPoint("LEFT", f.nextBtn, "RIGHT", 8, 0)
+    else
+        f.tab2:SetBackdropColor(0.18, 0.20, 0.26, 1.0)
+        f.tab2:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
+        f.tab2.text:SetTextColor(0.0, 0.90, 1.0)
+
+        f.tab1:SetBackdropColor(0.08, 0.08, 0.12, 0.95)
+        f.tab1:SetBackdropBorderColor(0.25, 0.25, 0.30, 1.0)
+        f.tab1.text:SetTextColor(0.70, 0.70, 0.75)
+
+        f.prevBtn:Hide()
+        f.nextBtn:Hide()
+        f.copyBtn:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 12, 12)
+    end
+
+    self:RefreshErrorFrame()
+    if f.scroll then
+        f.scroll:SetVerticalScroll(0)
+    end
+end
+
+-- Refresh error view
+function Debug:RefreshErrorFrame()
+    local f = self:CreateErrorFrame()
+    if not f then return end
+
+    local total = table.getn(self.capturedErrors)
+    local totalOccurrences = self.totalErrorOccurrences or total
+
+    f.tab1.text:SetText(string.format("Single Error (%d)", total))
+    f.tab2.text:SetText(string.format("Full Log (%d)", total))
+
+    if total == 0 then
+        f.statusText:SetText("|cff888888No Lua errors captured in this session. All clear!|r")
+        f.countText:SetText("")
+        f.editBox:SetText("No errors captured.")
+        f.prevBtn:Disable()
+        f.nextBtn:Disable()
+        return
+    end
+
+    if self.activeTab == 2 then
+        -- Tab 2: Full Log View
+        f.statusText:SetText(string.format("Aggregated Log: |cff00e5ff%d Unique Issues|r  |  Suppressed Triggers: |cffffcc00%d|r", total, totalOccurrences - total))
+        f.countText:SetText(string.format("Total Errors: |cffffcc00%d|r", totalOccurrences))
+        f.editBox:SetText(self:GenerateFullLogReport())
+    else
+        -- Tab 1: Single Error Inspector
+        if self.currentIndex < 1 then self.currentIndex = 1 end
+        if self.currentIndex > total then self.currentIndex = total end
+
+        local entry = self.capturedErrors[self.currentIndex]
+        f.statusText:SetText(string.format("Error %d of %d: |cff69ccf0%s|r  |  Time: |cffffffff%s|r", self.currentIndex, total, entry.addon, entry.lastSeen))
+        f.countText:SetText(string.format("Occurrences: |cffffcc00%d|r", entry.count))
+        f.editBox:SetText(self:GenerateSingleErrorReport(self.currentIndex))
+
+        if self.currentIndex > 1 then f.prevBtn:Enable() else f.prevBtn:Disable() end
+        if self.currentIndex < total then f.nextBtn:Enable() else f.nextBtn:Disable() end
+    end
+end
+
+-- Clear all captured errors & reset suppression cache
 function Debug:ClearErrors()
-    Utils.Wipe(self.capturedErrors)
+    if Utils and Utils.Wipe then
+        Utils.Wipe(self.capturedErrors)
+        Utils.Wipe(self.errorMap)
+    else
+        self.capturedErrors = {}
+        self.errorMap = {}
+    end
+    self.totalErrorOccurrences = 0
     self.currentIndex = 1
     self:RefreshErrorFrame()
     if self.errorFrame then self.errorFrame:Hide() end
     if DEFAULT_CHAT_FRAME then
-        DEFAULT_CHAT_FRAME:AddMessage("|cff69ccf0[Primus Errors]: Cleared all captured error logs.|r")
+        DEFAULT_CHAT_FRAME:AddMessage("|cff69ccf0[Primus Errors]: Cleared all captured error logs and suppression cache.|r")
     end
 end
 
@@ -480,4 +683,3 @@ if Primus.Console and Primus.Console.RegisterSubCommand then
         Primus.Console:RegisterAlias("err", "errors")
     end
 end
-
