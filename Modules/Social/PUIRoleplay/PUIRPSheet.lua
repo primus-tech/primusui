@@ -677,11 +677,14 @@ function Sheet:BuildFrame()
     end)
     bioEB:SetScript("OnUpdate", function()
         if ScrollingEdit_OnUpdate then
-            ScrollingEdit_OnUpdate(arg1, scrollBox)
+            ScrollingEdit_OnUpdate(scrollBox)
         end
     end)
     
     bioEB:SetScript("OnTextChanged", function()
+        if ScrollingEdit_OnTextChanged then
+            ScrollingEdit_OnTextChanged(scrollBox)
+        end
         local len = string.len(this:GetText() or "")
         p3.charCount:SetText(len .. " / 1000")
         if isViewingSelf and f.isRefreshing ~= true then
@@ -775,11 +778,14 @@ function Sheet:BuildFrame()
     end)
     notesEB:SetScript("OnUpdate", function()
         if ScrollingEdit_OnUpdate then
-            ScrollingEdit_OnUpdate(arg1, notesScroll)
+            ScrollingEdit_OnUpdate(notesScroll)
         end
     end)
     
     notesEB:SetScript("OnTextChanged", function()
+        if ScrollingEdit_OnTextChanged then
+            ScrollingEdit_OnTextChanged(notesScroll)
+        end
         if f.isRefreshing ~= true then
             local currentTarget = targetPlayerName or UnitName("player")
             PUIRoleplay:SetCharacterNote(currentTarget, this:GetText())
