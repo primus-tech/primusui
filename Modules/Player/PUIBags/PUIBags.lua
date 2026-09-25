@@ -51,23 +51,34 @@ local QUALITY_COLORS = {
 -- =========================================================================
 
 local function UpdateMoneyDisplay()
-    if not bagFrame or not bagFrame.moneyText then return end
+    if not bagFrame or not bagFrame.copperText then return end
 
     local copper = GetMoney() or 0
     local gold = math.floor(copper / 10000)
     local silver = math.floor(Utils.Mod(copper, 10000) / 100)
     local cop = Utils.Mod(copper, 100)
 
-    local moneyStr = ""
-    if gold > 0 then
-        moneyStr = moneyStr .. string.format("%d|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:2:0|t ", gold)
-    end
-    if silver > 0 or gold > 0 then
-        moneyStr = moneyStr .. string.format("%d|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:2:0|t ", silver)
-    end
-    moneyStr = moneyStr .. string.format("%d|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:2:0|t", cop)
+    bagFrame.copperText:SetText(cop)
+    bagFrame.copperText:Show()
+    bagFrame.copperIcon:Show()
 
-    bagFrame.moneyText:SetText(moneyStr)
+    if silver > 0 or gold > 0 then
+        bagFrame.silverText:SetText(silver)
+        bagFrame.silverText:Show()
+        bagFrame.silverIcon:Show()
+    else
+        bagFrame.silverText:Hide()
+        bagFrame.silverIcon:Hide()
+    end
+
+    if gold > 0 then
+        bagFrame.goldText:SetText(gold)
+        bagFrame.goldText:Show()
+        bagFrame.goldIcon:Show()
+    else
+        bagFrame.goldText:Hide()
+        bagFrame.goldIcon:Hide()
+    end
 end
 
 -- =========================================================================
@@ -556,17 +567,54 @@ function PUIBags:OnInitialize()
         slot:Hide()
     end
 
-    -- Footer: Money Display Frame
+    -- Footer: Money Display Frame (Native Vanilla 1.12.1 Coin Icons & Text)
     local moneyFrame = CreateFrame("Frame", "Primus_PUIBagMoneyFrame", bagFrame)
     moneyFrame:SetHeight(22)
     moneyFrame:SetPoint("BOTTOMLEFT", bagFrame, "BOTTOMLEFT", 10, 6)
     moneyFrame:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 6)
 
-    local moneyText = moneyFrame:CreateFontString(nil, "OVERLAY")
-    moneyText:SetFont(Media:Fetch("font", "Default"), 11, "OUTLINE")
-    moneyText:SetPoint("RIGHT", moneyFrame, "RIGHT", 0, 0)
-    moneyText:SetTextColor(1, 1, 1)
-    bagFrame.moneyText = moneyText
+    -- Copper
+    local copperIcon = moneyFrame:CreateTexture(nil, "ARTWORK")
+    copperIcon:SetWidth(12)
+    copperIcon:SetHeight(12)
+    copperIcon:SetPoint("RIGHT", moneyFrame, "RIGHT", 0, 0)
+    copperIcon:SetTexture("Interface\\MoneyFrame\\UI-CopperIcon")
+
+    local copperText = moneyFrame:CreateFontString(nil, "OVERLAY")
+    copperText:SetFont(Media:Fetch("font", "Default"), 11, "OUTLINE")
+    copperText:SetPoint("RIGHT", copperIcon, "LEFT", -2, 0)
+    copperText:SetTextColor(1, 1, 1)
+
+    -- Silver
+    local silverIcon = moneyFrame:CreateTexture(nil, "ARTWORK")
+    silverIcon:SetWidth(12)
+    silverIcon:SetHeight(12)
+    silverIcon:SetPoint("RIGHT", copperText, "LEFT", -6, 0)
+    silverIcon:SetTexture("Interface\\MoneyFrame\\UI-SilverIcon")
+
+    local silverText = moneyFrame:CreateFontString(nil, "OVERLAY")
+    silverText:SetFont(Media:Fetch("font", "Default"), 11, "OUTLINE")
+    silverText:SetPoint("RIGHT", silverIcon, "LEFT", -2, 0)
+    silverText:SetTextColor(1, 1, 1)
+
+    -- Gold
+    local goldIcon = moneyFrame:CreateTexture(nil, "ARTWORK")
+    goldIcon:SetWidth(12)
+    goldIcon:SetHeight(12)
+    goldIcon:SetPoint("RIGHT", silverText, "LEFT", -6, 0)
+    goldIcon:SetTexture("Interface\\MoneyFrame\\UI-GoldIcon")
+
+    local goldText = moneyFrame:CreateFontString(nil, "OVERLAY")
+    goldText:SetFont(Media:Fetch("font", "Default"), 11, "OUTLINE")
+    goldText:SetPoint("RIGHT", goldIcon, "LEFT", -2, 0)
+    goldText:SetTextColor(1, 1, 1)
+
+    bagFrame.copperIcon = copperIcon
+    bagFrame.copperText = copperText
+    bagFrame.silverIcon = silverIcon
+    bagFrame.silverText = silverText
+    bagFrame.goldIcon = goldIcon
+    bagFrame.goldText = goldText
 
     moneyFrame:EnableMouse(true)
     moneyFrame:SetScript("OnEnter", function()
