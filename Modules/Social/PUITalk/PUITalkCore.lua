@@ -18,8 +18,8 @@ Primus.PUITalk = PUITalk
 _G.PUITalk = PUITalk
 Primus:RegisterModule("PUITalk", PUITalk, "Social")
 
-local DB     = Primus.DB
-local Utils  = Primus.Utils
+local DB    = Primus.DB
+local Utils = Primus.Utils
 
 -- Database Namespace
 PUITalk.db = DB:RegisterNamespace("PUITalk", {
@@ -68,23 +68,23 @@ function PUITalk:SetChannelEnabled(chanKey, enabled)
 end
 
 -- Shared State
-PUITalk.playerClassCache     = {}
-PUITalk.chatBuffers          = {}
-PUITalk.dmTabs               = {}
-PUITalk.activeDMKey          = nil
-PUITalk.conversationHistory   = {}
-PUITalk.unreadCounts         = {}
-PUITalk.lastWhisperSender    = nil
-PUITalk.friendRows           = {}
-PUITalk.guildRows            = {}
-PUITalk.copyButtons          = {}
+PUITalk.playerClassCache    = {}
+PUITalk.chatBuffers         = {}
+PUITalk.dmTabs              = {}
+PUITalk.activeDMKey         = nil
+PUITalk.conversationHistory  = {}
+PUITalk.unreadCounts        = {}
+PUITalk.lastWhisperSender   = nil
+PUITalk.friendRows          = {}
+PUITalk.guildRows           = {}
+PUITalk.copyButtons         = {}
 
 for i = 1, 7 do
     PUITalk.chatBuffers[i] = {}
 end
 
 -- =========================================================================
--- UNREAD STATE MANAGEMENT & ROSTER HELPERS
+-- UNREAD STATE MANAGEMENT & CONVERSATIONS
 -- =========================================================================
 
 function PUITalk:GetTotalUnreadCount()
@@ -151,8 +151,14 @@ function PUITalk:CloseDMConversation(key)
             self.masterFrame.viewMessages.msgFrame:Clear()
         end
     end
-    self:RefreshDMTabs()
+    if self.RefreshDMTabs then
+        self:RefreshDMTabs()
+    end
 end
+
+-- =========================================================================
+-- ROSTER NAMES & CLASS CACHE
+-- =========================================================================
 
 function PUITalk:GetRosterNames()
     local names = {}
@@ -165,14 +171,12 @@ function PUITalk:GetRosterNames()
         end
     end
 
-    -- Friends
     local numFriends = GetNumFriends()
     for i = 1, numFriends do
         local n, _, _, _, connected = GetFriendInfo(i)
         if connected and n then add(n) end
     end
 
-    -- Guild
     if IsInGuild() then
         local numGuild = GetNumGuildMembers()
         for i = 1, numGuild do
@@ -181,7 +185,6 @@ function PUITalk:GetRosterNames()
         end
     end
 
-    -- Party / Raid
     for i = 1, 4 do
         if UnitExists("party" .. i) then add(UnitName("party" .. i)) end
     end
@@ -192,10 +195,6 @@ function PUITalk:GetRosterNames()
 
     return names
 end
-
--- =========================================================================
--- CLASS COLORING & STRING UTILITIES
--- =========================================================================
 
 local function CacheUnitClass(unit)
     if not UnitExists(unit) then return end
@@ -238,6 +237,10 @@ function PUITalk:UpdateClassCache()
     end
 end
 
+-- =========================================================================
+-- CLASS COLORING & STRING UTILITIES
+-- =========================================================================
+
 function PUITalk:GetColoredName(name)
     if not name or not self.db:Get("classColors") then return name end
     local class = self.playerClassCache[name]
@@ -276,7 +279,6 @@ function PUITalk:GetTimestamp()
     return string.format("[%02d:%02d]", hour, minute)
 end
 
--- Channel Default Colors (RGB)
 PUITalk.CHANNEL_COLORS = {
     ["SAY"]          = { r = 1.00, g = 1.00, b = 1.00 },
     ["YELL"]         = { r = 1.00, g = 0.25, b = 0.25 },

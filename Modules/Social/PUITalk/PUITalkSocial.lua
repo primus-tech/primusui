@@ -3,11 +3,10 @@
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides:
-    - Tab 3 (Social) real-time Friends list and Guild roster.
-    - Live Search Filter EditBox (instant search across names, classes, zones, ranks, notes).
-    - Right-Click Social Player Action Context Menu (DM, Invite, Target, Inspect, Who).
-    - Status indicators (Online/AFK/DND/Guildie).
-    - 1-Click [💬 DM] button switching directly to Tab 2 and opening conversation.
+    - Tab 3 Viewport construction (Primus_PUITalkViewSocial).
+    - Friends and Guild sub-tabs with instant live search filter EditBox.
+    - Right-click social player menu (DM, Invite, Target, Inspect, Who).
+    - Virtualized row pool with class colors, status dots, and 1-click [💬 DM] button.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -146,7 +145,7 @@ function PUITalk:OpenSocialContextMenu(anchor, targetName)
 end
 
 -- =========================================================================
--- 2. SOCIAL ROW CREATION & VIRTUALIZATION
+-- 2. TAB 3 SOCIAL VIEWPORT CONSTRUCTION & ROW BUILDER
 -- =========================================================================
 
 local function CreateSocialRow(parent, index)
@@ -228,6 +227,110 @@ local function CreateSocialRow(parent, index)
     return row
 end
 
+function PUITalk:CreateSocialView(viewport, master)
+    if not viewport then return end
+
+    local viewSocial = CreateFrame("Frame", "Primus_PUITalkViewSocial", viewport)
+    viewSocial:SetAllPoints(viewport)
+    viewSocial:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    viewSocial:SetBackdropColor(0.04, 0.04, 0.06, 0.8)
+    viewSocial:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.8)
+
+    local socialNav = CreateFrame("Frame", nil, viewSocial)
+    socialNav:SetPoint("TOPLEFT", viewSocial, "TOPLEFT", 4, -4)
+    socialNav:SetPoint("TOPRIGHT", viewSocial, "TOPRIGHT", -4, -4)
+    socialNav:SetHeight(22)
+
+    local btnFriends = CreateFrame("Button", nil, socialNav)
+    btnFriends:SetWidth(65)
+    btnFriends:SetHeight(20)
+    btnFriends:SetPoint("LEFT", socialNav, "LEFT", 0, 0)
+    btnFriends:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    local bfTxt = btnFriends:CreateFontString(nil, "OVERLAY")
+    bfTxt:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+    bfTxt:SetPoint("CENTER", 0, 0)
+    bfTxt:SetText("Friends")
+    btnFriends.text = bfTxt
+    btnFriends:SetScript("OnClick", function()
+        PUITalk.db:Set("activeSocialTab", "friends")
+        PUITalk:RefreshSocialView()
+    end)
+    viewSocial.btnFriends = btnFriends
+
+    local btnGuild = CreateFrame("Button", nil, socialNav)
+    btnGuild:SetWidth(65)
+    btnGuild:SetHeight(20)
+    btnGuild:SetPoint("LEFT", btnFriends, "RIGHT", 4, 0)
+    btnGuild:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    local bgTxt = btnGuild:CreateFontString(nil, "OVERLAY")
+    bgTxt:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+    bgTxt:SetPoint("CENTER", 0, 0)
+    bgTxt:SetText("Guild")
+    btnGuild.text = bgTxt
+    btnGuild:SetScript("OnClick", function()
+        PUITalk.db:Set("activeSocialTab", "guild")
+        PUITalk:RefreshSocialView()
+    end)
+    viewSocial.btnGuild = btnGuild
+
+    local btnRefresh = CreateFrame("Button", nil, socialNav)
+    btnRefresh:SetWidth(65)
+    btnRefresh:SetHeight(20)
+    btnRefresh:SetPoint("RIGHT", socialNav, "RIGHT", 0, 0)
+    btnRefresh:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    btnRefresh:SetBackdropColor(0.12, 0.16, 0.22, 1.0)
+    btnRefresh:SetBackdropBorderColor(0.25, 0.45, 0.70, 1.0)
+    local brTxt = btnRefresh:CreateFontString(nil, "OVERLAY")
+    brTxt:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    brTxt:SetPoint("CENTER", 0, 0)
+    brTxt:SetText("🔄 Refresh")
+    btnRefresh:SetScript("OnClick", function()
+        ShowFriends()
+        if IsInGuild() then GuildRoster() end
+        PUITalk:RefreshSocialView()
+    end)
+
+    local searchBox = CreateFrame("EditBox", "Primus_PUITalkSocialSearchBox", socialNav)
+    searchBox:SetPoint("LEFT", btnGuild, "RIGHT", 6, 0)
+    searchBox:SetPoint("RIGHT", btnRefresh, "LEFT", -6, 0)
+    searchBox:SetHeight(18)
+    searchBox:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    searchBox:SetBackdropColor(0.04, 0.05, 0.08, 0.9)
+    searchBox:SetBackdropBorderColor(0.20, 0.35, 0.60, 0.9)
+    searchBox:SetFont(Media:Fetch("font", "Default"), 8, "")
+    searchBox:SetTextColor(0.9, 0.9, 0.9)
+    searchBox:SetAutoFocus(false)
+
+    local searchPlaceholder = searchBox:CreateFontString(nil, "OVERLAY")
+    searchPlaceholder:SetFont(Media:Fetch("font", "Default"), 8, "")
+    searchPlaceholder:SetPoint("LEFT", searchBox, "LEFT", 6, 0)
+    searchPlaceholder:SetText("🔍 Search...")
+    searchPlaceholder:SetTextColor(0.45, 0.50, 0.60)
+    searchBox.placeholder = searchPlaceholder
+
+    searchBox:SetScript("OnTextChanged", function()
+        local txt = this:GetText()
+        if txt and txt ~= "" then
+            searchPlaceholder:Hide()
+        else
+            searchPlaceholder:Show()
+        end
+        PUITalk:RefreshSocialView()
+    end)
+    searchBox:SetScript("OnEscapePressed", function()
+        this:SetText("")
+        this:ClearFocus()
+    end)
+    viewSocial.searchBox = searchBox
+
+    local socialContainer = CreateFrame("Frame", "Primus_PUITalkSocialList", viewSocial)
+    socialContainer:SetPoint("TOPLEFT", socialNav, "BOTTOMLEFT", 0, -4)
+    socialContainer:SetPoint("BOTTOMRIGHT", viewSocial, "BOTTOMRIGHT", -4, 4)
+    viewSocial.socialContainer = socialContainer
+    master.viewSocial = viewSocial
+    return viewSocial
+end
+
 -- =========================================================================
 -- 3. REFRESH & POPULATE SOCIAL ROSTER (WITH LIVE SEARCH FILTER)
 -- =========================================================================
@@ -240,7 +343,6 @@ function PUITalk:RefreshSocialView()
     local container  = viewSocial.socialContainer
     local socialMode = self.db:Get("activeSocialTab") or "friends"
 
-    -- Highlight Sub-Tab Buttons
     if socialMode == "friends" then
         viewSocial.btnFriends:SetBackdropColor(0.18, 0.26, 0.40, 1.0)
         viewSocial.btnFriends:SetBackdropBorderColor(0.40, 0.75, 1.0, 1.0)
@@ -257,7 +359,6 @@ function PUITalk:RefreshSocialView()
         viewSocial.btnFriends.text:SetTextColor(0.7, 0.7, 0.7)
     end
 
-    -- Get Search Query
     local filterQuery = ""
     if viewSocial.searchBox then
         filterQuery = string.lower(Utils.Trim(viewSocial.searchBox:GetText() or ""))
@@ -296,13 +397,14 @@ function PUITalk:RefreshSocialView()
             end
         end
 
-        if filterQuery ~= "" then
-            masterFrame.tabSocial.text:SetText(string.format("👥 Social (%d/%d)", rowCount, onlineFriendsCount))
-        else
-            masterFrame.tabSocial.text:SetText(string.format("👥 Social (%d/%d)", onlineFriendsCount, totalFriendsCount))
+        if masterFrame.tabSocial and masterFrame.tabSocial.text then
+            if filterQuery ~= "" then
+                masterFrame.tabSocial.text:SetText(string.format("👥 Social (%d/%d)", rowCount, onlineFriendsCount))
+            else
+                masterFrame.tabSocial.text:SetText(string.format("👥 Social (%d/%d)", onlineFriendsCount, totalFriendsCount))
+            end
         end
     else
-        -- Guild Roster View
         if IsInGuild() then
             local numGuild = GetNumGuildMembers()
             local totalOnlineGuild = 0
@@ -331,15 +433,16 @@ function PUITalk:RefreshSocialView()
                     end
                 end
             end
-            if filterQuery ~= "" then
-                masterFrame.tabSocial.text:SetText(string.format("👥 Social (%d/%d)", rowCount, totalOnlineGuild))
-            else
-                masterFrame.tabSocial.text:SetText(string.format("👥 Social (%d)", totalOnlineGuild))
+            if masterFrame.tabSocial and masterFrame.tabSocial.text then
+                if filterQuery ~= "" then
+                    masterFrame.tabSocial.text:SetText(string.format("👥 Social (%d/%d)", rowCount, totalOnlineGuild))
+                else
+                    masterFrame.tabSocial.text:SetText(string.format("👥 Social (%d)", totalOnlineGuild))
+                end
             end
         end
     end
 
-    -- Hide unused rows
     for i = rowCount + 1, 60 do
         if self.friendRows[i] then self.friendRows[i]:Hide() end
         if self.guildRows[i] then self.guildRows[i]:Hide() end

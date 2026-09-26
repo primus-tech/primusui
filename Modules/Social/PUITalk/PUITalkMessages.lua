@@ -1,13 +1,12 @@
 --[[
-    PrimusUI Module: PUITalk (Direct Messages, DM Sub-Tabs, Context Menus & Whisper Routing)
+    PrimusUI Module: PUITalk (Direct Messages, DM Sub-Tabs & DM Context Menu)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides:
-    - Tab 2 (Messages) conversation manager with isolated per-player sub-tabs.
-    - Solid amber unread highlight on inactive conversations with incoming whispers.
-    - Inline [x] close buttons and Right-Click DM player action menus.
-    - Persistent session message history and authoritative whisper processing (zero double-send).
-    - Audio chime alerts on incoming whispers.
+    - Tab 2 Viewport construction (Primus_PUITalkViewMessages).
+    - DM conversation sub-tabs with inline [x] close buttons and solid amber unread highlight.
+    - Right-click DM player context menu (Invite, Who, Popout, Clear, Close).
+    - Authoritative whisper history manager and audio chime notification.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -147,7 +146,42 @@ function PUITalk:OpenDMContextMenu(anchor, key, targetName)
 end
 
 -- =========================================================================
--- 2. DIRECT MESSAGES (DMs) & SUB-TABS (TAB 2)
+-- 2. TAB 2 MESSAGES VIEWPORT CONSTRUCTION
+-- =========================================================================
+
+function PUITalk:CreateMessagesView(viewport, master)
+    if not viewport then return end
+
+    local viewMessages = CreateFrame("Frame", "Primus_PUITalkViewMessages", viewport)
+    viewMessages:SetAllPoints(viewport)
+    viewMessages:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    viewMessages:SetBackdropColor(0.04, 0.04, 0.06, 0.8)
+    viewMessages:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.8)
+
+    local dmTabBar = CreateFrame("Frame", "Primus_PUITalkDMTabBar", viewMessages)
+    dmTabBar:SetPoint("TOPLEFT", viewMessages, "TOPLEFT", 4, -4)
+    dmTabBar:SetPoint("TOPRIGHT", viewMessages, "TOPRIGHT", -4, -4)
+    dmTabBar:SetHeight(22)
+    viewMessages.dmTabBar = dmTabBar
+
+    local dmMsgFrame = CreateFrame("ScrollingMessageFrame", "Primus_PUITalkDMFrame", viewMessages)
+    dmMsgFrame:SetPoint("TOPLEFT", dmTabBar, "BOTTOMLEFT", 2, -4)
+    dmMsgFrame:SetPoint("BOTTOMRIGHT", viewMessages, "BOTTOMRIGHT", -6, 6)
+    dmMsgFrame:SetFont(Media:Fetch("font", "Default"), 10, "")
+    dmMsgFrame:SetJustifyH("LEFT")
+    dmMsgFrame:SetFading(false)
+    dmMsgFrame:SetMaxLines(400)
+    dmMsgFrame:EnableMouseWheel(true)
+    dmMsgFrame:SetScript("OnMouseWheel", function()
+        if arg1 > 0 then dmMsgFrame:ScrollUp() else dmMsgFrame:ScrollDown() end
+    end)
+    viewMessages.msgFrame = dmMsgFrame
+    master.viewMessages = viewMessages
+    return viewMessages
+end
+
+-- =========================================================================
+-- 3. DM SUB-TABS REFRESH & CONVERSATION CONTROLS
 -- =========================================================================
 
 function PUITalk:RefreshDMTabs()
@@ -231,17 +265,14 @@ function PUITalk:RefreshDMTabs()
         xOffset = xOffset + btnWidth + 4
 
         if key == self.activeDMKey then
-            -- Active Selected Tab
             btn:SetBackdropColor(0.18, 0.26, 0.40, 1.0)
             btn:SetBackdropBorderColor(0.40, 0.75, 1.0, 1.0)
             btn.text:SetTextColor(1.0, 1.0, 1.0)
         elseif unreadCount > 0 then
-            -- Solid Amber/Gold Unread Highlight
             btn:SetBackdropColor(0.40, 0.26, 0.08, 1.0)
             btn:SetBackdropBorderColor(1.00, 0.80, 0.20, 1.0)
             btn.text:SetTextColor(1.00, 0.92, 0.40)
         else
-            -- Normal Inactive Tab
             btn:SetBackdropColor(0.08, 0.10, 0.14, 0.8)
             btn:SetBackdropBorderColor(0.20, 0.28, 0.40, 0.8)
             btn.text:SetTextColor(0.7, 0.7, 0.7)
@@ -249,11 +280,12 @@ function PUITalk:RefreshDMTabs()
         btn:Show()
     end
 
-    -- Update Top Header Tab 2 Unread Badge
-    if totalUnread > 0 then
-        masterFrame.tabMessages.text:SetText(string.format("✉️ Messages |cffffcc00(%d)|r", totalUnread))
-    else
-        masterFrame.tabMessages.text:SetText("✉️ Messages")
+    if masterFrame.tabMessages and masterFrame.tabMessages.text then
+        if totalUnread > 0 then
+            masterFrame.tabMessages.text:SetText(string.format("✉️ Messages |cffffcc00(%d)|r", totalUnread))
+        else
+            masterFrame.tabMessages.text:SetText("✉️ Messages")
+        end
     end
 end
 
@@ -285,12 +317,11 @@ function PUITalk:SelectDMTab(key)
     self:MarkAsRead(key)
 
     local tab = self.dmTabs[key]
-    if self.masterFrame and self.masterFrame.contextPill then
+    if self.masterFrame and self.masterFrame.contextPill and self.masterFrame.contextPill.text then
         self.masterFrame.contextPill.text:SetText("To: " .. (tab.name or key))
     end
 
-    -- Reload messages into DM frame
-    if self.masterFrame and self.masterFrame.viewMessages then
+    if self.masterFrame and self.masterFrame.viewMessages and self.masterFrame.viewMessages.msgFrame then
         local msgFrame = self.masterFrame.viewMessages.msgFrame
         msgFrame:Clear()
         local history = self.conversationHistory[key] or {}
@@ -329,8 +360,10 @@ function PUITalk:AddDMMessage(key, sender, text, isOutgoing, r, g, b)
     local isViewingThisDM = self.masterFrame and self.masterFrame:IsShown() and (self.db:Get("activeMasterTab") == 2) and (self.activeDMKey == key)
 
     if isViewingThisDM then
-        self.masterFrame.viewMessages.msgFrame:AddMessage(formattedMsg, r, g, b)
-        self.masterFrame.viewMessages.msgFrame:ScrollToBottom()
+        if self.masterFrame.viewMessages and self.masterFrame.viewMessages.msgFrame then
+            self.masterFrame.viewMessages.msgFrame:AddMessage(formattedMsg, r, g, b)
+            self.masterFrame.viewMessages.msgFrame:ScrollToBottom()
+        end
     else
         if not isOutgoing then
             self:IncrementUnread(key)
