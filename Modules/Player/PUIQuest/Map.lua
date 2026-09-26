@@ -1,9 +1,12 @@
 --[[
-    PrimusUI Module: PUIQuest (World Map POI Overlay & Clustering Engine)
+    PrimusUI Module: PUIQuest (World Map POI Overlay & Route Line Engine)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
-    Renders high-performance pooled POI pins directly onto WorldMapButton
-    with interactive tooltips, clustering, level colors, and zero memory allocations.
+    Features:
+    1. High-Performance Pooled POI Pins: Available (!), Turn-in (?), and Objective (1, 2) markers on WorldMapButton.
+    2. Real-Time Dynamic Route Connection Lines: Glowing dotted GPS trails connecting player -> active quest targets.
+    3. Interactive Tooltips & Navigation Lock: Click any map pin to immediately focus HUD navigation.
+    4. Zero Memory Churn: Reusable object pools for all pins and route dots.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -25,6 +28,11 @@ local Events = Primus.Events
 local pinPool = {}
 local activePins = {}
 local pinIndex = 0
+
+-- Route Dot Pool & Active Dots
+local routeDotPool = {}
+local activeRouteDots = {}
+local routeDotIndex = 0
 
 -- Difficulty Colors
 local DIFFICULTY_COLORS = {
@@ -68,7 +76,8 @@ local function CreatePin()
     pin.icon = icon
 
     local text = pin:CreateFontString(nil, "OVERLAY")
-    text:SetFont(Media:Fetch("font", "Default"), 11, "OUTLINE")
+    local font = (Media and Media.Fetch and Media:Fetch("font", "Default")) or "Fonts\\FRIZQT__.TTF"
+    text:SetFont(font, 11, "OUTLINE")
     text:SetPoint("CENTER", pin, "CENTER", 0, 0)
     pin.label = text
 
@@ -100,7 +109,7 @@ local function CreatePin()
             WorldMapTooltip:AddLine(string.format("Node: |cffffffff%s|r", d.targetName or "Tracked Node"), 0.2, 1.0, 0.4)
         end
 
-        WorldMapTooltip:AddLine("Left-Click: Focus Navigation Arrow", 0.5, 0.5, 0.5)
+        WorldMapTooltip:AddLine("Left-Click: Focus Navigation Arrow & Route", 0.5, 0.5, 0.5)
         WorldMapTooltip:Show()
     end)
 
@@ -137,7 +146,77 @@ function Map:ClearPins()
 end
 
 -- =========================================================================
--- Extract and project coordinates matching current map zone (including subzone scaling)
+-- ROUTE LINE POOL ENGINE
+-- =========================================================================
+
+local function CreateRouteDot()
+    routeDotIndex = routeDotIndex + 1
+    local dot = WorldMapButton:CreateTexture("PUIQuest_RouteDot_" .. routeDotIndex, "OVERLAY")
+    dot:SetTexture("Interface\\Buttons\\WHITE8X8")
+    dot:SetWidth(4)
+    dot:SetHeight(4)
+    dot:SetVertexColor(0.25, 0.85, 1.0, 0.75)
+    return dot
+end
+
+local function AcquireRouteDot()
+    if table.getn(routeDotPool) > 0 then
+        local dot = table.remove(routeDotPool)
+        dot:Show()
+        return dot
+    end
+    return CreateRouteDot()
+end
+
+function Map:ClearRoute()
+    for i = 1, table.getn(activeRouteDots) do
+        local dot = activeRouteDots[i]
+        dot:Hide()
+        table.insert(routeDotPool, dot)
+    end
+    activeRouteDots = {}
+end
+
+-- Draw a dotted route line on WorldMapButton between (x1, y1) and (x2, y2) in percent coords (0..100)
+function Map:DrawRouteLine(x1, y1, x2, y2, r, g, b, a)
+    local w = WorldMapButton:GetWidth()
+    local h = WorldMapButton:GetHeight()
+    if not w or w <= 0 or not h or h <= 0 then return end
+
+    local px1 = (x1 / 100) * w
+    local py1 = -(y1 / 100) * h
+    local px2 = (x2 / 100) * w
+    local py2 = -(y2 / 100) * h
+
+    local pdx = px2 - px1
+    local pdy = py2 - py1
+    local dist = math.sqrt(pdx * pdx + pdy * pdy)
+    if dist < 8 then return end
+
+    local stepSize = 11
+    local numDots = math.min(math.floor(dist / stepSize), 80)
+
+    r = r or 0.25
+    g = g or 0.85
+    b = b or 1.0
+    a = a or 0.75
+
+    for i = 1, numDots do
+        local t = i / (numDots + 1)
+        local cx = px1 + pdx * t
+        local cy = py1 + pdy * t
+        local dot = AcquireRouteDot()
+        dot:ClearAllPoints()
+        dot:SetPoint("CENTER", WorldMapButton, "TOPLEFT", cx, cy)
+        dot:SetVertexColor(r, g, b, a)
+        table.insert(activeRouteDots, dot)
+    end
+end
+
+-- =========================================================================
+-- ZONE COORDINATES EXTRACTOR
+-- =========================================================================
+
 local function GetZoneCoords(spawnsTbl, currentZoneName, currentZoneID)
     if not spawnsTbl or not spawnsTbl.coords then return {} end
     local DB = PUIQuest.DB
@@ -179,10 +258,12 @@ function Map:Update()
     if not WorldMapFrame or not WorldMapFrame:IsVisible() then return end
     if not PUIQuest.db or not PUIQuest.db:Get("showWorldMapPins", true) or not PUIQuest.db:Get("enabled", true) then
         self:ClearPins()
+        self:ClearRoute()
         return
     end
 
     self:ClearPins()
+    self:ClearRoute()
 
     local mapContinent = GetCurrentMapContinent()
     local mapZone = GetCurrentMapZone()
@@ -226,6 +307,8 @@ function Map:Update()
                                         level = level,
                                         npcName = unit.name,
                                         pinType = "TURNIN",
+                                        x = coord.x,
+                                        y = coord.y,
                                     }
                                     table.insert(activePins, pin)
                                 end
@@ -253,6 +336,8 @@ function Map:Update()
                                         targetName = unit.name,
                                         objText = "Slay " .. unit.name,
                                         pinType = "OBJECTIVE",
+                                        x = coord.x,
+                                        y = coord.y,
                                     }
                                     table.insert(activePins, pin)
                                 end
@@ -280,6 +365,8 @@ function Map:Update()
                                         targetName = obj.name,
                                         objText = "Interact with " .. obj.name,
                                         pinType = "OBJECTIVE",
+                                        x = coord.x,
+                                        y = coord.y,
                                     }
                                     table.insert(activePins, pin)
                                 end
@@ -310,6 +397,8 @@ function Map:Update()
                                                 targetName = unit.name,
                                                 objText = "Loot " .. item.name .. " from " .. unit.name,
                                                 pinType = "OBJECTIVE",
+                                                x = coord.x,
+                                                y = coord.y,
                                             }
                                             table.insert(activePins, pin)
                                         end
@@ -337,7 +426,6 @@ function Map:Update()
                         if unit and unit.spawns then
                             local coords = GetZoneCoords(unit.spawns, currentZoneName, mapZone)
                             if table.getn(coords) > 0 then
-                                -- Check if already active in log
                                 local qEntry = PUIQuest.Database:FindQuest(qID)
                                 local qTitle = qEntry and qEntry.title or ("Quest #" .. qID)
                                 local inLog = false
@@ -360,6 +448,8 @@ function Map:Update()
                                             minLevel = minLvl,
                                             npcName = unit.name,
                                             pinType = "AVAILABLE",
+                                            x = coord.x,
+                                            y = coord.y,
                                         }
                                         table.insert(activePins, pin)
                                     end
@@ -368,6 +458,17 @@ function Map:Update()
                         end
                     end
                 end
+            end
+        end
+    end
+
+    -- 3. Draw Route Connection Line from Player to Active Target
+    if PUIQuest.db:Get("showRouteLines", true) then
+        local px, py = GetPlayerMapPosition("player")
+        if px and py and (px > 0 or py > 0) then
+            local target = PUIQuest.Tracker and PUIQuest.Tracker.GetActiveTarget and PUIQuest.Tracker:GetActiveTarget()
+            if target and target.x and target.y then
+                self:DrawRouteLine(px * 100, py * 100, target.x * 100, target.y * 100, 0.25, 0.85, 1.0, 0.85)
             end
         end
     end

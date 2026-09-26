@@ -3,17 +3,22 @@
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Features:
-    1. Permanent Quest Tracking: Fixes Blizzard's 5-minute AutoQuestWatch expiration bug and tremove table key bug.
-    2. Title-Based SavedVariables Persistence: Retains tracked quests across sessions, /reload, and quest log index shifts.
-    3. Multi-Anchor Conflict Fix: Prevents UIParent_ManageFramePositions from dual-anchoring and distorting QuestWatchFrame.
-    4. Enhanced Visuals:
+    1. Foldable Quest Tracker with Sleek Title Bar:
+       - 1-Click Fold/Unfold button ([−] / [+]) and interactive title bar.
+       - Displays active tracked count badge: Quests (3).
+       - Fully persistent collapsed state across sessions and /reload.
+    2. Permanent Quest Tracking: Fixes Blizzard's 5-minute AutoQuestWatch expiration bug and tremove table key bug.
+    3. Title-Based SavedVariables Persistence: Retains tracked quests across sessions, /reload, and quest log index shifts.
+    4. Multi-Anchor Conflict Fix: Prevents UIParent_ManageFramePositions from dual-anchoring and distorting QuestWatchFrame.
+    5. Enhanced Visuals:
        - Difficulty-colored quest titles with level brackets: [11] Quest Title.
        - Clean objective status bullets with (Complete) highlights.
        - Displays "Ready for turn-in" for quests without leaderboards so they never disappear on completion.
-    5. Interactive Clickable Headers:
+    6. Interactive Clickable Headers:
        - Left-Click on quest header: Opens Quest Log and selects that quest.
        - Shift-Click on quest header: Inserts quest link in chat or untracks quest.
-    6. Zen Engine & PUIMover Integration:
+       - Alt-Click on quest header: Locks Navigation Arrow / Route on that quest.
+    7. Zen Engine & PUIMover Integration:
        - Works smoothly with State.lua / Hider.lua combat fading and hover-to-peek.
        - Full support for PUIMover custom positioning without position snapping.
 --]]
@@ -30,12 +35,15 @@ Primus:RegisterModule("PUIQuestWatch", PUIQuestWatch, "Player")
 local DB       = Primus.DB
 local Utils    = Primus.Utils
 local Events   = Primus.Events
+local Media    = Primus.Media
 local PUIMover = Primus.PUIMover
 
 -- Persistent Database for Quest Tracking
 local questDB = DB:RegisterNamespace("PUIQuestWatch", {
     enabled               = true,
     trackedQuests         = {},     -- [questTitle] = true
+    isCollapsed           = false,  -- Folded / Minimized state
+    showTitleBar          = true,   -- Display sleek title bar header
     autoWatchNew          = true,   -- Automatically watch newly accepted quests
     autoWatchProgress     = true,   -- Automatically watch quests when objectives update
     showLevels            = true,   -- Display [Level] in front of quest titles
@@ -46,10 +54,11 @@ local questDB = DB:RegisterNamespace("PUIQuestWatch", {
 
 -- Internal Runtime State
 PUIQuestWatch.headerButtons    = {}
-PUIQuestWatch.allocatedLines   = 21
+PUIQuestWatch.allocatedLines   = 25
 PUIQuestWatch.isReconciling    = false
 PUIQuestWatch.isInitialized    = false
-PUIQuestWatch.cachedLogEntries = 0
+PUIQuestWatch.knownQuests      = {}
+PUIQuestWatch.titleBar         = nil
 
 -- Quest Difficulty Colors (Matches Blizzard standard with refined contrast)
 local DIFFICULTY_COLORS = {
@@ -65,7 +74,6 @@ local DIFFICULTY_COLORS = {
 -- UTILITY & LOOKUP HELPERS
 -- =========================================================================
 
--- Get color based on player level difference
 function PUIQuestWatch:GetQuestColor(level)
     if not level or level <= 0 then
         return DIFFICULTY_COLORS["standard"]
@@ -85,7 +93,6 @@ function PUIQuestWatch:GetQuestColor(level)
     end
 end
 
--- Find the current quest log index for a given quest title
 function PUIQuestWatch:FindQuestLogIndex(targetTitle)
     if not targetTitle or targetTitle == "" then return nil end
     local numEntries = GetNumQuestLogEntries()
@@ -102,7 +109,6 @@ end
 -- PERSISTENCE & TRACKING ENGINE
 -- =========================================================================
 
--- Get tracked quests table from DB
 function PUIQuestWatch:GetTrackedList()
     local list = questDB:Get("trackedQuests")
     if type(list) ~= "table" then
@@ -112,7 +118,6 @@ function PUIQuestWatch:GetTrackedList()
     return list
 end
 
--- Check if a quest is tracked by title or index
 function PUIQuestWatch:IsTracked(questIndexOrTitle)
     local title = questIndexOrTitle
     if type(questIndexOrTitle) == "number" then
@@ -123,7 +128,6 @@ function PUIQuestWatch:IsTracked(questIndexOrTitle)
     return tracked[title] == true
 end
 
--- Track a quest permanently
 function PUIQuestWatch:TrackQuest(questIndexOrTitle)
     local questIndex, title
     if type(questIndexOrTitle) == "number" then
@@ -139,7 +143,6 @@ function PUIQuestWatch:TrackQuest(questIndexOrTitle)
     local tracked = self:GetTrackedList()
     local maxWatches = questDB:Get("maxWatches", 10)
 
-    -- Count current tracked quests
     local count = 0
     for _ in pairs(tracked) do count = count + 1 end
 
@@ -153,7 +156,6 @@ function PUIQuestWatch:TrackQuest(questIndexOrTitle)
     tracked[title] = true
     questDB:Set("trackedQuests", tracked)
 
-    -- Synchronize with native C client watch list if index is valid
     if questIndex and questIndex > 0 then
         if not IsQuestWatched(questIndex) then
             AddQuestWatch(questIndex)
@@ -164,7 +166,6 @@ function PUIQuestWatch:TrackQuest(questIndexOrTitle)
     return true
 end
 
--- Untrack a quest
 function PUIQuestWatch:UntrackQuest(questIndexOrTitle)
     local questIndex, title
     if type(questIndexOrTitle) == "number" then
@@ -181,7 +182,6 @@ function PUIQuestWatch:UntrackQuest(questIndexOrTitle)
     tracked[title] = nil
     questDB:Set("trackedQuests", tracked)
 
-    -- Remove from native C client watch list
     if questIndex and questIndex > 0 then
         if IsQuestWatched(questIndex) then
             RemoveQuestWatch(questIndex)
@@ -192,7 +192,6 @@ function PUIQuestWatch:UntrackQuest(questIndexOrTitle)
     return true
 end
 
--- Toggle tracking on/off
 function PUIQuestWatch:ToggleQuest(questIndexOrTitle)
     if self:IsTracked(questIndexOrTitle) then
         return self:UntrackQuest(questIndexOrTitle)
@@ -201,7 +200,6 @@ function PUIQuestWatch:ToggleQuest(questIndexOrTitle)
     end
 end
 
--- Clear all tracked quests
 function PUIQuestWatch:ClearAllTracked()
     questDB:Set("trackedQuests", {})
     for i = 1, (GetNumQuestWatches and GetNumQuestWatches() or 0) do
@@ -213,37 +211,68 @@ function PUIQuestWatch:ClearAllTracked()
     self:UpdateTracker()
 end
 
--- Reconcile and restore tracked quests from SavedVariables into WoW engine
+-- Reconcile tracked quests with active Quest Log entries
 function PUIQuestWatch:ReconcileQuests()
     if self.isReconciling then return end
     self.isReconciling = true
 
-    local tracked = self:GetTrackedList()
     local numEntries = GetNumQuestLogEntries()
+    if not numEntries or numEntries == 0 then
+        -- Quest log not loaded yet; preserve SavedVariables and exit
+        self.isReconciling = false
+        return
+    end
+
+    local tracked = self:GetTrackedList()
+    local maxWatches = questDB:Get("maxWatches", 10)
+    local currentLogTitles = {}
+    local trackedCount = 0
+
+    for _ in pairs(tracked) do trackedCount = trackedCount + 1 end
 
     for i = 1, numEntries do
         local title, _, _, isHeader = GetQuestLogTitle(i)
-        if not isHeader and title and tracked[title] then
-            if not IsQuestWatched(i) then
-                AddQuestWatch(i)
+        if not isHeader and title then
+            currentLogTitles[title] = i
+
+            -- Check if this is a newly accepted quest not in our knownQuests cache
+            if questDB:Get("autoWatchNew", true) and not self.knownQuests[title] and trackedCount < maxWatches then
+                tracked[title] = true
+                trackedCount = trackedCount + 1
+            end
+
+            -- Sync native WoW watch state
+            if tracked[title] then
+                if not IsQuestWatched(i) then
+                    AddQuestWatch(i)
+                end
             end
         end
     end
 
-    -- Clean up quests in DB that are no longer in the quest log (abandoned or completed/turned in)
-    for savedTitle in pairs(tracked) do
-        local found = false
+    -- If tracked list is completely empty, auto-populate all current active quests
+    if trackedCount == 0 and questDB:Get("autoWatchNew", true) then
         for i = 1, numEntries do
             local title, _, _, isHeader = GetQuestLogTitle(i)
-            if not isHeader and title == savedTitle then
-                found = true
-                break
+            if not isHeader and title and trackedCount < maxWatches then
+                tracked[title] = true
+                trackedCount = trackedCount + 1
+                if not IsQuestWatched(i) then
+                    AddQuestWatch(i)
+                end
             end
         end
-        if not found then
+    end
+
+    -- Clean up quests that were turned in or abandoned (no longer in quest log)
+    for savedTitle in pairs(tracked) do
+        if not currentLogTitles[savedTitle] then
             tracked[savedTitle] = nil
         end
     end
+
+    -- Update knownQuests cache
+    self.knownQuests = currentLogTitles
     questDB:Set("trackedQuests", tracked)
 
     self.isReconciling = false
@@ -251,10 +280,120 @@ function PUIQuestWatch:ReconcileQuests()
 end
 
 -- =========================================================================
+-- TITLE BAR & COLLAPSE CONTROLLER
+-- =========================================================================
+
+function PUIQuestWatch:GetTitleBar()
+    if self.titleBar then return self.titleBar end
+    if not QuestWatchFrame then return nil end
+
+    local bar = CreateFrame("Button", "PUIQuestWatchTitleBar", QuestWatchFrame)
+    bar:SetHeight(20)
+    bar:SetPoint("TOPLEFT", QuestWatchFrame, "TOPLEFT", 0, 0)
+    bar:SetPoint("TOPRIGHT", QuestWatchFrame, "TOPRIGHT", 0, 0)
+    bar:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+
+    -- Sleek glassmorphic backdrop
+    bar:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    bar:SetBackdropColor(0.06, 0.08, 0.12, 0.85)
+    bar:SetBackdropBorderColor(0.20, 0.25, 0.35, 0.90)
+
+    -- Icon
+    local icon = bar:CreateTexture(nil, "ARTWORK")
+    icon:SetWidth(12)
+    icon:SetHeight(12)
+    icon:SetPoint("LEFT", bar, "LEFT", 5, 0)
+    icon:SetTexture("Interface\\Icons\\INV_Misc_Book_08")
+    bar.icon = icon
+
+    local titleFont = (Media and Media.Fetch and Media:Fetch("font", "Default")) or "Fonts\\FRIZQT__.TTF"
+
+    -- Title text: "Quest Tracker"
+    local title = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    title:SetPoint("LEFT", icon, "RIGHT", 5, 0)
+    title:SetFont(titleFont, 10, "OUTLINE")
+    title:SetTextColor(0.90, 0.82, 0.50)
+    title:SetText("Quest Tracker")
+    bar.title = title
+
+    -- Tracked Count Badge: "(3)"
+    local count = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    count:SetPoint("LEFT", title, "RIGHT", 4, 0)
+    count:SetFont(titleFont, 10, "OUTLINE")
+    count:SetTextColor(0.40, 0.85, 1.0)
+    bar.count = count
+
+    -- Collapse / Expand toggle button on right
+    local toggleBtn = CreateFrame("Button", "PUIQuestWatchCollapseButton", bar)
+    toggleBtn:SetWidth(18)
+    toggleBtn:SetHeight(18)
+    toggleBtn:SetPoint("RIGHT", bar, "RIGHT", -3, 0)
+
+    local toggleText = toggleBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    toggleText:SetFont(titleFont, 11, "OUTLINE")
+    toggleText:SetPoint("CENTER", toggleBtn, "CENTER", 0, 0)
+    toggleText:SetText("−")
+    toggleText:SetTextColor(0.85, 0.85, 0.85)
+    toggleBtn.text = toggleText
+    bar.toggleBtn = toggleBtn
+
+    local function ToggleFold()
+        local isCollapsed = questDB:Get("isCollapsed", false)
+        questDB:Set("isCollapsed", not isCollapsed)
+        PUIQuestWatch:UpdateTracker()
+    end
+
+    toggleBtn:SetScript("OnClick", function()
+        ToggleFold()
+    end)
+    toggleBtn:SetScript("OnEnter", function()
+        toggleText:SetTextColor(1.0, 0.82, 0.0)
+    end)
+    toggleBtn:SetScript("OnLeave", function()
+        toggleText:SetTextColor(0.85, 0.85, 0.85)
+    end)
+
+    bar:SetScript("OnClick", function()
+        if arg1 == "RightButton" then
+            if not QuestLogFrame:IsVisible() then
+                ShowUIPanel(QuestLogFrame)
+            end
+        else
+            ToggleFold()
+        end
+    end)
+
+    bar:SetScript("OnEnter", function()
+        bar:SetBackdropBorderColor(0.40, 0.65, 1.0, 1.0)
+        if GameTooltip then
+            GameTooltip:SetOwner(bar, "ANCHOR_TOPLEFT")
+            GameTooltip:ClearLines()
+            GameTooltip:AddLine("Quest Tracker", 1.0, 0.82, 0.0)
+            local isCollapsed = questDB:Get("isCollapsed", false)
+            GameTooltip:AddLine(isCollapsed and "Left-Click: Unfold / Expand Tracker" or "Left-Click: Fold / Minimize Tracker", 0.7, 0.7, 0.7)
+            GameTooltip:AddLine("Right-Click: Open Quest Log", 0.7, 0.7, 0.7)
+            GameTooltip:Show()
+        end
+    end)
+
+    bar:SetScript("OnLeave", function()
+        bar:SetBackdropBorderColor(0.20, 0.25, 0.35, 0.90)
+        if GameTooltip then GameTooltip:Hide() end
+    end)
+
+    self.titleBar = bar
+    return bar
+end
+
+-- =========================================================================
 -- DYNAMIC FONTSTRING ALLOCATOR & INTERACTIVE HEADERS
 -- =========================================================================
 
--- Ensure a QuestWatchLine fontstring exists
 function PUIQuestWatch:GetWatchLine(index)
     local line = _G["QuestWatchLine" .. index]
     if not line and QuestWatchFrame then
@@ -267,7 +406,6 @@ function PUIQuestWatch:GetWatchLine(index)
     return line
 end
 
--- Get or create an interactive clickable header button for a quest
 function PUIQuestWatch:GetHeaderButton(index)
     local btn = self.headerButtons[index]
     if not btn and QuestWatchFrame then
@@ -275,7 +413,6 @@ function PUIQuestWatch:GetHeaderButton(index)
         btn:SetHeight(16)
         btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
-        -- Highlight texture on hover
         local hl = btn:CreateTexture(nil, "HIGHLIGHT")
         hl:SetTexture("Interface\\QuestFrame\\UI-QuestLogTitleHighlight")
         hl:SetBlendMode("ADD")
@@ -295,12 +432,12 @@ function PUIQuestWatch:GetHeaderButton(index)
                     PUIQuestWatch:UntrackQuest(btn.questTitle)
                 end
             elseif IsAltKeyDown() then
-                -- Alt-Click: Focus Navigation Target directly in PUIQuest
+                -- Alt-Click: Lock navigation focus
                 if Primus.PUIQuest and Primus.PUIQuest.FocusQuest then
                     Primus.PUIQuest:FocusQuest(btn.questTitle)
                 end
             else
-                -- Left-Click: Open Quest Log directly to this quest & Focus Navigation
+                -- Left-Click: Open Quest Log & Focus Navigation Target
                 if Primus.PUIQuest and Primus.PUIQuest.FocusQuest then
                     Primus.PUIQuest:FocusQuest(btn.questTitle)
                 end
@@ -330,7 +467,7 @@ function PUIQuestWatch:GetHeaderButton(index)
                 end
                 GameTooltip:AddLine(headerText, 1.0, 0.82, 0.0)
                 GameTooltip:AddLine("Left-Click: Open in Quest Log & Focus Navigation", 0.7, 0.7, 0.7)
-                GameTooltip:AddLine("Alt-Click: Focus Objective Target", 0.4, 0.85, 1.0)
+                GameTooltip:AddLine("Alt-Click: Lock Objective Pointer", 0.4, 0.85, 1.0)
                 GameTooltip:AddLine("Shift-Click: Untrack / Link in Chat", 0.7, 0.7, 0.7)
                 GameTooltip:Show()
             end
@@ -361,6 +498,8 @@ function PUIQuestWatch:UpdateTracker()
     end
 
     local tracked = self:GetTrackedList()
+    local isCollapsed = questDB:Get("isCollapsed", false)
+    local showTitleBar = questDB:Get("showTitleBar", true)
     local showLevels = questDB:Get("showLevels", true)
     local lineSpacing = questDB:Get("lineSpacing", 2)
     local questSpacing = questDB:Get("questSpacing", 6)
@@ -374,17 +513,53 @@ function PUIQuestWatch:UpdateTracker()
     local numEntries = GetNumQuestLogEntries()
     local activeTracked = {}
 
-    for i = 1, numEntries do
-        local title, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(i)
-        if not isHeader and title and tracked[title] then
-            table.insert(activeTracked, {
-                index = i,
-                title = title,
-                level = level,
-                questTag = questTag,
-                isComplete = isComplete,
-            })
+    if numEntries and numEntries > 0 then
+        for i = 1, numEntries do
+            local title, level, questTag, isHeader, isCollapsedState, isComplete = GetQuestLogTitle(i)
+            if not isHeader and title and tracked[title] then
+                table.insert(activeTracked, {
+                    index = i,
+                    title = title,
+                    level = level,
+                    questTag = questTag,
+                    isComplete = isComplete,
+                })
+            end
         end
+    end
+
+    -- If no tracked quests, hide frame
+    if table.getn(activeTracked) == 0 then
+        QuestWatchFrame:Hide()
+        return
+    end
+
+    QuestWatchFrame:Show()
+
+    -- Title Bar Handling
+    local titleBar = self:GetTitleBar()
+    if showTitleBar and titleBar then
+        titleBar:Show()
+        titleBar.count:SetText(string.format("(%d)", table.getn(activeTracked)))
+        titleBar.toggleBtn.text:SetText(isCollapsed and "+" or "−")
+    elseif titleBar then
+        titleBar:Hide()
+    end
+
+    -- If Collapsed (Folded Up), hide all lines and shrink frame
+    if isCollapsed then
+        for i = 1, self.allocatedLines do
+            local line = _G["QuestWatchLine" .. i]
+            if line then line:Hide() end
+        end
+        for i = 1, table.getn(self.headerButtons) do
+            local btn = self.headerButtons[i]
+            if btn then btn:Hide() end
+        end
+        QuestWatchFrame:SetHeight(22)
+        QuestWatchFrame:SetWidth(180)
+        self:StabilizeAnchor()
+        return
     end
 
     -- Render each tracked quest
@@ -423,7 +598,11 @@ function PUIQuestWatch:UpdateTracker()
 
             titleLine:ClearAllPoints()
             if lineIndex == 1 then
-                titleLine:SetPoint("TOPLEFT", QuestWatchFrame, "TOPLEFT", 0, -2)
+                if showTitleBar then
+                    titleLine:SetPoint("TOPLEFT", QuestWatchFrame, "TOPLEFT", 4, -26)
+                else
+                    titleLine:SetPoint("TOPLEFT", QuestWatchFrame, "TOPLEFT", 0, -2)
+                end
             else
                 titleLine:SetPoint("TOPLEFT", prevLine, "BOTTOMLEFT", 0, -questSpacing)
             end
@@ -462,10 +641,10 @@ function PUIQuestWatch:UpdateTracker()
                         objLine:SetText("  • " .. objText)
 
                         if finished then
-                            objLine:SetTextColor(0.40, 1.00, 0.40) -- Bright light green for completed
+                            objLine:SetTextColor(0.40, 1.00, 0.40) -- Bright light green
                             objectivesFinished = objectivesFinished + 1
                         else
-                            objLine:SetTextColor(0.85, 0.85, 0.85) -- Clean high-legibility light gray
+                            objLine:SetTextColor(0.85, 0.85, 0.85) -- Light gray
                         end
 
                         objLine:ClearAllPoints()
@@ -482,7 +661,7 @@ function PUIQuestWatch:UpdateTracker()
                     end
                 end
             else
-                -- Quest has no leaderboards (e.g. event quest, talk to NPC) or ready to turn in
+                -- Quest has no leaderboards (e.g. talk to NPC) or ready to turn in
                 local objLine = self:GetWatchLine(lineIndex)
                 if objLine then
                     if isComplete then
@@ -507,7 +686,7 @@ function PUIQuestWatch:UpdateTracker()
                 end
             end
 
-            -- If all objectives complete, indicate on quest header
+            -- Highlight complete header if all objectives finished
             if numObjectives > 0 and objectivesFinished == numObjectives then
                 titleLine:SetText(levelPrefix .. title .. " (Complete)")
                 titleLine:SetTextColor(1.00, 0.85, 0.20)
@@ -536,19 +715,15 @@ function PUIQuestWatch:UpdateTracker()
         end
     end
 
-    -- Sizing & Frame Visibility
-    if lineIndex == 1 then
-        QuestWatchFrame:Hide()
-        return
-    else
-        QuestWatchFrame:Show()
-        local calculatedHeight = (lineIndex - 1) * 14 + (table.getn(activeTracked) * questSpacing) + 12
-        local calculatedWidth = math.max(questWatchMaxWidth + 16, 200)
-        QuestWatchFrame:SetHeight(calculatedHeight)
-        QuestWatchFrame:SetWidth(calculatedWidth)
+    -- Frame Sizing
+    local calculatedHeight = (lineIndex - 1) * 14 + (table.getn(activeTracked) * questSpacing) + 12
+    if showTitleBar then
+        calculatedHeight = calculatedHeight + 26
     end
+    local calculatedWidth = math.max(questWatchMaxWidth + 20, 200)
+    QuestWatchFrame:SetHeight(calculatedHeight)
+    QuestWatchFrame:SetWidth(calculatedWidth)
 
-    -- Stabilize Anchor against Blizzard UIParent_ManageFramePositions reset
     self:StabilizeAnchor()
 end
 
@@ -559,7 +734,6 @@ end
 function PUIQuestWatch:StabilizeAnchor()
     if not QuestWatchFrame then return end
 
-    -- Check if PUIMover has a custom saved position for QuestWatchFrame
     local mover = PUIMover or Primus.PUIMover
     local moverPos = mover and mover.GetPosition and mover:GetPosition("QuestWatchFrame")
 
@@ -570,7 +744,6 @@ function PUIQuestWatch:StabilizeAnchor()
             QuestWatchFrame:SetUserPlaced(true)
         end
     else
-        -- If no custom position, keep cleanly anchored below MinimapCluster without conflicting points
         local point, relativeTo = QuestWatchFrame:GetPoint()
         if not point or point ~= "TOPRIGHT" or relativeTo ~= MinimapCluster then
             QuestWatchFrame:ClearAllPoints()
@@ -585,9 +758,9 @@ end
 -- =========================================================================
 
 local function InterceptBlizzardQuestWatch()
-    -- 1. Completely neutralize Blizzard's 5-minute AutoQuestWatch_OnUpdate countdown
+    -- 1. Neutralize Blizzard's 5-minute AutoQuestWatch countdown
     _G.AutoQuestWatch_OnUpdate = function(elapsed)
-        -- No-op: Quests never expire on a timer in PrimusUI!
+        -- Quests never expire on a timer in PrimusUI
     end
 
     -- 2. Override AutoQuestWatch_Insert to prevent table key corruption
@@ -648,81 +821,186 @@ local function InterceptBlizzardQuestWatch()
 end
 
 -- =========================================================================
--- EVENT DISPATCHER
+-- OPTIONS FLARE REGISTRATION
 -- =========================================================================
 
-function PUIQuestWatch:OnEvent(event, arg1, arg2, arg3)
-    if event == "PLAYER_ENTERING_WORLD" then
-        if not self.isInitialized then
-            self.isInitialized = true
-            InterceptBlizzardQuestWatch()
-        end
-        self:ReconcileQuests()
-        self:StabilizeAnchor()
+function PUIQuestWatch:RegisterOptionsFlare()
+    local Options = Primus.Options
+    if not Options or not Options.RegisterModuleOptions then return end
 
-    elseif event == "QUEST_LOG_UPDATE" or event == "UNIT_QUEST_LOG_CHANGED" then
-        self:ReconcileQuests()
-
-    elseif event == "QUEST_WATCH_UPDATE" then
-        -- arg1 is questIndex
-        if questDB:Get("autoWatchProgress", true) and arg1 then
-            self:TrackQuest(arg1)
-        else
-            self:UpdateTracker()
-        end
-
-    elseif event == "QUEST_FINISHED" or event == "QUEST_COMPLETE" then
-        self:ReconcileQuests()
-
-    elseif event == "UI_INFO_MESSAGE" then
-        -- Detect quest acceptance message if autoWatchNew is enabled
-        if questDB:Get("autoWatchNew", true) and arg1 then
-            -- Reconcile quests shortly after quest acceptance
-            self:ReconcileQuests()
-        end
-    end
+    Options:RegisterModuleOptions("PUIQuestWatch", "Player", {
+        title = "PUIQuestWatch: Quest Tracker",
+        description = "Bulletproof quest objective tracker with title bar folding, persistence, level badges, and interactive headers.",
+        icon = "Interface\\Icons\\INV_Misc_Book_08",
+        fields = {
+            {
+                key = "enabled",
+                label = "Enable Quest Objective Tracker",
+                type = "checkbox",
+                default = true,
+                get = function() return questDB:Get("enabled", true) end,
+                set = function(val)
+                    questDB:Set("enabled", val)
+                    if val then
+                        PUIQuestWatch:UpdateTracker()
+                    elseif QuestWatchFrame then
+                        QuestWatchFrame:Hide()
+                    end
+                end,
+            },
+            {
+                key = "showTitleBar",
+                label = "Show Tracker Title Bar Header",
+                type = "checkbox",
+                default = true,
+                get = function() return questDB:Get("showTitleBar", true) end,
+                set = function(val)
+                    questDB:Set("showTitleBar", val)
+                    PUIQuestWatch:UpdateTracker()
+                end,
+            },
+            {
+                key = "isCollapsed",
+                label = "Fold / Minimize Quest Tracker",
+                type = "checkbox",
+                default = false,
+                get = function() return questDB:Get("isCollapsed", false) end,
+                set = function(val)
+                    questDB:Set("isCollapsed", val)
+                    PUIQuestWatch:UpdateTracker()
+                end,
+            },
+            {
+                key = "autoWatchNew",
+                label = "Auto-Watch Newly Accepted Quests",
+                type = "checkbox",
+                default = true,
+                get = function() return questDB:Get("autoWatchNew", true) end,
+                set = function(val) questDB:Set("autoWatchNew", val) end,
+            },
+            {
+                key = "autoWatchProgress",
+                label = "Auto-Watch Quests on Objective Progress",
+                type = "checkbox",
+                default = true,
+                get = function() return questDB:Get("autoWatchProgress", true) end,
+                set = function(val) questDB:Set("autoWatchProgress", val) end,
+            },
+            {
+                key = "showLevels",
+                label = "Show Quest Level Badges ([12] Title)",
+                type = "checkbox",
+                default = true,
+                get = function() return questDB:Get("showLevels", true) end,
+                set = function(val)
+                    questDB:Set("showLevels", val)
+                    PUIQuestWatch:UpdateTracker()
+                end,
+            },
+            {
+                key = "maxWatches",
+                label = "Max Watched Quests (1..20)",
+                type = "slider",
+                min = 1,
+                max = 20,
+                step = 1,
+                default = 10,
+                get = function() return questDB:Get("maxWatches", 10) end,
+                set = function(val)
+                    questDB:Set("maxWatches", val)
+                    PUIQuestWatch:UpdateTracker()
+                end,
+            },
+            {
+                key = "lineSpacing",
+                label = "Objective Line Spacing",
+                type = "slider",
+                min = 0,
+                max = 8,
+                step = 1,
+                default = 2,
+                get = function() return questDB:Get("lineSpacing", 2) end,
+                set = function(val)
+                    questDB:Set("lineSpacing", val)
+                    PUIQuestWatch:UpdateTracker()
+                end,
+            },
+            {
+                key = "questSpacing",
+                label = "Spacing Between Quests",
+                type = "slider",
+                min = 2,
+                max = 14,
+                step = 1,
+                default = 6,
+                get = function() return questDB:Get("questSpacing", 6) end,
+                set = function(val)
+                    questDB:Set("questSpacing", val)
+                    PUIQuestWatch:UpdateTracker()
+                end,
+            },
+        },
+    })
 end
 
 -- =========================================================================
--- INITIALIZATION & SLASH COMMANDS
+-- INITIALIZATION & EVENT ROUTING
 -- =========================================================================
 
-function PUIQuestWatch:Initialize()
-    Events:Register("PLAYER_ENTERING_WORLD", function() self:OnEvent("PLAYER_ENTERING_WORLD") end)
-    Events:Register("QUEST_LOG_UPDATE",      function() self:OnEvent("QUEST_LOG_UPDATE") end)
-    Events:Register("UNIT_QUEST_LOG_CHANGED", function(unit) if unit == "player" then self:OnEvent("UNIT_QUEST_LOG_CHANGED") end end)
-    Events:Register("QUEST_WATCH_UPDATE",    function(qIndex) self:OnEvent("QUEST_WATCH_UPDATE", qIndex) end)
-    Events:Register("QUEST_FINISHED",        function() self:OnEvent("QUEST_FINISHED") end)
-    Events:Register("QUEST_COMPLETE",        function() self:OnEvent("QUEST_COMPLETE") end)
-    Events:Register("UI_INFO_MESSAGE",       function(msg) self:OnEvent("UI_INFO_MESSAGE", msg) end)
-
+function PUIQuestWatch:OnInitialize()
+    self:RegisterOptionsFlare()
     InterceptBlizzardQuestWatch()
 
-    -- Register with PUIMover
     if PUIMover and PUIMover.Register and QuestWatchFrame then
         PUIMover:Register(QuestWatchFrame, "QuestWatchFrame", "Quest Tracker", "UTILITY")
     end
 end
 
--- Slash Commands
-if Primus.Console and Primus.Console.RegisterSubCommand then
-    Primus.Console:RegisterSubCommand("quest", function(argParam, parts)
-        local cmd = string.lower(argParam or "")
+function PUIQuestWatch:OnEnable()
+    Events:Register("PLAYER_ENTERING_WORLD", "PUIQuestWatch", function()
+        self:ReconcileQuests()
+        self:StabilizeAnchor()
+    end)
 
-        if cmd == "clear" then
-            PUIQuestWatch:ClearAllTracked()
-            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuestWatch]: Cleared all tracked quests.", "69ccf0"))
-        elseif cmd == "levels" then
-            local cur = questDB:Get("showLevels", true)
-            questDB:Set("showLevels", not cur)
-            PUIQuestWatch:UpdateTracker()
-            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuestWatch]: Quest levels " .. (not cur and "enabled." or "disabled."), "69ccf0"))
-        elseif cmd == "autowatch" then
-            local cur = questDB:Get("autoWatchProgress", true)
-            questDB:Set("autoWatchProgress", not cur)
-            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuestWatch]: Auto-watch on progress " .. (not cur and "enabled." or "disabled."), "69ccf0"))
+    Events:Register("QUEST_LOG_UPDATE", "PUIQuestWatch", function()
+        self:ReconcileQuests()
+    end)
+
+    Events:Register("UNIT_QUEST_LOG_CHANGED", "PUIQuestWatch", function(unit)
+        if unit == "player" then self:ReconcileQuests() end
+    end)
+
+    Events:Register("QUEST_WATCH_UPDATE", "PUIQuestWatch", function(qIndex)
+        if questDB:Get("autoWatchProgress", true) and qIndex then
+            self:TrackQuest(qIndex)
         else
-            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuestWatch]: Commands: /pui quest clear | /pui quest levels | /pui quest autowatch", "ffbb33"))
+            self:UpdateTracker()
         end
-    end, "Quest Tracker & Watchlist Manager")
+    end)
+
+    Events:Register("QUEST_FINISHED", "PUIQuestWatch", function()
+        self:ReconcileQuests()
+    end)
+
+    Events:Register("QUEST_COMPLETE", "PUIQuestWatch", function()
+        self:ReconcileQuests()
+    end)
+
+    Events:Register("UI_INFO_MESSAGE", "PUIQuestWatch", function()
+        self:ReconcileQuests()
+    end)
+
+    self:ReconcileQuests()
+end
+
+function PUIQuestWatch:OnDisable()
+    Events:UnregisterOwner("PUIQuestWatch")
+    if QuestWatchFrame then
+        QuestWatchFrame:Hide()
+    end
+end
+
+function PUIQuestWatch:Initialize()
+    self:OnInitialize()
+    self:OnEnable()
 end

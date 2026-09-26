@@ -26,6 +26,7 @@ PUIQuest.db = DB:RegisterNamespace("PUIQuest", {
     turtleMode          = true,   -- Enable Turtle WoW / Custom Extensions
     showWorldMapPins    = true,
     showMinimapPins     = true,
+    showRouteLines      = true,   -- Glowing route trails connecting player to target
     showAvailableQuests = true,
     showTurnIns         = true,
     showObjectives      = true,
@@ -69,7 +70,7 @@ function PUIQuest:RegisterOptionsFlare()
 
     Options:RegisterModuleOptions("PUIQuest", "Player", {
         title = "PUIQuest: Database & Quest Engine",
-        description = "Integrated quest navigation, 25,000+ item/NPC database, world map overlays, and Turtle WoW extensions.",
+        description = "Integrated quest navigation, 25,000+ item/NPC database, world map overlays, route connection lines, and Turtle WoW extensions.",
         icon = "Interface\\Icons\\INV_Misc_Map02",
         fields = {
             {
@@ -94,6 +95,28 @@ function PUIQuest:RegisterOptionsFlare()
                     if val and PUIQuest.Patchtable then
                         PUIQuest.Patchtable:Apply()
                     end
+                    if PUIQuest.Map then PUIQuest.Map:Update() end
+                end,
+            },
+            {
+                key = "showMinimapPins",
+                label = "Show 3D HUD Navigation Arrow & Minimap Radar",
+                type = "checkbox",
+                default = true,
+                get = function() return PUIQuest.db:Get("showMinimapPins", true) end,
+                set = function(val)
+                    PUIQuest.db:Set("showMinimapPins", val)
+                    if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
+                end,
+            },
+            {
+                key = "showRouteLines",
+                label = "Show Dynamic Route Connection Lines on Map",
+                type = "checkbox",
+                default = true,
+                get = function() return PUIQuest.db:Get("showRouteLines", true) end,
+                set = function(val)
+                    PUIQuest.db:Set("showRouteLines", val)
                     if PUIQuest.Map then PUIQuest.Map:Update() end
                 end,
             },
@@ -128,16 +151,6 @@ function PUIQuest:RegisterOptionsFlare()
                 set = function(val)
                     PUIQuest.db:Set("showTurnIns", val)
                     if PUIQuest.Map then PUIQuest.Map:Update() end
-                end,
-            },
-            {
-                key = "showMinimapPins",
-                label = "Show Minimap Directional Navigation Arrow",
-                type = "checkbox",
-                default = true,
-                get = function() return PUIQuest.db:Get("showMinimapPins", true) end,
-                set = function(val)
-                    PUIQuest.db:Set("showMinimapPins", val)
                 end,
             },
         },
@@ -184,24 +197,44 @@ function PUIQuest:OnEnable()
 
     Events:Register("QUEST_LOG_UPDATE", "PUIQuest", function()
         if PUIQuest.Map then PUIQuest.Map:Update() end
+        if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
+    end)
+
+    Events:Register("ZONE_CHANGED", "PUIQuest", function()
+        if PUIQuest.Map then PUIQuest.Map:Update() end
+        if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
+    end)
+
+    Events:Register("ZONE_CHANGED_NEW_AREA", "PUIQuest", function()
+        if PUIQuest.Map then PUIQuest.Map:Update() end
+        if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
     end)
 
     Events:Register("PLAYER_ENTERING_WORLD", "PUIQuest", function()
         if PUIQuest.Quest then PUIQuest.Quest:Initialize() end
         if PUIQuest.Map then PUIQuest.Map:Update() end
+        if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
     end)
 
-    -- Minimap Ticker (0.25s)
-    Time:Every(0.25, "PUIQuest", function()
+    -- Real-time HUD Navigation & Radar Ticker (0.15s)
+    Time:Every(0.15, "PUIQuest", function()
         if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
+        if WorldMapFrame and WorldMapFrame:IsVisible() and PUIQuest.Map then
+            PUIQuest.Map:Update()
+        end
     end)
 end
 
 function PUIQuest:OnDisable()
     Events:UnregisterOwner("PUIQuest")
     Time:CancelAll("PUIQuest")
-    if PUIQuest.Map then PUIQuest.Map:ClearPins() end
-    if PUIQuest.Tracker then PUIQuest.Tracker:SetFocus(nil) end
+    if PUIQuest.Map then
+        PUIQuest.Map:ClearPins()
+        PUIQuest.Map:ClearRoute()
+    end
+    if PUIQuest.Tracker then
+        PUIQuest.Tracker:SetFocus(nil)
+    end
 end
 
 -- =========================================================================
@@ -240,7 +273,7 @@ function PUIQuest:HandleSlashCommand(args)
             self:FocusQuest(title)
         else
             self:FocusQuest(nil)
-            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuest]: Cleared quest focus.", "ffbb33"))
+            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuest]: Reset to automatic closest-quest navigation.", "ffbb33"))
         end
     else
         DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuest]: Unknown subcommand. Use '/pui quest' for status.", "ff4444"))

@@ -56,7 +56,7 @@ local function CreateDMContextMenu()
         {
             text = "🔍 Who / Info",
             action = function()
-                if menu.targetName then SendChatMessage("/who " .. menu.targetName, "SAY") end
+                if menu.targetName then SendWho(menu.targetName) end
             end
         },
         {

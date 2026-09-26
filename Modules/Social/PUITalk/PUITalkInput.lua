@@ -206,14 +206,7 @@ end
 function PUITalk:HandleInputSubmit(text)
     if not text or text == "" then return end
 
-    local currentTab = self.db:Get("activeMasterTab") or 1
-
-    if currentTab == 2 and self.activeDMKey and self.dmTabs[self.activeDMKey] then
-        local targetName = self.dmTabs[self.activeDMKey].name or self.activeDMKey
-        SendChatMessage(text, "WHISPER", nil, targetName)
-        return
-    end
-
+    -- 1. Check if input is a slash command (/s, /p, /w, /pui, /who, /dance, /cast, etc.)
     if string.sub(text, 1, 1) == "/" then
         local spacePos = string.find(text, " ")
         local cmd = spacePos and string.sub(text, 2, spacePos - 1) or string.sub(text, 2)
@@ -271,13 +264,24 @@ function PUITalk:HandleInputSubmit(text)
             return
         end
 
+        -- Fallback to default Blizzard ChatEdit_SendText for all game/addon slash commands (/pui, /dance, /who, /played, /macro, etc.)
         if ChatFrameEditBox then
             ChatFrameEditBox:SetText(text)
             ChatEdit_SendText(ChatFrameEditBox)
         end
-    else
-        SendChatMessage(text, activeChannelType or "SAY")
+        return
     end
+
+    -- 2. Regular non-slash text message
+    local currentTab = self.db:Get("activeMasterTab") or 1
+
+    if currentTab == 2 and self.activeDMKey and self.dmTabs[self.activeDMKey] then
+        local targetName = self.dmTabs[self.activeDMKey].name or self.activeDMKey
+        SendChatMessage(text, "WHISPER", nil, targetName)
+        return
+    end
+
+    SendChatMessage(text, activeChannelType or "SAY")
 end
 
 -- =========================================================================
