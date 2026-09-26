@@ -33,7 +33,7 @@ local Events  = Primus.Events
 local Time    = Primus.Time
 local PUIMover = Primus.PUIMover
 
-local puipuimessengerDB = DB:RegisterNamespace("PUIMessenger", {
+local messengerDB = DB:RegisterNamespace("PUIMessenger", {
     enabled = true,
     autoPopIM = true,
     playSounds = true,
@@ -192,6 +192,8 @@ function PUIMessenger:CreateIMWindow()
     editBox:SetScript("OnEscapePressed", function()
         this:ClearFocus()
     end)
+    imWindow.editBox = editBox
+
     local mover = PUIMover or Primus.PUIMover
     if mover and mover.Register then
         mover:Register(imWindow, "PUIMessenger_IM", "PUIMessenger: Instant Message Window", "SOCIAL")
@@ -309,7 +311,9 @@ function PUIMessenger:SelectTab(key)
     imWindow.msgFrame:ScrollToBottom()
 
     self:RefreshTabs()
-    imWindow.editBox:SetFocus()
+    if imWindow and imWindow.editBox and imWindow:IsShown() and not UnitAffectingCombat("player") then
+        imWindow.editBox:SetFocus()
+    end
 end
 
 -- Close a Conversation Tab
@@ -363,7 +367,7 @@ function PUIMessenger:AddChatMessage(key, sender, text, isOutgoing, r, g, b)
         end
     end
 
-    if puipuimessengerDB.playSounds and not isOutgoing then
+    if messengerDB:Get("playSounds", true) and not isOutgoing then
         PlaySound("TellMessage")
     end
 end
@@ -487,6 +491,8 @@ function PUIMessenger:CreateBuddyListWindow()
     local listContainer = CreateFrame("Frame", nil, buddyWindow)
     listContainer:SetPoint("TOPLEFT", roomBar, "BOTTOMLEFT", 0, -4)
     listContainer:SetPoint("BOTTOMRIGHT", buddyWindow, "BOTTOMRIGHT", -4, 4)
+    buddyWindow.listContainer = listContainer
+
     local mover = PUIMover or Primus.PUIMover
     if mover and mover.Register then
         mover:Register(buddyWindow, "PUIMessenger_BuddyList", "PUIMessenger: Buddy List Window", "SOCIAL")
@@ -612,9 +618,9 @@ function PUIMessenger:RegisterOptionsFlare()
                 label = "Enable PUIMessenger",
                 type = "checkbox",
                 default = true,
-                get = function() return puipuimessengerDB:Get("enabled", true) end,
+                get = function() return messengerDB:Get("enabled", true) end,
                 set = function(val)
-                    puipuimessengerDB:Set("enabled", val)
+                    messengerDB:Set("enabled", val)
                     if val then PUIMessenger:OnEnable() else PUIMessenger:OnDisable() end
                 end,
             },
@@ -623,24 +629,24 @@ function PUIMessenger:RegisterOptionsFlare()
                 label = "Auto-Open IM Window on Incoming Whisper",
                 type = "checkbox",
                 default = true,
-                get = function() return puipuimessengerDB:Get("autoPopIM", true) end,
-                set = function(val) puipuimessengerDB:Set("autoPopIM", val) end,
+                get = function() return messengerDB:Get("autoPopIM", true) end,
+                set = function(val) messengerDB:Set("autoPopIM", val) end,
             },
             {
                 key = "playSounds",
                 label = "Play Sound Notification on Message",
                 type = "checkbox",
                 default = true,
-                get = function() return puipuimessengerDB:Get("playSounds", true) end,
-                set = function(val) puipuimessengerDB:Set("playSounds", val) end,
+                get = function() return messengerDB:Get("playSounds", true) end,
+                set = function(val) messengerDB:Set("playSounds", val) end,
             },
             {
                 key = "enableChatRooms",
                 label = "Enable Tabbed Chat Rooms (#guild, #party, #raid)",
                 type = "checkbox",
                 default = true,
-                get = function() return puipuimessengerDB:Get("enableChatRooms", true) end,
-                set = function(val) puipuimessengerDB:Set("enableChatRooms", val) end,
+                get = function() return messengerDB:Get("enableChatRooms", true) end,
+                set = function(val) messengerDB:Set("enableChatRooms", val) end,
             },
         },
     })
@@ -679,7 +685,7 @@ function PUIMessenger:OnEnable()
     Events:Register("CHAT_MSG_WHISPER", "PUIMessenger", function(owner, event, msg, sender)
         local key = string.lower(sender)
         PUIMessenger:AddChatMessage(key, sender, msg, false)
-        if puipuimessengerDB:Get("autoPopIM", true) then
+        if messengerDB:Get("autoPopIM", true) then
             PUIMessenger:OpenConversation(key, sender, false)
         end
     end)
@@ -692,19 +698,19 @@ function PUIMessenger:OnEnable()
 
     -- Intercept Chat Rooms
     Events:Register("CHAT_MSG_GUILD", "PUIMessenger", function(owner, event, msg, sender)
-        if sender ~= UnitName("player") and puipuimessengerDB:Get("enableChatRooms", true) then
+        if sender ~= UnitName("player") and messengerDB:Get("enableChatRooms", true) then
             PUIMessenger:AddChatMessage("#guild", sender, msg, false, 0.25, 1.0, 0.25)
         end
     end)
 
     Events:Register("CHAT_MSG_PARTY", "PUIMessenger", function(owner, event, msg, sender)
-        if sender ~= UnitName("player") and puipuimessengerDB:Get("enableChatRooms", true) then
+        if sender ~= UnitName("player") and messengerDB:Get("enableChatRooms", true) then
             PUIMessenger:AddChatMessage("#party", sender, msg, false, 0.67, 0.67, 1.0)
         end
     end)
 
     Events:Register("CHAT_MSG_RAID", "PUIMessenger", function(owner, event, msg, sender)
-        if sender ~= UnitName("player") and puipuimessengerDB:Get("enableChatRooms", true) then
+        if sender ~= UnitName("player") and messengerDB:Get("enableChatRooms", true) then
             PUIMessenger:AddChatMessage("#raid", sender, msg, false, 1.0, 0.5, 0.0)
         end
     end)
