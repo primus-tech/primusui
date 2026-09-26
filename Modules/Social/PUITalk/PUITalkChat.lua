@@ -461,3 +461,160 @@ function PUITalk:DockDefaultChatFrame(parentView)
         end
     end
 end
+
+-- =========================================================================
+-- 5. IN-PLACE SELECTABLE CHAT OVERLAY (CLICK, DRAG-HIGHLIGHT, & CTRL+C)
+-- =========================================================================
+
+function PUITalk:CreateSelectableOverlay(parent, modeName)
+    if not parent then return nil end
+    if parent.selectOverlay then return parent.selectOverlay end
+
+    local overlay = CreateFrame("Frame", "Primus_PUITalkSelectOverlay_" .. (modeName or "Chat"), parent)
+    overlay:SetAllPoints(parent)
+    overlay:SetFrameLevel(parent:GetFrameLevel() + 15)
+    overlay:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    overlay:SetBackdropColor(0.04, 0.05, 0.07, 0.98)
+    overlay:SetBackdropBorderColor(0.20, 0.50, 0.90, 1.0)
+    overlay:EnableMouse(true)
+    overlay:Hide()
+
+    -- Top Mini Header Toolbar
+    local topBar = CreateFrame("Frame", nil, overlay)
+    topBar:SetPoint("TOPLEFT", overlay, "TOPLEFT", 4, -4)
+    topBar:SetPoint("TOPRIGHT", overlay, "TOPRIGHT", -4, -4)
+    topBar:SetHeight(20)
+    topBar:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    topBar:SetBackdropColor(0.10, 0.14, 0.22, 1.0)
+    topBar:SetBackdropBorderColor(0.25, 0.45, 0.75, 1.0)
+
+    local backBtn = CreateFrame("Button", nil, topBar)
+    backBtn:SetWidth(110)
+    backBtn:SetHeight(16)
+    backBtn:SetPoint("LEFT", topBar, "LEFT", 2, 0)
+    backBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    backBtn:SetBackdropColor(0.15, 0.20, 0.30, 1.0)
+    backBtn:SetBackdropBorderColor(0.30, 0.60, 0.90, 1.0)
+    local bkTxt = backBtn:CreateFontString(nil, "OVERLAY")
+    bkTxt:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    bkTxt:SetPoint("CENTER", 0, 0)
+    bkTxt:SetText("◀ Return to Live")
+    backBtn.text = bkTxt
+    backBtn:SetScript("OnClick", function()
+        PUITalk:ToggleSelectableMode()
+    end)
+
+    local selectAllBtn = CreateFrame("Button", nil, topBar)
+    selectAllBtn:SetWidth(75)
+    selectAllBtn:SetHeight(16)
+    selectAllBtn:SetPoint("LEFT", backBtn, "RIGHT", 4, 0)
+    selectAllBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    selectAllBtn:SetBackdropColor(0.15, 0.25, 0.15, 1.0)
+    selectAllBtn:SetBackdropBorderColor(0.30, 0.80, 0.30, 1.0)
+    local saTxt = selectAllBtn:CreateFontString(nil, "OVERLAY")
+    saTxt:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    saTxt:SetPoint("CENTER", 0, 0)
+    saTxt:SetText("Select All")
+    selectAllBtn.text = saTxt
+
+    local infoText = topBar:CreateFontString(nil, "OVERLAY")
+    infoText:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    infoText:SetPoint("LEFT", selectAllBtn, "RIGHT", 6, 0)
+    infoText:SetPoint("RIGHT", topBar, "RIGHT", -4, 0)
+    infoText:SetJustifyH("LEFT")
+    infoText:SetText(Utils.ColorText("Selectable Mode", "69ccf0") .. " |cffaaaaaa// Drag to highlight, Ctrl+C to copy|r")
+
+    -- Scrollable Multiline EditBox Container
+    local scroll = CreateFrame("ScrollFrame", "Primus_PUITalkSelectScroll_" .. (modeName or "Chat"), overlay, "UIPanelScrollFrameTemplate")
+    scroll:SetPoint("TOPLEFT", topBar, "BOTTOMLEFT", 4, -4)
+    scroll:SetPoint("BOTTOMRIGHT", overlay, "BOTTOMRIGHT", -24, 6)
+
+    local editBox = CreateFrame("EditBox", "Primus_PUITalkSelectEdit_" .. (modeName or "Chat"), scroll)
+    editBox:SetWidth(380)
+    editBox:SetMultiLine(true)
+    editBox:SetAutoFocus(false)
+    editBox:SetFont(Media:Fetch("font", "Default"), 10, "")
+    editBox:SetTextColor(0.95, 0.95, 0.95, 1.0)
+    editBox:SetScript("OnEscapePressed", function()
+        PUITalk:ToggleSelectableMode()
+    end)
+    editBox:SetScript("OnTextChanged", function()
+        local s = this:GetParent()
+        if s and s.UpdateScrollChildRect then
+            s:UpdateScrollChildRect()
+        end
+    end)
+    scroll:SetScrollChild(editBox)
+
+    selectAllBtn:SetScript("OnClick", function()
+        editBox:SetFocus()
+        editBox:HighlightText(0)
+    end)
+
+    overlay.scroll = scroll
+    overlay.editBox = editBox
+    overlay.topBar = topBar
+    parent.selectOverlay = overlay
+    return overlay
+end
+
+function PUITalk:ToggleSelectableMode(tabIndex)
+    tabIndex = tabIndex or self.db:Get("activeMasterTab") or 1
+    local masterFrame = self.masterFrame
+    if not masterFrame then return end
+
+    if tabIndex == 1 then
+        -- Tab 1: Chat Stream
+        local viewChat = masterFrame.viewChat
+        if not viewChat then return end
+        local overlay = viewChat.selectOverlay or self:CreateSelectableOverlay(viewChat, "Chat")
+
+        if overlay:IsShown() then
+            overlay:Hide()
+            if ChatFrame1 then ChatFrame1:Show() end
+        else
+            local buffer = self.chatBuffers[1] or {}
+            local totalLines = table.getn(buffer)
+            local lines = {}
+            for i = 1, totalLines do
+                local entry = buffer[i]
+                local clean = self:CleanChatText(entry.text)
+                table.insert(lines, string.format("[%s] %s", entry.time, clean))
+            end
+            local fullText = table.concat(lines, "\n")
+            overlay.editBox:SetText(fullText)
+            overlay:Show()
+            if ChatFrame1 then ChatFrame1:Hide() end
+            overlay.editBox:SetFocus()
+            overlay.scroll:ScrollToBottom()
+            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: Selectable chat mode active! Click & drag mouse to highlight, Ctrl+C to copy.", "69ccf0"))
+        end
+    elseif tabIndex == 2 then
+        -- Tab 2: Messages / DMs
+        local viewMessages = masterFrame.viewMessages
+        if not viewMessages then return end
+        local overlay = viewMessages.selectOverlay or self:CreateSelectableOverlay(viewMessages, "Messages")
+
+        if overlay:IsShown() then
+            overlay:Hide()
+            if viewMessages.msgFrame then viewMessages.msgFrame:Show() end
+        else
+            local activeKey = self.activeDMKey or ""
+            local history = self.conversationHistory[activeKey] or {}
+            local count = table.getn(history)
+            local lines = {}
+            for i = 1, count do
+                local entry = history[i]
+                local clean = self:CleanChatText(entry.msg)
+                table.insert(lines, clean)
+            end
+            local fullText = table.concat(lines, "\n")
+            overlay.editBox:SetText(fullText)
+            overlay:Show()
+            if viewMessages.msgFrame then viewMessages.msgFrame:Hide() end
+            overlay.editBox:SetFocus()
+            overlay.scroll:ScrollToBottom()
+            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: Selectable messages mode active! Click & drag mouse to highlight, Ctrl+C to copy.", "69ccf0"))
+        end
+    end
+end

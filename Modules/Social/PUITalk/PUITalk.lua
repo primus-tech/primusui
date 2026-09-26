@@ -99,20 +99,45 @@ function PUITalk:CreateMasterFrame()
     tabSocial:SetScript("OnClick", function() PUITalk:SelectMasterTab(3) end)
     f.tabSocial = tabSocial
 
-    -- Window Controls on Right ([C] Chat Copy) - Master Frame is permanent & non-closable
-    local copyBtn = CreateFrame("Button", nil, header)
-    copyBtn:SetWidth(20)
-    copyBtn:SetHeight(20)
-    copyBtn:SetPoint("RIGHT", header, "RIGHT", -4, 0)
-    copyBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
-    copyBtn:SetBackdropColor(0.1, 0.2, 0.35, 0.9)
-    copyBtn:SetBackdropBorderColor(0.3, 0.6, 0.9, 1)
-    local cpText = copyBtn:CreateFontString(nil, "OVERLAY")
-    cpText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
-    cpText:SetPoint("CENTER", 0, 0)
-    cpText:SetText("C")
-    cpText:SetTextColor(0.4, 0.85, 1.0)
-    copyBtn:SetScript("OnClick", function() PUITalk:OpenCopyFrame(1) end)
+    -- Header Controls on Right: [ 📋 Select ] (In-Place Selectable Mode & Shift-Click Popout)
+    local selectBtn = CreateFrame("Button", "Primus_PUITalkHeaderSelectBtn", header)
+    selectBtn:SetWidth(68)
+    selectBtn:SetHeight(20)
+    selectBtn:SetPoint("RIGHT", header, "RIGHT", -4, 0)
+    selectBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    selectBtn:SetBackdropColor(0.12, 0.18, 0.28, 0.95)
+    selectBtn:SetBackdropBorderColor(0.30, 0.60, 0.95, 1.0)
+    local slText = selectBtn:CreateFontString(nil, "OVERLAY")
+    slText:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    slText:SetPoint("CENTER", 0, 0)
+    slText:SetText("📋 Select")
+    slText:SetTextColor(0.45, 0.85, 1.0)
+    selectBtn.text = slText
+
+    selectBtn:SetScript("OnEnter", function()
+        this:SetBackdropColor(0.20, 0.32, 0.50, 1.0)
+        this:SetBackdropBorderColor(0.50, 0.85, 1.0, 1.0)
+        GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+        GameTooltip:AddLine("Primus Selectable Chat", 0.4, 0.85, 1.0)
+        GameTooltip:AddLine("Click to toggle Selectable Text Mode in this window.", 1, 1, 1)
+        GameTooltip:AddLine("• Drag mouse over text to highlight and select.", 0.8, 0.8, 0.8)
+        GameTooltip:AddLine("• Press Ctrl+C (Cmd+C) to copy highlighted text to clipboard.", 0.8, 0.8, 0.8)
+        GameTooltip:AddLine("• Shift-Click to open full Popout Copy Dialog.", 1, 0.85, 0.2)
+        GameTooltip:Show()
+    end)
+    selectBtn:SetScript("OnLeave", function()
+        this:SetBackdropColor(0.12, 0.18, 0.28, 0.95)
+        this:SetBackdropBorderColor(0.30, 0.60, 0.95, 1.0)
+        GameTooltip:Hide()
+    end)
+    selectBtn:SetScript("OnClick", function()
+        if IsShiftKeyDown() then
+            PUITalk:OpenCopyFrame(1)
+        else
+            PUITalk:ToggleSelectableMode()
+        end
+    end)
+    f.selectBtn = selectBtn
 
     -- ---------------------------------------------------------------------
     -- Universal Docked Input EditBox (Bottom)
@@ -313,6 +338,14 @@ function PUITalk:SelectMasterTab(tabIndex)
             btn:SetBackdropBorderColor(0.20, 0.28, 0.40, 0.8)
             btn.text:SetTextColor(0.7, 0.7, 0.7)
         end
+    end
+
+    -- Reset selectable overlays when switching master tabs
+    if masterFrame.viewChat and masterFrame.viewChat.selectOverlay then
+        masterFrame.viewChat.selectOverlay:Hide()
+    end
+    if masterFrame.viewMessages and masterFrame.viewMessages.selectOverlay then
+        masterFrame.viewMessages.selectOverlay:Hide()
     end
 
     -- Toggle Viewports & Manage ChatFrame1 Visibility
