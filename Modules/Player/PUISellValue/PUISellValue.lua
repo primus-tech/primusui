@@ -594,7 +594,7 @@ function PUISellValue:OnEnable()
     Events:Register("MERCHANT_SHOW", "PUISellValue", function()
         local count = PUISellValue:ScanBagsAtMerchant()
         if count > 0 then
-            Debug:Log("PUISellValue", string.format("Learned %d new vendor prices from inventory.", count))
+            Debug:Info("PUISellValue", string.format("Learned %d new vendor prices from inventory.", count))
         end
     end)
 

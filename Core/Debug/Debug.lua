@@ -88,7 +88,14 @@ function Debug:Info(tag, message)
 end
 
 function Debug:Log(level, tag, message)
-    if level > self.logLevel then return end
+    if type(level) == "string" and not message then
+        message = tag
+        tag = level
+        level = 3
+    end
+    level = tonumber(level) or 3
+    local maxLevel = tonumber(self.logLevel) or 1
+    if level > maxLevel then return end
 
     local timestamp = date("%H:%M:%S")
     local entry = {
