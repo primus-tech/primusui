@@ -732,23 +732,31 @@ function Tracker:Update()
     -- 2. UPDATE MINIMAP RADAR PIN
     local mPin = CreateMinimapPin()
     mPin:Show()
+
+    local isRotating = (GetCVar and GetCVar("rotateMinimap") == "1")
+    local mmAngle = isRotating and diff or targetAngle
+
     if minimapTex then
         minimapTex:Show()
-        Set3DArrowAngle(minimapTex, diff)
+        Set3DArrowAngle(minimapTex, mmAngle)
         minimapTex:SetVertexColor(r, g, b, 1.0)
     end
 
-    local radius = 54
-    local mmDist = dist * 250
+    local radius = 56
+    local zoom = (Minimap and Minimap.GetZoom and Minimap:GetZoom()) or 0
+    local zoomScale = { 300, 360, 440, 540, 660, 800 }
+    local scale = zoomScale[zoom + 1] or 400
+    local mmDist = dist * scale
+
+    local nx, ny
     if mmDist > radius then
-        local nx = math.sin(diff) * radius
-        local ny = math.cos(diff) * radius
-        mPin:ClearAllPoints()
-        mPin:SetPoint("CENTER", Minimap, "CENTER", nx, ny)
+        nx = math.sin(mmAngle) * radius
+        ny = math.cos(mmAngle) * radius
     else
-        local nx = math.sin(diff) * mmDist
-        local ny = math.cos(diff) * mmDist
-        mPin:ClearAllPoints()
-        mPin:SetPoint("CENTER", Minimap, "CENTER", nx, ny)
+        nx = math.sin(mmAngle) * mmDist
+        ny = math.cos(mmAngle) * mmDist
     end
+
+    mPin:ClearAllPoints()
+    mPin:SetPoint("CENTER", Minimap, "CENTER", nx, ny)
 end
