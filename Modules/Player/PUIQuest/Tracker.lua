@@ -128,17 +128,18 @@ local function Set3DArrowAngle(tex, angle)
     local a = math.mod(angle, twoPi)
     if a < 0 then a = a + twoPi end
 
-    -- 120 frames across 2*pi radians, with Frame 1 centered at angle 0 (North / Forward)
-    local frame = math.mod(math.floor((a / (twoPi / 120)) + 1.5), 120)
+    -- 108 frames across 2*pi radians (9 columns x 12 rows, 3.33° per frame)
+    -- Frame 0 is centered at 0 rad (Forward / North)
+    local frame = math.mod(math.floor((a / (twoPi / 108)) + 0.5), 108)
     
-    local col = math.mod(frame, 10)
-    local row = math.floor(frame / 10)
+    local col = math.mod(frame, 9)
+    local row = math.floor(frame / 9)
 
-    -- Inset by 0.0005 to prevent texture bleeding from neighboring cells
-    local left = col * 0.1 + 0.0005
-    local right = (col + 1) * 0.1 - 0.0005
-    local top = row * (1 / 12) + 0.0005
-    local bottom = (row + 1) * (1 / 12) - 0.0005
+    -- Inset by 0.001 to prevent texture bleeding from neighboring cells
+    local left = col * (1 / 9) + 0.001
+    local right = (col + 1) * (1 / 9) - 0.001
+    local top = row * (1 / 12) + 0.001
+    local bottom = (row + 1) * (1 / 12) - 0.001
 
     tex:SetTexCoord(left, right, top, bottom)
 end
@@ -152,7 +153,7 @@ local function CreateHUDArrow()
 
     hudArrow = CreateFrame("Frame", "PUIQuestHUDArrow", UIParent)
     hudArrow:SetWidth(156)
-    hudArrow:SetHeight(66)
+    hudArrow:SetHeight(68)
     hudArrow:SetPoint("CENTER", UIParent, "CENTER", 0, -130)
     hudArrow:SetFrameStrata("BACKGROUND")
     hudArrow:SetClampedToScreen(true)
@@ -168,20 +169,18 @@ local function CreateHUDArrow()
     hudArrow:SetBackdropColor(0.04, 0.06, 0.09, 0.88)
     hudArrow:SetBackdropBorderColor(0.20, 0.35, 0.55, 0.90)
 
-    -- Arrow Container Frame
+    -- Arrow Container Frame (4:3 aspect ratio matching 316x237 cell dimensions)
     local arrowHolder = CreateFrame("Frame", nil, hudArrow)
-    arrowHolder:SetWidth(36)
-    arrowHolder:SetHeight(36)
-    arrowHolder:SetPoint("TOP", hudArrow, "TOP", 0, -2)
+    arrowHolder:SetWidth(44)
+    arrowHolder:SetHeight(33)
+    arrowHolder:SetPoint("TOP", hudArrow, "TOP", 0, -3)
     arrowHolder:EnableMouse(false)
     hudArrowHolder = arrowHolder
 
-    -- 3D Rotating Texture Arrow (120-frame rendered sprite sheet)
+    -- 3D Rotating Texture Arrow (108-frame rendered sprite sheet)
     local arrowTex = arrowHolder:CreateTexture(nil, "ARTWORK")
     arrowTex:SetTexture(ARROW_TEXTURE_PATH)
-    arrowTex:SetWidth(36)
-    arrowTex:SetHeight(36)
-    arrowTex:SetPoint("CENTER", arrowHolder, "CENTER", 0, 0)
+    arrowTex:SetAllPoints(arrowHolder)
     arrowTex:SetVertexColor(1.0, 0.85, 0.1, 1.0)
     Set3DArrowAngle(arrowTex, 0)
     hudArrowTex = arrowTex
@@ -227,8 +226,8 @@ local function CreateMinimapPin()
     if minimapPin then return minimapPin end
 
     minimapPin = CreateFrame("Button", "PUIQuest_MinimapNavArrow", Minimap)
-    minimapPin:SetWidth(22)
-    minimapPin:SetHeight(22)
+    minimapPin:SetWidth(24)
+    minimapPin:SetHeight(18)
     minimapPin:SetPoint("CENTER", Minimap, "CENTER", 0, 0)
     minimapPin:SetFrameLevel(Minimap:GetFrameLevel() + 10)
 
