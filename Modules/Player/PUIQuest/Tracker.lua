@@ -504,12 +504,13 @@ function Tracker:Update()
         return
     end
 
-    -- Ensure map engine is synchronized with current player location
-    if not WorldMapFrame or not WorldMapFrame:IsVisible() then
-        SetMapToCurrentZone()
-    end
-
     local px, py = GetPlayerMapPosition("player")
+    if (not px or px == 0) and (not py or py == 0) then
+        if not WorldMapFrame or not WorldMapFrame:IsVisible() then
+            SetMapToCurrentZone()
+            px, py = GetPlayerMapPosition("player")
+        end
+    end
     px = px or 0
     py = py or 0
 

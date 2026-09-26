@@ -216,9 +216,8 @@ function PUIQuest:OnEnable()
         if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
     end)
 
-    -- Real-time HUD Navigation & Radar Ticker (0.15s)
-    Time:Every(0.15, function()
-        if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
+    -- Real-time WorldMap Route & Pin Ticker (0.3s when WorldMap is open)
+    Time:Every(0.3, function()
         if WorldMapFrame and WorldMapFrame:IsVisible() and PUIQuest.Map then
             PUIQuest.Map:Update()
         end
