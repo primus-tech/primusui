@@ -184,10 +184,13 @@
 
 ## 💬 Tier 4: Interaction, Social & Content Modules (`Modules/`)
 
-- [x] **Modern Chat Engine (`Modules/Social/Chat/`):**
-  - Copy/paste support, clickable web URLs, sticky channels, class colors, and editbox docking.
-- [x] **PUIMessenger Buddy List (`Modules/Social/PUIMessenger/`):**
-  - Tabbed IM-style chat windows for whispers and channels.
+- [x] **PUITalk Unified Communication Suite (`Modules/Social/PUITalk/`):**
+  - Consolidates `PUIChat` and `PUIMessenger` into a single 3-tab modern social communication hub.
+  - **Tab 1 (`[💬 Chat]`):** Virtualized game channels, class-colored names, clickable web URLs with 1-click copy popup, sticky channels, fast mousewheel scrolling, and chat history copy frame `[C]`.
+  - **Tab 2 (`[✉️ Messages]`):** Direct whisper conversation sub-tabs, session message history, unread badge counters, audio chimes, and double-send elimination.
+  - **Tab 3 (`[👥 Social]`):** Real-time Friends list and Guild roster with online status, level, class, zone, and 1-click `[💬 DM]` button switching to Tab 2.
+  - Docked universal input edit box with context pills (`#General`, `To: <Player>`, `Social`).
+  - Integrated Whisper Diversion suppressing whispers from main chat log and routing to Tab 2.
 - [x] **Inspect Suite (`Modules/Utility/Inspect/`):**
   - Throttled inspect queue preventing client lockups, with target gear and talent tree caching.
 - [x] **Master Loot Assistant (`Modules/Social/MasterLoot/`):**

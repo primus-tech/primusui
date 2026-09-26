@@ -95,8 +95,7 @@ TIER 4: INTERACTION, SOCIAL & CONTENT SUB-MODULES (Modules/Social, Utility)
 • PUIMinimapOrbit           : Minimap button consolidation dock
 • PUIMailbox                : Mass mail collection ("Open All") and recipient auto-fill
 • PUIInspect                : Throttled inspect queue and gear overview cache
-• PUIMessenger              : Tabbed instant messenger style chat interface with history
-• PUIChat                   : Modernized chat frames with class colors, URLs, and editbox docking
+• PUITalk                   : Unified chat streams, isolated DM tabs, and live friends/guild roster
 • PUIMasterLoot             : Need/Greed popups, master looter roll tracking, and loot logs
 ========================================================================================
 ```
@@ -155,7 +154,7 @@ To prevent frame-fighting, flickering, and cascading breakages, PrimusUI enforce
    - `PUIHotbars` owns all action bars and action button art.
    - `PUIBags` owns all container and backpack interactions.
    - `PUIUnitFrames` owns player, target, party, and raid unit frames.
-   - `PUIChat` owns chat frames and edit boxes.
+   - `PUITalk` owns chat frames, conversation tabs, and edit boxes.
 2. **Zero Cross-Module Frame Mutation:**
    - External modules (e.g. `State.lua` Zen focus, `PUIDock`, `PUIHud`) **must never** directly alter, hide, or set the alpha of frames owned by another module.
 3. **Request APIs & Signal Bus:**
@@ -180,7 +179,7 @@ To prevent frame-fighting, flickering, and cascading breakages, PrimusUI enforce
 
 #### Case Study C: The Combat Focus Boundary (`Core/State.lua` vs Visual Frame Owners)
 * **`Core/State.lua` (Zen Engine):** Monitors player combat state (`PLAYER_REGEN_DISABLED` / `PLAYER_REGEN_ENABLED`).
-* **Interaction:** Instead of forcefully hiding `MainMenuBar` or `ChatFrame1`, `State.lua` emits `Events:Fire("UI_COMBAT_STATE_CHANGED", inCombat)` or calls owner methods. `PUIHotbars` and `PUIChat` handle their own out-of-combat fading and mouseover peeking internally.
+* **Interaction:** Instead of forcefully hiding `MainMenuBar` or `ChatFrame1`, `State.lua` emits `Events:Fire("UI_COMBAT_STATE_CHANGED", inCombat)` or calls owner methods. `PUIHotbars` and `PUITalk` handle their own out-of-combat fading and mouseover peeking internally.
 
 #### Case Study D: The HUD Cockpit Mini-Bars vs Action Bars Boundary (`PUIHud` vs `PUIHotbars`)
 * **`PUIHud` Ownership:** Claims exclusive domain ownership over **Bar 10 (Action Slots 109..120)** for the center-screen cockpit array:
@@ -207,7 +206,7 @@ To prevent frame-fighting, flickering, and cascading breakages, PrimusUI enforce
 | **Frame Repositioning & Grids** | `PUIMover` (Drag Handles, Grid) | Respective owning modules | Registration via `PUIMover:Register(frame, key, ...)` |
 | **ActiveAssist Threat Peel** | `PUIHud` (ActiveAssist Widgets) | `PUITactical` (Aggro & Comm Protocol) | Public API: `PUITactical:GetCurrentAlert()`, `ClaimRescue()` |
 | **Unit Frames vs Castbars / Auras** | `PUIUnitFrames` (Health/Mana) | `PUICastBar`, `PUICombatAuras` | Frame anchoring only; independent bar & aura life cycles |
-| **Combat Focus & Fading** | Visual Owners (`PUIHotbars`, `PUIChat`) | `Core/State.lua` (Zen Combat Monitor) | Signal Bus: `Events:Fire("UI_COMBAT_STATE_CHANGED")` |
+| **Combat Focus & Fading** | Visual Owners (`PUIHotbars`, `PUITalk`) | `Core/State.lua` (Zen Combat Monitor) | Signal Bus: `Events:Fire("UI_COMBAT_STATE_CHANGED")` |
 
 ---
 
@@ -255,7 +254,7 @@ Interface/AddOns/PrimusUI/
 │   ├── HUD/                      <-- PUIHud (PUIWings, PUIMiniBars, etc.), PUIAuras
 │   ├── Player/                   <-- PUIBags, PUIBank, PUISpellbook, PUIVendor, etc.
 │   ├── Professions/              <-- PUIProfessions
-│   ├── Social/                   <-- PUIMessenger, PUIChat, PUIMasterLoot
+│   ├── Social/                   <-- PUITalk, PUIMasterLoot, PUIRoleplay
 │   ├── Units/                    <-- PUIUnitBase, PUIUnitFrames
 │   └── Utility/                  <-- PUIMover, PUIDock, PUIMerchant, PUIFastLoot, etc.
 ├── Tools/                        <-- Packaging and release build scripts

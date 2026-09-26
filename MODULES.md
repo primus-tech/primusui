@@ -88,12 +88,11 @@ To achieve total architectural consistency, all modular components in PrimusUI a
 
 ---
 
-### 6. Social & Communication Suite (4 Modules)
+### 6. Social & Communication Suite (3 Modules)
 
 | Current Name | Target Standard Name | File Path | Status |
 | :--- | :--- | :--- | :--- |
-| `PUIMessenger` | `PUIMessenger` | `Modules/Social/PUIMessenger/PUIMessenger.lua` | ✅ **DONE** |
-| `PUIChat` | `PUIChat` | `Modules/Social/PUIChat/PUIChat.lua` | ✅ **DONE** |
+| `PUITalk` | `PUITalk` | `Modules/Social/PUITalk/PUITalk.lua` | ✅ **DONE** |
 | `PUIMasterLoot` | `PUIMasterLoot` | `Modules/Social/PUIMasterLoot/PUIMasterLoot.lua` | ✅ **DONE** |
 | `PUIRoleplay` | `PUIRoleplay` | `Modules/Social/PUIRoleplay/`<br>• `PUIConstants.lua`<br>• `PUIComms.lua`<br>• `PUIRPSheet.lua`<br>• `PUIGlance.lua`<br>• `PUITooltip.lua`<br>• `PUIDirectory.lua`<br>• `PUIEmotes.lua`<br>• `PUIRoleplay.lua` | ✅ **DONE** |
 
