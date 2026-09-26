@@ -111,7 +111,7 @@ local function HookTooltipMethods(tip)
     end)
 
     Events:Hook(tip, "SetInventoryItem", function(self, unit, slot)
-        if unit ~= "player" then
+        if unit ~= "player" or (slot and tonumber(slot) and tonumber(slot) > 19) then
             local link = GetInventoryItemLink(unit, slot)
             ShowComparison(self, link)
         else

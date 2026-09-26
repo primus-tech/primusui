@@ -131,20 +131,35 @@ local function CreateBankSlot(parent, index)
     end)
 
     slot:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+        local hasItem = false
+
         if isBankOpen and this.bagID and this.slotID then
-            local texture = GetContainerItemInfo(this.bagID, this.slotID)
-            if texture then
-                GameTooltip:SetOwner(this, "ANCHOR_LEFT")
-                GameTooltip:SetBagItem(this.bagID, this.slotID)
-                GameTooltip:Show()
+            if this.bagID == -1 then
+                local invSlot = BankButtonIDToInvSlotID and BankButtonIDToInvSlotID(this.slotID, 0)
+                if invSlot then
+                    hasItem = GameTooltip:SetInventoryItem("player", invSlot)
+                end
+            else
+                local texture = GetContainerItemInfo(this.bagID, this.slotID)
+                if texture then
+                    hasItem = GameTooltip:SetBagItem(this.bagID, this.slotID)
+                end
             end
-        elseif this.itemLink then
-            local rawLink = Utils.ExtractLink(this.itemLink)
+        end
+
+        if not hasItem and this.itemLink then
+            local rawLink = Utils.ExtractLink(this.itemLink) or this.itemLink
             if rawLink then
-                GameTooltip:SetOwner(this, "ANCHOR_LEFT")
                 GameTooltip:SetHyperlink(rawLink)
-                GameTooltip:Show()
+                hasItem = true
             end
+        end
+
+        if hasItem or (GameTooltip:NumLines() and GameTooltip:NumLines() > 0) then
+            GameTooltip:Show()
+        else
+            GameTooltip:Hide()
         end
     end)
 
