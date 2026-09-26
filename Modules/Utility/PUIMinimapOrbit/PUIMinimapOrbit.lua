@@ -100,7 +100,19 @@ local KNOWN_BUTTONS = {
 
 -- Verify whether a frame is a genuine 3rd-party minimap button
 local function IsMinimapButton(name, frame)
-    if not frame or type(frame) ~= "table" or not frame.SetPoint or not frame.GetParent then
+    if not frame or type(frame) ~= "table" then return false end
+
+    -- Must be a frame object (Button or Frame), never a Texture or FontString
+    if not frame.GetObjectType then return false end
+    local objType = frame:GetObjectType()
+    if objType ~= "Button" and objType ~= "Frame" then
+        return false
+    end
+
+    -- Must possess standard Frame methods
+    if not frame.GetFrameStrata or not frame.SetFrameStrata or 
+       not frame.GetFrameLevel or not frame.SetFrameLevel or
+       not frame.SetPoint or not frame.GetParent then
         return false
     end
 
@@ -147,11 +159,11 @@ local function IsMinimapButton(name, frame)
     -- Parent-based heuristics for anonymous or uniquely named addon buttons anchored to Minimap
     local parent = frame:GetParent()
     if parent == Minimap or parent == MinimapCluster or parent == MinimapBackdrop then
-        local w = frame:GetWidth()
-        local h = frame:GetHeight()
-        if w and h and w >= 16 and w <= 48 and h >= 16 and h <= 48 then
+        local w = (frame.GetWidth and frame:GetWidth()) or 0
+        local h = (frame.GetHeight and frame:GetHeight()) or 0
+        if w >= 16 and w <= 48 and h >= 16 and h <= 48 then
             -- Verify it has interactive button characteristics
-            if frame.GetNormalTexture or frame:GetScript("OnClick") or frame:GetScript("OnMouseDown") or frame:GetScript("OnMouseUp") then
+            if frame.GetNormalTexture or (frame.GetScript and (frame:GetScript("OnClick") or frame:GetScript("OnMouseDown") or frame:GetScript("OnMouseUp"))) then
                 return true
             end
         end
@@ -163,54 +175,62 @@ end
 -- Safely restore Blizzard default frames (e.g. Zone Text Button) to their standard anchor
 local function RestoreBlizzardFrames()
     if MinimapZoneTextButton then
-        if MinimapZoneTextButton:GetParent() ~= MinimapCluster then
+        if MinimapZoneTextButton.GetParent and MinimapZoneTextButton:GetParent() ~= MinimapCluster then
             MinimapZoneTextButton:SetParent(MinimapCluster)
         end
-        MinimapZoneTextButton:ClearAllPoints()
-        MinimapZoneTextButton:SetPoint("CENTER", MinimapCluster, "CENTER", -3, 83)
-        MinimapZoneTextButton:Show()
+        if MinimapZoneTextButton.ClearAllPoints and MinimapZoneTextButton.SetPoint then
+            MinimapZoneTextButton:ClearAllPoints()
+            MinimapZoneTextButton:SetPoint("CENTER", MinimapCluster, "CENTER", -3, 83)
+        end
+        if MinimapZoneTextButton.Show then
+            MinimapZoneTextButton:Show()
+        end
         if MinimapZoneText then
-            MinimapZoneText:Show()
-            if GetMinimapZoneText then
+            if MinimapZoneText.Show then MinimapZoneText:Show() end
+            if GetMinimapZoneText and MinimapZoneText.SetText then
                 MinimapZoneText:SetText(GetMinimapZoneText())
             end
         end
     end
 
-    if MinimapToggleButton and MinimapToggleButton:GetParent() ~= MinimapCluster then
+    if MinimapToggleButton and MinimapToggleButton.GetParent and MinimapToggleButton:GetParent() ~= MinimapCluster then
         MinimapToggleButton:SetParent(MinimapCluster)
-        MinimapToggleButton:ClearAllPoints()
-        MinimapToggleButton:SetPoint("CENTER", MinimapCluster, "TOPRIGHT", -15, -13)
-        MinimapToggleButton:Show()
+        if MinimapToggleButton.ClearAllPoints and MinimapToggleButton.SetPoint then
+            MinimapToggleButton:ClearAllPoints()
+            MinimapToggleButton:SetPoint("CENTER", MinimapCluster, "TOPRIGHT", -15, -13)
+        end
+        if MinimapToggleButton.Show then MinimapToggleButton:Show() end
     end
 end
 
 -- Save original frame state before docking
 local function SaveButtonState(btn)
-    if savedState[btn] then return end
+    if not btn or savedState[btn] then return end
 
     local numPoints = (btn.GetNumPoints and btn:GetNumPoints()) or 1
     local points = {}
-    for p = 1, numPoints do
-        local point, relativeTo, relativePoint, xOfs, yOfs = btn:GetPoint(p)
-        if point then
-            table.insert(points, {
-                point = point,
-                relativeTo = relativeTo,
-                relativePoint = relativePoint,
-                xOfs = xOfs,
-                yOfs = yOfs
-            })
+    if btn.GetPoint then
+        for p = 1, numPoints do
+            local point, relativeTo, relativePoint, xOfs, yOfs = btn:GetPoint(p)
+            if point then
+                table.insert(points, {
+                    point = point,
+                    relativeTo = relativeTo,
+                    relativePoint = relativePoint,
+                    xOfs = xOfs,
+                    yOfs = yOfs
+                })
+            end
         end
     end
 
     savedState[btn] = {
-        parent = btn:GetParent(),
+        parent = btn.GetParent and btn:GetParent(),
         points = points,
-        width = btn:GetWidth(),
-        height = btn:GetHeight(),
-        strata = btn:GetFrameStrata(),
-        level = btn:GetFrameLevel(),
+        width = (btn.GetWidth and btn:GetWidth()) or 28,
+        height = (btn.GetHeight and btn:GetHeight()) or 28,
+        strata = (btn.GetFrameStrata and btn:GetFrameStrata()) or "MEDIUM",
+        level = (btn.GetFrameLevel and btn:GetFrameLevel()) or 1,
         hiddenTextures = {},
     }
 end
@@ -220,10 +240,10 @@ local function SkinDockedButton(btn)
     if not btn then return end
 
     local btnSize = orbitDB:Get("buttonSize", 28)
-    btn:SetWidth(btnSize)
-    btn:SetHeight(btnSize)
-    btn:SetFrameStrata("HIGH")
-    if dockFrame then
+    if btn.SetWidth then btn:SetWidth(btnSize) end
+    if btn.SetHeight then btn:SetHeight(btnSize) end
+    if btn.SetFrameStrata then btn:SetFrameStrata("HIGH") end
+    if btn.SetFrameLevel and dockFrame and dockFrame.GetFrameLevel then
         btn:SetFrameLevel(dockFrame:GetFrameLevel() + 5)
     end
 
@@ -234,7 +254,8 @@ local function SkinDockedButton(btn)
         for _, region in ipairs(regions) do
             if region and region.GetObjectType and region:GetObjectType() == "Texture" then
                 local texPath = region:GetTexture()
-                local tw, th = region:GetWidth(), region:GetHeight()
+                local tw = (region.GetWidth and region:GetWidth()) or 0
+                local th = (region.GetHeight and region:GetHeight()) or 0
                 local isBorder = false
 
                 if texPath and type(texPath) == "string" then
@@ -247,7 +268,7 @@ local function SkinDockedButton(btn)
                     end
                 end
 
-                if tw and th and (tw > 36 or th > 36) then
+                if tw > 36 or th > 36 then
                     isBorder = true
                 end
 
@@ -260,9 +281,11 @@ local function SkinDockedButton(btn)
                     -- Ensure icon texture is positioned and drawn crisply
                     if texPath and region.SetDrawLayer then
                         region:SetDrawLayer("ARTWORK")
-                        region:ClearAllPoints()
-                        region:SetPoint("TOPLEFT", btn, "TOPLEFT", 2, -2)
-                        region:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, 2)
+                        if region.ClearAllPoints and region.SetPoint then
+                            region:ClearAllPoints()
+                            region:SetPoint("TOPLEFT", btn, "TOPLEFT", 2, -2)
+                            region:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, 2)
+                        end
                         region:Show()
                     end
                 end
@@ -273,39 +296,43 @@ local function SkinDockedButton(btn)
     -- Normal texture styling
     if btn.GetNormalTexture and btn:GetNormalTexture() then
         local norm = btn:GetNormalTexture()
-        norm:SetDrawLayer("ARTWORK")
-        norm:ClearAllPoints()
-        norm:SetPoint("TOPLEFT", btn, "TOPLEFT", 2, -2)
-        norm:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, 2)
-        norm:Show()
+        if norm.SetDrawLayer then norm:SetDrawLayer("ARTWORK") end
+        if norm.ClearAllPoints and norm.SetPoint then
+            norm:ClearAllPoints()
+            norm:SetPoint("TOPLEFT", btn, "TOPLEFT", 2, -2)
+            norm:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, 2)
+        end
+        if norm.Show then norm:Show() end
     end
 
     -- Backdrop for consistent sleek look
-    btn:SetBackdrop(Media:Fetch("border", "1Pixel"))
-    btn:SetBackdropColor(0.12, 0.12, 0.15, 0.95)
-    btn:SetBackdropBorderColor(0.28, 0.28, 0.35, 1.0)
-    btn:Show()
+    if btn.SetBackdrop then
+        btn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+        btn:SetBackdropColor(0.12, 0.12, 0.15, 0.95)
+        btn:SetBackdropBorderColor(0.28, 0.28, 0.35, 1.0)
+    end
+    if btn.Show then btn:Show() end
 end
 
 -- Restore all docked buttons to their original state
 function PUIMinimapOrbit:RestoreButtons()
     for btn, state in pairs(savedState) do
-        if btn and btn.SetParent and state then
-            btn:SetParent(state.parent or Minimap)
-            btn:ClearAllPoints()
-            if state.points and table.getn(state.points) > 0 then
+        if btn and state then
+            if btn.SetParent then btn:SetParent(state.parent or Minimap) end
+            if btn.ClearAllPoints then btn:ClearAllPoints() end
+            if state.points and table.getn(state.points) > 0 and btn.SetPoint then
                 for _, pt in ipairs(state.points) do
                     btn:SetPoint(pt.point, pt.relativeTo or state.parent or Minimap, pt.relativePoint or pt.point, pt.xOfs or 0, pt.yOfs or 0)
                 end
-            else
+            elseif btn.SetPoint then
                 btn:SetPoint("CENTER", Minimap, "CENTER", 0, 0)
             end
             if state.width and state.height then
-                btn:SetWidth(state.width)
-                btn:SetHeight(state.height)
+                if btn.SetWidth then btn:SetWidth(state.width) end
+                if btn.SetHeight then btn:SetHeight(state.height) end
             end
-            if state.strata then btn:SetFrameStrata(state.strata) end
-            if state.level then btn:SetFrameLevel(state.level) end
+            if state.strata and btn.SetFrameStrata then btn:SetFrameStrata(state.strata) end
+            if state.level and btn.SetFrameLevel then btn:SetFrameLevel(state.level) end
 
             -- Restore hidden textures
             if state.hiddenTextures then
