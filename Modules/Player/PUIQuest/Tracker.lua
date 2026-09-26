@@ -733,7 +733,13 @@ function Tracker:Update()
     local mPin = CreateMinimapPin()
     mPin:Show()
 
-    local isRotating = (GetCVar and GetCVar("rotateMinimap") == "1")
+    local isRotating = false
+    if GetCVar then
+        local ok, val = pcall(GetCVar, "rotateMinimap")
+        if ok and val == "1" then
+            isRotating = true
+        end
+    end
     local mmAngle = isRotating and diff or targetAngle
 
     if minimapTex then
