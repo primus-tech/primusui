@@ -3,9 +3,10 @@
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides:
-    - Shared module state, database namespace registration, and backwards-compatibility aliases.
+    - Shared module state and database namespace registration.
     - Player class caching and class color string formatting.
     - Chat cleaning, timestamp generation, channel coloring, and URL linkification.
+    - Unread state tracking, conversation management, and roster lookup for tab-completion.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -67,18 +68,129 @@ function PUITalk:SetChannelEnabled(chanKey, enabled)
 end
 
 -- Shared State
-PUITalk.playerClassCache    = {}
-PUITalk.chatBuffers         = {}
-PUITalk.dmTabs              = {}
-PUITalk.activeDMKey         = nil
-PUITalk.conversationHistory  = {}
-PUITalk.lastWhisperSender   = nil
-PUITalk.friendRows          = {}
-PUITalk.guildRows           = {}
-PUITalk.copyButtons         = {}
+PUITalk.playerClassCache     = {}
+PUITalk.chatBuffers          = {}
+PUITalk.dmTabs               = {}
+PUITalk.activeDMKey          = nil
+PUITalk.conversationHistory   = {}
+PUITalk.unreadCounts         = {}
+PUITalk.lastWhisperSender    = nil
+PUITalk.friendRows           = {}
+PUITalk.guildRows            = {}
+PUITalk.copyButtons          = {}
 
 for i = 1, 7 do
     PUITalk.chatBuffers[i] = {}
+end
+
+-- =========================================================================
+-- UNREAD STATE MANAGEMENT & ROSTER HELPERS
+-- =========================================================================
+
+function PUITalk:GetTotalUnreadCount()
+    local total = 0
+    for k, count in pairs(self.unreadCounts) do
+        if count and count > 0 then
+            total = total + count
+        end
+    end
+    return total
+end
+
+function PUITalk:GetUnreadCount(key)
+    if not key then return 0 end
+    return self.unreadCounts[string.lower(key)] or 0
+end
+
+function PUITalk:IncrementUnread(key)
+    if not key then return end
+    key = string.lower(key)
+    self.unreadCounts[key] = (self.unreadCounts[key] or 0) + 1
+    if self.dmTabs[key] then
+        self.dmTabs[key].unread = self.unreadCounts[key]
+    end
+end
+
+function PUITalk:MarkAsRead(key)
+    if not key then return end
+    key = string.lower(key)
+    self.unreadCounts[key] = 0
+    if self.dmTabs[key] then
+        self.dmTabs[key].unread = 0
+    end
+end
+
+function PUITalk:ClearDMHistory(key)
+    if not key then return end
+    key = string.lower(key)
+    self.conversationHistory[key] = {}
+    if self.masterFrame and self.masterFrame.viewMessages and (self.activeDMKey == key) then
+        self.masterFrame.viewMessages.msgFrame:Clear()
+    end
+end
+
+function PUITalk:CloseDMConversation(key)
+    if not key then return end
+    key = string.lower(key)
+    self:MarkAsRead(key)
+    if self.dmTabs[key] then
+        if self.dmTabs[key].button then
+            self.dmTabs[key].button:Hide()
+            self.dmTabs[key].button = nil
+        end
+        self.dmTabs[key] = nil
+    end
+
+    if self.activeDMKey == key then
+        self.activeDMKey = nil
+        for nextKey, _ in pairs(self.dmTabs) do
+            self:SelectDMTab(nextKey)
+            return
+        end
+        if self.masterFrame and self.masterFrame.viewMessages then
+            self.masterFrame.viewMessages.msgFrame:Clear()
+        end
+    end
+    self:RefreshDMTabs()
+end
+
+function PUITalk:GetRosterNames()
+    local names = {}
+    local seen = {}
+
+    local function add(n)
+        if n and n ~= "" and not seen[n] then
+            seen[n] = true
+            table.insert(names, n)
+        end
+    end
+
+    -- Friends
+    local numFriends = GetNumFriends()
+    for i = 1, numFriends do
+        local n, _, _, _, connected = GetFriendInfo(i)
+        if connected and n then add(n) end
+    end
+
+    -- Guild
+    if IsInGuild() then
+        local numGuild = GetNumGuildMembers()
+        for i = 1, numGuild do
+            local n, _, _, _, _, _, _, _, online = GetGuildRosterInfo(i)
+            if online and n then add(n) end
+        end
+    end
+
+    -- Party / Raid
+    for i = 1, 4 do
+        if UnitExists("party" .. i) then add(UnitName("party" .. i)) end
+    end
+    local numRaid = GetNumRaidMembers()
+    for i = 1, numRaid do
+        if UnitExists("raid" .. i) then add(UnitName("raid" .. i)) end
+    end
+
+    return names
 end
 
 -- =========================================================================

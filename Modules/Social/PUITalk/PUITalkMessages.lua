@@ -1,12 +1,12 @@
 --[[
-    PrimusUI Module: PUITalk (Direct Messages, DM Sub-Tabs & Whisper Routing)
+    PrimusUI Module: PUITalk (Direct Messages, DM Sub-Tabs, Context Menus & Whisper Routing)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides:
     - Tab 2 (Messages) conversation manager with isolated per-player sub-tabs.
-    - Persistent session message history.
-    - Authoritative incoming/outgoing whisper processing (zero double-send).
-    - Unread counters and header notification badges.
+    - Solid amber unread highlight on inactive conversations with incoming whispers.
+    - Inline [x] close buttons and Right-Click DM player action menus.
+    - Persistent session message history and authoritative whisper processing (zero double-send).
     - Audio chime alerts on incoming whispers.
 --]]
 
@@ -16,9 +16,138 @@ if not Primus or not Primus.PUITalk then return end
 
 local PUITalk = Primus.PUITalk
 local Media   = Primus.Media
+local Utils   = Primus.Utils
+
+local dmContextMenu = nil
 
 -- =========================================================================
--- DIRECT MESSAGES (DMs) & SUB-TABS (TAB 2)
+-- 1. RIGHT-CLICK DM CONTEXT MENU
+-- =========================================================================
+
+local function CreateDMContextMenu()
+    if dmContextMenu then return dmContextMenu end
+
+    local menu = CreateFrame("Frame", "Primus_PUITalkDMMenu", UIParent)
+    menu:SetWidth(150)
+    menu:SetHeight(130)
+    menu:SetFrameStrata("DIALOG")
+    menu:SetFrameLevel(110)
+    menu:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    menu:SetBackdropColor(0.06, 0.08, 0.12, 0.98)
+    menu:SetBackdropBorderColor(0.20, 0.50, 0.90, 1.0)
+    menu:EnableMouse(true)
+    menu:SetClampedToScreen(true)
+    menu:Hide()
+
+    tinsert(UISpecialFrames, "Primus_PUITalkDMMenu")
+
+    local title = menu:CreateFontString(nil, "OVERLAY")
+    title:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+    title:SetPoint("TOPLEFT", menu, "TOPLEFT", 8, -8)
+    title:SetText(Utils.ColorText("DM Options", "69ccf0"))
+    menu.title = title
+
+    local items = {
+        {
+            text = "⚔️ Invite to Group",
+            action = function()
+                if menu.targetName then InviteByName(menu.targetName) end
+            end
+        },
+        {
+            text = "🔍 Who / Info",
+            action = function()
+                if menu.targetName then SendChatMessage("/who " .. menu.targetName, "SAY") end
+            end
+        },
+        {
+            text = "📋 Popout History",
+            action = function()
+                if PUITalk.OpenCopyFrame then PUITalk:OpenCopyFrame(1) end
+            end
+        },
+        {
+            text = "🗑️ Clear History",
+            action = function()
+                if menu.targetKey then
+                    PUITalk:ClearDMHistory(menu.targetKey)
+                    if DEFAULT_CHAT_FRAME then
+                        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: DM history cleared for " .. (menu.targetName or menu.targetKey), "69ccf0"))
+                    end
+                end
+            end
+        },
+        {
+            text = "❌ Close Conversation",
+            action = function()
+                if menu.targetKey then PUITalk:CloseDMConversation(menu.targetKey) end
+            end
+        },
+    }
+
+    local yOff = -26
+    for i, it in ipairs(items) do
+        local btn = CreateFrame("Button", nil, menu)
+        btn:SetWidth(138)
+        btn:SetHeight(18)
+        btn:SetPoint("TOPLEFT", menu, "TOPLEFT", 6, yOff)
+        btn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+        btn:SetBackdropColor(0.08, 0.10, 0.14, 0.6)
+        btn:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.6)
+
+        local bTxt = btn:CreateFontString(nil, "OVERLAY")
+        bTxt:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+        bTxt:SetPoint("LEFT", btn, "LEFT", 6, 0)
+        bTxt:SetText(it.text)
+
+        btn.act = it.action
+        btn:SetScript("OnEnter", function()
+            this:SetBackdropColor(0.18, 0.26, 0.40, 1.0)
+            this:SetBackdropBorderColor(0.40, 0.75, 1.0, 1.0)
+        end)
+        btn:SetScript("OnLeave", function()
+            this:SetBackdropColor(0.08, 0.10, 0.14, 0.6)
+            this:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.6)
+        end)
+        btn:SetScript("OnClick", function()
+            menu:Hide()
+            if this.act then this.act() end
+        end)
+
+        yOff = yOff - 20
+    end
+
+    dmContextMenu = menu
+    return menu
+end
+
+function PUITalk:OpenDMContextMenu(anchor, key, targetName)
+    local menu = CreateDMContextMenu()
+    menu.targetKey = key
+    menu.targetName = targetName
+    menu.title:SetText(Utils.ColorText(targetName or "Player", "69ccf0"))
+
+    menu:ClearAllPoints()
+    if anchor then
+        local top = anchor:GetTop() or 0
+        local screenHeight = UIParent:GetHeight() or 768
+        if top > (screenHeight * 0.6) then
+            menu:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -4)
+        else
+            menu:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", 0, 4)
+        end
+    else
+        local x, y = GetCursorPosition()
+        local scale = UIParent:GetEffectiveScale()
+        menu:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", x / scale, y / scale)
+    end
+
+    menu:Show()
+    menu:Raise()
+end
+
+-- =========================================================================
+-- 2. DIRECT MESSAGES (DMs) & SUB-TABS (TAB 2)
 -- =========================================================================
 
 function PUITalk:RefreshDMTabs()
@@ -27,7 +156,7 @@ function PUITalk:RefreshDMTabs()
 
     local tabBar = masterFrame.viewMessages.dmTabBar
     local xOffset = 0
-    local totalUnread = 0
+    local totalUnread = self:GetTotalUnreadCount()
 
     for key, tab in pairs(self.dmTabs) do
         local btn = tab.button
@@ -35,53 +164,84 @@ function PUITalk:RefreshDMTabs()
             btn = CreateFrame("Button", "Primus_PUITalkDMTab_" .. key, tabBar)
             btn:SetHeight(20)
             btn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+            btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
             btn.key = key
 
             local text = btn:CreateFontString(nil, "OVERLAY")
             text:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
-            text:SetPoint("CENTER", btn, "CENTER", -6, 0)
+            text:SetPoint("LEFT", btn, "LEFT", 6, 0)
             btn.text = text
 
             local close = CreateFrame("Button", nil, btn)
             close:SetWidth(12)
             close:SetHeight(12)
-            close:SetPoint("RIGHT", btn, "RIGHT", -2, 0)
+            close:SetPoint("RIGHT", btn, "RIGHT", -3, 0)
+            close:SetBackdrop(Media:Fetch("border", "1Pixel"))
+            close:SetBackdropColor(0.20, 0.08, 0.08, 0.8)
+            close:SetBackdropBorderColor(0.50, 0.15, 0.15, 0.9)
             local cT = close:CreateFontString(nil, "OVERLAY")
             cT:SetFont(Media:Fetch("font", "Default"), 8, "")
             cT:SetPoint("CENTER", close, "CENTER", 0, 0)
             cT:SetText("x")
-            cT:SetTextColor(0.8, 0.4, 0.4)
+            cT:SetTextColor(0.9, 0.4, 0.4)
             close:SetScript("OnClick", function()
-                PUITalk:CloseDMTab(this:GetParent().key)
+                local parentBtn = this:GetParent()
+                if parentBtn and parentBtn.key then
+                    PUITalk:CloseDMConversation(parentBtn.key)
+                end
             end)
             btn.closeBtn = close
 
             btn:SetScript("OnClick", function()
-                PUITalk:SelectDMTab(this.key)
+                if arg1 == "RightButton" then
+                    PUITalk:OpenDMContextMenu(this, this.key, this.targetName)
+                else
+                    PUITalk:SelectDMTab(this.key)
+                end
             end)
+            btn:SetScript("OnEnter", function()
+                GameTooltip:SetOwner(this, "ANCHOR_TOP")
+                GameTooltip:AddLine("✉️ DM: " .. (this.targetName or this.key), 0.4, 0.85, 1.0)
+                GameTooltip:AddLine("• Left-Click: Select conversation.", 1, 1, 1)
+                GameTooltip:AddLine("• Right-Click: Open DM player menu.", 1, 0.85, 0.2)
+                GameTooltip:Show()
+            end)
+            btn:SetScript("OnLeave", function()
+                GameTooltip:Hide()
+            end)
+
             tab.button = btn
         end
 
-        local displayName = tab.name
-        if tab.unread and tab.unread > 0 then
-            displayName = displayName .. string.format(" |cffffcc00(%d)|r", tab.unread)
-            totalUnread = totalUnread + tab.unread
+        btn.targetName = tab.name or key
+        local unreadCount = self:GetUnreadCount(key)
+        local displayName = tab.name or key
+
+        if unreadCount > 0 then
+            displayName = displayName .. string.format(" |cffffcc00(%d)|r", unreadCount)
         end
 
         btn.text:SetText(displayName)
         local textWidth = btn.text:GetStringWidth() or 40
-        local btnWidth = math.max(55, textWidth + 20)
+        local btnWidth = math.max(65, textWidth + 24)
         btn:SetWidth(btnWidth)
 
         btn:ClearAllPoints()
         btn:SetPoint("LEFT", tabBar, "LEFT", xOffset, 0)
-        xOffset = xOffset + btnWidth + 3
+        xOffset = xOffset + btnWidth + 4
 
         if key == self.activeDMKey then
+            -- Active Selected Tab
             btn:SetBackdropColor(0.18, 0.26, 0.40, 1.0)
             btn:SetBackdropBorderColor(0.40, 0.75, 1.0, 1.0)
             btn.text:SetTextColor(1.0, 1.0, 1.0)
+        elseif unreadCount > 0 then
+            -- Solid Amber/Gold Unread Highlight
+            btn:SetBackdropColor(0.40, 0.26, 0.08, 1.0)
+            btn:SetBackdropBorderColor(1.00, 0.80, 0.20, 1.0)
+            btn.text:SetTextColor(1.00, 0.92, 0.40)
         else
+            -- Normal Inactive Tab
             btn:SetBackdropColor(0.08, 0.10, 0.14, 0.8)
             btn:SetBackdropBorderColor(0.20, 0.28, 0.40, 0.8)
             btn.text:SetTextColor(0.7, 0.7, 0.7)
@@ -89,7 +249,7 @@ function PUITalk:RefreshDMTabs()
         btn:Show()
     end
 
-    -- Update Top Header Tab 2 Unread Pill
+    -- Update Top Header Tab 2 Unread Badge
     if totalUnread > 0 then
         masterFrame.tabMessages.text:SetText(string.format("✉️ Messages |cffffcc00(%d)|r", totalUnread))
     else
@@ -122,11 +282,11 @@ end
 function PUITalk:SelectDMTab(key)
     if not self.dmTabs[key] then return end
     self.activeDMKey = key
-    self.dmTabs[key].unread = 0
+    self:MarkAsRead(key)
 
     local tab = self.dmTabs[key]
     if self.masterFrame and self.masterFrame.contextPill then
-        self.masterFrame.contextPill.text:SetText("To: " .. tab.name)
+        self.masterFrame.contextPill.text:SetText("To: " .. (tab.name or key))
     end
 
     -- Reload messages into DM frame
@@ -146,28 +306,6 @@ function PUITalk:SelectDMTab(key)
     if self.masterFrame and self.masterFrame.editBox and self.masterFrame:IsShown() and not UnitAffectingCombat("player") then
         self.masterFrame.editBox:SetFocus()
     end
-end
-
-function PUITalk:CloseDMTab(key)
-    if self.dmTabs[key] then
-        if self.dmTabs[key].button then
-            self.dmTabs[key].button:Hide()
-            self.dmTabs[key].button = nil
-        end
-        self.dmTabs[key] = nil
-    end
-
-    if self.activeDMKey == key then
-        self.activeDMKey = nil
-        for nextKey, _ in pairs(self.dmTabs) do
-            self:SelectDMTab(nextKey)
-            return
-        end
-        if self.masterFrame and self.masterFrame.viewMessages then
-            self.masterFrame.viewMessages.msgFrame:Clear()
-        end
-    end
-    self:RefreshDMTabs()
 end
 
 function PUITalk:AddDMMessage(key, sender, text, isOutgoing, r, g, b)
@@ -194,8 +332,8 @@ function PUITalk:AddDMMessage(key, sender, text, isOutgoing, r, g, b)
         self.masterFrame.viewMessages.msgFrame:AddMessage(formattedMsg, r, g, b)
         self.masterFrame.viewMessages.msgFrame:ScrollToBottom()
     else
-        if self.dmTabs[key] then
-            self.dmTabs[key].unread = (self.dmTabs[key].unread or 0) + 1
+        if not isOutgoing then
+            self:IncrementUnread(key)
         end
         self:RefreshDMTabs()
     end

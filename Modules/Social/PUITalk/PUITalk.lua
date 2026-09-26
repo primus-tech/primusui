@@ -202,7 +202,78 @@ function PUITalk:CreateMasterFrame()
     footer:SetBackdropBorderColor(0.20, 0.35, 0.60, 1.0)
     f.footer = footer
 
-    local contextPill = CreateFrame("Frame", nil, footer)
+    local channelSelectMenu = nil
+    local function OpenChannelSelectMenu(anchor)
+        if not channelSelectMenu then
+            local m = CreateFrame("Frame", "Primus_PUITalkChannelSelectMenu", UIParent)
+            m:SetWidth(100)
+            m:SetHeight(130)
+            m:SetFrameStrata("DIALOG")
+            m:SetFrameLevel(110)
+            m:SetBackdrop(Media:Fetch("border", "1Pixel"))
+            m:SetBackdropColor(0.06, 0.08, 0.12, 0.98)
+            m:SetBackdropBorderColor(0.20, 0.50, 0.90, 1.0)
+            m:EnableMouse(true)
+            m:SetClampedToScreen(true)
+            tinsert(UISpecialFrames, "Primus_PUITalkChannelSelectMenu")
+
+            local chList = {
+                { tag = "#Say",     chan = "SAY" },
+                { tag = "#Yell",    chan = "YELL" },
+                { tag = "#Party",   chan = "PARTY" },
+                { tag = "#Raid",    chan = "RAID" },
+                { tag = "#Guild",   chan = "GUILD" },
+                { tag = "#Officer", chan = "OFFICER" },
+            }
+
+            local yOff = -4
+            for _, c in ipairs(chList) do
+                local b = CreateFrame("Button", nil, m)
+                b:SetWidth(92)
+                b:SetHeight(18)
+                b:SetPoint("TOPLEFT", m, "TOPLEFT", 4, yOff)
+                b:SetBackdrop(Media:Fetch("border", "1Pixel"))
+                b:SetBackdropColor(0.08, 0.10, 0.14, 0.6)
+                b:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.6)
+
+                local bt = b:CreateFontString(nil, "OVERLAY")
+                bt:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+                bt:SetPoint("CENTER", 0, 0)
+                bt:SetText(c.tag)
+
+                b.chan = c.chan
+                b.tag = c.tag
+                b:SetScript("OnEnter", function()
+                    this:SetBackdropColor(0.18, 0.26, 0.40, 1.0)
+                    this:SetBackdropBorderColor(0.40, 0.75, 1.0, 1.0)
+                end)
+                b:SetScript("OnLeave", function()
+                    this:SetBackdropColor(0.08, 0.10, 0.14, 0.6)
+                    this:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.6)
+                end)
+                b:SetScript("OnClick", function()
+                    activeChannelType = this.chan
+                    if masterFrame and masterFrame.contextPill then
+                        masterFrame.contextPill.text:SetText(this.tag)
+                    end
+                    m:Hide()
+                end)
+                yOff = yOff - 20
+            end
+            channelSelectMenu = m
+        end
+
+        if channelSelectMenu:IsShown() then
+            channelSelectMenu:Hide()
+        else
+            channelSelectMenu:ClearAllPoints()
+            channelSelectMenu:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", 0, 4)
+            channelSelectMenu:Show()
+            channelSelectMenu:Raise()
+        end
+    end
+
+    local contextPill = CreateFrame("Button", "Primus_PUITalkContextPill", footer)
     contextPill:SetPoint("LEFT", footer, "LEFT", 2, 0)
     contextPill:SetWidth(80)
     contextPill:SetHeight(20)
@@ -214,6 +285,25 @@ function PUITalk:CreateMasterFrame()
     contextText:SetPoint("CENTER", 0, 0)
     contextText:SetText("#Say")
     contextPill.text = contextText
+    contextPill:SetScript("OnClick", function()
+        local curTab = PUITalk.db:Get("activeMasterTab") or 1
+        if curTab == 1 then
+            OpenChannelSelectMenu(this)
+        end
+    end)
+    contextPill:SetScript("OnEnter", function()
+        this:SetBackdropColor(0.18, 0.26, 0.40, 1.0)
+        this:SetBackdropBorderColor(0.50, 0.85, 1.0, 1.0)
+        GameTooltip:SetOwner(this, "ANCHOR_TOP")
+        GameTooltip:AddLine("Active Target / Channel", 0.4, 0.85, 1.0)
+        GameTooltip:AddLine("Click to switch default broadcast channel.", 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    contextPill:SetScript("OnLeave", function()
+        this:SetBackdropColor(0.12, 0.16, 0.24, 1.0)
+        this:SetBackdropBorderColor(0.3, 0.6, 1.0, 0.8)
+        GameTooltip:Hide()
+    end)
     f.contextPill = contextPill
 
     local editBox = CreateFrame("EditBox", "Primus_PUITalkUniversalInput", footer)
@@ -233,6 +323,32 @@ function PUITalk:CreateMasterFrame()
     end)
     editBox:SetScript("OnEscapePressed", function()
         this:ClearFocus()
+    end)
+    editBox:SetScript("OnTabPressed", function()
+        local text = this:GetText() or ""
+        if text == "" then return end
+
+        local lastSpace = 0
+        local len = string.len(text)
+        for i = len, 1, -1 do
+            if string.sub(text, i, i) == " " then
+                lastSpace = i
+                break
+            end
+        end
+
+        local prefix = string.sub(text, 1, lastSpace)
+        local partial = string.lower(string.sub(text, lastSpace + 1))
+        if partial == "" then return end
+
+        local names = PUITalk:GetRosterNames()
+        for _, name in ipairs(names) do
+            if string.sub(string.lower(name), 1, string.len(partial)) == partial then
+                this:SetText(prefix .. name .. " ")
+                this:SetCursorPosition(string.len(prefix .. name .. " "))
+                return
+            end
+        end
     end)
     f.editBox = editBox
 
@@ -315,7 +431,7 @@ function PUITalk:CreateMasterFrame()
     socialNav:SetHeight(22)
 
     local btnFriends = CreateFrame("Button", nil, socialNav)
-    btnFriends:SetWidth(75)
+    btnFriends:SetWidth(65)
     btnFriends:SetHeight(20)
     btnFriends:SetPoint("LEFT", socialNav, "LEFT", 0, 0)
     btnFriends:SetBackdrop(Media:Fetch("border", "1Pixel"))
@@ -331,7 +447,7 @@ function PUITalk:CreateMasterFrame()
     viewSocial.btnFriends = btnFriends
 
     local btnGuild = CreateFrame("Button", nil, socialNav)
-    btnGuild:SetWidth(75)
+    btnGuild:SetWidth(65)
     btnGuild:SetHeight(20)
     btnGuild:SetPoint("LEFT", btnFriends, "RIGHT", 4, 0)
     btnGuild:SetBackdrop(Media:Fetch("border", "1Pixel"))
@@ -363,11 +479,116 @@ function PUITalk:CreateMasterFrame()
         PUITalk:RefreshSocialView()
     end)
 
+    local searchBox = CreateFrame("EditBox", "Primus_PUITalkSocialSearchBox", socialNav)
+    searchBox:SetPoint("LEFT", btnGuild, "RIGHT", 6, 0)
+    searchBox:SetPoint("RIGHT", btnRefresh, "LEFT", -6, 0)
+    searchBox:SetHeight(18)
+    searchBox:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    searchBox:SetBackdropColor(0.04, 0.05, 0.08, 0.9)
+    searchBox:SetBackdropBorderColor(0.20, 0.35, 0.60, 0.9)
+    searchBox:SetFont(Media:Fetch("font", "Default"), 8, "")
+    searchBox:SetTextColor(0.9, 0.9, 0.9)
+    searchBox:SetAutoFocus(false)
+
+    local searchPlaceholder = searchBox:CreateFontString(nil, "OVERLAY")
+    searchPlaceholder:SetFont(Media:Fetch("font", "Default"), 8, "")
+    searchPlaceholder:SetPoint("LEFT", searchBox, "LEFT", 6, 0)
+    searchPlaceholder:SetText("🔍 Search...")
+    searchPlaceholder:SetTextColor(0.45, 0.50, 0.60)
+    searchBox.placeholder = searchPlaceholder
+
+    searchBox:SetScript("OnTextChanged", function()
+        local txt = this:GetText()
+        if txt and txt ~= "" then
+            searchPlaceholder:Hide()
+        else
+            searchPlaceholder:Show()
+        end
+        PUITalk:RefreshSocialView()
+    end)
+    searchBox:SetScript("OnEscapePressed", function()
+        this:SetText("")
+        this:ClearFocus()
+    end)
+    viewSocial.searchBox = searchBox
+
     local socialContainer = CreateFrame("Frame", "Primus_PUITalkSocialList", viewSocial)
     socialContainer:SetPoint("TOPLEFT", socialNav, "BOTTOMLEFT", 0, -4)
     socialContainer:SetPoint("BOTTOMRIGHT", viewSocial, "BOTTOMRIGHT", -4, 4)
     viewSocial.socialContainer = socialContainer
     f.viewSocial = viewSocial
+
+    -- ---------------------------------------------------------------------
+    -- Interactive Bottom-Right Corner Resize Grip Handle
+    -- ---------------------------------------------------------------------
+    f:SetResizable(true)
+    f:SetMinResize(360, 180)
+    f:SetMaxResize(800, 600)
+
+    local resizeGrip = CreateFrame("Button", "Primus_PUITalkResizeGrip", f)
+    resizeGrip:SetWidth(14)
+    resizeGrip:SetHeight(14)
+    resizeGrip:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
+    resizeGrip:EnableMouse(true)
+    resizeGrip:RegisterForDrag("LeftButton")
+    resizeGrip:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    resizeGrip:SetBackdropColor(0.12, 0.22, 0.38, 0.6)
+    resizeGrip:SetBackdropBorderColor(0.30, 0.60, 1.0, 0.8)
+
+    local gripDot = resizeGrip:CreateTexture(nil, "OVERLAY")
+    gripDot:SetWidth(6)
+    gripDot:SetHeight(6)
+    gripDot:SetPoint("BOTTOMRIGHT", resizeGrip, "BOTTOMRIGHT", -2, 2)
+    gripDot:SetTexture("Interface\\Buttons\\WHITE8X8")
+    gripDot:SetVertexColor(0.4, 0.75, 1.0, 0.9)
+
+    resizeGrip:SetScript("OnDragStart", function()
+        f:StartSizing("BOTTOMRIGHT")
+    end)
+    resizeGrip:SetScript("OnDragStop", function()
+        f:StopMovingOrSizing()
+        PUITalk.db:Set("width", f:GetWidth())
+        PUITalk.db:Set("height", f:GetHeight())
+    end)
+    resizeGrip:SetScript("OnEnter", function()
+        this:SetBackdropColor(0.20, 0.35, 0.60, 0.9)
+        GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+        GameTooltip:AddLine("Resize Window", 0.4, 0.85, 1.0)
+        GameTooltip:AddLine("Click and drag to resize chat container.", 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    resizeGrip:SetScript("OnLeave", function()
+        this:SetBackdropColor(0.12, 0.22, 0.38, 0.6)
+        GameTooltip:Hide()
+    end)
+    f.resizeGrip = resizeGrip
+
+    -- ---------------------------------------------------------------------
+    -- Unread Whisper Master Tab Pulse Animation (OnUpdate)
+    -- ---------------------------------------------------------------------
+    f:SetScript("OnUpdate", function()
+        local unreads = PUITalk:GetTotalUnreadCount()
+        local curTab = PUITalk.db:Get("activeMasterTab") or 1
+
+        if unreads > 0 and curTab ~= 2 then
+            local alpha = 0.40 + 0.60 * math.abs(math.sin(GetTime() * 3.5))
+            f.tabMessages:SetBackdropColor(0.42 * alpha, 0.28 * alpha, 0.08 * alpha, 0.95)
+            f.tabMessages:SetBackdropBorderColor(1.0 * alpha, 0.80 * alpha, 0.20 * alpha, 1.0)
+            f.tabMessages.text:SetTextColor(1.0, 0.92, 0.40)
+            f.tabMessages.text:SetText(string.format("✉️ Messages |cffffcc00(%d)|r", unreads))
+        else
+            if curTab == 2 then
+                f.tabMessages:SetBackdropColor(0.18, 0.26, 0.40, 1.0)
+                f.tabMessages:SetBackdropBorderColor(0.40, 0.75, 1.0, 1.0)
+                f.tabMessages.text:SetTextColor(1.0, 1.0, 1.0)
+            else
+                f.tabMessages:SetBackdropColor(0.08, 0.10, 0.14, 0.8)
+                f.tabMessages:SetBackdropBorderColor(0.20, 0.28, 0.40, 0.8)
+                f.tabMessages.text:SetTextColor(0.7, 0.7, 0.7)
+            end
+            f.tabMessages.text:SetText("✉️ Messages")
+        end
+    end)
 
     -- Register with PUIMover
     local mover = PUIMover or Primus.PUIMover
