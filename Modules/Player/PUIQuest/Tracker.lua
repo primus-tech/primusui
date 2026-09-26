@@ -47,38 +47,79 @@ local lastPlayerX       = 0
 local lastPlayerY       = 0
 local estimatedFacing   = 0
 
--- =========================================================================
--- PLAYER FACING DETECTOR (REAL-TIME MINIMAP MODEL & API RESOLVER)
--- =========================================================================
-
 local minimapPlayerModel = nil
+local lastFacingSource = "None"
 
 local function GetRealPlayerFacing()
+    -- 1. Try global GetPlayerFacing API
     if GetPlayerFacing then
-        local f = GetPlayerFacing()
-        if f then return f end
+        local ok, f = pcall(GetPlayerFacing)
+        if ok and type(f) == "number" then
+            lastFacingSource = "GetPlayerFacing API"
+            return f
+        end
     end
 
-    if minimapPlayerModel and minimapPlayerModel.GetFacing then
-        local f = minimapPlayerModel:GetFacing()
-        if f then return f end
+    -- 2. Try cached minimap model
+    if minimapPlayerModel then
+        local ok, f = pcall(function() return minimapPlayerModel:GetFacing() end)
+        if ok and type(f) == "number" then
+            lastFacingSource = "Minimap Model (Cached)"
+            return f
+        end
+        minimapPlayerModel = nil
     end
 
+    -- 3. Scan Minimap children for any frame with a working GetFacing()
     if Minimap then
         local children = { Minimap:GetChildren() }
+        local n = table.getn(children)
+        for i = 1, n do
+            local child = children[i]
+            if child and child.GetFacing then
+                local ok, f = pcall(function() return child:GetFacing() end)
+                if ok and type(f) == "number" then
+                    minimapPlayerModel = child
+                    lastFacingSource = string.format("Minimap Child #%d", i)
+                    return f
+                end
+            end
+        end
+        -- Direct check on child 9 (standard Blizzard index)
+        local c9 = children[9]
+        if c9 and c9.GetFacing then
+            local ok, f = pcall(function() return c9:GetFacing() end)
+            if ok and type(f) == "number" then
+                minimapPlayerModel = c9
+                lastFacingSource = "Minimap Child #9"
+                return f
+            end
+        end
+    end
+
+    -- 4. Scan MinimapCluster children
+    if MinimapCluster then
+        local children = { MinimapCluster:GetChildren() }
         for i = 1, table.getn(children) do
             local child = children[i]
-            if child and child.GetFacing and child:GetObjectType() == "Model" then
-                local f = child:GetFacing()
-                if f then
+            if child and child.GetFacing then
+                local ok, f = pcall(function() return child:GetFacing() end)
+                if ok and type(f) == "number" then
                     minimapPlayerModel = child
+                    lastFacingSource = string.format("MinimapCluster Child #%d", i)
                     return f
                 end
             end
         end
     end
 
+    lastFacingSource = "Motion Displacement Delta"
     return estimatedFacing or 0
+end
+
+function Tracker:GetFacingInfo()
+    local pf = GetRealPlayerFacing()
+    return pf, lastFacingSource
 end
 
 -- =========================================================================
@@ -541,7 +582,7 @@ function Tracker:Update()
     if px > 0 and py > 0 and (px ~= lastPlayerX or py ~= lastPlayerY) then
         local mdx = px - lastPlayerX
         local mdy = py - lastPlayerY
-        if (mdx * mdx + mdy * mdy) > 0.000001 then
+        if (mdx * mdx + mdy * mdy) > 0.0000000001 then
             estimatedFacing = math.atan2(-mdx, -mdy)
         end
         lastPlayerX = px

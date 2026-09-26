@@ -278,6 +278,13 @@ function PUIQuest:HandleSlashCommand(args)
         DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PUIQuest Navigation Diagnostics ===", "69ccf0"))
         local px, py = GetPlayerMapPosition("player")
         DEFAULT_CHAT_FRAME:AddMessage(string.format("• Player Pos: |cffffd100%.2f, %.2f|r (Zone: %s / %s)", (px or 0)*100, (py or 0)*100, tostring(GetZoneText()), tostring(GetRealZoneText())))
+        
+        if PUIQuest.Tracker and PUIQuest.Tracker.GetFacingInfo then
+            local pf, src = PUIQuest.Tracker:GetFacingInfo()
+            local deg = math.floor(math.deg(pf or 0) + 0.5)
+            DEFAULT_CHAT_FRAME:AddMessage(string.format("• Player Facing: |cffffd100%d°|r (%.2f rad) via |cff69ccf0%s|r", deg, pf or 0, src or "None"))
+        end
+
         local activeTarget = PUIQuest.Tracker and PUIQuest.Tracker:GetActiveTarget()
         if activeTarget then
             DEFAULT_CHAT_FRAME:AddMessage(string.format("• Active Target: |cff00ff00%s|r (%s)", activeTarget.title or "None", activeTarget.text or ""))
