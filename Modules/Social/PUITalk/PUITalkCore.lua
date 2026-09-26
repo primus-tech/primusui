@@ -34,7 +34,37 @@ PUITalk.db = DB:RegisterNamespace("PUITalk", {
     activeSocialTab  = "friends", -- "friends" or "guild"
     width            = 450,
     height           = 230,
+    channels         = {
+        SAY          = true,
+        YELL         = true,
+        EMOTE        = true,
+        PARTY        = true,
+        RAID         = true,
+        GUILD        = true,
+        OFFICER      = true,
+        GENERAL      = true,
+        TRADE        = true,
+        LOCALDEFENSE = true,
+        LFG          = true,
+        WORLD        = true,
+        SYSTEM       = true,
+        MONSTER      = true,
+        LOOT         = true,
+    },
 })
+
+function PUITalk:IsChannelEnabled(chanKey)
+    local ch = self.db:Get("channels")
+    if not ch then return true end
+    if ch[chanKey] == nil then return true end
+    return ch[chanKey]
+end
+
+function PUITalk:SetChannelEnabled(chanKey, enabled)
+    local ch = self.db:Get("channels") or {}
+    ch[chanKey] = enabled
+    self.db:Set("channels", ch)
+end
 
 -- Shared State
 PUITalk.playerClassCache    = {}

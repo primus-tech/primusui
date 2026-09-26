@@ -56,21 +56,42 @@ function PUITalk:CreateMasterFrame()
 
     -- Tab 1: [💬 Chat]
     local tabChat = CreateFrame("Button", "Primus_PUITalkTab_1", header)
-    tabChat:SetWidth(95)
+    tabChat:SetWidth(80)
     tabChat:SetHeight(20)
     tabChat:SetPoint("LEFT", header, "LEFT", 4, 0)
     tabChat:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    tabChat:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     local tabChatText = tabChat:CreateFontString(nil, "OVERLAY")
     tabChatText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
     tabChatText:SetPoint("CENTER", 0, 0)
     tabChatText:SetText("💬 Chat")
     tabChat.text = tabChatText
-    tabChat:SetScript("OnClick", function() PUITalk:SelectMasterTab(1) end)
+    tabChat:SetScript("OnClick", function()
+        if arg1 == "RightButton" then
+            PUITalk:ToggleChannelContextMenu(this)
+        else
+            PUITalk:SelectMasterTab(1)
+        end
+    end)
+    tabChat:SetScript("OnEnter", function()
+        this:SetBackdropColor(0.18, 0.26, 0.40, 1.0)
+        GameTooltip:SetOwner(this, "ANCHOR_TOP")
+        GameTooltip:AddLine("💬 Chat Stream", 0.4, 0.85, 1.0)
+        GameTooltip:AddLine("• Left-Click: Switch to Chat tab.", 1, 1, 1)
+        GameTooltip:AddLine("• Right-Click: Open Channel Filter Menu.", 1, 0.85, 0.2)
+        GameTooltip:Show()
+    end)
+    tabChat:SetScript("OnLeave", function()
+        if (PUITalk.db:Get("activeMasterTab") or 1) ~= 1 then
+            this:SetBackdropColor(0.08, 0.10, 0.14, 0.8)
+        end
+        GameTooltip:Hide()
+    end)
     f.tabChat = tabChat
 
     -- Tab 2: [✉️ Messages]
     local tabMessages = CreateFrame("Button", "Primus_PUITalkTab_2", header)
-    tabMessages:SetWidth(115)
+    tabMessages:SetWidth(95)
     tabMessages:SetHeight(20)
     tabMessages:SetPoint("LEFT", tabChat, "RIGHT", 4, 0)
     tabMessages:SetBackdrop(Media:Fetch("border", "1Pixel"))
@@ -84,7 +105,7 @@ function PUITalk:CreateMasterFrame()
 
     -- Tab 3: [👥 Social]
     local tabSocial = CreateFrame("Button", "Primus_PUITalkTab_3", header)
-    tabSocial:SetWidth(110)
+    tabSocial:SetWidth(85)
     tabSocial:SetHeight(20)
     tabSocial:SetPoint("LEFT", tabMessages, "RIGHT", 4, 0)
     tabSocial:SetBackdrop(Media:Fetch("border", "1Pixel"))
@@ -96,9 +117,9 @@ function PUITalk:CreateMasterFrame()
     tabSocial:SetScript("OnClick", function() PUITalk:SelectMasterTab(3) end)
     f.tabSocial = tabSocial
 
-    -- Header Controls on Right: [ 📋 Select ] (In-Place Selectable Mode & Shift-Click Popout)
+    -- Header Controls on Right: [ 📋 Select ] & [ ⚙️ Filters ]
     local selectBtn = CreateFrame("Button", "Primus_PUITalkHeaderSelectBtn", header)
-    selectBtn:SetWidth(68)
+    selectBtn:SetWidth(65)
     selectBtn:SetHeight(20)
     selectBtn:SetPoint("RIGHT", header, "RIGHT", -4, 0)
     selectBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
@@ -114,7 +135,7 @@ function PUITalk:CreateMasterFrame()
     selectBtn:SetScript("OnEnter", function()
         this:SetBackdropColor(0.20, 0.32, 0.50, 1.0)
         this:SetBackdropBorderColor(0.50, 0.85, 1.0, 1.0)
-        GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+        GameTooltip:SetOwner(this, "ANCHOR_TOP")
         GameTooltip:AddLine("Primus Selectable Chat", 0.4, 0.85, 1.0)
         GameTooltip:AddLine("Click to toggle Selectable Text Mode in this window.", 1, 1, 1)
         GameTooltip:AddLine("• Drag mouse over text to highlight and select.", 0.8, 0.8, 0.8)
@@ -135,6 +156,39 @@ function PUITalk:CreateMasterFrame()
         end
     end)
     f.selectBtn = selectBtn
+
+    local filterBtn = CreateFrame("Button", "Primus_PUITalkHeaderFilterBtn", header)
+    filterBtn:SetWidth(65)
+    filterBtn:SetHeight(20)
+    filterBtn:SetPoint("RIGHT", selectBtn, "LEFT", -4, 0)
+    filterBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    filterBtn:SetBackdropColor(0.12, 0.18, 0.28, 0.95)
+    filterBtn:SetBackdropBorderColor(0.30, 0.60, 0.95, 1.0)
+    local flText = filterBtn:CreateFontString(nil, "OVERLAY")
+    flText:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    flText:SetPoint("CENTER", 0, 0)
+    flText:SetText("⚙️ Filters")
+    flText:SetTextColor(0.45, 0.85, 1.0)
+    filterBtn.text = flText
+
+    filterBtn:SetScript("OnEnter", function()
+        this:SetBackdropColor(0.20, 0.32, 0.50, 1.0)
+        this:SetBackdropBorderColor(0.50, 0.85, 1.0, 1.0)
+        GameTooltip:SetOwner(this, "ANCHOR_TOP")
+        GameTooltip:AddLine("⚙️ Channel Filters", 0.4, 0.85, 1.0)
+        GameTooltip:AddLine("Click to open the Chat Channel Filter Menu.", 1, 1, 1)
+        GameTooltip:AddLine("Toggle Say, Trade, General, Loot, Monster, etc.", 0.8, 0.8, 0.8)
+        GameTooltip:Show()
+    end)
+    filterBtn:SetScript("OnLeave", function()
+        this:SetBackdropColor(0.12, 0.18, 0.28, 0.95)
+        this:SetBackdropBorderColor(0.30, 0.60, 0.95, 1.0)
+        GameTooltip:Hide()
+    end)
+    filterBtn:SetScript("OnClick", function()
+        PUITalk:ToggleChannelContextMenu(this)
+    end)
+    f.filterBtn = filterBtn
 
     -- ---------------------------------------------------------------------
     -- Universal Docked Input EditBox (Bottom)

@@ -1,11 +1,12 @@
 --[[
-    PrimusUI Module: PUITalk (Autonomous Chat Engine, Event Subscriptions & Selection)
+    PrimusUI Module: PUITalk (Autonomous Chat Engine, Event Subscriptions & Channel Filter Menu)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides:
     - 100% Autonomous Chat Engine taking over all game channels and addon messages.
     - Permanent suppression of default Blizzard chat frames (ChatFrame1..7).
-    - Event routing for SAY, YELL, PARTY, RAID, GUILD, OFFICER, CHANNELS, SYSTEM, LOOT, EMOTES.
+    - Granular channel filtering (SAY, YELL, EMOTE, PARTY, RAID, GUILD, OFFICER, CHANNELS, SYSTEM, MONSTER, LOOT).
+    - Right-click channel filter context menu on [💬 Chat] tab.
     - Timestamping, class-colored player names, and clickable web URLs.
     - In-place drag-highlight selectable text mode and popout copy modal.
 --]]
@@ -18,10 +19,10 @@ local PUITalk = Primus.PUITalk
 local Media   = Primus.Media
 local Utils   = Primus.Utils
 local Events  = Primus.Events
-local Hider   = Primus.Hider
 
-local copyFrame = nil
-local urlFrame  = nil
+local copyFrame        = nil
+local urlFrame         = nil
+local channelMenuFrame = nil
 
 -- =========================================================================
 -- 1. ADD MESSAGE TO PUITALK CHAT STREAM
@@ -53,12 +54,13 @@ function PUITalk:AddChatMessage(text, r, g, b, isRaw)
 end
 
 -- =========================================================================
--- 2. GAME CHAT EVENT DISPATCHERS
+-- 2. GAME CHAT EVENT DISPATCHERS WITH CHANNEL FILTERS
 -- =========================================================================
 
 function PUITalk:RegisterChatEvents()
     -- Say & Yell
     Events:Register("CHAT_MSG_SAY", "PUITalk_Chat", function(owner, event, msg, sender, lang)
+        if not PUITalk:IsChannelEnabled("SAY") then return end
         local colored = PUITalk:GetColoredName(sender)
         local formatted = string.format("%s |cffffffff[Say]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
         local r, g, b = PUITalk:GetChannelColor("SAY")
@@ -66,6 +68,7 @@ function PUITalk:RegisterChatEvents()
     end)
 
     Events:Register("CHAT_MSG_YELL", "PUITalk_Chat", function(owner, event, msg, sender, lang)
+        if not PUITalk:IsChannelEnabled("YELL") then return end
         local colored = PUITalk:GetColoredName(sender)
         local formatted = string.format("%s |cffff4040[Yell]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
         local r, g, b = PUITalk:GetChannelColor("YELL")
@@ -74,6 +77,7 @@ function PUITalk:RegisterChatEvents()
 
     -- Emotes
     Events:Register("CHAT_MSG_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("EMOTE") then return end
         local colored = PUITalk:GetColoredName(sender)
         local formatted = string.format("%s |cffff8040[Emote]|r %s %s", PUITalk:GetTimestamp(), colored, msg)
         local r, g, b = PUITalk:GetChannelColor("EMOTE")
@@ -81,6 +85,7 @@ function PUITalk:RegisterChatEvents()
     end)
 
     Events:Register("CHAT_MSG_TEXT_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("EMOTE") then return end
         local formatted = string.format("%s |cffff8040%s|r", PUITalk:GetTimestamp(), msg)
         local r, g, b = PUITalk:GetChannelColor("EMOTE")
         PUITalk:AddChatMessage(formatted, r, g, b)
@@ -88,6 +93,7 @@ function PUITalk:RegisterChatEvents()
 
     -- Party & Raid
     Events:Register("CHAT_MSG_PARTY", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("PARTY") then return end
         local colored = PUITalk:GetColoredName(sender)
         local formatted = string.format("%s |cffaaaaee[Party]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
         local r, g, b = PUITalk:GetChannelColor("PARTY")
@@ -95,6 +101,7 @@ function PUITalk:RegisterChatEvents()
     end)
 
     Events:Register("CHAT_MSG_RAID", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("RAID") then return end
         local colored = PUITalk:GetColoredName(sender)
         local formatted = string.format("%s |cffff7f00[Raid]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
         local r, g, b = PUITalk:GetChannelColor("RAID")
@@ -102,6 +109,7 @@ function PUITalk:RegisterChatEvents()
     end)
 
     Events:Register("CHAT_MSG_RAID_LEADER", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("RAID") then return end
         local colored = PUITalk:GetColoredName(sender)
         local formatted = string.format("%s |cffff4800[Raid Leader]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
         local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
@@ -109,6 +117,7 @@ function PUITalk:RegisterChatEvents()
     end)
 
     Events:Register("CHAT_MSG_RAID_WARNING", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("RAID") then return end
         local colored = PUITalk:GetColoredName(sender)
         local formatted = string.format("%s |cffff4800[Raid Warning]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
         local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
@@ -117,6 +126,7 @@ function PUITalk:RegisterChatEvents()
 
     -- Guild & Officer
     Events:Register("CHAT_MSG_GUILD", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("GUILD") then return end
         local colored = PUITalk:GetColoredName(sender)
         local formatted = string.format("%s |cff40ff40[Guild]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
         local r, g, b = PUITalk:GetChannelColor("GUILD")
@@ -124,6 +134,7 @@ function PUITalk:RegisterChatEvents()
     end)
 
     Events:Register("CHAT_MSG_OFFICER", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("OFFICER") then return end
         local colored = PUITalk:GetColoredName(sender)
         local formatted = string.format("%s |cff40c040[Officer]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
         local r, g, b = PUITalk:GetChannelColor("OFFICER")
@@ -131,18 +142,34 @@ function PUITalk:RegisterChatEvents()
     end)
 
     -- Custom & Standard Channels (General, Trade, LocalDefense, LFG, World)
-    Events:Register("CHAT_MSG_CHANNEL", "PUITalk_Chat", function(owner, event, msg, sender, lang, channelName, target, channelNumber)
+    Events:Register("CHAT_MSG_CHANNEL", "PUITalk_Chat", function(owner, event, msg, sender, lang, channelName, target, afk, zoneID, channelNumber, channelNameBase)
+        local cNum = tonumber(channelNumber) or 0
+        local cName = channelNameBase or channelName or "Channel"
+        local lowerName = string.lower(cName .. " " .. (channelName or ""))
+        local filterKey = "WORLD"
+
+        if cNum == 1 or string.find(lowerName, "general") then
+            filterKey = "GENERAL"
+        elseif cNum == 2 or string.find(lowerName, "trade") then
+            filterKey = "TRADE"
+        elseif cNum == 3 or string.find(lowerName, "defense") or string.find(lowerName, "localdefense") then
+            filterKey = "LOCALDEFENSE"
+        elseif cNum == 4 or string.find(lowerName, "lookingforgroup") or string.find(lowerName, "lfg") then
+            filterKey = "LFG"
+        end
+
+        if not PUITalk:IsChannelEnabled(filterKey) then return end
+
         local colored = PUITalk:GetColoredName(sender)
-        local cNum = channelNumber or ""
-        local cName = channelName or "Channel"
-        local chanBadge = string.format("[%s. %s]", tostring(cNum), cName)
+        local chanBadge = string.format("[%s. %s]", tostring(cNum > 0 and cNum or ""), cName)
         local formatted = string.format("%s |cffe6c099%s|r [%s]: %s", PUITalk:GetTimestamp(), chanBadge, colored, msg)
         local r, g, b = PUITalk:GetChannelColor("CHANNEL")
         PUITalk:AddChatMessage(formatted, r, g, b)
     end)
 
-    -- System, AFK, DND, Notice
+    -- System, Notice
     Events:Register("CHAT_MSG_SYSTEM", "PUITalk_Chat", function(owner, event, msg)
+        if not PUITalk:IsChannelEnabled("SYSTEM") then return end
         local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
         PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
     end)
@@ -154,34 +181,244 @@ function PUITalk:RegisterChatEvents()
 
     -- Monster Emotes / Say / Yell
     Events:Register("CHAT_MSG_MONSTER_SAY", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("MONSTER") then return end
         local formatted = string.format("%s |cffffd100[%s]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
         PUITalk:AddChatMessage(formatted, 1.0, 0.85, 0.4)
     end)
 
     Events:Register("CHAT_MSG_MONSTER_YELL", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("MONSTER") then return end
         local formatted = string.format("%s |cffff4040[%s yells]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
         PUITalk:AddChatMessage(formatted, 1.0, 0.35, 0.35)
     end)
 
     Events:Register("CHAT_MSG_MONSTER_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
+        if not PUITalk:IsChannelEnabled("MONSTER") then return end
         local formatted = string.format("%s |cffff8040%s %s|r", PUITalk:GetTimestamp(), sender or "", msg)
         PUITalk:AddChatMessage(formatted, 1.0, 0.5, 0.25)
     end)
 
     -- Loot & Money
     Events:Register("CHAT_MSG_LOOT", "PUITalk_Chat", function(owner, event, msg)
+        if not PUITalk:IsChannelEnabled("LOOT") then return end
         local formatted = string.format("%s |cff00cc00%s|r", PUITalk:GetTimestamp(), msg)
         PUITalk:AddChatMessage(formatted, 0.0, 0.8, 0.0)
     end)
 
     Events:Register("CHAT_MSG_MONEY", "PUITalk_Chat", function(owner, event, msg)
+        if not PUITalk:IsChannelEnabled("LOOT") then return end
         local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
         PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
     end)
 end
 
 -- =========================================================================
--- 3. PERMANENT BLIZZARD CHAT FRAME SUPPRESSION & ADDOUN ROUTING
+-- 3. RIGHT-CLICK CHANNEL FILTER CONTEXT MENU
+-- =========================================================================
+
+local CHANNEL_MENU_ITEMS = {
+    { key = "SAY",          label = "Say & Yell",          color = "ffffff" },
+    { key = "EMOTE",        label = "Emotes",              color = "ff8040" },
+    { key = "PARTY",        label = "Party",               color = "aaaaee" },
+    { key = "RAID",         label = "Raid & Warnings",     color = "ff7f00" },
+    { key = "GUILD",        label = "Guild",               color = "40ff40" },
+    { key = "OFFICER",      label = "Officer",             color = "40c040" },
+    { key = "GENERAL",      label = "1. General",          color = "e6c099" },
+    { key = "TRADE",        label = "2. Trade",            color = "e6c099" },
+    { key = "LOCALDEFENSE", label = "3. Local Defense",    color = "e6c099" },
+    { key = "LFG",          label = "4. LookingForGroup",  color = "e6c099" },
+    { key = "WORLD",        label = "World / Custom",      color = "e6c099" },
+    { key = "SYSTEM",       label = "System Messages",     color = "ffff00" },
+    { key = "MONSTER",      label = "Monster Say/Emotes",  color = "ffd100" },
+    { key = "LOOT",         label = "Loot & Money",        color = "00cc00" },
+}
+
+function PUITalk:CreateChannelContextMenu()
+    if channelMenuFrame then return channelMenuFrame end
+
+    local menu = CreateFrame("Frame", "Primus_PUITalkChannelMenu", UIParent)
+    menu:SetWidth(190)
+    menu:SetHeight(335)
+    menu:SetFrameStrata("DIALOG")
+    menu:SetFrameLevel(100)
+    menu:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    menu:SetBackdropColor(0.06, 0.07, 0.10, 0.98)
+    menu:SetBackdropBorderColor(0.20, 0.50, 0.90, 1.0)
+    menu:EnableMouse(true)
+    menu:SetClampedToScreen(true)
+    menu:Hide()
+
+    tinsert(UISpecialFrames, "Primus_PUITalkChannelMenu")
+
+    -- Title Header
+    local header = CreateFrame("Frame", nil, menu)
+    header:SetPoint("TOPLEFT", menu, "TOPLEFT", 4, -4)
+    header:SetPoint("TOPRIGHT", menu, "TOPRIGHT", -4, -4)
+    header:SetHeight(22)
+    header:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    header:SetBackdropColor(0.10, 0.14, 0.22, 1.0)
+    header:SetBackdropBorderColor(0.25, 0.45, 0.75, 1.0)
+
+    local title = header:CreateFontString(nil, "OVERLAY")
+    title:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+    title:SetPoint("LEFT", header, "LEFT", 6, 0)
+    title:SetText(Utils.ColorText("Channel Filters", "69ccf0"))
+
+    local closeBtn = CreateFrame("Button", nil, header)
+    closeBtn:SetWidth(14)
+    closeBtn:SetHeight(14)
+    closeBtn:SetPoint("RIGHT", header, "RIGHT", -4, 0)
+    closeBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    closeBtn:SetBackdropColor(0.6, 0.1, 0.1, 0.8)
+    closeBtn:SetBackdropBorderColor(0.8, 0.2, 0.2, 1)
+    local cX = closeBtn:CreateFontString(nil, "OVERLAY")
+    cX:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    cX:SetPoint("CENTER", 0, 0)
+    cX:SetText("x")
+    closeBtn:SetScript("OnClick", function() menu:Hide() end)
+
+    -- Item Rows
+    local rows = {}
+    local yOffset = -28
+
+    for i, item in ipairs(CHANNEL_MENU_ITEMS) do
+        local row = CreateFrame("Button", nil, menu)
+        row:SetWidth(178)
+        row:SetHeight(17)
+        row:SetPoint("TOPLEFT", menu, "TOPLEFT", 6, yOffset)
+        row:SetBackdrop(Media:Fetch("border", "1Pixel"))
+        row:SetBackdropColor(0.08, 0.10, 0.14, 0.6)
+        row:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.6)
+
+        local check = row:CreateFontString(nil, "OVERLAY")
+        check:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+        check:SetPoint("LEFT", row, "LEFT", 6, 0)
+        row.check = check
+
+        local label = row:CreateFontString(nil, "OVERLAY")
+        label:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+        label:SetPoint("LEFT", check, "RIGHT", 6, 0)
+        label:SetText(Utils.ColorText(item.label, item.color))
+        row.label = label
+
+        row.chanKey = item.key
+        row.itemLabel = item.label
+
+        row:SetScript("OnEnter", function()
+            this:SetBackdropColor(0.15, 0.22, 0.35, 1.0)
+            this:SetBackdropBorderColor(0.30, 0.60, 1.0, 1.0)
+        end)
+        row:SetScript("OnLeave", function()
+            this:SetBackdropColor(0.08, 0.10, 0.14, 0.6)
+            this:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.6)
+        end)
+        row:SetScript("OnClick", function()
+            local cur = PUITalk:IsChannelEnabled(this.chanKey)
+            local newState = not cur
+            PUITalk:SetChannelEnabled(this.chanKey, newState)
+            PUITalk:RefreshChannelContextMenu()
+            if DEFAULT_CHAT_FRAME then
+                local status = newState and "|cff00ff00ENABLED|r" or "|cffff4040DISABLED|r"
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: " .. (this.itemLabel or this.chanKey) .. " channel is now " .. status .. ".", "69ccf0"))
+            end
+        end)
+
+        rows[i] = row
+        yOffset = yOffset - 18
+    end
+
+    -- Bottom Controls: [ All On ] [ All Off ]
+    local footer = CreateFrame("Frame", nil, menu)
+    footer:SetPoint("BOTTOMLEFT", menu, "BOTTOMLEFT", 4, 4)
+    footer:SetPoint("BOTTOMRIGHT", menu, "BOTTOMRIGHT", -4, 4)
+    footer:SetHeight(20)
+
+    local btnAllOn = CreateFrame("Button", nil, footer)
+    btnAllOn:SetWidth(88)
+    btnAllOn:SetHeight(18)
+    btnAllOn:SetPoint("LEFT", footer, "LEFT", 2, 0)
+    btnAllOn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    btnAllOn:SetBackdropColor(0.12, 0.20, 0.12, 1.0)
+    btnAllOn:SetBackdropBorderColor(0.25, 0.60, 0.25, 1.0)
+    local onTxt = btnAllOn:CreateFontString(nil, "OVERLAY")
+    onTxt:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    onTxt:SetPoint("CENTER", 0, 0)
+    onTxt:SetText("✓ All On")
+    btnAllOn:SetScript("OnClick", function()
+        for _, it in ipairs(CHANNEL_MENU_ITEMS) do
+            PUITalk:SetChannelEnabled(it.key, true)
+        end
+        PUITalk:RefreshChannelContextMenu()
+        if DEFAULT_CHAT_FRAME then
+            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: All channels ENABLED.", "69ccf0"))
+        end
+    end)
+
+    local btnAllOff = CreateFrame("Button", nil, footer)
+    btnAllOff:SetWidth(88)
+    btnAllOff:SetHeight(18)
+    btnAllOff:SetPoint("RIGHT", footer, "RIGHT", -2, 0)
+    btnAllOff:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    btnAllOff:SetBackdropColor(0.20, 0.12, 0.12, 1.0)
+    btnAllOff:SetBackdropBorderColor(0.60, 0.25, 0.25, 1.0)
+    local offTxt = btnAllOff:CreateFontString(nil, "OVERLAY")
+    offTxt:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    offTxt:SetPoint("CENTER", 0, 0)
+    offTxt:SetText("✗ All Off")
+    btnAllOff:SetScript("OnClick", function()
+        for _, it in ipairs(CHANNEL_MENU_ITEMS) do
+            PUITalk:SetChannelEnabled(it.key, false)
+        end
+        PUITalk:RefreshChannelContextMenu()
+        if DEFAULT_CHAT_FRAME then
+            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: All channels DISABLED.", "69ccf0"))
+        end
+    end)
+
+    menu.rows = rows
+    channelMenuFrame = menu
+    return menu
+end
+
+function PUITalk:RefreshChannelContextMenu()
+    if not channelMenuFrame or not channelMenuFrame.rows then return end
+    for _, row in ipairs(channelMenuFrame.rows) do
+        local enabled = self:IsChannelEnabled(row.chanKey)
+        if enabled then
+            row.check:SetText("|cff00ff00[x]|r")
+        else
+            row.check:SetText("|cff888888[ ]|r")
+        end
+    end
+end
+
+function PUITalk:ToggleChannelContextMenu(anchor)
+    local menu = self:CreateChannelContextMenu()
+    if menu:IsShown() then
+        menu:Hide()
+    else
+        self:RefreshChannelContextMenu()
+        menu:ClearAllPoints()
+        if anchor then
+            local top = anchor:GetTop() or 0
+            local screenHeight = UIParent:GetHeight() or 768
+            if top > (screenHeight * 0.6) then
+                menu:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -4)
+            else
+                menu:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", 0, 4)
+            end
+        else
+            local x, y = GetCursorPosition()
+            local scale = UIParent:GetEffectiveScale()
+            menu:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", x / scale, y / scale)
+        end
+        menu:Show()
+        menu:Raise()
+    end
+end
+
+-- =========================================================================
+-- 4. PERMANENT BLIZZARD CHAT FRAME SUPPRESSION & ADDOUN ROUTING
 -- =========================================================================
 
 function PUITalk:SuppressBlizzardChat()
@@ -234,7 +471,7 @@ function PUITalk:SuppressBlizzardChat()
 end
 
 -- =========================================================================
--- 4. CLICKABLE URL & COPY DIALOG MODALS
+-- 5. CLICKABLE URL & COPY DIALOG MODALS
 -- =========================================================================
 
 function PUITalk:CreateCopyFrame()
@@ -443,7 +680,7 @@ function PUITalk:ShowURLCopyPopup(url)
 end
 
 -- =========================================================================
--- 5. IN-PLACE SELECTABLE CHAT OVERLAY (CLICK, DRAG-HIGHLIGHT, & CTRL+C)
+-- 6. IN-PLACE SELECTABLE CHAT OVERLAY (CLICK, DRAG-HIGHLIGHT, & CTRL+C)
 -- =========================================================================
 
 function PUITalk:CreateSelectableOverlay(parent, modeName)
