@@ -467,6 +467,13 @@ local function HookBlizzardRedraws()
         UIParent_ManageFramePositions = function()
             if origManage then origManage() end
             PUIDock:ApplyElementHiding()
+            local mover = Primus.PUIMover or PUIMover
+            if mover and mover.RestorePosition then
+                mover:RestorePosition("MinimapCluster")
+                mover:RestorePosition("QuestWatchFrame")
+                mover:RestorePosition("DurabilityFrame")
+                mover:RestorePosition("WorldStateAlwaysUpFrame")
+            end
         end
     end
 

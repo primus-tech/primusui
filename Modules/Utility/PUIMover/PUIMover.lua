@@ -53,9 +53,10 @@ local moverDB = DB:RegisterNamespace("PUIMover", {
 
 -- Default dimensions for frames that have 0 width/height when inactive
 local DEFAULT_DIMS = {
+    ["MinimapCluster"]          = { w = 192, h = 192 },
     ["BuffFrame"]               = { w = 180, h = 50 },
     ["DurabilityFrame"]         = { w = 60,  h = 60 },
-    ["QuestWatchFrame"]         = { w = 200, h = 100 },
+    ["QuestWatchFrame"]         = { w = 220, h = 150 },
     ["UIErrorsFrame"]           = { w = 400, h = 40 },
     ["WorldStateAlwaysUpFrame"] = { w = 160, h = 40 },
     ["MirrorTimer1"]            = { w = 160, h = 25 },
@@ -83,8 +84,12 @@ local function SyncOverlayToFrame(overlay, frame, key)
     if (w < 16 or h < 16) and dims then
         w = dims.w
         h = dims.h
-        frame:SetWidth(w)
-        frame:SetHeight(h)
+        if frame.SetWidth and (not frame:GetWidth() or frame:GetWidth() < 16) then
+            frame:SetWidth(w)
+        end
+        if frame.SetHeight and (not frame:GetHeight() or frame:GetHeight() < 16) then
+            frame:SetHeight(h)
+        end
     end
     overlay:SetWidth(math.max(w, 20))
     overlay:SetHeight(math.max(h, 20))
@@ -96,15 +101,34 @@ local function SyncOverlayToFrame(overlay, frame, key)
         overlay:SetPoint(p.point or "CENTER", UIParent, p.relativePoint or "CENTER", p.x or 0, p.y or 0)
     else
         local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
-        if point and relativeTo == UIParent then
+        if point and (not relativeTo or relativeTo == UIParent or relativeTo == "UIParent") then
             overlay:ClearAllPoints()
             overlay:SetPoint(point, UIParent, relativePoint or point, xOfs or 0, yOfs or 0)
         elseif frame:GetLeft() and frame:GetBottom() then
             overlay:ClearAllPoints()
             overlay:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", frame:GetLeft(), frame:GetBottom())
-        else
+        elseif point and relativeTo and type(relativeTo) == "table" and relativeTo.GetPoint then
+            -- Frame is anchored relative to another frame (e.g. MinimapCluster)
             overlay:ClearAllPoints()
-            overlay:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+            overlay:SetPoint(point, relativeTo, relativePoint or point, xOfs or 0, yOfs or 0)
+        else
+            -- Intelligent defaults based on known keys if unanchored/hidden
+            local defaultAnchors = {
+                ["MinimapCluster"]          = { point = "TOPRIGHT", rel = "TOPRIGHT", x = 0, y = 0 },
+                ["QuestWatchFrame"]         = { point = "TOPRIGHT", rel = "TOPRIGHT", x = -10, y = -200 },
+                ["DurabilityFrame"]         = { point = "TOPRIGHT", rel = "TOPRIGHT", x = -170, y = -200 },
+                ["WorldStateAlwaysUpFrame"] = { point = "TOP",      rel = "TOP",      x = 0, y = -15 },
+                ["UIErrorsFrame"]           = { point = "TOP",      rel = "TOP",      x = 0, y = -120 },
+                ["MirrorTimer1"]            = { point = "TOP",      rel = "TOP",      x = 0, y = -96 },
+                ["ComboFrame"]              = { point = "CENTER",   rel = "CENTER",   x = 0, y = -150 },
+            }
+            local def = defaultAnchors[key]
+            overlay:ClearAllPoints()
+            if def then
+                overlay:SetPoint(def.point, UIParent, def.rel, def.x, def.y)
+            else
+                overlay:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+            end
         end
     end
 end
@@ -578,6 +602,21 @@ function PUIMover:RefreshOverlays()
             SyncOverlayToFrame(overlay, entry.frame, key)
         end
     end
+end
+
+-- Get saved position for a specific key
+function PUIMover:GetPosition(key)
+    if not key then return nil end
+    local pos = moverDB and moverDB:Get("positions")
+    if pos and pos[key] then
+        return pos[key]
+    end
+    return nil
+end
+
+-- Check if a frame has a user-customized position
+function PUIMover:HasCustomPosition(key)
+    return self:GetPosition(key) ~= nil
 end
 
 -- Restore saved position from DB
