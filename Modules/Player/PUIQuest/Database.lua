@@ -2,8 +2,8 @@
     PrimusUI Module: PUIQuest (Canonical Multi-Indexed Database Engine)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
-    Provides high-speed lookups across items, quests, NPCs, objects, and coordinates
-    directly on PUIQuest.DB with zero legacy globals.
+    Provides high-speed lookups across items, quests, NPCs, objects, coordinates,
+    pin clustering, and zone projections directly on PUIQuest.DB with zero legacy globals.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -25,6 +25,9 @@ local questIndex = {}
 local unitIndex = {}
 local objectIndex = {}
 local isIndexed = false
+
+-- Cluster calculation cache
+local clusterCache = {}
 
 function Database:BuildIndices()
     local DB = PUIQuest.DB
@@ -86,6 +89,7 @@ function Database:Reload()
     questIndex = {}
     unitIndex = {}
     objectIndex = {}
+    clusterCache = {}
     self:BuildIndices()
 end
 
@@ -214,6 +218,118 @@ function Database:GetItemVendorPrice(itemID)
         for vendorID, count in pairs(v) do
             return tonumber(count) or 0
         end
+    end
+    return nil
+end
+
+-- =========================================================================
+-- PIN CLUSTERING & DENSITY RESOLUTION
+-- =========================================================================
+
+-- Return the best density centroid point for a list of coordinates
+function Database:GetCluster(coordsList, key)
+    if not coordsList or table.getn(coordsList) == 0 then return nil, nil, 0 end
+    local n = table.getn(coordsList)
+    if n == 1 then
+        return coordsList[1][1], coordsList[1][2], 1
+    end
+
+    local cacheKey = string.format("%s:%d", tostring(key or "def"), n)
+    if clusterCache[cacheKey] then
+        return clusterCache[cacheKey][1], clusterCache[cacheKey][2], clusterCache[cacheKey][3]
+    end
+
+    local bestIndex = 1
+    local bestNeighbors = -1
+    local count = 0
+
+    for i = 1, n do
+        local c = coordsList[i]
+        local x = c[1]
+        local y = c[2]
+        local xmin, xmax = x - 5.0, x + 5.0
+        local ymin, ymax = y - 5.0, y + 5.0
+        local neighbors = 0
+        count = count + 1
+
+        for j = 1, n do
+            local other = coordsList[j]
+            if other[1] >= xmin and other[1] <= xmax and other[2] >= ymin and other[2] <= ymax then
+                neighbors = neighbors + 1
+            end
+        end
+
+        if neighbors > bestNeighbors then
+            bestNeighbors = neighbors
+            bestIndex = i
+        end
+    end
+
+    local bestCoord = coordsList[bestIndex]
+    local resX = bestCoord[1]
+    local resY = bestCoord[2]
+
+    clusterCache[cacheKey] = { resX, resY, count }
+    return resX, resY, count
+end
+
+-- =========================================================================
+-- TEXT FORMATTING & ZONE LOOKUPS
+-- =========================================================================
+
+function Database:FormatQuestText(questText)
+    if not questText or type(questText) ~= "string" then return "" end
+    questText = string.gsub(questText, "$[Nn]", UnitName("player") or "Hero")
+    questText = string.gsub(questText, "$[Cc]", string.lower(UnitClass("player") or "Adventurer"))
+    questText = string.gsub(questText, "$[Rr]", string.lower(UnitRace("player") or "Mortal"))
+    questText = string.gsub(questText, "$[Bb]", "\n")
+    local sex = UnitSex("player") or 2
+    questText = string.gsub(questText, "($[Gg])([^:]+):([^;]+);", "%" .. sex)
+    return questText
+end
+
+function Database:GetMapIDByName(search)
+    if not search or search == "" then return nil end
+    local DB = PUIQuest.DB
+    if not DB or not DB["zones"] then return nil end
+    local zonesLoc = DB["zones"]["enUS"] or DB["zones"]["loc"]
+    if not zonesLoc then return nil end
+
+    local sLower = string.lower(search)
+    for id, name in pairs(zonesLoc) do
+        if type(name) == "string" and string.lower(name) == sLower then
+            return tonumber(id)
+        end
+    end
+    return nil
+end
+
+local mapZoneCache = {}
+function Database:GetMapID(cid, mid)
+    cid = cid or GetCurrentMapContinent()
+    mid = mid or GetCurrentMapZone()
+    if cid <= 0 or mid <= 0 then return nil end
+
+    if not mapZoneCache[cid] then
+        mapZoneCache[cid] = { GetMapZones(cid) }
+    end
+
+    local list = mapZoneCache[cid]
+    local name = list[mid]
+    if not name then return nil end
+
+    return self:GetMapIDByName(name)
+end
+
+function Database:GetQuestIDs(qlogid)
+    if not qlogid or qlogid <= 0 then return nil end
+    local title, level, _, isHeader = GetQuestLogTitle(qlogid)
+    if isHeader or not title then return nil end
+
+    if not isIndexed then self:BuildIndices() end
+    local qID = questIndex[string.lower(title)]
+    if qID then
+        return { qID }
     end
     return nil
 end

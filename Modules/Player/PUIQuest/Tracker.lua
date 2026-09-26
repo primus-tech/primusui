@@ -4,14 +4,15 @@
     
     Features:
     1. Dual 2D/3D Navigation Arrow: High-definition rotating arrow texture (360° affine SetTexCoord)
-       with optional 3D Rotating-MinimapArrow.mdl model overlay and real-time distance in yards.
+       with 108-frame 3D sprite sheet and real-time distance in yards.
     2. Dynamic Proximity & Angle Tinting: Real-time emerald/gold/amber coloring based on player bearing.
     3. Multi-Zone Objective Resolution: Accurately maps standard zones and custom subzones (including Turtle WoW).
-    4. Smart Objective Priority: Prioritizes slay mobs, interact objects, and loot drops before turn-in NPCs.
-    5. Quest Log Auto-Detection: Automatically targets closest quest even if not manually watched.
+    4. Smart Objective Priority & Progress Awareness: Evaluates quest log leaderboards to filter out
+       already-completed sub-objectives, targeting only active goals or turn-ins.
+    5. Minimap Perimeter Radar: Calibrated radial & square boundary clamping across various minimap
+       geometries (Circle, Square, Auto) without unnatural sliding or orbiting.
     6. Cross-Zone Guidance: Shows destination zone when objective is in another area.
-    7. Minimap Perimeter Radar: Rotating directional blip on the Minimap border.
-    8. PUIMover Support: Move and anchor the HUD navigation arrow anywhere.
+    7. PUIMover Support: Move and anchor the HUD navigation arrow anywhere.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -25,21 +26,19 @@ _G.PUIQuest = PUIQuest
 local Tracker = {}
 PUIQuest.Tracker = Tracker
 
-local Utils   = Primus.Utils
-local Media   = Primus.Media
-local Events  = Primus.Events
+local Utils    = Primus.Utils
+local Media    = Primus.Media
+local Events   = Primus.Events
 local PUIMover = Primus.PUIMover
 
 -- State Variables
 local hudArrow          = nil
 local hudArrowHolder    = nil
 local hudArrowTex       = nil
-local hudModel          = nil
 local hudDistText       = nil
 local hudTitleText      = nil
 local minimapPin        = nil
 local minimapTex        = nil
-local minimapModel      = nil
 
 local manualFocusQuest  = nil
 local currentActiveData = nil
@@ -48,7 +47,38 @@ local lastPlayerY       = 0
 local estimatedFacing   = 0
 
 local minimapPlayerModel = nil
-local lastFacingSource = "None"
+local lastFacingSource   = "None"
+
+-- Minimap zoom constants for 1.12.1
+local MINIMAP_ZOOM_TABLE = {
+    [0] = { [0] = 300, [1] = 240, [2] = 180, [3] = 120, [4] = 80, [5] = 50 }, -- Indoor
+    [1] = { [0] = 466.667, [1] = 400, [2] = 333.333, [3] = 266.333, [4] = 200, [5] = 133.333 }, -- Outdoor
+}
+
+local function GetMinimapIndoorState()
+    local tempzoom = 0
+    local state = 1
+    if GetCVar then
+        local ok1, mz = pcall(GetCVar, "minimapZoom")
+        local ok2, miz = pcall(GetCVar, "minimapInsideZoom")
+        if ok1 and ok2 and mz and miz and mz == miz then
+            local n = tonumber(miz) or 0
+            if n >= 3 then
+                Minimap:SetZoom(Minimap:GetZoom() - 1)
+                tempzoom = 1
+            else
+                Minimap:SetZoom(Minimap:GetZoom() + 1)
+                tempzoom = -1
+            end
+        end
+        local ok3, curInside = pcall(GetCVar, "minimapInsideZoom")
+        if ok3 and (tonumber(curInside) or 0) == Minimap:GetZoom() then
+            state = 0
+        end
+        Minimap:SetZoom(Minimap:GetZoom() + tempzoom)
+    end
+    return state
+end
 
 local function GetRealPlayerFacing()
     -- 1. Try global GetPlayerFacing API
@@ -117,7 +147,7 @@ function Tracker:GetFacingInfo()
 end
 
 -- =========================================================================
--- 3D SPRITE ARROW ENGINE (120-FRAME CELL RESOLVER)
+-- 3D SPRITE ARROW ENGINE (108-FRAME CELL RESOLVER)
 -- =========================================================================
 
 local ARROW_TEXTURE_PATH = "Interface\\AddOns\\PrimusUI\\Media\\Textures\\3darrow.tga"
@@ -363,23 +393,60 @@ local function ExtractZoneCoords(spawnsTbl, playerZones, currentMapZoneID)
     return localResults, worldResults
 end
 
+-- Scan quest log leaderboards to build a completion map for sub-objectives
+local function GetQuestObjectiveProgress(questTitle)
+    local numEntries = GetNumQuestLogEntries() or 0
+    local qlogid = nil
+    local isComplete = false
+
+    for i = 1, numEntries do
+        local title, _, _, isHeader, _, comp = GetQuestLogTitle(i)
+        if not isHeader and title and string.lower(title) == string.lower(questTitle) then
+            qlogid = i
+            isComplete = (comp == 1 or comp == true)
+            break
+        end
+    end
+
+    local finishedObjs = {}
+    if qlogid then
+        local numObjectives = GetNumQuestLeaderBoards(qlogid) or 0
+        if numObjectives == 0 and isComplete then
+            -- No leaderboards, quest is complete
+            return true, finishedObjs, qlogid
+        end
+
+        local allDone = (numObjectives > 0)
+        for i = 1, numObjectives do
+            local text, objType, finished = GetQuestLogLeaderBoard(i, qlogid)
+            if finished then
+                if text then
+                    finishedObjs[string.lower(text)] = true
+                    local _, _, name = string.find(text, "^(.-):")
+                    if name then
+                        finishedObjs[string.lower(Utils.Trim(name))] = true
+                    end
+                end
+            else
+                allDone = false
+            end
+        end
+
+        if allDone and numObjectives > 0 then
+            isComplete = true
+        end
+    end
+
+    return isComplete, finishedObjs, qlogid
+end
+
 -- Find the best objective coordinate for a given quest
-local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, playerX, playerY, isComplete)
+local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, playerX, playerY)
     if not questTitle or questTitle == "" then return nil end
     local q = PUIQuest.Database:FindQuest(questTitle)
     if not q or not q.data then return nil end
 
-    -- Check completion state if not explicitly passed
-    if isComplete == nil then
-        local numEntries = GetNumQuestLogEntries() or 0
-        for i = 1, numEntries do
-            local title, _, _, isHeader, _, comp = GetQuestLogTitle(i)
-            if not isHeader and title and string.lower(title) == string.lower(questTitle) then
-                isComplete = comp
-                break
-            end
-        end
-    end
+    local isComplete, finishedObjs, qlogid = GetQuestObjectiveProgress(questTitle)
 
     local bestLocalCoord = nil
     local bestLocalDist = 999999
@@ -388,8 +455,14 @@ local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, 
     local firstWorldCoord = nil
     local firstWorldText = nil
 
-    local function Evaluate(spawns, labelText)
+    local function Evaluate(spawns, labelText, objIdentifier)
         if not spawns then return end
+
+        -- Skip if this sub-objective is already marked finished in the quest log
+        if objIdentifier and finishedObjs[string.lower(objIdentifier)] then
+            return
+        end
+
         local localCoords, worldCoords = ExtractZoneCoords(spawns, playerZones, currentMapZoneID)
 
         for _, coord in ipairs(localCoords) do
@@ -410,7 +483,7 @@ local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, 
     end
 
     -- If Quest is COMPLETE: Point to Turn-in NPC / Object
-    if isComplete == 1 or isComplete == true then
+    if isComplete then
         local endUnits = q.data["end"] and q.data["end"]["U"]
         if endUnits then
             for _, uID in pairs(endUnits) do
@@ -438,7 +511,7 @@ local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, 
             for _, uID in pairs(objUnits) do
                 local unit = PUIQuest.Database:FindUnit(uID)
                 if unit and unit.spawns then
-                    Evaluate(unit.spawns, "Slay: " .. unit.name)
+                    Evaluate(unit.spawns, "Slay: " .. unit.name, unit.name)
                 end
             end
         end
@@ -449,7 +522,7 @@ local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, 
             for _, oID in pairs(objObjects) do
                 local obj = PUIQuest.Database:FindObject(oID)
                 if obj and obj.spawns then
-                    Evaluate(obj.spawns, "Interact: " .. obj.name)
+                    Evaluate(obj.spawns, "Interact: " .. obj.name, obj.name)
                 end
             end
         end
@@ -465,7 +538,7 @@ local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, 
                         for uID in pairs(item.data["U"]) do
                             local unit = PUIQuest.Database:FindUnit(uID)
                             if unit and unit.spawns then
-                                Evaluate(unit.spawns, "Loot: " .. item.name .. " (" .. unit.name .. ")")
+                                Evaluate(unit.spawns, "Loot: " .. item.name .. " (" .. unit.name .. ")", item.name)
                             end
                         end
                     end
@@ -474,7 +547,7 @@ local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, 
                         for oID in pairs(item.data["O"]) do
                             local obj = PUIQuest.Database:FindObject(oID)
                             if obj and obj.spawns then
-                                Evaluate(obj.spawns, "Gather: " .. item.name)
+                                Evaluate(obj.spawns, "Gather: " .. item.name, item.name)
                             end
                         end
                     end
@@ -483,7 +556,7 @@ local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, 
                         for vID in pairs(item.data["V"]) do
                             local vendor = PUIQuest.Database:FindUnit(vID)
                             if vendor and vendor.spawns then
-                                Evaluate(vendor.spawns, "Buy: " .. item.name)
+                                Evaluate(vendor.spawns, "Buy: " .. item.name, item.name)
                             end
                         end
                     end
@@ -491,7 +564,7 @@ local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, 
             end
         end
 
-        -- 4. Fallback if no specific objective coords: Check Turn-In
+        -- 4. Fallback if all sub-objectives complete or no specific objective coords: Check Turn-In
         if not bestLocalCoord and not firstWorldCoord then
             local endUnits = q.data["end"] and q.data["end"]["U"]
             if endUnits then
@@ -591,12 +664,12 @@ function Tracker:Update()
     px = px or 0
     py = py or 0
 
-    -- Estimate player facing if GetPlayerFacing is unavailable
+    -- Estimate player facing if GetPlayerFacing is unavailable (CCW radians)
     if px > 0 and py > 0 and (px ~= lastPlayerX or py ~= lastPlayerY) then
         local mdx = px - lastPlayerX
         local mdy = py - lastPlayerY
         if (mdx * mdx + mdy * mdy) > 0.0000000001 then
-            estimatedFacing = math.atan2(-mdx, -mdy)
+            estimatedFacing = -math.atan2(mdx, -mdy)
         end
         lastPlayerX = px
         lastPlayerY = py
@@ -636,9 +709,9 @@ function Tracker:Update()
         if not nearestLocalTarget and not fallbackWorldTarget then
             local numEntries = GetNumQuestLogEntries() or 0
             for i = 1, numEntries do
-                local title, _, _, isHeader, _, isComplete = GetQuestLogTitle(i)
+                local title, _, _, isHeader = GetQuestLogTitle(i)
                 if not isHeader and title then
-                    local cand = ResolveQuestObjective(title, playerZones, mapZone, px, py, isComplete)
+                    local cand = ResolveQuestObjective(title, playerZones, mapZone, px, py)
                     if cand then
                         if not cand.isDifferentZone then
                             local cdx = cand.x - px
@@ -685,29 +758,50 @@ function Tracker:Update()
         return
     end
 
-    -- In-zone calculations
+    -- Query Zone Dimensions & Minimap Zoom Data
+    local realZone = GetRealZoneText and GetRealZoneText() or ""
+    local mapID = (PUIQuest.Database and PUIQuest.Database.GetMapIDByName and PUIQuest.Database:GetMapIDByName(realZone)) or mapZone
+    local indoorState = GetMinimapIndoorState()
+    local mZoom = (Minimap and Minimap.GetZoom and Minimap:GetZoom()) or 0
+    local mapZoom = (MINIMAP_ZOOM_TABLE[indoorState] and MINIMAP_ZOOM_TABLE[indoorState][mZoom]) or 300
+
+    local DB = PUIQuest.DB
+    local minimapSizes = DB and DB["minimap"]
+    local mapWidth = (minimapSizes and mapID and minimapSizes[mapID] and minimapSizes[mapID][1]) or 0
+    local mapHeight = (minimapSizes and mapID and minimapSizes[mapID] and minimapSizes[mapID][2]) or 0
+
     local tx = resolvedTarget.x
     local ty = resolvedTarget.y
-    local dx = tx - px
-    local dy = ty - py
-    local dist = math.sqrt(dx * dx + dy * dy)
-    local yards = math.floor(dist * 1800)
+    local rawDx = tx - px
+    local rawDy = ty - py
+
+    -- Calculate Yard Distance
+    local yards = 0
+    if mapWidth > 0 and mapHeight > 0 then
+        local dxYd = rawDx * mapWidth
+        local dyYd = rawDy * mapHeight
+        yards = math.floor(math.sqrt(dxYd * dxYd + dyYd * dyYd) + 0.5)
+    else
+        local distEst = math.sqrt((rawDx * 1.5) * (rawDx * 1.5) + rawDy * rawDy)
+        yards = math.floor(distEst * 1800 + 0.5)
+    end
 
     resolvedTarget.yards = yards
     currentActiveData = resolvedTarget
 
-    -- Calculate Angles (atan2(-dx, -dy) aligns with North=0 and CCW rotation)
-    local targetAngle = math.atan2(-dx, -dy)
-    local playerFacing = GetRealPlayerFacing()
-    local diff = targetAngle - playerFacing
+    -- Calculate Compass Bearing (CW) & CCW Target Angle
+    local targetBearingCW = math.atan2(rawDx * 1.5, -rawDy)
+    local targetBearingCCW = -targetBearingCW
+    local playerFacingCCW = GetRealPlayerFacing()
+    local relativeAngleCCW = targetBearingCCW - playerFacingCCW
 
-    -- Dynamic Color & Text based on facing angle & distance
+    -- Dynamic Color & Text based on bearing angle & distance
     local r, g, b = 1.0, 1.0, 1.0
-    if yards < 15 or dist < 0.008 then
+    if yards < 15 then
         hudDistText:SetText("|cff00ff00Arrived!|r")
         r, g, b = 0.0, 1.0, 0.5
     else
-        local absAngle = math.abs(math.mod(diff + math.pi, 2 * math.pi) - math.pi)
+        local absAngle = math.abs(math.mod(relativeAngleCCW + math.pi, 2 * math.pi) - math.pi)
         if absAngle < 0.35 then
             hudDistText:SetText(string.format("|cff00ff00%d yd|r", yards))
             r, g, b = 0.1, 1.0, 0.2
@@ -722,10 +816,10 @@ function Tracker:Update()
 
     hudTitleText:SetText(resolvedTarget.text or resolvedTarget.title or "Quest Objective")
 
-    -- Rotate 3D Texture Arrow
+    -- Rotate HUD Arrow
     if hudArrowTex then
         hudArrowTex:Show()
-        Set3DArrowAngle(hudArrowTex, diff)
+        Set3DArrowAngle(hudArrowTex, relativeAngleCCW)
         hudArrowTex:SetVertexColor(r, g, b, 1.0)
     end
 
@@ -733,6 +827,23 @@ function Tracker:Update()
     local mPin = CreateMinimapPin()
     mPin:Show()
 
+    -- Calculate Minimap Drawing Offsets
+    local xDraw, yDraw
+    if mapWidth > 0 and mapHeight > 0 then
+        local xScale = mapZoom / mapWidth
+        local yScale = mapZoom / mapHeight
+        xDraw = Minimap:GetWidth() / xScale / 100
+        yDraw = Minimap:GetHeight() / yScale / 100
+    else
+        local fallbackScale = mapZoom * 1.2
+        xDraw = fallbackScale / 100 * 1.5
+        yDraw = fallbackScale / 100
+    end
+
+    local xPos = rawDx * 100 * xDraw
+    local yPos = rawDy * 100 * yDraw
+
+    -- Check if Minimap Rotation is enabled
     local isRotating = false
     if GetCVar then
         local ok, val = pcall(GetCVar, "rotateMinimap")
@@ -740,27 +851,67 @@ function Tracker:Update()
             isRotating = true
         end
     end
-    local mmAngle = isRotating and diff or targetAngle
 
-    if minimapTex then
-        minimapTex:Show()
-        Set3DArrowAngle(minimapTex, mmAngle)
-        minimapTex:SetVertexColor(r, g, b, 1.0)
+    local dxScreen, dyScreen
+    if isRotating then
+        local cosF = math.cos(playerFacingCCW)
+        local sinF = math.sin(playerFacingCCW)
+        dxScreen = xPos * cosF + (-yPos) * sinF
+        dyScreen = -xPos * sinF + (-yPos) * cosF
+    else
+        dxScreen = xPos
+        dyScreen = -yPos
     end
 
-    local radius = 56
-    local zoom = (Minimap and Minimap.GetZoom and Minimap:GetZoom()) or 0
-    local zoomScale = { 300, 360, 440, 540, 660, 800 }
-    local scale = zoomScale[zoom + 1] or 400
-    local mmDist = dist * scale
+    -- Detect Minimap Shape (Square vs Round)
+    local shapeMode = PUIQuest.db and PUIQuest.db:Get("minimapShape", "auto") or "auto"
+    local isSquare = false
+    if shapeMode == "square" then
+        isSquare = true
+    elseif shapeMode == "auto" then
+        if Primus.PUIMinimapper or _G.pfUI and _G.pfUI.minimap then
+            isSquare = true
+        end
+    end
 
+    local mw = Minimap:GetWidth()
+    local mh = Minimap:GetHeight()
+    local margin = 10
     local nx, ny
-    if mmDist > radius then
-        nx = math.sin(mmAngle) * radius
-        ny = math.cos(mmAngle) * radius
+
+    if isSquare then
+        -- Clamping to Square / Rectangular Bounding Box
+        local hw = (mw / 2) - margin
+        local hh = (mh / 2) - margin
+        if math.abs(dxScreen) <= hw and math.abs(dyScreen) <= hh then
+            nx = dxScreen
+            ny = dyScreen
+        else
+            local scaleX = hw / math.max(math.abs(dxScreen), 0.0001)
+            local scaleY = hh / math.max(math.abs(dyScreen), 0.0001)
+            local scale = math.min(scaleX, scaleY)
+            nx = dxScreen * scale
+            ny = dyScreen * scale
+        end
     else
-        nx = math.sin(mmAngle) * mmDist
-        ny = math.cos(mmAngle) * mmDist
+        -- Clamping to Circular Perimeter
+        local radius = (math.min(mw, mh) / 2) - margin
+        local distOnMap = math.sqrt(dxScreen * dxScreen + dyScreen * dyScreen)
+        if distOnMap > radius then
+            nx = (dxScreen / distOnMap) * radius
+            ny = (dyScreen / distOnMap) * radius
+        else
+            nx = dxScreen
+            ny = dyScreen
+        end
+    end
+
+    -- Orient the perimeter arrow to point towards the objective
+    local pinAngleCCW = math.atan2(-dxScreen, dyScreen)
+    if minimapTex then
+        minimapTex:Show()
+        Set3DArrowAngle(minimapTex, pinAngleCCW)
+        minimapTex:SetVertexColor(r, g, b, 1.0)
     end
 
     mPin:ClearAllPoints()

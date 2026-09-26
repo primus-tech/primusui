@@ -217,9 +217,12 @@
     - [x] Bi-directional subzone $\leftrightarrow$ parent zone hierarchy expansion (`GetPlayerZoneAliases()`).
     - [x] Proximity & bearing dynamic tinting (Emerald, Gold, Amber, Green Pulse Arrived).
     - [x] Engine-safe CVar checking via `pcall`.
-  - [ ] **Minimap Perimeter Radar Pin Fine-Tuning (`Tracker.lua` - Next Sprint Focus)**:
-    - [ ] Calibrate radial distance clamping and coordinate offsets for the Minimap edge pin across various square/round minimap geometries.
-    - [ ] Ensure seamless sync with `PUIMinimapper` shape masks.
+  - [x] **Minimap Perimeter Radar Pin Calibration (`Tracker.lua`)**:
+    - [x] Calibrate radial and square bounding box distance clamping across circular and modern square minimap geometries.
+    - [x] Accurate yard distance resolution using `PUIQuest.DB["minimap"]` zone dimensions and 1.12.1 zoom tables.
+    - [x] Quest leaderboard progress evaluation filtering out already-completed sub-objectives.
+    - [x] Multi-pin overlap separation offset engine preventing pin occlusion on World Map.
+    - [x] Ensure seamless sync with `PUIMinimapper` shape masks.
   - [x] QuestLogFrame integration (`Quest.lua`) with `[Show on Map]` and `[Clean Map]` action buttons.
   - [x] Themed dark glassmorphic Database Browser UI (`Browser.lua`, `/pui db`).
   - [x] Handshake integration with `PUIQuestWatch` (Alt-Click header / Left-Click auto-focus) and `PUISellValue`.

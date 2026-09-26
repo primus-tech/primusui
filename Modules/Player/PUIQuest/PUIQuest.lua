@@ -23,10 +23,11 @@ local Debug   = Primus.Debug
 
 PUIQuest.db = DB:RegisterNamespace("PUIQuest", {
     enabled             = true,
-    turtleMode          = true,   -- Enable Turtle WoW / Custom Extensions
+    turtleMode          = true,     -- Enable Turtle WoW / Custom Extensions
     showWorldMapPins    = true,
     showMinimapPins     = true,
-    showRouteLines      = true,   -- Glowing route trails connecting player to target
+    minimapShape        = "auto",   -- "auto", "round", "square"
+    showRouteLines      = true,     -- Glowing route trails connecting player to target
     showAvailableQuests = true,
     showTurnIns         = true,
     showObjectives      = true,
@@ -106,6 +107,22 @@ function PUIQuest:RegisterOptionsFlare()
                 get = function() return PUIQuest.db:Get("showMinimapPins", true) end,
                 set = function(val)
                     PUIQuest.db:Set("showMinimapPins", val)
+                    if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
+                end,
+            },
+            {
+                key = "minimapShape",
+                label = "Minimap Radar Shape Clamp",
+                type = "dropdown",
+                options = {
+                    { value = "auto", label = "Auto (Detect Square/Round)" },
+                    { value = "round", label = "Classic Round" },
+                    { value = "square", label = "Modern Square" },
+                },
+                default = "auto",
+                get = function() return PUIQuest.db:Get("minimapShape", "auto") end,
+                set = function(val)
+                    PUIQuest.db:Set("minimapShape", val)
                     if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
                 end,
             },

@@ -161,6 +161,9 @@
     - **Bi-directional Subzone & Parent Zone Mapping**: `GetPlayerZoneAliases()` dynamically expands parent/subzone hierarchies (e.g. Turtle WoW `Alah'Thalas` [2040] $\leftrightarrow$ `Thalassian Highlands` [5225]), seamlessly mapping subzone objectives without false cross-zone locks.
     - **Dynamic Bearing & Distance Tinting**: Real-time vertex coloring (Emerald Green $< 20^\circ$, Radiant Gold $< 60^\circ$, Amber Orange $> 60^\circ$, Green Pulse `Arrived!` $< 15\text{ yd}$).
     - **Full Safe Engine Guarding**: Protected CVar queries with `pcall` ensuring zero runtime errors on 1.12.1 clients.
+    - **Minimap Perimeter Radar & Boundary Clamping**: Calibrated circular and square bounding box clamping syncing seamlessly with `PUIMinimapper`, supporting auto-detection, distance in yards, and orienting directional arrow pin without sliding or orbiting.
+    - **Quest Progress & Objective Awareness**: Real-time evaluation of quest leaderboards filtering out completed sub-objectives and prioritizing active goals and turn-ins.
+    - **Multi-Pin Overlap Separation Engine**: Automatic radial offset dispersal preventing pin occlusion when multiple spawns or available quests share identical coordinates.
   - **Quest Log Integration (`Quest.lua`)**: Embedded `[Show on Map]` and `[Clean Map]` action buttons on `QuestLogFrame`.
   - **Themed Dark Glassmorphic Database Browser (`Browser.lua`)**: In-game searchable database explorer (`/pui db` / `/pui quest show`) with search by item, quest, NPC, or object.
   - **Cross-Module Synergies**: Seamless handshakes with `PUIQuestWatch` (Alt-Click header / Left-Click auto-focus) and `PUISellValue` (providing 25,000+ item vendor baseline prices).
