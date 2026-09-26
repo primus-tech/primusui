@@ -48,24 +48,30 @@ local lastPlayerY       = 0
 local estimatedFacing   = 0
 
 -- =========================================================================
--- TEXTURE ROTATION UTILITY (360° AFFINE SETTEXCOORD)
+-- 3D SPRITE ARROW ENGINE (120-FRAME CELL RESOLVER)
 -- =========================================================================
 
-local function RotateTexture(tex, angle)
+local ARROW_TEXTURE_PATH = "Interface\\AddOns\\PrimusUI\\Media\\Textures\\3darrow.tga"
+
+local function Set3DArrowAngle(tex, angle)
     if not tex then return end
-    local s = math.sin(angle)
-    local c = math.cos(angle)
-    -- Rotate unit square centered at (0.5, 0.5)
-    -- UL = (-0.5, -0.5), LL = (-0.5, 0.5), UR = (0.5, -0.5), LR = (0.5, 0.5)
-    local ULx = 0.5 + (-0.5 * c - -0.5 * s)
-    local ULy = 0.5 + (-0.5 * s + -0.5 * c)
-    local LLx = 0.5 + (-0.5 * c - 0.5 * s)
-    local LLy = 0.5 + (-0.5 * s + 0.5 * c)
-    local URx = 0.5 + (0.5 * c - -0.5 * s)
-    local URy = 0.5 + (0.5 * s + -0.5 * c)
-    local LRx = 0.5 + (0.5 * c - 0.5 * s)
-    local LRy = 0.5 + (0.5 * s + 0.5 * c)
-    tex:SetTexCoord(ULx, ULy, LLx, LLy, URx, URy, LRx, LRy)
+    local twoPi = 2 * math.pi
+    local a = math.mod(angle, twoPi)
+    if a < 0 then a = a + twoPi end
+
+    -- 120 frames across 2*pi radians, with Frame 1 centered at angle 0 (North / Forward)
+    local frame = math.mod(math.floor((a / (twoPi / 120)) + 1.5), 120)
+    
+    local col = math.mod(frame, 10)
+    local row = math.floor(frame / 10)
+
+    -- Inset by 0.0005 to prevent texture bleeding from neighboring cells
+    local left = col * 0.1 + 0.0005
+    local right = (col + 1) * 0.1 - 0.0005
+    local top = row * (1 / 12) + 0.0005
+    local bottom = (row + 1) * (1 / 12) - 0.0005
+
+    tex:SetTexCoord(left, right, top, bottom)
 end
 
 -- =========================================================================
@@ -77,7 +83,7 @@ local function CreateHUDArrow()
 
     hudArrow = CreateFrame("Frame", "PUIQuestHUDArrow", UIParent)
     hudArrow:SetWidth(156)
-    hudArrow:SetHeight(64)
+    hudArrow:SetHeight(66)
     hudArrow:SetPoint("CENTER", UIParent, "CENTER", 0, -130)
     hudArrow:SetFrameStrata("BACKGROUND")
     hudArrow:SetClampedToScreen(true)
@@ -95,31 +101,21 @@ local function CreateHUDArrow()
 
     -- Arrow Container Frame
     local arrowHolder = CreateFrame("Frame", nil, hudArrow)
-    arrowHolder:SetWidth(32)
-    arrowHolder:SetHeight(32)
-    arrowHolder:SetPoint("TOP", hudArrow, "TOP", 0, -3)
+    arrowHolder:SetWidth(36)
+    arrowHolder:SetHeight(36)
+    arrowHolder:SetPoint("TOP", hudArrow, "TOP", 0, -2)
     arrowHolder:EnableMouse(false)
     hudArrowHolder = arrowHolder
 
-    -- 2D Rotating Texture Arrow (Always 100% visible and reliable)
+    -- 3D Rotating Texture Arrow (120-frame rendered sprite sheet)
     local arrowTex = arrowHolder:CreateTexture(nil, "ARTWORK")
-    arrowTex:SetTexture("Interface\\Minimap\\MinimapArrow")
-    arrowTex:SetWidth(28)
-    arrowTex:SetHeight(28)
+    arrowTex:SetTexture(ARROW_TEXTURE_PATH)
+    arrowTex:SetWidth(36)
+    arrowTex:SetHeight(36)
     arrowTex:SetPoint("CENTER", arrowHolder, "CENTER", 0, 0)
     arrowTex:SetVertexColor(1.0, 0.85, 0.1, 1.0)
+    Set3DArrowAngle(arrowTex, 0)
     hudArrowTex = arrowTex
-
-    -- 3D Model Pointer Overlay (Rotating-MinimapArrow.mdl)
-    local model = CreateFrame("Model", "PUIQuestHUDArrowModel", arrowHolder)
-    model:SetAllPoints(arrowHolder)
-    model:SetModel("Interface\\Minimap\\Rotating-MinimapArrow.mdl")
-    model:SetModelScale(0.65)
-    model:SetPosition(0, 0, 0)
-    if model.SetCamera then model:SetCamera(0) end
-    model:SetFrameLevel(arrowHolder:GetFrameLevel() + 2)
-    model:EnableMouse(false)
-    hudModel = model
 
     -- Distance FontString
     local dist = hudArrow:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -162,23 +158,16 @@ local function CreateMinimapPin()
     if minimapPin then return minimapPin end
 
     minimapPin = CreateFrame("Button", "PUIQuest_MinimapNavArrow", Minimap)
-    minimapPin:SetWidth(20)
-    minimapPin:SetHeight(20)
+    minimapPin:SetWidth(22)
+    minimapPin:SetHeight(22)
     minimapPin:SetPoint("CENTER", Minimap, "CENTER", 0, 0)
     minimapPin:SetFrameLevel(Minimap:GetFrameLevel() + 10)
 
     local tex = minimapPin:CreateTexture(nil, "ARTWORK")
-    tex:SetTexture("Interface\\Minimap\\MinimapArrow")
+    tex:SetTexture(ARROW_TEXTURE_PATH)
     tex:SetAllPoints(minimapPin)
+    Set3DArrowAngle(tex, 0)
     minimapTex = tex
-
-    local model = CreateFrame("Model", "PUIQuest_MinimapNavModel", minimapPin)
-    model:SetAllPoints(minimapPin)
-    model:SetModel("Interface\\Minimap\\Rotating-MinimapArrow.mdl")
-    model:SetModelScale(0.5)
-    model:SetPosition(0, 0, 0)
-    if model.SetCamera then model:SetCamera(0) end
-    minimapModel = model
 
     minimapPin:SetScript("OnClick", function()
         if currentActiveData and currentActiveData.title then
@@ -599,12 +588,8 @@ function Tracker:Update()
 
         if hudArrowTex then
             hudArrowTex:Show()
-            RotateTexture(hudArrowTex, 0)
+            Set3DArrowAngle(hudArrowTex, 0)
             hudArrowTex:SetVertexColor(1.0, 0.75, 0.2, 1.0)
-        end
-        if hudModel then
-            hudModel:Show()
-            hudModel:SetFacing(0)
         end
         hudDistText:SetText(string.format("|cffffbb33In %s|r", resolvedTarget.zoneName or "Other Area"))
         hudTitleText:SetText(resolvedTarget.text or resolvedTarget.title or "Quest Objective")
@@ -649,17 +634,11 @@ function Tracker:Update()
 
     hudTitleText:SetText(resolvedTarget.text or resolvedTarget.title or "Quest Objective")
 
-    -- Rotate 2D Texture Arrow
+    -- Rotate 3D Texture Arrow
     if hudArrowTex then
         hudArrowTex:Show()
-        RotateTexture(hudArrowTex, diff)
+        Set3DArrowAngle(hudArrowTex, diff)
         hudArrowTex:SetVertexColor(r, g, b, 1.0)
-    end
-
-    -- Rotate 3D Model Pointer
-    if hudModel then
-        hudModel:Show()
-        hudModel:SetFacing(diff)
     end
 
     -- 2. UPDATE MINIMAP RADAR PIN
@@ -667,12 +646,8 @@ function Tracker:Update()
     mPin:Show()
     if minimapTex then
         minimapTex:Show()
-        RotateTexture(minimapTex, diff)
+        Set3DArrowAngle(minimapTex, diff)
         minimapTex:SetVertexColor(r, g, b, 1.0)
-    end
-    if minimapModel then
-        minimapModel:Show()
-        minimapModel:SetFacing(diff)
     end
 
     local radius = 54
