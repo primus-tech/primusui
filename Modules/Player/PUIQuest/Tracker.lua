@@ -48,6 +48,40 @@ local lastPlayerY       = 0
 local estimatedFacing   = 0
 
 -- =========================================================================
+-- PLAYER FACING DETECTOR (REAL-TIME MINIMAP MODEL & API RESOLVER)
+-- =========================================================================
+
+local minimapPlayerModel = nil
+
+local function GetRealPlayerFacing()
+    if GetPlayerFacing then
+        local f = GetPlayerFacing()
+        if f then return f end
+    end
+
+    if minimapPlayerModel and minimapPlayerModel.GetFacing then
+        local f = minimapPlayerModel:GetFacing()
+        if f then return f end
+    end
+
+    if Minimap then
+        local children = { Minimap:GetChildren() }
+        for i = 1, table.getn(children) do
+            local child = children[i]
+            if child and child.GetFacing and child:GetObjectType() == "Model" then
+                local f = child:GetFacing()
+                if f then
+                    minimapPlayerModel = child
+                    return f
+                end
+            end
+        end
+    end
+
+    return estimatedFacing or 0
+end
+
+-- =========================================================================
 -- 3D SPRITE ARROW ENGINE (120-FRAME CELL RESOLVER)
 -- =========================================================================
 
@@ -135,11 +169,11 @@ local function CreateHUDArrow()
     title:SetJustifyH("CENTER")
     hudTitleText = title
 
-    -- Self-driving real-time update loop (throttled to 0.08s for super-smooth 60fps tracking)
+    -- Self-driving real-time update loop (throttled to 0.03s for super-smooth 60fps tracking)
     local updateElapsed = 0
     hudArrow:SetScript("OnUpdate", function()
-        updateElapsed = updateElapsed + (arg1 or 0.05)
-        if updateElapsed >= 0.08 then
+        updateElapsed = updateElapsed + (arg1 or 0.03)
+        if updateElapsed >= 0.03 then
             updateElapsed = 0
             Tracker:Update()
         end
@@ -508,7 +542,7 @@ function Tracker:Update()
         local mdx = px - lastPlayerX
         local mdy = py - lastPlayerY
         if (mdx * mdx + mdy * mdy) > 0.000001 then
-            estimatedFacing = math.atan2(mdx, -mdy)
+            estimatedFacing = math.atan2(-mdx, -mdy)
         end
         lastPlayerX = px
         lastPlayerY = py
@@ -608,9 +642,9 @@ function Tracker:Update()
     resolvedTarget.yards = yards
     currentActiveData = resolvedTarget
 
-    -- Calculate Angles
-    local targetAngle = math.atan2(dx, -dy)
-    local playerFacing = (GetPlayerFacing and GetPlayerFacing()) or estimatedFacing or 0
+    -- Calculate Angles (atan2(-dx, -dy) aligns with North=0 and CCW rotation)
+    local targetAngle = math.atan2(-dx, -dy)
+    local playerFacing = GetRealPlayerFacing()
     local diff = targetAngle - playerFacing
 
     -- Dynamic Color & Text based on facing angle & distance
