@@ -154,7 +154,13 @@
   - **Dual Database & Dynamic Runtime Delta Patcher (`Patchtable.lua`)**: Comprehensive database supporting standard Vanilla 1.12.1 and Turtle WoW / Custom extensions (items, quests, units, objects, refloot, zones, areatriggers, minimap coordinates, meta, and locales) with 1-click dynamic runtime toggling in `/pui config` or `/pui quest turtle`. Supports custom race bitmasks (`Goblin` [256], `BloodElf` [512]).
   - **Multi-Index Query Engine (`Database.lua`)**: High-performance querying across items, quests, units, objects, vendor buy/sell prices, item drops, and full-text substring search.
   - **World Map POI Pin System (`Map.lua`)**: Frame-pooled pins on `WorldMapButton` with level-difficulty colored headers, cluster peeking for dense locations, interactive tooltips, and custom icons (`!` available, `?` turn-in, numbered spawns).
-  - **Minimap Radar & 3D HUD Arrow (`Tracker.lua`)**: Directional navigation radar pins and rotating HUD arrow (`ROTATING-MINIMAPARROW`) guiding the player to the active quest target.
+  - **108-Frame 3D HUD Navigation Arrow Engine (`Tracker.lua`)**:
+    - High-definition 3D rendered sprite sheet texture (`3darrow.tga`, 1024×1024, 32-bit alpha) using an exact **9 columns × 12 rows = 108 frames** grid ($3.33^\circ$ angular resolution across full $360^\circ$).
+    - Exact 4:3 frame aspect ratio ($44 \times 33\text{ px}$) matching native $316 \times 237\text{ px}$ cell geometry with sub-pixel margin insets eliminating texture bleeding.
+    - **Vanilla 1.12.1 Player Facing Engine**: Directly queries `Minimap:GetChildren()[9]` (Blizzard's rotating player arrow Model frame in 1.12.1), bypassing static Child #1 compass frames, with automatic fallback to motion displacement vectors.
+    - **Bi-directional Subzone & Parent Zone Mapping**: `GetPlayerZoneAliases()` dynamically expands parent/subzone hierarchies (e.g. Turtle WoW `Alah'Thalas` [2040] $\leftrightarrow$ `Thalassian Highlands` [5225]), seamlessly mapping subzone objectives without false cross-zone locks.
+    - **Dynamic Bearing & Distance Tinting**: Real-time vertex coloring (Emerald Green $< 20^\circ$, Radiant Gold $< 60^\circ$, Amber Orange $> 60^\circ$, Green Pulse `Arrived!` $< 15\text{ yd}$).
+    - **Full Safe Engine Guarding**: Protected CVar queries with `pcall` ensuring zero runtime errors on 1.12.1 clients.
   - **Quest Log Integration (`Quest.lua`)**: Embedded `[Show on Map]` and `[Clean Map]` action buttons on `QuestLogFrame`.
   - **Themed Dark Glassmorphic Database Browser (`Browser.lua`)**: In-game searchable database explorer (`/pui db` / `/pui quest show`) with search by item, quest, NPC, or object.
   - **Cross-Module Synergies**: Seamless handshakes with `PUIQuestWatch` (Alt-Click header / Left-Click auto-focus) and `PUISellValue` (providing 25,000+ item vendor baseline prices).

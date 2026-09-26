@@ -210,7 +210,16 @@
   - [x] Dynamic runtime delta-patching engine (`Patchtable.lua`) enabling 1-click toggling between Vanilla 1.12.1 and Turtle WoW / Custom content.
   - [x] Multi-index entity query engine (`Database.lua`) for items, quests, units, objects, vendors, and drops.
   - [x] World map POI pin overlays (`Map.lua`) on `WorldMapButton` with level-difficulty coloring, cluster peeking, and rich tooltips.
-  - [x] Minimap radar pin tracking and rotating HUD directional navigation arrow (`Tracker.lua`).
+  - [x] **108-Frame 3D HUD Navigation Arrow Engine (`Tracker.lua`)**:
+    - [x] Precision 108-frame ($9 \times 12$) UV cell coordinate resolver ($3.33^\circ$ per frame, zero-bleed margin insets).
+    - [x] True 4:3 native frame proportions ($44 \times 33\text{ px}$) matching $316 \times 237\text{ px}$ cell geometry.
+    - [x] Vanilla 1.12.1 Minimap Child #9 model frame player facing engine with movement delta fallback.
+    - [x] Bi-directional subzone $\leftrightarrow$ parent zone hierarchy expansion (`GetPlayerZoneAliases()`).
+    - [x] Proximity & bearing dynamic tinting (Emerald, Gold, Amber, Green Pulse Arrived).
+    - [x] Engine-safe CVar checking via `pcall`.
+  - [ ] **Minimap Perimeter Radar Pin Fine-Tuning (`Tracker.lua` - Next Sprint Focus)**:
+    - [ ] Calibrate radial distance clamping and coordinate offsets for the Minimap edge pin across various square/round minimap geometries.
+    - [ ] Ensure seamless sync with `PUIMinimapper` shape masks.
   - [x] QuestLogFrame integration (`Quest.lua`) with `[Show on Map]` and `[Clean Map]` action buttons.
   - [x] Themed dark glassmorphic Database Browser UI (`Browser.lua`, `/pui db`).
   - [x] Handshake integration with `PUIQuestWatch` (Alt-Click header / Left-Click auto-focus) and `PUISellValue`.
