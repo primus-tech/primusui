@@ -134,13 +134,23 @@
 
 ---
 
-## 🎒 Tier 3: Player & Character Sub-Modules (`Modules/`)
-
-- [x] **All-in-One Bags & Bank Suite (`Modules/Player/Bags/` & `Bank/`):**
-  - Consolidated single-window inventory and bank with search filtering, item quality borders, and auto-sort.
-- [x] **Character Sheet & Item Stats (`Modules/Player/CharacterSheet/` & `ItemStats/`):**
+- [x] **PUIBags & PUIBank Unified Containers (`Modules/Player/PUIBags/` & `PUIBank/`):**
+  - Consolidated single-window inventory and bank with live search filtering and item quality borders.
+  - Interactive top bag bar tray (Bags 0–4) with 1-click header toggle button.
+  - Plain left-click bag space highlight filtering (dimming unselected bags to 20% alpha) with active gold border indicator.
+  - Shift-click / drag bag pickup & swap (`PickupBagFromSlot(invSlot)`).
+  - Native 1.12.1 `UI-MoneyIcons` spritesheet integration with dynamic right-to-left layout.
+  - Offline persistent caching for Bank container.
+- [x] **PUIQuestWatch: Persistent Advanced Quest Tracker (`Modules/Player/PUIQuestWatch/`):**
+  - Completely neutralized Blizzard 5-minute auto-expiry bug (`AutoQuestWatch_OnUpdate`).
+  - Fixed Blizzard `tremove` array index corruption bug in quest watch lists.
+  - Title-based SavedVariables persistence across reloads, relogs, and disconnects.
+  - Difficulty colored level headers (`[11] Quest Title`) and completion preservation (`• Complete (Ready to turn in)`).
+  - PUIMover integration under `"PLAYER"` category with multi-anchor stretching protection.
+  - Slash command registration via `Primus.Console:RegisterSubCommand`.
+- [x] **Character Sheet & Item Stats (`Modules/Player/PUICharacterSheet/` & `PUIItemStats/`):**
   - Gear score / iLvl calculator, durability indicators, and extended stat scanner (+Healing, +Spell Dmg, Hit, Crit, MP5).
-- [x] **Item Compare (`Modules/Utility/ItemCompare/`):**
+- [x] **Item Compare (`Modules/Utility/PUIItemCompare/`):**
   - Side-by-side equipment comparison tooltips.
 - [x] **PUISpellbook: Traditional 2-Page Spellbook Spread (`Modules/Player/PUISpellbook/`):**
   - Classic 2-column, 2-page spread (6 spells left + 6 spells right = 12 per view) with central spine divider.

@@ -70,7 +70,7 @@ To achieve total architectural consistency, all modular components in PrimusUI a
 
 ---
 
-### 5. Player & Character Suite (8 Modules)
+### 5. Player & Character Suite (11 Modules)
 
 | Current Name | Target Standard Name | File Path | Status |
 | :--- | :--- | :--- | :--- |
@@ -80,8 +80,11 @@ To achieve total architectural consistency, all modular components in PrimusUI a
 | `PUICharacterSheet` | `PUICharacterSheet` | `Modules/Player/PUICharacterSheet/PUICharacterSheet.lua` | ✅ **DONE** |
 | `PUIItemStats` | `PUIItemStats` | `Modules/Player/PUIItemStats/PUIItemStats.lua` | ✅ **DONE** |
 | `PUIVendor` | `PUIVendor` | `Modules/Player/PUIVendor/PUIVendor.lua` | ✅ **DONE** |
+| `PUISellValue` | `PUISellValue` | `Modules/Player/PUISellValue/PUISellValue.lua` | 📋 **PLANNED** |
 | `PUIReagents` | `PUIReagents` | `Modules/Player/PUIReagents/PUIReagents.lua` | ✅ **DONE** |
 | `PUITalents` | `PUITalents` | `Modules/Player/PUITalents/PUITalents.lua` | ✅ **DONE** |
+| `PUIQuestWatch` | `PUIQuestWatch` | `Modules/Player/PUIQuestWatch/PUIQuestWatch.lua` | ✅ **DONE** |
+| `PUIQuestHelper` | `PUIQuestHelper` | `Modules/Player/PUIQuestHelper/PUIQuestHelper.lua` | 📋 **PLANNED** |
 
 ---
 
