@@ -185,7 +185,6 @@ function PUITalk:CreateUniversalInput(f)
         for _, name in ipairs(names) do
             if string.sub(string.lower(name), 1, string.len(partial)) == partial then
                 this:SetText(prefix .. name .. " ")
-                this:SetCursorPosition(string.len(prefix .. name .. " "))
                 return
             end
         end
@@ -297,7 +296,6 @@ function PUITalk:FocusInput(text)
             self.masterFrame.editBox:SetText("")
         else
             self.masterFrame.editBox:SetText(text)
-            self.masterFrame.editBox:SetCursorPosition(string.len(text))
         end
     else
         self.masterFrame.editBox:SetText("")
