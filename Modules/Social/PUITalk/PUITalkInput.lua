@@ -158,8 +158,10 @@ function PUITalk:CreateUniversalInput(f)
             this:AddHistoryLine(text)
             this:SetText("")
         end
+        this:ClearFocus()
     end)
     editBox:SetScript("OnEscapePressed", function()
+        this:SetText("")
         this:ClearFocus()
     end)
     editBox:SetScript("OnTabPressed", function()
@@ -273,22 +275,56 @@ function PUITalk:HandleInputSubmit(text)
 end
 
 -- =========================================================================
--- 4. GLOBAL ENTER KEYBIND HOOK
+-- 4. GLOBAL ENTER & SLASH KEYBIND HOOK (ChatFrame_OpenChat)
 -- =========================================================================
 
+function PUITalk:FocusInput(text)
+    if not self.masterFrame then
+        self:CreateMasterFrame()
+    end
+    if not self.masterFrame or not self.masterFrame.editBox then return end
+
+    if not self.masterFrame:IsShown() then
+        self.masterFrame:Show()
+    end
+
+    if text and text ~= "" then
+        -- Check if it's a whisper command e.g. "/w Name " or "/whisper Name "
+        local _, _, cmd, target = string.find(text, "^/(%a+)%s+([^%s]+)%s*$")
+        if (cmd == "w" or cmd == "whisper" or cmd == "tell" or cmd == "t") and target and self.db:Get("divertWhispers", true) then
+            self:OpenDMConversation(target)
+            self:SelectMasterTab(2)
+            self.masterFrame.editBox:SetText("")
+        else
+            self.masterFrame.editBox:SetText(text)
+            self.masterFrame.editBox:SetCursorPosition(string.len(text))
+        end
+    else
+        self.masterFrame.editBox:SetText("")
+    end
+
+    self.masterFrame.editBox:SetFocus()
+
+    -- Ensure default Blizzard ChatFrameEditBox stays hidden
+    if ChatFrameEditBox and ChatFrameEditBox:IsShown() then
+        ChatFrameEditBox:Hide()
+    end
+end
+
 function PUITalk:HookChatKeybind()
-    if not _G.Primus_OriginalChatFrame_OpenChatBox then
-        _G.Primus_OriginalChatFrame_OpenChatBox = ChatFrame_OpenChatBox
-        ChatFrame_OpenChatBox = function(text)
-            if PUITalk.masterFrame and PUITalk.masterFrame.editBox and not UnitAffectingCombat("player") then
-                PUITalk.masterFrame:Show()
-                if text and text ~= "" then
-                    PUITalk.masterFrame.editBox:SetText(text)
+    if not _G.Primus_OriginalChatFrame_OpenChat then
+        _G.Primus_OriginalChatFrame_OpenChat = ChatFrame_OpenChat
+        ChatFrame_OpenChat = function(text, chatFrame)
+            if PUITalk.masterFrame and PUITalk.masterFrame.editBox then
+                PUITalk:FocusInput(text)
+                if chatFrame and chatFrame.editBox and chatFrame.editBox:IsShown() then
+                    chatFrame.editBox:Hide()
                 end
-                PUITalk.masterFrame.editBox:SetFocus()
                 return
             end
-            return _G.Primus_OriginalChatFrame_OpenChatBox(text)
+            if _G.Primus_OriginalChatFrame_OpenChat then
+                return _G.Primus_OriginalChatFrame_OpenChat(text, chatFrame)
+            end
         end
     end
 end
