@@ -64,57 +64,51 @@ local function GetRealPlayerFacing()
     if minimapPlayerModel then
         local ok, f = pcall(function() return minimapPlayerModel:GetFacing() end)
         if ok and type(f) == "number" then
-            lastFacingSource = "Minimap Model (Cached)"
+            lastFacingSource = "Minimap Arrow (Cached)"
             return f
         end
         minimapPlayerModel = nil
     end
 
-    -- 3. Scan Minimap children for any frame with a working GetFacing()
+    -- 3. Check Minimap Child #9 FIRST (Standard Blizzard 1.12.1 Minimap Arrow Model)
     if Minimap then
         local children = { Minimap:GetChildren() }
-        local n = table.getn(children)
-        for i = 1, n do
-            local child = children[i]
-            if child and child.GetFacing then
-                local ok, f = pcall(function() return child:GetFacing() end)
-                if ok and type(f) == "number" then
-                    minimapPlayerModel = child
-                    lastFacingSource = string.format("Minimap Child #%d", i)
-                    return f
-                end
-            end
-        end
-        -- Direct check on child 9 (standard Blizzard index)
         local c9 = children[9]
         if c9 and c9.GetFacing then
             local ok, f = pcall(function() return c9:GetFacing() end)
             if ok and type(f) == "number" then
                 minimapPlayerModel = c9
-                lastFacingSource = "Minimap Child #9"
+                lastFacingSource = "Minimap Arrow (Child #9)"
                 return f
             end
         end
-    end
 
-    -- 4. Scan MinimapCluster children
-    if MinimapCluster then
-        local children = { MinimapCluster:GetChildren() }
-        for i = 1, table.getn(children) do
+        -- 4. Search other Minimap children for Model frames with GetFacing (skip child #1 / CompassRing)
+        local n = table.getn(children)
+        for i = n, 2, -1 do
             local child = children[i]
-            if child and child.GetFacing then
-                local ok, f = pcall(function() return child:GetFacing() end)
-                if ok and type(f) == "number" then
-                    minimapPlayerModel = child
-                    lastFacingSource = string.format("MinimapCluster Child #%d", i)
-                    return f
+            if child and child.GetFacing and child ~= children[1] then
+                local name = (child.GetName and child:GetName()) or ""
+                local nameLower = string.lower(name)
+                if not string.find(nameLower, "compass") and not string.find(nameLower, "ring") then
+                    local ok, f = pcall(function() return child:GetFacing() end)
+                    if ok and type(f) == "number" then
+                        minimapPlayerModel = child
+                        lastFacingSource = string.format("Minimap Model (Child #%d)", i)
+                        return f
+                    end
                 end
             end
         end
     end
 
+    -- 5. Fallback to movement displacement delta
     lastFacingSource = "Motion Displacement Delta"
     return estimatedFacing or 0
+end
+
+function Tracker:ResetFacingModel()
+    minimapPlayerModel = nil
 end
 
 function Tracker:GetFacingInfo()
@@ -282,6 +276,26 @@ local function GetPlayerZoneAliases()
 
     local mz = GetMinimapZoneText and GetMinimapZoneText()
     if mz and mz ~= "" then aliases[string.lower(mz)] = true end
+
+    -- Expand parent zones: If any current alias matches a subzone in DB, also add the parent zone name
+    local DB = PUIQuest.DB
+    if DB and DB["zones"] then
+        local zonesLoc = DB["zones"]["enUS"] or DB["zones"]["loc"]
+        local zonesData = DB["zones"]["data"]
+        if zonesLoc and zonesData then
+            for zID, name in pairs(zonesLoc) do
+                if aliases[string.lower(name)] then
+                    local zInfo = zonesData[zID]
+                    if zInfo then
+                        local pID = zInfo[1]
+                        if pID and pID > 0 and zonesLoc[pID] then
+                            aliases[string.lower(zonesLoc[pID])] = true
+                        end
+                    end
+                end
+            end
+        end
+    end
 
     return aliases, mapZone
 end

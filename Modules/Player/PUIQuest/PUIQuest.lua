@@ -279,10 +279,33 @@ function PUIQuest:HandleSlashCommand(args)
         local px, py = GetPlayerMapPosition("player")
         DEFAULT_CHAT_FRAME:AddMessage(string.format("• Player Pos: |cffffd100%.2f, %.2f|r (Zone: %s / %s)", (px or 0)*100, (py or 0)*100, tostring(GetZoneText()), tostring(GetRealZoneText())))
         
-        if PUIQuest.Tracker and PUIQuest.Tracker.GetFacingInfo then
-            local pf, src = PUIQuest.Tracker:GetFacingInfo()
-            local deg = math.floor(math.deg(pf or 0) + 0.5)
-            DEFAULT_CHAT_FRAME:AddMessage(string.format("• Player Facing: |cffffd100%d°|r (%.2f rad) via |cff69ccf0%s|r", deg, pf or 0, src or "None"))
+        if PUIQuest.Tracker then
+            if PUIQuest.Tracker.ResetFacingModel then
+                PUIQuest.Tracker:ResetFacingModel()
+            end
+            if PUIQuest.Tracker.GetFacingInfo then
+                local pf, src = PUIQuest.Tracker:GetFacingInfo()
+                local deg = math.floor(math.deg(pf or 0) + 0.5)
+                DEFAULT_CHAT_FRAME:AddMessage(string.format("• Player Facing: |cffffd100%d°|r (%.2f rad) via |cff69ccf0%s|r", deg, pf or 0, src or "None"))
+            end
+        end
+
+        if Minimap then
+            local ch = { Minimap:GetChildren() }
+            local chCount = table.getn(ch)
+            local details = {}
+            for i = 1, chCount do
+                local c = ch[i]
+                if c and c.GetFacing then
+                    local ok, f = pcall(function() return c:GetFacing() end)
+                    if ok and type(f) == "number" then
+                        table.insert(details, string.format("#%d: %.1f°", i, math.deg(f)))
+                    end
+                end
+            end
+            if table.getn(details) > 0 then
+                DEFAULT_CHAT_FRAME:AddMessage(string.format("• Minimap Frames (%d total): %s", chCount, table.concat(details, ", ")))
+            end
         end
 
         local activeTarget = PUIQuest.Tracker and PUIQuest.Tracker:GetActiveTarget()
