@@ -415,13 +415,14 @@ function PUIMinimapOrbit:OnInitialize()
     -- Ensure Blizzard zone text is restored immediately
     RestoreBlizzardFrames()
 
-    -- Create Main Orbit Toggle Button on Minimap
-    toggleButton = CreateFrame("Button", "Primus_MinimapOrbitBtn", Minimap)
+    -- Create Main Orbit Toggle Button on UIParent (defaults anchored to Minimap)
+    toggleButton = CreateFrame("Button", "Primus_MinimapOrbitBtn", UIParent)
     toggleButton:SetWidth(24)
     toggleButton:SetHeight(24)
-    toggleButton:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", -2, -2)
+    toggleButton:SetPoint("TOPRIGHT", Minimap or UIParent, "TOPRIGHT", -2, -2)
     toggleButton:SetFrameStrata("HIGH")
-    toggleButton:SetFrameLevel(Minimap:GetFrameLevel() + 15)
+    toggleButton:SetFrameLevel(25)
+    toggleButton:SetMovable(true)
     toggleButton:SetBackdrop(Media:Fetch("border", "1Pixel"))
     toggleButton:SetBackdropColor(0.1, 0.1, 0.12, 0.95)
     toggleButton:SetBackdropBorderColor(0.3, 0.6, 1.0, 1.0)
@@ -432,6 +433,12 @@ function PUIMinimapOrbit:OnInitialize()
     icon:SetPoint("TOPLEFT", toggleButton, "TOPLEFT", 2, -2)
     icon:SetPoint("BOTTOMRIGHT", toggleButton, "BOTTOMRIGHT", -2, 2)
     icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+
+    -- Register with PUIMover under UTILITY
+    local mover = Primus.PUIMover or PUIMover
+    if mover and mover.Register then
+        mover:Register(toggleButton, "PUIMinimapOrbit", "Minimap Orbit Pill", "UTILITY")
+    end
 
     -- Create Dock Container Frame
     dockFrame = CreateFrame("Frame", "Primus_MinimapOrbitDock", toggleButton)
