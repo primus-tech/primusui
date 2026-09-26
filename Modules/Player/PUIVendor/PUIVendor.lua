@@ -37,7 +37,7 @@ local merchantAutoCheck = nil
 
 -- Dedicated Hidden Tooltip for definitive 1.12 item scanning
 local scanTooltip = CreateFrame("GameTooltip", "Primus_VendorScanTip", UIParent, "GameTooltipTemplate")
-scanTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
 
 -- Extract all programmatic info about an item in a container slot
 local function GetSlotItemData(bag, slot)

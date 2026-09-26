@@ -110,7 +110,7 @@ end
 
 -- Hidden Tooltip for Lockbox Scanning
 local scanTooltip = CreateFrame("GameTooltip", "Primus_RogueScanTooltip", nil, "GameTooltipTemplate")
-scanTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
 
 -- Check if Bag Item is a Locked Box
 local function IsItemLocked(bag, slot)

@@ -52,7 +52,7 @@ end
 
 -- Dedicated Hidden Tooltip for Definitive 1.12 Vendor Money Capture
 local scanTip = CreateFrame("GameTooltip", "Primus_SellValueScanTip", UIParent, "GameTooltipTemplate")
-scanTip:SetOwner(WorldFrame, "ANCHOR_NONE")
+scanTip:SetOwner(UIParent, "ANCHOR_NONE")
 
 local lastScannedMoney = 0
 scanTip:SetScript("OnTooltipAddMoney", function()

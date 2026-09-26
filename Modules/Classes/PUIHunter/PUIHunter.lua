@@ -120,7 +120,7 @@ local hunterScanTooltip = nil
 local function GetHunterScanTooltip()
     if not hunterScanTooltip then
         hunterScanTooltip = CreateFrame("GameTooltip", "Primus_Hunter_ScanTooltip", UIParent, "GameTooltipTemplate")
-        hunterScanTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+        hunterScanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
     end
     return hunterScanTooltip
 end
@@ -352,7 +352,7 @@ function PUIHunter:GetAllPetFoods()
                     end
 
                     -- Tooltip scan directly from local bag slot
-                    tt:SetOwner(WorldFrame, "ANCHOR_NONE")
+                    tt:SetOwner(UIParent, "ANCHOR_NONE")
                     tt:ClearLines()
                     tt:SetBagItem(bag, slot)
 

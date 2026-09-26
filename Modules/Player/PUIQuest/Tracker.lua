@@ -75,13 +75,13 @@ end
 local function CreateHUDArrow()
     if hudArrow then return hudArrow end
 
-    hudArrow = CreateFrame("Button", "PUIQuestHUDArrow", UIParent)
+    hudArrow = CreateFrame("Frame", "PUIQuestHUDArrow", UIParent)
     hudArrow:SetWidth(156)
     hudArrow:SetHeight(64)
     hudArrow:SetPoint("CENTER", UIParent, "CENTER", 0, -130)
-    hudArrow:SetFrameStrata("MEDIUM")
+    hudArrow:SetFrameStrata("BACKGROUND")
     hudArrow:SetClampedToScreen(true)
-    hudArrow:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    hudArrow:EnableMouse(false)
 
     -- Glassmorphic pill backdrop
     hudArrow:SetBackdrop({
@@ -98,6 +98,7 @@ local function CreateHUDArrow()
     arrowHolder:SetWidth(32)
     arrowHolder:SetHeight(32)
     arrowHolder:SetPoint("TOP", hudArrow, "TOP", 0, -3)
+    arrowHolder:EnableMouse(false)
     hudArrowHolder = arrowHolder
 
     -- 2D Rotating Texture Arrow (Always 100% visible and reliable)
@@ -117,6 +118,7 @@ local function CreateHUDArrow()
     model:SetPosition(0, 0, 0)
     if model.SetCamera then model:SetCamera(0) end
     model:SetFrameLevel(arrowHolder:GetFrameLevel() + 2)
+    model:EnableMouse(false)
     hudModel = model
 
     -- Distance FontString
@@ -145,56 +147,6 @@ local function CreateHUDArrow()
             updateElapsed = 0
             Tracker:Update()
         end
-    end)
-
-    -- Interactive Scripts
-    hudArrow:SetScript("OnClick", function()
-        if arg1 == "RightButton" then
-            Tracker:SetFocus(nil)
-            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuest]: Reset to automatic closest-quest navigation.", "69ccf0"))
-        else
-            if currentActiveData and currentActiveData.title then
-                if not QuestLogFrame:IsVisible() then
-                    ShowUIPanel(QuestLogFrame)
-                end
-                if Primus.PUIQuestWatch and Primus.PUIQuestWatch.FindQuestLogIndex then
-                    local qIdx = Primus.PUIQuestWatch:FindQuestLogIndex(currentActiveData.title)
-                    if qIdx and qIdx > 0 then
-                        QuestLog_SetSelection(qIdx)
-                        QuestLog_Update()
-                    end
-                end
-            end
-        end
-    end)
-
-    hudArrow:SetScript("OnEnter", function()
-        if not currentActiveData then return end
-        GameTooltip:SetOwner(hudArrow, "ANCHOR_TOP")
-        GameTooltip:ClearLines()
-        GameTooltip:AddLine(currentActiveData.title or "Quest Target", 1.0, 0.82, 0.0)
-        if currentActiveData.text and currentActiveData.text ~= "" then
-            GameTooltip:AddLine(string.format("Objective: |cffffffff%s|r", currentActiveData.text), 0.4, 0.85, 1.0)
-        end
-        if currentActiveData.isDifferentZone then
-            GameTooltip:AddLine(string.format("Destination: |cffffbb33%s|r", currentActiveData.zoneName or "Other Zone"), 1.0, 0.82, 0.2)
-        elseif currentActiveData.yards then
-            GameTooltip:AddLine(string.format("Distance: |cffffffff%d yards|r", currentActiveData.yards), 0.7, 0.7, 0.7)
-        end
-        if currentActiveData.x and currentActiveData.y and not currentActiveData.isDifferentZone then
-            GameTooltip:AddLine(string.format("Coords: |cffffd100%.1f, %.1f|r", currentActiveData.x * 100, currentActiveData.y * 100), 0.6, 0.6, 0.6)
-        end
-        if manualFocusQuest then
-            GameTooltip:AddLine("Status: |cffffbb33Manually Locked|r (Right-Click to unlock)", 1.0, 0.7, 0.2)
-        else
-            GameTooltip:AddLine("Status: |cff00ff00Auto-Targeting Closest|r", 0.5, 1.0, 0.5)
-        end
-        GameTooltip:AddLine("Left-Click: Open in Quest Log", 0.5, 0.5, 0.5)
-        GameTooltip:Show()
-    end)
-
-    hudArrow:SetScript("OnLeave", function()
-        GameTooltip:Hide()
     end)
 
     -- Register with PUIMover

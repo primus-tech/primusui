@@ -457,7 +457,7 @@ local scanTooltip = nil
 local function GetScanTooltip()
     if not scanTooltip then
         scanTooltip = CreateFrame("GameTooltip", "Primus_Utils_ScanTooltip", UIParent, "GameTooltipTemplate")
-        scanTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+        scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
     end
     return scanTooltip
 end
