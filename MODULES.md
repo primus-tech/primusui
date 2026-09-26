@@ -92,7 +92,7 @@ To achieve total architectural consistency, all modular components in PrimusUI a
 
 | Current Name | Target Standard Name | File Path | Status |
 | :--- | :--- | :--- | :--- |
-| `PUITalk` | `PUITalk` | `Modules/Social/PUITalk/PUITalk.lua` | ✅ **DONE** |
+| `PUITalk` | `PUITalk` | `Modules/Social/PUITalk/`<br>• `PUITalkCore.lua`<br>• `PUITalkChat.lua`<br>• `PUITalkMessages.lua`<br>• `PUITalkSocial.lua`<br>• `PUITalk.lua` | ✅ **DONE** |
 | `PUIMasterLoot` | `PUIMasterLoot` | `Modules/Social/PUIMasterLoot/PUIMasterLoot.lua` | ✅ **DONE** |
 | `PUIRoleplay` | `PUIRoleplay` | `Modules/Social/PUIRoleplay/`<br>• `PUIConstants.lua`<br>• `PUIComms.lua`<br>• `PUIRPSheet.lua`<br>• `PUIGlance.lua`<br>• `PUITooltip.lua`<br>• `PUIDirectory.lua`<br>• `PUIEmotes.lua`<br>• `PUIRoleplay.lua` | ✅ **DONE** |
 

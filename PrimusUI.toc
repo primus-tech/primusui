@@ -95,6 +95,10 @@ Modules\Player\PUIQuestWatch\PUIQuestWatch.lua
 # =========================================================================
 # SOCIAL & COMMUNICATION (Tier 3)
 # =========================================================================
+Modules\Social\PUITalk\PUITalkCore.lua
+Modules\Social\PUITalk\PUITalkChat.lua
+Modules\Social\PUITalk\PUITalkMessages.lua
+Modules\Social\PUITalk\PUITalkSocial.lua
 Modules\Social\PUITalk\PUITalk.lua
 Modules\Social\PUIMasterLoot\PUIMasterLoot.lua
 Modules\Social\PUIRoleplay\PUIConstants.lua
