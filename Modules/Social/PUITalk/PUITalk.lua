@@ -592,10 +592,6 @@ function PUITalk:OnInitialize()
                 end
             end
         end, "PUITalk Autonomous Chat & Social Suite (/pui talk [copy 1-7|msg|social])")
-
-        -- Backward compatibility aliases
-        Primus.Console:RegisterAlias("chat", "talk")
-        Primus.Console:RegisterAlias("messenger", "talk")
     end
 end
 

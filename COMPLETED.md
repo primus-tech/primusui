@@ -17,7 +17,7 @@
   - Staged 2-phase boot sequencer (`OnInitialize` &rarr; `OnEnable`) at `PLAYER_LOGIN`.
   - Dynamic provisioning of SavedVariables namespaces, Options flares, and Mover targets.
 - [x] **Strict Single Domain Ownership & Request-Driven Interaction Model:**
-  - Enforced exclusive domain ownership (`PUIHotbars` owns action bars; `PUIBags` owns containers; `PUIUnitFrames` owns unit frames; `PUIChat` owns chat).
+  - Enforced exclusive domain ownership (`PUIHotbars` owns action bars; `PUIBags` owns containers; `PUIUnitFrames` owns unit frames; `PUITalk` owns chat).
   - Banned direct foreign frame mutations in favor of public API requests and decoupled Signal Bus broadcasting (`Events:Fire`).
 - [x] **SavedVariables Automatic Schema Migration (`Core/DB/`):**
   - Seamless deep-copy migration from legacy non-PUI keys (`"Bags"` &rarr; `"PUIBags"`, `"UnitFrames"` &rarr; `"PUIUnitFrames"`) on first boot without resetting user configurations.

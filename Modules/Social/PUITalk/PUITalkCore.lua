@@ -17,12 +17,6 @@ Primus.PUITalk = PUITalk
 _G.PUITalk = PUITalk
 Primus:RegisterModule("PUITalk", PUITalk, "Social")
 
--- Backwards compatibility aliases for existing module references
-Primus.PUIChat = PUITalk
-_G.PUIChat = PUITalk
-Primus.PUIMessenger = PUITalk
-_G.PUIMessenger = PUITalk
-
 local DB     = Primus.DB
 local Utils  = Primus.Utils
 
