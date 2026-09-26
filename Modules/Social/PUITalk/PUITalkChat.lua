@@ -773,6 +773,22 @@ function PUITalk:CreateSelectableOverlay(parent, modeName)
     return overlay
 end
 
+local function ScrollFrameToBottom(scrollFrame)
+    if not scrollFrame then return end
+    if scrollFrame.UpdateScrollChildRect then
+        scrollFrame:UpdateScrollChildRect()
+    end
+    local maxScroll = scrollFrame:GetVerticalScrollRange() or 0
+    scrollFrame:SetVerticalScroll(maxScroll)
+    local sName = scrollFrame:GetName()
+    if sName then
+        local sb = _G[sName .. "ScrollBar"]
+        if sb and sb.SetValue then
+            sb:SetValue(maxScroll)
+        end
+    end
+end
+
 function PUITalk:ToggleSelectableMode(tabIndex)
     tabIndex = tabIndex or self.db:Get("activeMasterTab") or 1
     local masterFrame = self.masterFrame
@@ -800,7 +816,7 @@ function PUITalk:ToggleSelectableMode(tabIndex)
             overlay:Show()
             if viewChat.msgFrame then viewChat.msgFrame:Hide() end
             overlay.editBox:SetFocus()
-            overlay.scroll:ScrollToBottom()
+            ScrollFrameToBottom(overlay.scroll)
             DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: Selectable chat mode active! Click & drag mouse to highlight, Ctrl+C to copy.", "69ccf0"))
         end
     elseif tabIndex == 2 then
@@ -826,7 +842,7 @@ function PUITalk:ToggleSelectableMode(tabIndex)
             overlay:Show()
             if viewMessages.msgFrame then viewMessages.msgFrame:Hide() end
             overlay.editBox:SetFocus()
-            overlay.scroll:ScrollToBottom()
+            ScrollFrameToBottom(overlay.scroll)
             DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: Selectable messages mode active! Click & drag mouse to highlight, Ctrl+C to copy.", "69ccf0"))
         end
     end
