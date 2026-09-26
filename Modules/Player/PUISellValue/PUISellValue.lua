@@ -410,11 +410,23 @@ local function HookTooltip(tooltip)
         tooltip.SetQuestLogItem = function(self, qtype, slot)
             ClearTooltipFlag(self)
             local r1, r2, r3, r4 = origSetQuestLogItem(self, qtype, slot)
-            local link = GetQuestLogItemLink(qtype, slot)
-            if link then
-                local itemID = PUISellValue:ExtractItemID(link)
-                local _, _, count = GetQuestLogItemInfo(qtype, slot)
-                PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
+            if GetQuestLogItemLink then
+                local link = GetQuestLogItemLink(qtype, slot)
+                if link then
+                    local itemID = PUISellValue:ExtractItemID(link)
+                    local count = 1
+                    if qtype == "choice" and GetQuestLogChoiceInfo then
+                        local _, _, num = GetQuestLogChoiceInfo(slot)
+                        count = num or 1
+                    elseif qtype == "reward" and GetQuestLogRewardInfo then
+                        local _, _, num = GetQuestLogRewardInfo(slot)
+                        count = num or 1
+                    elseif GetQuestLogItemInfo then
+                        local _, _, num = GetQuestLogItemInfo(qtype, slot)
+                        count = num or 1
+                    end
+                    PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
+                end
             end
             return r1, r2, r3, r4
         end
