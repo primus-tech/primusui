@@ -205,20 +205,24 @@
   - [x] Persistent SavedVariables storage by quest title.
   - [x] Difficulty colored level headers (`[11] Quest Title`) and completion preservation.
   - [x] Mover integration (`PUIMover`) with multi-anchor stretching protection.
-- [ ] **`PUIQuestHelper` Dynamic Realm-Learning Quest Engine (`Modules/Player/PUIQuestHelper/`):**
-  - [ ] Dual-mode database loader: **Vanilla 1.12.1 Standard** vs. **Turtle WoW / Custom Additions**.
-  - [ ] Autonomous Realm-Learning cache (`PrimusGlobalDB.PUIQuestHelper.realms[GetRealmName()]`) for questgivers, turn-in NPCs, mob spawn zones, and drop coordinates.
-  - [ ] World map & Minimap POI overlays (`!` available, `?` turn-in, circular objective highlight zones).
-  - [ ] Handshake integration with `PUIQuestWatch` for direct navigation and objective clicking.
+- [x] **`PUIQuest` Integrated Quest Navigation & Database Engine (`Modules/Player/PUIQuest/`):**
+  - [x] Canonical zero-shim database ingestion for Vanilla 1.12.1 + Turtle WoW extensions (`PUIQuest.DB`).
+  - [x] Dynamic runtime delta-patching engine (`Patchtable.lua`) enabling 1-click toggling between Vanilla 1.12.1 and Turtle WoW / Custom content.
+  - [x] Multi-index entity query engine (`Database.lua`) for items, quests, units, objects, vendors, and drops.
+  - [x] World map POI pin overlays (`Map.lua`) on `WorldMapButton` with level-difficulty coloring, cluster peeking, and rich tooltips.
+  - [x] Minimap radar pin tracking and rotating HUD directional navigation arrow (`Tracker.lua`).
+  - [x] QuestLogFrame integration (`Quest.lua`) with `[Show on Map]` and `[Clean Map]` action buttons.
+  - [x] Themed dark glassmorphic Database Browser UI (`Browser.lua`, `/pui db`).
+  - [x] Handshake integration with `PUIQuestWatch` (Alt-Click header / Left-Click auto-focus) and `PUISellValue`.
 
 ---
 
 ## 🎯 Tier 3: Player & Character Sub-Modules
 
-- [ ] **`PUISellValue` Hybrid Item Pricing Engine (`Modules/Player/PUISellValue/`):**
-  - [ ] Tier 1 built-in static price table (seeded from pfUI/pfQuest item database).
-  - [ ] Tier 2 autonomous realm auto-learning cache (`PrimusGlobalDB.PUISellValue.realms[GetRealmName()].prices[itemID]`) recording prices on merchant visits.
-  - [ ] Universal tooltip injection (`GameTooltip:SetBagItem`, `SetInventoryItem`, `SetHyperlink`, `SetAction`, `SetCraftItem`, etc.) displaying single item and stack prices when away from vendors.
+- [x] **`PUISellValue` Hybrid Item Pricing Engine (`Modules/Player/PUISellValue/`):**
+  - [x] Tier 1 built-in static price table (seeded from pfUI/pfQuest item database).
+  - [x] Tier 2 autonomous realm auto-learning cache (`PrimusGlobalDB.PUISellValue.realms[GetRealmName()].prices[itemID]`) recording prices on merchant visits.
+  - [x] Universal tooltip injection (`GameTooltip:SetBagItem`, `SetInventoryItem`, `SetHyperlink`, `SetAction`, `SetCraftItem`, etc.) displaying single item and stack prices when away from vendors.
 - [ ] **`Bags` & Inventory Advanced Innovations (`Modules/Player/PUIBags/`):**
   - [ ] Implement the automated bag defragmentation & auto-sort algorithm (`[SORT]`).
   - [x] Build collapsible bottom bag dock with interactive bag highlight filter (spotlights selected bag, dims other slots to 20%).

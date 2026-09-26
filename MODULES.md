@@ -80,11 +80,11 @@ To achieve total architectural consistency, all modular components in PrimusUI a
 | `PUICharacterSheet` | `PUICharacterSheet` | `Modules/Player/PUICharacterSheet/PUICharacterSheet.lua` | ✅ **DONE** |
 | `PUIItemStats` | `PUIItemStats` | `Modules/Player/PUIItemStats/PUIItemStats.lua` | ✅ **DONE** |
 | `PUIVendor` | `PUIVendor` | `Modules/Player/PUIVendor/PUIVendor.lua` | ✅ **DONE** |
-| `PUISellValue` | `PUISellValue` | `Modules/Player/PUISellValue/PUISellValue.lua` | 📋 **PLANNED** |
+| `PUISellValue` | `PUISellValue` | `Modules/Player/PUISellValue/`<br>• `PUISellValueData.lua`<br>• `PUISellValue.lua` | ✅ **DONE** |
 | `PUIReagents` | `PUIReagents` | `Modules/Player/PUIReagents/PUIReagents.lua` | ✅ **DONE** |
 | `PUITalents` | `PUITalents` | `Modules/Player/PUITalents/PUITalents.lua` | ✅ **DONE** |
 | `PUIQuestWatch` | `PUIQuestWatch` | `Modules/Player/PUIQuestWatch/PUIQuestWatch.lua` | ✅ **DONE** |
-| `PUIQuestHelper` | `PUIQuestHelper` | `Modules/Player/PUIQuestHelper/PUIQuestHelper.lua` | 📋 **PLANNED** |
+| `PUIQuest` | `PUIQuest` | `Modules/Player/PUIQuest/`<br>• `DB/` (Vanilla 1.12.1 database & locales)<br>• `DB-Turtle/` (Turtle WoW / Custom extensions)<br>• `Patchtable.lua` (Dynamic delta patcher)<br>• `Database.lua` (Multi-index query engine)<br>• `Map.lua` (World Map POI pins & tooltips)<br>• `Tracker.lua` (Minimap radar & HUD arrow)<br>• `Quest.lua` (QuestLog hooks & action buttons)<br>• `Browser.lua` (Themed DB browser UI `/pui db`)<br>• `PUIQuest.lua` (Master coordinator) | ✅ **DONE** |
 
 ---
 

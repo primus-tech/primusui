@@ -73,7 +73,7 @@ TIER 3: PLAYER & CHARACTER SUB-MODULES (Modules/Player, Professions, Gathering, 
 • PUIBank                   : Unified bank container (main bank + bags 5–10) with offline persistent caching
 • PUISellValue              : Hybrid item pricing engine (Tier 1 built-in database + Tier 2 autonomous realm-learning cache) with universal tooltip injection
 • PUIQuestWatch             : Advanced persistent quest tracker with 5-minute expiry fix, difficulty headers, and PUIMover anchoring
-• PUIQuestHelper            : Dynamic realm-learning quest navigation engine (Vanilla & Turtle modes) with World Map & Minimap POIs
+• PUIQuest                  : Cannibalized zero-shim quest engine & database (Vanilla 1.12.1 + Turtle WoW) with World Map pins, minimap radar, 3D HUD arrow, and database browser UI
 • PUICharacterSheet         : Equipment slot durability percentages and item level display
 • PUIItemStats              : Hidden tooltip stat scanner (+Spell Dmg, +Healing, Hit, Crit, MP5)
 • PUIVendor                 : Grey junk vendor automation with wearability protection & auto-repair

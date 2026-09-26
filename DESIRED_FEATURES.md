@@ -603,36 +603,37 @@ In Vanilla WoW 1.12.1, Blizzard's game engine suppresses vendor sell prices from
 
 ---
 
-## 14. PUIQuestHelper: Dynamic Realm-Learning Quest Helper & Map POI Engine
+## 14. PUIQuest: Integrated Quest Navigation & Database Engine
 
 ### Conceptual Vision
-A lightweight, fully integrated quest navigation and objective engine inspired by `pfQuest`, unified directly with **`PUIQuestWatch`**. Eliminates the need for bulky external quest addons by providing configurable database modes (Vanilla vs. Turtle WoW) and an **Autonomous Realm-Learning Engine** that records questgivers, objectives, monster spawns, and item drop rates on custom private realms.
+A fully integrated, zero-shim quest navigation and database engine cannibalized from `pfQuest` and `pfQuest-turtle`, natively integrated into PrimusUI. Eliminates external quest addon dependencies by embedding a complete multi-index query database (`PUIQuest.DB`), dynamic Turtle WoW delta-patching, pooled World Map pins, minimap radar and HUD directional arrow, QuestLog action buttons, and an in-game dark glassmorphic database browser (`/pui db`).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                   PUIQUESTHELPER: DATABASE & REALM ENGINE                 │
+│                      PUIQUEST: DATABASE & NAVIGATION                     │
 ├──────────────────────────────────────────────────────────────────────────┤
-│  [ Database Mode ]                                                       │
-│  ◉ Vanilla 1.12.1 Standard      ○ Turtle WoW / Custom Additions          │
+│  [ Database Content ]                                                    │
+│  [x] Vanilla 1.12.1 Core        [x] Turtle WoW / Custom Additions        │
 │                                                                          │
-│  [ Realm-Learning Engine ]                                               │
-│  • Active Realm: [Alah'Thalas / OctoWoW]                                 │
-│  • Learned Questgivers: 412     • Learned Objectives: 1,280              │
-│  • Learned Drop Coordinates: 890 Entities                                │
+│  [ Navigation & Overlays ]                                               │
+│  • World Map POI Pins: Active   • Minimap Radar & HUD Arrow: Active      │
+│  • QuestLog Direct Map Link     • In-Game DB Browser (/pui db)           │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Core Specifications:
-1. **Dual-Mode Database Architecture:**
-   - **Vanilla 1.12.1 Mode:** Pure standard quest definitions, NPC coordinates, monster spawn areas, and object nodes.
-   - **Turtle WoW Mode:** Extended database incorporating custom quests, new zones/subzones (e.g., Alah'Thalas, Gillijim's Isle, Lapidis), new quest items, and altered level requirements.
-2. **Autonomous Realm-Based Dynamic Learning:**
-   - When completing quests, interacting with quest NPCs (`QUEST_GREET`, `QUEST_DETAIL`, `QUEST_PROGRESS`, `QUEST_COMPLETE`), or looting quest objectives (`CHAT_MSG_LOOT`), the engine automatically records the player's current zone and coordinates (`GetPlayerMapPosition`) into `PrimusGlobalDB.PUIQuestHelper.realms[GetRealmName()]`.
-   - Allows seamless support for private realms with custom quest scripts or relocated NPCs without requiring manual database patches.
-3. **World Map & Minimap Overlays:**
-   - Clean, lightweight map POI pins indicating:
-     - `!` Available Quests (level-scaled color coding).
-     - `?` Active Turn-ins (silver for in-progress, gold for complete).
-     - Circular highlight zones for mob spawns and objective areas.
-4. **PUIQuestWatch Direct Navigation Handshake:**
-   - Interacts with `PUIQuestWatch`: clicking a quest header in the tracker highlights its objective nodes on the World Map and points the minimap arrow toward the nearest target.
+1. **Canonical Zero-Shim Architecture (`PUIQuest.DB`):**
+   - Direct absorption of Vanilla 1.12.1 database (items, quests, units, objects, refloot, zones, areatriggers, minimap coordinates, meta, and locales) and Turtle WoW / Custom extensions into `Primus.PUIQuest.DB` without legacy `pfDB` globals or metatable shims.
+2. **Dynamic Runtime Delta-Patching (`Patchtable.lua`):**
+   - In-memory table patching over `PUIQuest.DB` allowing 1-click toggling between pure Vanilla 1.12.1 and Turtle WoW / custom content via `/pui config` or `/pui quest turtle`. Supports custom race bitmasks (`Goblin` [256], `BloodElf` [512]).
+3. **Multi-Index Query Engine (`Database.lua`):**
+   - Fast lookup indices for quests (by giver, turn-in, item drop, level), items (by vendor, drop, recipe), units (by spawn zone, coordinates), and objects.
+4. **World Map POIs & Minimap Radar / HUD Arrow (`Map.lua` & `Tracker.lua`):**
+   - Frame-pooled pins on `WorldMapButton` with level-difficulty colored headers, cluster peeking for dense locations, interactive tooltips, and custom icons (`!` available, `?` turn-in, numbered spawns).
+   - Minimap radar pins and rotating 3D HUD directional navigation arrow (`ROTATING-MINIMAPARROW`).
+5. **QuestLog & In-Game Database Browser (`Quest.lua` & `Browser.lua`):**
+   - Embedded `[Show on Map]` and `[Clean Map]` buttons on `QuestLogFrame`.
+   - Themed dark glassmorphic database browser UI (`/pui db` / `/pui quest show`) supporting live entity search.
+6. **Cross-Module Handshakes:**
+   - Seamless synergy with `PUIQuestWatch` (Alt-Click header / Left-Click auto-focus) and `PUISellValue` (supplying offline vendor baseline prices for 25,000+ items).
+

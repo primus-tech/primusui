@@ -148,6 +148,17 @@
   - Difficulty colored level headers (`[11] Quest Title`) and completion preservation (`• Complete (Ready to turn in)`).
   - PUIMover integration under `"PLAYER"` category with multi-anchor stretching protection.
   - Slash command registration via `Primus.Console:RegisterSubCommand`.
+  - Direct Alt-Click / Left-Click navigation focus handshake with `PUIQuest`.
+- [x] **PUIQuest: Cannibalized & Canonical Standalone Quest Engine & Database (`Modules/Player/PUIQuest/`):**
+  - **Zero Legacy Shims / No Metatable Proxies**: 100% native PrimusUI architecture where all Vanilla 1.12.1 + Turtle WoW databases load cleanly into `Primus.PUIQuest.DB` without legacy `pfDB` globals.
+  - **Dual Database & Dynamic Runtime Delta Patcher (`Patchtable.lua`)**: Comprehensive database supporting standard Vanilla 1.12.1 and Turtle WoW / Custom extensions (items, quests, units, objects, refloot, zones, areatriggers, minimap coordinates, meta, and locales) with 1-click dynamic runtime toggling in `/pui config` or `/pui quest turtle`. Supports custom race bitmasks (`Goblin` [256], `BloodElf` [512]).
+  - **Multi-Index Query Engine (`Database.lua`)**: High-performance querying across items, quests, units, objects, vendor buy/sell prices, item drops, and full-text substring search.
+  - **World Map POI Pin System (`Map.lua`)**: Frame-pooled pins on `WorldMapButton` with level-difficulty colored headers, cluster peeking for dense locations, interactive tooltips, and custom icons (`!` available, `?` turn-in, numbered spawns).
+  - **Minimap Radar & 3D HUD Arrow (`Tracker.lua`)**: Directional navigation radar pins and rotating HUD arrow (`ROTATING-MINIMAPARROW`) guiding the player to the active quest target.
+  - **Quest Log Integration (`Quest.lua`)**: Embedded `[Show on Map]` and `[Clean Map]` action buttons on `QuestLogFrame`.
+  - **Themed Dark Glassmorphic Database Browser (`Browser.lua`)**: In-game searchable database explorer (`/pui db` / `/pui quest show`) with search by item, quest, NPC, or object.
+  - **Cross-Module Synergies**: Seamless handshakes with `PUIQuestWatch` (Alt-Click header / Left-Click auto-focus) and `PUISellValue` (providing 25,000+ item vendor baseline prices).
+  - Options Flare configuration and `/pui quest` / `/pui db` CLI router.
 - [x] **Character Sheet & Item Stats (`Modules/Player/PUICharacterSheet/` & `PUIItemStats/`):**
   - Gear score / iLvl calculator, durability indicators, and extended stat scanner (+Healing, +Spell Dmg, Hit, Crit, MP5).
 - [x] **Item Compare (`Modules/Utility/PUIItemCompare/`):**
@@ -164,7 +175,14 @@
   - Recipe catalog, craftable item counters, and reagent acquisition tracker.
 - [x] **PUIGathering Tracker (`Modules/Gathering/PUIGathering/`):**
   - Mining and herbalism node recording with minimap pin tracking.
-- [x] **Vendor Suite & Merchant Automation (`Modules/Player/Vendor/`):**
+- [x] **PUISellValue: Hybrid Item Pricing & Vendor Sell Value Engine (`Modules/Player/PUISellValue/`):**
+  - Hybrid 2-tier resolution architecture: Tier 1 built-in static database (`PUISellValueData.lua`) seeded with standard Vanilla 1.12.1 + Turtle WoW items, and Tier 2 autonomous live realm-learning cache (`PrimusGlobalDB.PUISellValue.realms[GetRealmName()].prices[itemID]`).
+  - Universal tooltip injection hooking `SetBagItem`, `SetInventoryItem`, `SetHyperlink`, `SetAction`, `SetCraftItem`, `SetTradeSkillItem`, `SetLootItem`, `SetLootRollItem`, `SetQuestItem`, `SetQuestLogItem`, `SetInboxItem`, `SetSendMailItem`, `SetAuctionItem`, `SetAuctionSellItem`, `SetTradePlayerItem`, and `SetTradeTargetItem`.
+  - Single item (`Sell: 1g 25s 40c`) and stack price (`Sell (x5): 7g 27s 00c (1g 25s 40c ea)`) formatting using native copper conversion.
+  - Native merchant suppression preventing duplicate rows when `MerchantFrame` is open.
+  - Autonomous live vendor price extraction on `MERCHANT_SHOW`, `MERCHANT_UPDATE`, and bag item scans.
+  - Full Options Flare integration and `/pui sell` diagnostic CLI router commands.
+- [x] **Vendor Suite & Merchant Automation (`Modules/Player/PUIVendor/`):**
   - Embedded `[Sell Greys]` button and `[x] Auto-Sell` checkbox directly on `MerchantFrame` (deactivated by default).
   - 100% Vanilla 1.12.1 `GetItemInfo` 9-value unpack engine compliance.
   - Strict protection filter preserving all wearable equipment (weapons, armor, cloth/leather/mail/plate, accessories).

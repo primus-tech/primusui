@@ -294,8 +294,16 @@ function PUIQuestWatch:GetHeaderButton(index)
                 else
                     PUIQuestWatch:UntrackQuest(btn.questTitle)
                 end
+            elseif IsAltKeyDown() then
+                -- Alt-Click: Focus Navigation Target directly in PUIQuest
+                if Primus.PUIQuest and Primus.PUIQuest.FocusQuest then
+                    Primus.PUIQuest:FocusQuest(btn.questTitle)
+                end
             else
-                -- Left-Click: Open Quest Log directly to this quest
+                -- Left-Click: Open Quest Log directly to this quest & Focus Navigation
+                if Primus.PUIQuest and Primus.PUIQuest.FocusQuest then
+                    Primus.PUIQuest:FocusQuest(btn.questTitle)
+                end
                 if not QuestLogFrame:IsVisible() then
                     ShowUIPanel(QuestLogFrame)
                 end
@@ -321,7 +329,8 @@ function PUIQuestWatch:GetHeaderButton(index)
                     headerText = headerText .. " (" .. questTag .. ")"
                 end
                 GameTooltip:AddLine(headerText, 1.0, 0.82, 0.0)
-                GameTooltip:AddLine("Left-Click: Open in Quest Log", 0.7, 0.7, 0.7)
+                GameTooltip:AddLine("Left-Click: Open in Quest Log & Focus Navigation", 0.7, 0.7, 0.7)
+                GameTooltip:AddLine("Alt-Click: Focus Objective Target", 0.4, 0.85, 1.0)
                 GameTooltip:AddLine("Shift-Click: Untrack / Link in Chat", 0.7, 0.7, 0.7)
                 GameTooltip:Show()
             end
