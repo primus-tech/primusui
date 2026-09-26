@@ -69,8 +69,11 @@ TIER 2: WORLD, COMBAT & NAVIGATION ENGINES (Modules/Combat, HUD, Units, Bars, Na
 TIER 3: PLAYER & CHARACTER SUB-MODULES (Modules/Player, Professions, Gathering, Classes)
 ========================================================================================
 • PUISpellbook              : Authentic 2-page book spread, rank dropdown flyouts, discipline tabs
-• PUIBags                   : Single-window unified inventory for bags 0–4 with search and quality borders
+• PUIBags                   : Single-window unified inventory for bags 0–4 with search, quality borders, dynamic coin display, and bag highlight filtering
 • PUIBank                   : Unified bank container (main bank + bags 5–10) with offline persistent caching
+• PUISellValue              : Hybrid item pricing engine (Tier 1 built-in database + Tier 2 autonomous realm-learning cache) with universal tooltip injection
+• PUIQuestWatch             : Advanced persistent quest tracker with 5-minute expiry fix, difficulty headers, and PUIMover anchoring
+• PUIQuestHelper            : Dynamic realm-learning quest navigation engine (Vanilla & Turtle modes) with World Map & Minimap POIs
 • PUICharacterSheet         : Equipment slot durability percentages and item level display
 • PUIItemStats              : Hidden tooltip stat scanner (+Spell Dmg, +Healing, Hit, Crit, MP5)
 • PUIVendor                 : Grey junk vendor automation with wearability protection & auto-repair

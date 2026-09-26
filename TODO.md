@@ -199,19 +199,30 @@
   - [ ] Add player & cursor coordinates to `WorldMapFrame`.
   - [ ] Support windowed / scalable mode for `WorldMapFrame` without taking over the full screen.
   - [ ] Add map pin overlay system for custom waypoints, quest objectives, and gathering nodes.
-- [ ] **`QuestLog` Tracker Module (`Modules/Player/QuestLog/`):**
-  - [ ] Extended quest objective tracker with collapsible headers and progress percentages.
-  - [ ] Quest level display in the quest title list (`[60] In Dreams`).
-  - [ ] Integrated quest timer and quest reward preview.
+- [x] **`PUIQuestWatch` Advanced Quest Tracker (`Modules/Player/PUIQuestWatch/PUIQuestWatch.lua`):**
+  - [x] Neutralize Blizzard 5-minute auto-expiry bug (`AutoQuestWatch_OnUpdate`).
+  - [x] Fix Blizzard `tremove` quest watch table corruption.
+  - [x] Persistent SavedVariables storage by quest title.
+  - [x] Difficulty colored level headers (`[11] Quest Title`) and completion preservation.
+  - [x] Mover integration (`PUIMover`) with multi-anchor stretching protection.
+- [ ] **`PUIQuestHelper` Dynamic Realm-Learning Quest Engine (`Modules/Player/PUIQuestHelper/`):**
+  - [ ] Dual-mode database loader: **Vanilla 1.12.1 Standard** vs. **Turtle WoW / Custom Additions**.
+  - [ ] Autonomous Realm-Learning cache (`PrimusGlobalDB.PUIQuestHelper.realms[GetRealmName()]`) for questgivers, turn-in NPCs, mob spawn zones, and drop coordinates.
+  - [ ] World map & Minimap POI overlays (`!` available, `?` turn-in, circular objective highlight zones).
+  - [ ] Handshake integration with `PUIQuestWatch` for direct navigation and objective clicking.
 
 ---
 
 ## 🎯 Tier 3: Player & Character Sub-Modules
 
-- [ ] **`Bags` & Inventory Advanced Innovations (`Modules/Player/Bags/`):**
+- [ ] **`PUISellValue` Hybrid Item Pricing Engine (`Modules/Player/PUISellValue/`):**
+  - [ ] Tier 1 built-in static price table (seeded from pfUI/pfQuest item database).
+  - [ ] Tier 2 autonomous realm auto-learning cache (`PrimusGlobalDB.PUISellValue.realms[GetRealmName()].prices[itemID]`) recording prices on merchant visits.
+  - [ ] Universal tooltip injection (`GameTooltip:SetBagItem`, `SetInventoryItem`, `SetHyperlink`, `SetAction`, `SetCraftItem`, etc.) displaying single item and stack prices when away from vendors.
+- [ ] **`Bags` & Inventory Advanced Innovations (`Modules/Player/PUIBags/`):**
   - [ ] Implement the automated bag defragmentation & auto-sort algorithm (`[SORT]`).
-  - [ ] Build collapsible bottom bag dock with interactive bag highlight filter (spotlights selected bag, dims other slots to 20%).
-  - [ ] Add single-button Master Bag Bar mode with live slot badge (`[34/80]`).
+  - [x] Build collapsible bottom bag dock with interactive bag highlight filter (spotlights selected bag, dims other slots to 20%).
+  - [x] Shift-click bag slot pickup and dynamic money footer with native 1.12.1 `UI-MoneyIcons`.
   - [ ] Build three layout presentation presets:
     - *Preset 1:* Unified Continuous Grid.
     - *Preset 2:* Grouped by Bag Containers.

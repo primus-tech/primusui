@@ -559,5 +559,80 @@ Eliminates the need for external healing addons (HealBot, Clique, Decursive) by 
 5. **Aura & Debuff Highlight Borders:**
    - Frame borders automatically highlight in standard debuff colors (*Purple for Curse, Blue for Magic, Green for Poison, Brown for Disease*) when a cleansable affliction is detected.
 
+---
 
+## 13. PUISellValue: Hybrid Item Pricing & Vendor Sell Value Engine
 
+### Conceptual Vision
+In Vanilla WoW 1.12.1, Blizzard's game engine suppresses vendor sell prices from item tooltips whenever the player is away from a merchant window (`MERCHANT_SHOW`), and `GetItemInfo` only returns 9 values without price metadata. **PUISellValue** provides an instant, universal sell price engine utilizing a **Hybrid Resolution Architecture**: combining a compact built-in database (seeded from pfUI/pfQuest item records) with an autonomous, realm-partitioned **Live Auto-Learning Cache**.
+
+```
+┌────────────────────────────────────────────────────────┐
+│               TOOLTIP HOVER / ITEM QUERY               │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+              ┌───────────────────────────┐
+              │  Is Merchant Frame Open?  │
+              └─────────────┬─────────────┘
+                     NO     │     YES
+             ┌──────────────┴──────────────┐
+             ▼                             ▼
+  ┌───────────────────────┐   ┌──────────────────────────┐
+  │ Query PUISellValue    │   │ Let Blizzard Native Row  │
+  │ Hybrid Price Engine   │   │ Render (Prevent Doubles) │
+  └──────────┬────────────┘   └──────────────────────────┘
+             │
+   ┌─────────┴─────────┐
+   ▼                   ▼
+[ Tier 1: Built-in ]  [ Tier 2: Realm Cache ]
+(pfUI / pfQuest DB)   (Learned from Merchants)
+```
+
+### Core Specifications:
+1. **Hybrid Resolution Hierarchy:**
+   - **Tier 1 (Built-In Static DB):** Fast numeric key-value store (`itemID -> priceInCopper`) seeded with standard Vanilla 1.12.1 items and Turtle WoW/OctoWoW custom additions.
+   - **Tier 2 (Realm Auto-Learning Cache):** Silently intercepts merchant inventories (`MERCHANT_SHOW`, `MERCHANT_UPDATE`) and container scans to learn and update prices dynamically into `PrimusGlobalDB.PUISellValue.realms[GetRealmName()].prices[itemID]`.
+2. **Contextual Tooltip Formatting:**
+   - Appends a clean, formatted footer line to item tooltips using Vanilla coin icons or colored abbreviations:
+     - **Single Item:** `Sell: 1g 25s 40c`
+     - **Stack (>1 items):** `Sell (x5): 7g 27s 00c (1g 25s 40c ea)`
+3. **Universal Tooltip Hooks:**
+   - Hooks `GameTooltip:SetBagItem`, `SetInventoryItem`, `SetHyperlink`, `SetAction`, `SetCraftItem`, `SetTradeSkillItem`, and `SetLootItem`.
+   - Strictly suppresses injection when a merchant window is open to prevent duplicate rows.
+
+---
+
+## 14. PUIQuestHelper: Dynamic Realm-Learning Quest Helper & Map POI Engine
+
+### Conceptual Vision
+A lightweight, fully integrated quest navigation and objective engine inspired by `pfQuest`, unified directly with **`PUIQuestWatch`**. Eliminates the need for bulky external quest addons by providing configurable database modes (Vanilla vs. Turtle WoW) and an **Autonomous Realm-Learning Engine** that records questgivers, objectives, monster spawns, and item drop rates on custom private realms.
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                   PUIQUESTHELPER: DATABASE & REALM ENGINE                 │
+├──────────────────────────────────────────────────────────────────────────┤
+│  [ Database Mode ]                                                       │
+│  ◉ Vanilla 1.12.1 Standard      ○ Turtle WoW / Custom Additions          │
+│                                                                          │
+│  [ Realm-Learning Engine ]                                               │
+│  • Active Realm: [Alah'Thalas / OctoWoW]                                 │
+│  • Learned Questgivers: 412     • Learned Objectives: 1,280              │
+│  • Learned Drop Coordinates: 890 Entities                                │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Core Specifications:
+1. **Dual-Mode Database Architecture:**
+   - **Vanilla 1.12.1 Mode:** Pure standard quest definitions, NPC coordinates, monster spawn areas, and object nodes.
+   - **Turtle WoW Mode:** Extended database incorporating custom quests, new zones/subzones (e.g., Alah'Thalas, Gillijim's Isle, Lapidis), new quest items, and altered level requirements.
+2. **Autonomous Realm-Based Dynamic Learning:**
+   - When completing quests, interacting with quest NPCs (`QUEST_GREET`, `QUEST_DETAIL`, `QUEST_PROGRESS`, `QUEST_COMPLETE`), or looting quest objectives (`CHAT_MSG_LOOT`), the engine automatically records the player's current zone and coordinates (`GetPlayerMapPosition`) into `PrimusGlobalDB.PUIQuestHelper.realms[GetRealmName()]`.
+   - Allows seamless support for private realms with custom quest scripts or relocated NPCs without requiring manual database patches.
+3. **World Map & Minimap Overlays:**
+   - Clean, lightweight map POI pins indicating:
+     - `!` Available Quests (level-scaled color coding).
+     - `?` Active Turn-ins (silver for in-progress, gold for complete).
+     - Circular highlight zones for mob spawns and objective areas.
+4. **PUIQuestWatch Direct Navigation Handshake:**
+   - Interacts with `PUIQuestWatch`: clicking a quest header in the tracker highlights its objective nodes on the World Map and points the minimap arrow toward the nearest target.
