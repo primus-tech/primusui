@@ -136,9 +136,11 @@ local function CreateBankSlot(parent, index)
 
         if isBankOpen and this.bagID and this.slotID then
             if this.bagID == -1 then
-                local invSlot = BankButtonIDToInvSlotID and BankButtonIDToInvSlotID(this.slotID, 0)
-                if invSlot then
-                    hasItem = GameTooltip:SetInventoryItem("player", invSlot)
+                local link = GetContainerItemLink(-1, this.slotID) or this.itemLink
+                if link then
+                    local rawLink = Utils.ExtractLink(link) or link
+                    GameTooltip:SetHyperlink(rawLink)
+                    hasItem = true
                 end
             else
                 local texture = GetContainerItemInfo(this.bagID, this.slotID)

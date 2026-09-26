@@ -271,7 +271,10 @@ local function HookTooltip(tooltip)
     tooltip.SetInventoryItem = function(self, unit, slot)
         ClearTooltipFlag(self)
         local r1, r2, r3, r4 = origSetInventoryItem(self, unit, slot)
-        local link = GetInventoryItemLink(unit, slot)
+        local link = nil
+        if slot and tonumber(slot) and tonumber(slot) >= 1 and tonumber(slot) <= 23 then
+            link = GetInventoryItemLink(unit, slot)
+        end
         if link then
             local itemID = PUISellValue:ExtractItemID(link)
             local count = GetInventoryItemCount(unit, slot) or 1
