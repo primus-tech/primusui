@@ -1,13 +1,9 @@
 --[[
-    PrimusUI Module: PUITalk (Master Orchestrator & Frame Architecture)
+    PrimusUI Module: PUITalk (Master Autonomous Chat & Social Orchestrator)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
-    Consolidates:
-    - PUIChat: Modern chat styling, class colors, URL clicks, sticky channels, chat copy.
-    - PUIMessenger: Isolated whisper DMs, unread badges, audio alerts, and live social roster.
-    
-    Provides 3 Master Top-Level Tabs blended directly into the primary Chat Frame:
-    1. [💬 Chat]     - Docked ChatFrame1 stream, class-colored names, clickable URLs, copy frame, whisper diversion.
+    Provides 3 Master Top-Level Tabs in a Single Autonomous Container:
+    1. [💬 Chat]     - 100% Autonomous chat stream for all channels, class colors, URLs, and in-place selectable text.
     2. [✉️ Messages] - Isolated DM conversation sub-tabs, session history, unread counters, no double-send.
     3. [👥 Social]   - Real-time Friends list & Guild roster with online status, level, zone, and 1-click [DM] action.
 --]]
@@ -26,7 +22,7 @@ local PUIMover = Primus.PUIMover
 local masterFrame = nil
 
 -- =========================================================================
--- 1. MASTER FRAME CONSTRUCTION & DOCKING
+-- 1. MASTER FRAME CONSTRUCTION & LAYOUT
 -- =========================================================================
 
 function PUITalk:CreateMasterFrame()
@@ -45,6 +41,7 @@ function PUITalk:CreateMasterFrame()
     f:SetScript("OnDragStart", function() this:StartMoving() end)
     f:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
     f:Show()
+
     -- ---------------------------------------------------------------------
     -- Top Master Rail (3 Master Tabs + Utility Buttons)
     -- ---------------------------------------------------------------------
@@ -161,7 +158,7 @@ function PUITalk:CreateMasterFrame()
     local contextText = contextPill:CreateFontString(nil, "OVERLAY")
     contextText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
     contextText:SetPoint("CENTER", 0, 0)
-    contextText:SetText("#General")
+    contextText:SetText("#Say")
     contextPill.text = contextText
     f.contextPill = contextPill
 
@@ -194,7 +191,7 @@ function PUITalk:CreateMasterFrame()
     f.viewport = viewport
 
     -- ---------------------------------------------------------------------
-    -- TAB 1 VIEW: 💬 CHAT
+    -- TAB 1 VIEW: 💬 AUTONOMOUS CHAT STREAM
     -- ---------------------------------------------------------------------
     local viewChat = CreateFrame("Frame", "Primus_PUITalkViewChat", viewport)
     viewChat:SetAllPoints(viewport)
@@ -202,8 +199,22 @@ function PUITalk:CreateMasterFrame()
     viewChat:SetBackdropColor(0.04, 0.04, 0.06, 0.6)
     viewChat:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.6)
 
-    -- Dock default Blizzard ChatFrame1 right into the viewChat container!
-    PUITalk:DockDefaultChatFrame(viewChat)
+    local chatMsgFrame = CreateFrame("ScrollingMessageFrame", "Primus_PUITalkChatMsgStream", viewChat)
+    chatMsgFrame:SetPoint("TOPLEFT", viewChat, "TOPLEFT", 6, -4)
+    chatMsgFrame:SetPoint("BOTTOMRIGHT", viewChat, "BOTTOMRIGHT", -6, 4)
+    chatMsgFrame:SetFont(Media:Fetch("font", "Default"), 10, "")
+    chatMsgFrame:SetJustifyH("LEFT")
+    chatMsgFrame:SetFading(false)
+    chatMsgFrame:SetMaxLines(500)
+    chatMsgFrame:EnableMouseWheel(true)
+    chatMsgFrame:SetScript("OnMouseWheel", function()
+        if arg1 > 0 then
+            if IsShiftKeyDown() then chatMsgFrame:ScrollToTop() else chatMsgFrame:ScrollUp() chatMsgFrame:ScrollUp() chatMsgFrame:ScrollUp() end
+        else
+            if IsShiftKeyDown() then chatMsgFrame:ScrollToBottom() else chatMsgFrame:ScrollDown() chatMsgFrame:ScrollDown() chatMsgFrame:ScrollDown() end
+        end
+    end)
+    viewChat.msgFrame = chatMsgFrame
     f.viewChat = viewChat
 
     -- ---------------------------------------------------------------------
@@ -348,18 +359,18 @@ function PUITalk:SelectMasterTab(tabIndex)
         masterFrame.viewMessages.selectOverlay:Hide()
     end
 
-    -- Toggle Viewports & Manage ChatFrame1 Visibility
+    -- Toggle Viewports
     masterFrame.viewChat:Hide()
     masterFrame.viewMessages:Hide()
     masterFrame.viewSocial:Hide()
 
     if tabIndex == 1 then
         masterFrame.viewChat:Show()
-        if ChatFrame1 then ChatFrame1:Show() end
-        masterFrame.contextPill.text:SetText("#General")
+        if masterFrame.viewChat.msgFrame then masterFrame.viewChat.msgFrame:Show() end
+        masterFrame.contextPill.text:SetText("#Say")
     elseif tabIndex == 2 then
         masterFrame.viewMessages:Show()
-        if ChatFrame1 then ChatFrame1:Hide() end
+        if masterFrame.viewMessages.msgFrame then masterFrame.viewMessages.msgFrame:Show() end
         self:RefreshDMTabs()
         if self.activeDMKey and self.dmTabs[self.activeDMKey] then
             masterFrame.contextPill.text:SetText("To: " .. (self.dmTabs[self.activeDMKey].name or self.activeDMKey))
@@ -368,15 +379,16 @@ function PUITalk:SelectMasterTab(tabIndex)
         end
     elseif tabIndex == 3 then
         masterFrame.viewSocial:Show()
-        if ChatFrame1 then ChatFrame1:Hide() end
         masterFrame.contextPill.text:SetText("Social")
         self:RefreshSocialView()
     end
 end
 
 -- =========================================================================
--- 3. INPUT SUBMISSION HANDLER
+-- 3. INPUT SUBMISSION & SLASH DISPATCH
 -- =========================================================================
+
+local activeChannelType = "SAY"
 
 function PUITalk:HandleInputSubmit(text)
     if not text or text == "" then return end
@@ -387,14 +399,103 @@ function PUITalk:HandleInputSubmit(text)
         -- Direct Whisper Mode
         local targetName = self.dmTabs[self.activeDMKey].name or self.activeDMKey
         SendChatMessage(text, "WHISPER", nil, targetName)
+        return
+    end
+
+    -- Check for leading slash commands
+    if string.sub(text, 1, 1) == "/" then
+        local spacePos = string.find(text, " ")
+        local cmd = spacePos and string.sub(text, 2, spacePos - 1) or string.sub(text, 2)
+        local rest = spacePos and string.sub(text, spacePos + 1) or ""
+        cmd = string.lower(cmd)
+
+        -- Channel switcher shortcuts
+        if cmd == "s" or cmd == "say" then
+            activeChannelType = "SAY"
+            if masterFrame and masterFrame.contextPill then masterFrame.contextPill.text:SetText("#Say") end
+            if rest ~= "" then SendChatMessage(rest, "SAY") end
+            return
+        elseif cmd == "y" or cmd == "yell" then
+            activeChannelType = "YELL"
+            if masterFrame and masterFrame.contextPill then masterFrame.contextPill.text:SetText("#Yell") end
+            if rest ~= "" then SendChatMessage(rest, "YELL") end
+            return
+        elseif cmd == "p" or cmd == "party" then
+            activeChannelType = "PARTY"
+            if masterFrame and masterFrame.contextPill then masterFrame.contextPill.text:SetText("#Party") end
+            if rest ~= "" then SendChatMessage(rest, "PARTY") end
+            return
+        elseif cmd == "g" or cmd == "guild" then
+            activeChannelType = "GUILD"
+            if masterFrame and masterFrame.contextPill then masterFrame.contextPill.text:SetText("#Guild") end
+            if rest ~= "" then SendChatMessage(rest, "GUILD") end
+            return
+        elseif cmd == "ra" or cmd == "raid" then
+            activeChannelType = "RAID"
+            if masterFrame and masterFrame.contextPill then masterFrame.contextPill.text:SetText("#Raid") end
+            if rest ~= "" then SendChatMessage(rest, "RAID") end
+            return
+        elseif cmd == "o" or cmd == "officer" then
+            activeChannelType = "OFFICER"
+            if masterFrame and masterFrame.contextPill then masterFrame.contextPill.text:SetText("#Officer") end
+            if rest ~= "" then SendChatMessage(rest, "OFFICER") end
+            return
+        elseif cmd == "w" or cmd == "whisper" or cmd == "tell" or cmd == "t" then
+            local sp2 = string.find(rest, " ")
+            local target = sp2 and string.sub(rest, 1, sp2 - 1) or rest
+            local msg = sp2 and string.sub(rest, sp2 + 1) or ""
+            if target and target ~= "" then
+                PUITalk:OpenDMConversation(target)
+                if msg ~= "" then
+                    SendChatMessage(msg, "WHISPER", nil, target)
+                end
+            end
+            return
+        elseif cmd == "r" or cmd == "reply" then
+            if PUITalk.lastWhisperSender then
+                PUITalk:OpenDMConversation(PUITalk.lastWhisperSender)
+                if rest ~= "" then
+                    SendChatMessage(rest, "WHISPER", nil, PUITalk.lastWhisperSender)
+                end
+            end
+            return
+        end
+
+        -- Standard Slash Command dispatch via ChatFrameEditBox
+        if ChatFrameEditBox then
+            ChatFrameEditBox:SetText(text)
+            ChatEdit_SendText(ChatFrameEditBox)
+        end
     else
-        -- Standard Chat Execution
-        ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox or ChatFrame1EditBox, text)
+        -- Standard chat message to active channel
+        SendChatMessage(text, activeChannelType or "SAY")
     end
 end
 
 -- =========================================================================
--- 4. OPTIONS FLARE REGISTRATION
+-- 4. GLOBAL ENTER HOOK FOR AUTONOMOUS CHAT
+-- =========================================================================
+
+local function HookChatKeybind()
+    -- Intercept ChatFrame_OpenChatBox so pressing Enter or clicking chat focuses PUITalk's input
+    if not _G.Primus_OriginalChatFrame_OpenChatBox then
+        _G.Primus_OriginalChatFrame_OpenChatBox = ChatFrame_OpenChatBox
+        ChatFrame_OpenChatBox = function(text)
+            if masterFrame and masterFrame.editBox and not UnitAffectingCombat("player") then
+                masterFrame:Show()
+                if text and text ~= "" then
+                    masterFrame.editBox:SetText(text)
+                end
+                masterFrame.editBox:SetFocus()
+                return
+            end
+            return _G.Primus_OriginalChatFrame_OpenChatBox(text)
+        end
+    end
+end
+
+-- =========================================================================
+-- 5. OPTIONS FLARE REGISTRATION
 -- =========================================================================
 
 function PUITalk:RegisterOptionsFlare()
@@ -404,7 +505,7 @@ function PUITalk:RegisterOptionsFlare()
     Options:RegisterModuleOptions("PUITalk", {
         name = "Social_Talk",
         category = "Social",
-        label = "PUITalk (Unified Chat & Social Hub)",
+        label = "PUITalk (Autonomous Chat & Social Hub)",
         options = {
             {
                 key = "divertWhispers",
@@ -445,67 +546,21 @@ function PUITalk:RegisterOptionsFlare()
                     PUITalk:UpdateClassCache()
                 end,
             },
-            {
-                key = "stickyChannels",
-                type = "checkbox",
-                label = "Sticky Chat Channels",
-                desc = "Remembers last chat channel across /say, /party, /guild, /raid.",
-                default = true,
-                get = function() return PUITalk.db:Get("stickyChannels") end,
-                set = function(v)
-                    PUITalk.db:Set("stickyChannels", v)
-                    if v then PUITalk:SetupStickyChannels() end
-                end,
-            },
-            {
-                key = "mousewheelScroll",
-                type = "checkbox",
-                label = "Mousewheel Fast Scrolling",
-                desc = "Enables mousewheel fast scrolling on chat frames (Shift: Top/Bottom).",
-                default = true,
-                get = function() return PUITalk.db:Get("mousewheelScroll") end,
-                set = function(v)
-                    PUITalk.db:Set("mousewheelScroll", v)
-                    if v then PUITalk:SetupMousewheelScrolling() end
-                end,
-            },
-            {
-                key = "chatCopy",
-                type = "checkbox",
-                label = "Chat Copy [C] Button",
-                desc = "Shows docked [C] button on chat tabs for 1-click clipboard copying.",
-                default = true,
-                get = function() return PUITalk.db:Get("chatCopy") end,
-                set = function(v)
-                    PUITalk.db:Set("chatCopy", v)
-                    if v then
-                        PUITalk:AttachCopyButtons()
-                        for i = 1, 7 do
-                            if PUITalk.copyButtons[i] then PUITalk.copyButtons[i]:Show() end
-                        end
-                    else
-                        for i = 1, 7 do
-                            if PUITalk.copyButtons[i] then PUITalk.copyButtons[i]:Hide() end
-                        end
-                    end
-                end,
-            },
         },
     })
 end
 
 -- =========================================================================
--- 5. LIFECYCLE & EVENT DISPATCH
+-- 6. LIFECYCLE & INITIALIZATION
 -- =========================================================================
 
 function PUITalk:OnInitialize()
-    self:SetupChatHooks()
-    self:AttachCopyButtons()
-    self:SetupMousewheelScrolling()
-    self:SetupStickyChannels()
+    self:SuppressBlizzardChat()
+    self:RegisterChatEvents()
     self:UpdateClassCache()
     self:RegisterOptionsFlare()
     self:CreateMasterFrame()
+    HookChatKeybind()
 
     -- Console Subcommand Registrations
     if Primus.Console and Primus.Console.RegisterSubCommand then
@@ -536,7 +591,7 @@ function PUITalk:OnInitialize()
                     end
                 end
             end
-        end, "PUITalk Unified Communication Suite (/pui talk [copy 1-7|msg|social])")
+        end, "PUITalk Autonomous Chat & Social Suite (/pui talk [copy 1-7|msg|social])")
 
         -- Backward compatibility aliases
         Primus.Console:RegisterAlias("chat", "talk")
@@ -545,12 +600,7 @@ function PUITalk:OnInitialize()
 end
 
 function PUITalk:OnEnable()
-    self:AttachCopyButtons()
-    for i = 1, 7 do
-        if self.copyButtons[i] and self.db:Get("chatCopy") then
-            self.copyButtons[i]:Show()
-        end
-    end
+    self:SuppressBlizzardChat()
 
     -- Incoming Whisper Interception
     Events:Register("CHAT_MSG_WHISPER", "PUITalk", function(owner, event, msg, sender)
@@ -572,7 +622,7 @@ function PUITalk:OnEnable()
 
     -- Social & Class Cache Update Events
     Events:Register("PLAYER_ENTERING_WORLD", "PUITalk", function()
-        PUITalk:AttachCopyButtons()
+        PUITalk:SuppressBlizzardChat()
         PUITalk:UpdateClassCache()
     end)
     Events:Register("PARTY_MEMBERS_CHANGED", "PUITalk", function() PUITalk:UpdateClassCache() end)
@@ -608,12 +658,7 @@ end
 function PUITalk:OnDisable()
     Time:CancelAll("PUITalk")
     Events:UnregisterOwner("PUITalk")
-
-    for i = 1, 7 do
-        if self.copyButtons[i] then
-            self.copyButtons[i]:Hide()
-        end
-    end
+    Events:UnregisterOwner("PUITalk_Chat")
 
     if copyFrame and copyFrame:IsShown() then copyFrame:Hide() end
     if urlFrame and urlFrame:IsShown() then urlFrame:Hide() end

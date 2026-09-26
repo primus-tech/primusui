@@ -5,7 +5,7 @@
     Provides:
     - Shared module state, database namespace registration, and backwards-compatibility aliases.
     - Player class caching and class color string formatting.
-    - Chat cleaning, timestamp generation, and URL linkification.
+    - Chat cleaning, timestamp generation, channel coloring, and URL linkification.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -35,7 +35,7 @@ PUITalk.db = DB:RegisterNamespace("PUITalk", {
     classColors      = true,   -- Class colored player names
     stickyChannels   = true,   -- Sticky chat channels across /say, /guild, /party, /raid
     mousewheelScroll = true,   -- Mousewheel fast scrolling on chat frames
-    chatCopy         = true,   -- Docked [C] button on chat frames for quick copy
+    chatCopy         = true,   -- In-place selection and clipboard copy tools
     activeMasterTab  = 1,      -- 1: Chat, 2: Messages, 3: Social
     activeSocialTab  = "friends", -- "friends" or "guild"
     width            = 450,
@@ -43,15 +43,15 @@ PUITalk.db = DB:RegisterNamespace("PUITalk", {
 })
 
 -- Shared State
-PUITalk.playerClassCache   = {}
-PUITalk.chatBuffers        = {}
-PUITalk.dmTabs             = {}
-PUITalk.activeDMKey        = nil
-PUITalk.conversationHistory = {}
-PUITalk.lastWhisperSender  = nil
-PUITalk.friendRows         = {}
-PUITalk.guildRows          = {}
-PUITalk.copyButtons        = {}
+PUITalk.playerClassCache    = {}
+PUITalk.chatBuffers         = {}
+PUITalk.dmTabs              = {}
+PUITalk.activeDMKey         = nil
+PUITalk.conversationHistory  = {}
+PUITalk.lastWhisperSender   = nil
+PUITalk.friendRows          = {}
+PUITalk.guildRows           = {}
+PUITalk.copyButtons         = {}
 
 for i = 1, 7 do
     PUITalk.chatBuffers[i] = {}
@@ -138,4 +138,27 @@ end
 function PUITalk:GetTimestamp()
     local hour, minute = GetGameTime()
     return string.format("[%02d:%02d]", hour, minute)
+end
+
+-- Channel Default Colors (RGB)
+PUITalk.CHANNEL_COLORS = {
+    ["SAY"]          = { r = 1.00, g = 1.00, b = 1.00 },
+    ["YELL"]         = { r = 1.00, g = 0.25, b = 0.25 },
+    ["EMOTE"]        = { r = 1.00, g = 0.50, b = 0.25 },
+    ["PARTY"]        = { r = 0.67, g = 0.67, b = 1.00 },
+    ["RAID"]         = { r = 1.00, g = 0.50, b = 0.00 },
+    ["RAID_WARNING"] = { r = 1.00, g = 0.28, b = 0.00 },
+    ["GUILD"]        = { r = 0.25, g = 1.00, b = 0.25 },
+    ["OFFICER"]      = { r = 0.25, g = 0.75, b = 0.25 },
+    ["WHISPER"]      = { r = 1.00, g = 0.50, b = 1.00 },
+    ["SYSTEM"]       = { r = 1.00, g = 1.00, b = 0.00 },
+    ["CHANNEL"]      = { r = 0.90, g = 0.75, b = 0.60 },
+    ["MONSTER"]      = { r = 1.00, g = 0.85, b = 0.40 },
+    ["LOOT"]         = { r = 0.00, g = 0.67, b = 0.00 },
+}
+
+function PUITalk:GetChannelColor(chanType)
+    local col = self.CHANNEL_COLORS[chanType]
+    if col then return col.r, col.g, col.b end
+    return 1.0, 1.0, 1.0
 end

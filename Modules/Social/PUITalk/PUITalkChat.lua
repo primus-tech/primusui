@@ -1,15 +1,13 @@
 --[[
-    PrimusUI Module: PUITalk (Chat Integration, Hooks, Copy/Paste & URL Engine)
+    PrimusUI Module: PUITalk (Autonomous Chat Engine, Event Subscriptions & Selection)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides:
-    - Seamless docking & blending of ChatFrame1..7 into the PUITalk master viewport.
-    - Message buffering for clipboard copy frame with 1-click select/copy.
-    - Clickable web URL links with instant copy dialog modal.
-    - Docked [C] buttons on chat tabs.
-    - Mousewheel fast scrolling across all chat frames.
-    - Sticky chat channel remembrance.
-    - Whisper diversion filter to suppress whispers from the main chat stream.
+    - 100% Autonomous Chat Engine taking over all game channels and addon messages.
+    - Permanent suppression of default Blizzard chat frames (ChatFrame1..7).
+    - Event routing for SAY, YELL, PARTY, RAID, GUILD, OFFICER, CHANNELS, SYSTEM, LOOT, EMOTES.
+    - Timestamping, class-colored player names, and clickable web URLs.
+    - In-place drag-highlight selectable text mode and popout copy modal.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -19,12 +17,224 @@ if not Primus or not Primus.PUITalk then return end
 local PUITalk = Primus.PUITalk
 local Media   = Primus.Media
 local Utils   = Primus.Utils
+local Events  = Primus.Events
+local Hider   = Primus.Hider
 
 local copyFrame = nil
 local urlFrame  = nil
 
 -- =========================================================================
--- 1. CHAT COPY WINDOW
+-- 1. ADD MESSAGE TO PUITALK CHAT STREAM
+-- =========================================================================
+
+function PUITalk:AddChatMessage(text, r, g, b, isRaw)
+    if not text or text == "" then return end
+
+    r = r or 1.0
+    g = g or 1.0
+    b = b or 1.0
+
+    local timeStamp = self:GetTimestamp()
+    local cleanText = self:CleanChatText(text)
+    table.insert(self.chatBuffers[1], { time = timeStamp, text = cleanText })
+    if table.getn(self.chatBuffers[1]) > 400 then
+        table.remove(self.chatBuffers[1], 1)
+    end
+
+    local formatted = text
+    if not isRaw then
+        formatted = self:LinkifyURLs(text)
+    end
+
+    if self.masterFrame and self.masterFrame.viewChat and self.masterFrame.viewChat.msgFrame then
+        local msgFrame = self.masterFrame.viewChat.msgFrame
+        msgFrame:AddMessage(formatted, r, g, b)
+    end
+end
+
+-- =========================================================================
+-- 2. GAME CHAT EVENT DISPATCHERS
+-- =========================================================================
+
+function PUITalk:RegisterChatEvents()
+    -- Say & Yell
+    Events:Register("CHAT_MSG_SAY", "PUITalk_Chat", function(owner, event, msg, sender, lang)
+        local colored = PUITalk:GetColoredName(sender)
+        local formatted = string.format("%s |cffffffff[Say]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("SAY")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    Events:Register("CHAT_MSG_YELL", "PUITalk_Chat", function(owner, event, msg, sender, lang)
+        local colored = PUITalk:GetColoredName(sender)
+        local formatted = string.format("%s |cffff4040[Yell]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("YELL")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    -- Emotes
+    Events:Register("CHAT_MSG_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
+        local colored = PUITalk:GetColoredName(sender)
+        local formatted = string.format("%s |cffff8040[Emote]|r %s %s", PUITalk:GetTimestamp(), colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("EMOTE")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    Events:Register("CHAT_MSG_TEXT_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
+        local formatted = string.format("%s |cffff8040%s|r", PUITalk:GetTimestamp(), msg)
+        local r, g, b = PUITalk:GetChannelColor("EMOTE")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    -- Party & Raid
+    Events:Register("CHAT_MSG_PARTY", "PUITalk_Chat", function(owner, event, msg, sender)
+        local colored = PUITalk:GetColoredName(sender)
+        local formatted = string.format("%s |cffaaaaee[Party]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("PARTY")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    Events:Register("CHAT_MSG_RAID", "PUITalk_Chat", function(owner, event, msg, sender)
+        local colored = PUITalk:GetColoredName(sender)
+        local formatted = string.format("%s |cffff7f00[Raid]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("RAID")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    Events:Register("CHAT_MSG_RAID_LEADER", "PUITalk_Chat", function(owner, event, msg, sender)
+        local colored = PUITalk:GetColoredName(sender)
+        local formatted = string.format("%s |cffff4800[Raid Leader]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    Events:Register("CHAT_MSG_RAID_WARNING", "PUITalk_Chat", function(owner, event, msg, sender)
+        local colored = PUITalk:GetColoredName(sender)
+        local formatted = string.format("%s |cffff4800[Raid Warning]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    -- Guild & Officer
+    Events:Register("CHAT_MSG_GUILD", "PUITalk_Chat", function(owner, event, msg, sender)
+        local colored = PUITalk:GetColoredName(sender)
+        local formatted = string.format("%s |cff40ff40[Guild]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("GUILD")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    Events:Register("CHAT_MSG_OFFICER", "PUITalk_Chat", function(owner, event, msg, sender)
+        local colored = PUITalk:GetColoredName(sender)
+        local formatted = string.format("%s |cff40c040[Officer]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("OFFICER")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    -- Custom & Standard Channels (General, Trade, LocalDefense, LFG, World)
+    Events:Register("CHAT_MSG_CHANNEL", "PUITalk_Chat", function(owner, event, msg, sender, lang, channelName, target, channelNumber)
+        local colored = PUITalk:GetColoredName(sender)
+        local cNum = channelNumber or ""
+        local cName = channelName or "Channel"
+        local chanBadge = string.format("[%s. %s]", tostring(cNum), cName)
+        local formatted = string.format("%s |cffe6c099%s|r [%s]: %s", PUITalk:GetTimestamp(), chanBadge, colored, msg)
+        local r, g, b = PUITalk:GetChannelColor("CHANNEL")
+        PUITalk:AddChatMessage(formatted, r, g, b)
+    end)
+
+    -- System, AFK, DND, Notice
+    Events:Register("CHAT_MSG_SYSTEM", "PUITalk_Chat", function(owner, event, msg)
+        local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
+        PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
+    end)
+
+    Events:Register("CHAT_MSG_CHANNEL_NOTICE", "PUITalk_Chat", function(owner, event, action, _, _, channelName)
+        local formatted = string.format("%s |cff888888[%s]: %s|r", PUITalk:GetTimestamp(), channelName or "Channel", action or "")
+        PUITalk:AddChatMessage(formatted, 0.6, 0.6, 0.6)
+    end)
+
+    -- Monster Emotes / Say / Yell
+    Events:Register("CHAT_MSG_MONSTER_SAY", "PUITalk_Chat", function(owner, event, msg, sender)
+        local formatted = string.format("%s |cffffd100[%s]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
+        PUITalk:AddChatMessage(formatted, 1.0, 0.85, 0.4)
+    end)
+
+    Events:Register("CHAT_MSG_MONSTER_YELL", "PUITalk_Chat", function(owner, event, msg, sender)
+        local formatted = string.format("%s |cffff4040[%s yells]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
+        PUITalk:AddChatMessage(formatted, 1.0, 0.35, 0.35)
+    end)
+
+    Events:Register("CHAT_MSG_MONSTER_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
+        local formatted = string.format("%s |cffff8040%s %s|r", PUITalk:GetTimestamp(), sender or "", msg)
+        PUITalk:AddChatMessage(formatted, 1.0, 0.5, 0.25)
+    end)
+
+    -- Loot & Money
+    Events:Register("CHAT_MSG_LOOT", "PUITalk_Chat", function(owner, event, msg)
+        local formatted = string.format("%s |cff00cc00%s|r", PUITalk:GetTimestamp(), msg)
+        PUITalk:AddChatMessage(formatted, 0.0, 0.8, 0.0)
+    end)
+
+    Events:Register("CHAT_MSG_MONEY", "PUITalk_Chat", function(owner, event, msg)
+        local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
+        PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
+    end)
+end
+
+-- =========================================================================
+-- 3. PERMANENT BLIZZARD CHAT FRAME SUPPRESSION & ADDOUN ROUTING
+-- =========================================================================
+
+function PUITalk:SuppressBlizzardChat()
+    -- Hook DEFAULT_CHAT_FRAME to capture 100% of addon output and print statements
+    if DEFAULT_CHAT_FRAME and not DEFAULT_CHAT_FRAME.primusPUITalkHooked then
+        local origAddMessage = DEFAULT_CHAT_FRAME.AddMessage
+        DEFAULT_CHAT_FRAME.AddMessage = function(self, text, r, g, b, id)
+            if text then
+                PUITalk:AddChatMessage(tostring(text), r, g, b)
+            end
+        end
+        DEFAULT_CHAT_FRAME.primusPUITalkHooked = true
+    end
+
+    -- Suppress Blizzard Chat Frames 1..7 into dummy frame
+    for i = 1, 7 do
+        local cf = _G["ChatFrame" .. i]
+        if cf then
+            cf:UnregisterAllEvents()
+            cf:ClearAllPoints()
+            cf:SetPoint("BOTTOMLEFT", UIParent, "TOPLEFT", -2000, 2000)
+            cf:SetWidth(1)
+            cf:SetHeight(1)
+            cf:SetAlpha(0)
+            cf:EnableMouse(false)
+            cf:Hide()
+        end
+
+        local tab = _G["ChatFrame" .. i .. "Tab"]
+        if tab then
+            tab:UnregisterAllEvents()
+            tab:ClearAllPoints()
+            tab:SetPoint("BOTTOMLEFT", UIParent, "TOPLEFT", -2000, 2000)
+            tab:SetAlpha(0)
+            tab:EnableMouse(false)
+            tab:Hide()
+        end
+    end
+
+    -- Suppress ChatFrameEditBox
+    if ChatFrameEditBox then
+        ChatFrameEditBox:ClearAllPoints()
+        ChatFrameEditBox:SetPoint("BOTTOMLEFT", UIParent, "TOPLEFT", -2000, 2000)
+        ChatFrameEditBox:Hide()
+    end
+    if ChatFrameMenuButton then
+        ChatFrameMenuButton:Hide()
+        ChatFrameMenuButton.Show = function() end
+    end
+end
+
+-- =========================================================================
+-- 4. CLICKABLE URL & COPY DIALOG MODALS
 -- =========================================================================
 
 function PUITalk:CreateCopyFrame()
@@ -47,7 +257,6 @@ function PUITalk:CreateCopyFrame()
 
     tinsert(UISpecialFrames, "Primus_ChatCopyFrame")
 
-    -- Header
     local header = CreateFrame("Frame", nil, f)
     header:SetPoint("TOPLEFT", f, "TOPLEFT", 4, -4)
     header:SetPoint("TOPRIGHT", f, "TOPRIGHT", -4, -4)
@@ -75,24 +284,8 @@ function PUITalk:CreateCopyFrame()
     cX:SetText("X")
     closeX:SetScript("OnClick", function() f:Hide() end)
 
-    -- Subheader
-    local subHeader = CreateFrame("Frame", nil, f)
-    subHeader:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4)
-    subHeader:SetPoint("TOPRIGHT", header, "BOTTOMRIGHT", 0, -4)
-    subHeader:SetHeight(22)
-    subHeader:SetBackdrop(Media:Fetch("border", "1Pixel"))
-    subHeader:SetBackdropColor(0.08, 0.09, 0.12, 0.9)
-    subHeader:SetBackdropBorderColor(0.20, 0.25, 0.35, 0.8)
-
-    local subText = subHeader:CreateFontString(nil, "OVERLAY")
-    subText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
-    subText:SetPoint("LEFT", subHeader, "LEFT", 8, 0)
-    subText:SetText("Chat History Log")
-    f.subText = subText
-
-    -- Scroll & EditBox
     local editContainer = CreateFrame("Frame", nil, f)
-    editContainer:SetPoint("TOPLEFT", subHeader, "BOTTOMLEFT", 0, -4)
+    editContainer:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4)
     editContainer:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -4, 40)
     editContainer:SetBackdrop(Media:Fetch("border", "1Pixel"))
     editContainer:SetBackdropColor(0.03, 0.04, 0.05, 1.0)
@@ -119,7 +312,6 @@ function PUITalk:CreateCopyFrame()
     f.editBox = editBox
     f.scroll = scroll
 
-    -- Footer
     local footer = CreateFrame("Frame", nil, f)
     footer:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 4, 4)
     footer:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -4, 4)
@@ -142,24 +334,6 @@ function PUITalk:CreateCopyFrame()
         DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: Text highlighted! Press Ctrl+C to copy.", "69ccf0"))
     end)
 
-    local clearBtn = CreateFrame("Button", nil, footer)
-    clearBtn:SetWidth(90)
-    clearBtn:SetHeight(22)
-    clearBtn:SetPoint("LEFT", selectBtn, "RIGHT", 8, 0)
-    clearBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
-    clearBtn:SetBackdropColor(0.20, 0.10, 0.10, 1.0)
-    clearBtn:SetBackdropBorderColor(0.80, 0.30, 0.30, 1.0)
-    local clTxt = clearBtn:CreateFontString(nil, "OVERLAY")
-    clTxt:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
-    clTxt:SetPoint("CENTER", 0, 0)
-    clTxt:SetText("Clear Buffer")
-    clearBtn:SetScript("OnClick", function()
-        local idx = f.activeFrameIndex or 1
-        PUITalk.chatBuffers[idx] = {}
-        editBox:SetText("")
-        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[Primus Talk]: Cleared chat buffer for Tab %d.", idx), "69ccf0"))
-    end)
-
     local closeBtn = CreateFrame("Button", nil, footer)
     closeBtn:SetWidth(75)
     closeBtn:SetHeight(22)
@@ -178,38 +352,22 @@ function PUITalk:CreateCopyFrame()
 end
 
 function PUITalk:OpenCopyFrame(chatIndex)
-    chatIndex = tonumber(chatIndex) or 1
-    if chatIndex < 1 or chatIndex > 7 then chatIndex = 1 end
-
     local f = self:CreateCopyFrame()
-    f.activeFrameIndex = chatIndex
-
-    local tabName = _G["ChatFrame" .. chatIndex .. "Tab"] and _G["ChatFrame" .. chatIndex .. "Tab"]:GetText() or ("Chat " .. chatIndex)
-    f.titleText:SetText(string.format("%s |cffaaaaaa// Tab: %s (Ctrl+C to Copy)|r", Utils.ColorText("Primus Chat Copy", "69ccf0"), tabName))
-
-    local buffer = self.chatBuffers[chatIndex] or {}
+    local buffer = self.chatBuffers[1] or {}
     local totalLines = table.getn(buffer)
-    f.subText:SetText(string.format("Logged %d messages from %s. Click 'Select All / Copy' to grab all text.", totalLines, tabName))
-
     local lines = {}
     for i = 1, totalLines do
         local entry = buffer[i]
         local clean = self:CleanChatText(entry.text)
         table.insert(lines, string.format("[%s] %s", entry.time, clean))
     end
-
     local fullText = table.concat(lines, "\n")
     f.editBox:SetText(fullText)
     f:Show()
     f:Raise()
-
     f.editBox:SetFocus()
     f.editBox:HighlightText(0)
 end
-
--- =========================================================================
--- 2. CLICKABLE URL POPUP MODAL
--- =========================================================================
 
 function PUITalk:ShowURLCopyPopup(url)
     if not urlFrame then
@@ -285,184 +443,6 @@ function PUITalk:ShowURLCopyPopup(url)
 end
 
 -- =========================================================================
--- 3. DOCKED COPY BUTTONS ON CHAT TABS
--- =========================================================================
-
-function PUITalk:AttachCopyButtons()
-    if not self.db:Get("chatCopy") then return end
-
-    for i = 1, 7 do
-        local cf = _G["ChatFrame" .. i]
-        if cf and not self.copyButtons[i] then
-            local btn = CreateFrame("Button", "Primus_ChatCopyBtn_" .. i, cf)
-            btn:SetWidth(18)
-            btn:SetHeight(18)
-            btn:SetPoint("TOPRIGHT", cf, "TOPRIGHT", -2, -2)
-            btn:SetFrameLevel(cf:GetFrameLevel() + 5)
-            btn:SetBackdrop(Media:Fetch("border", "1Pixel"))
-            btn:SetBackdropColor(0.08, 0.10, 0.14, 0.85)
-            btn:SetBackdropBorderColor(0.30, 0.50, 0.80, 0.8)
-
-            local txt = btn:CreateFontString(nil, "OVERLAY")
-            txt:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
-            txt:SetPoint("CENTER", btn, "CENTER", 0, 0)
-            txt:SetText("C")
-            txt:SetTextColor(0.40, 0.80, 1.00)
-            btn.text = txt
-
-            btn.frameIndex = i
-            btn:SetScript("OnEnter", function()
-                this:SetBackdropColor(0.18, 0.28, 0.45, 1.0)
-                this:SetBackdropBorderColor(0.50, 0.85, 1.0, 1.0)
-                GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
-                GameTooltip:AddLine("Primus Chat Copy", 0.4, 0.8, 1.0)
-                GameTooltip:AddLine(string.format("Click to copy text from Chat Tab %d.", this.frameIndex or 1), 1, 1, 1, 1)
-                GameTooltip:Show()
-            end)
-            btn:SetScript("OnLeave", function()
-                this:SetBackdropColor(0.08, 0.10, 0.14, 0.85)
-                this:SetBackdropBorderColor(0.30, 0.50, 0.80, 0.8)
-                GameTooltip:Hide()
-            end)
-            btn:SetScript("OnClick", function()
-                PUITalk:OpenCopyFrame(this.frameIndex)
-            end)
-
-            self.copyButtons[i] = btn
-        end
-    end
-end
-
--- =========================================================================
--- 4. CHATFRAME HOOKS & EMBEDDING
--- =========================================================================
-
-function PUITalk:SetupChatHooks()
-    for i = 1, 7 do
-        local cf = _G["ChatFrame" .. i]
-        if cf and not cf.primusBufferHooked then
-            local frameIdx = i
-            local origAddMessage = cf.AddMessage
-            cf.AddMessage = function(self, text, r, g, b, id)
-                if text then
-                    -- Whisper Diversion Check
-                    if PUITalk.db:Get("divertWhispers") and id then
-                        local msgType = id
-                        if msgType == "WHISPER" or msgType == "WHISPER_INFORM" then
-                            -- Cleanly suppressed from standard chat frame when diversion is enabled
-                            return
-                        end
-                    end
-
-                    local timeStamp = date("%H:%M:%S")
-                    local rawText = tostring(text)
-                    table.insert(PUITalk.chatBuffers[frameIdx], { time = timeStamp, text = rawText })
-                    if table.getn(PUITalk.chatBuffers[frameIdx]) > 300 then
-                        table.remove(PUITalk.chatBuffers[frameIdx], 1)
-                    end
-                    text = PUITalk:LinkifyURLs(text)
-                end
-                return origAddMessage(self, text, r, g, b, id)
-            end
-            cf.primusBufferHooked = true
-        end
-    end
-
-    -- Hook SetItemRef to handle clicked URL links
-    if not _G.Primus_OriginalSetItemRef then
-        _G.Primus_OriginalSetItemRef = SetItemRef
-        SetItemRef = function(link, text, button)
-            if link and string.sub(link, 1, 4) == "url:" then
-                local url = string.sub(link, 5)
-                PUITalk:ShowURLCopyPopup(url)
-                return
-            end
-            return _G.Primus_OriginalSetItemRef(link, text, button)
-        end
-    end
-end
-
-function PUITalk:SetupMousewheelScrolling()
-    if not self.db:Get("mousewheelScroll") then return end
-
-    for i = 1, 7 do
-        local cf = _G["ChatFrame" .. i]
-        if cf and not cf.primusScrolled then
-            cf:EnableMouseWheel(true)
-            cf:SetScript("OnMouseWheel", function()
-                if arg1 > 0 then
-                    if IsShiftKeyDown() then
-                        this:ScrollToTop()
-                    else
-                        this:ScrollUp()
-                        this:ScrollUp()
-                        this:ScrollUp()
-                    end
-                else
-                    if IsShiftKeyDown() then
-                        this:ScrollToBottom()
-                    else
-                        this:ScrollDown()
-                        this:ScrollDown()
-                        this:ScrollDown()
-                    end
-                end
-            end)
-            cf.primusScrolled = true
-        end
-    end
-end
-
-function PUITalk:SetupStickyChannels()
-    if not self.db:Get("stickyChannels") then return end
-    local channels = { "SAY", "YELL", "PARTY", "RAID", "GUILD", "OFFICER", "WHISPER", "CHANNEL" }
-    local count = table.getn(channels)
-    for i = 1, count do
-        local chan = channels[i]
-        if ChatTypeInfo[chan] then
-            ChatTypeInfo[chan].sticky = 1
-        end
-    end
-end
-
---- Embed and blend ChatFrame1 cleanly inside PUITalk's Chat Viewport
-function PUITalk:DockDefaultChatFrame(parentView)
-    if not parentView then return end
-
-    local cf = ChatFrame1
-    if cf then
-        cf:ClearAllPoints()
-        cf:SetParent(parentView)
-        cf:SetPoint("TOPLEFT", parentView, "TOPLEFT", 6, -2)
-        cf:SetPoint("BOTTOMRIGHT", parentView, "BOTTOMRIGHT", -6, 2)
-        cf:SetClampedToScreen(false)
-
-        -- Clean up redundant Blizzard textures on ChatFrame1
-        local hideTextures = {
-            "ChatFrame1BottomLeftTexture",
-            "ChatFrame1BottomRightTexture",
-            "ChatFrame1TopLeftTexture",
-            "ChatFrame1TopRightTexture",
-            "ChatFrame1BottomTexture",
-            "ChatFrame1TopTexture",
-            "ChatFrame1LeftTexture",
-            "ChatFrame1RightTexture",
-            "ChatFrameMenuButton",
-            "ChatFrame1UpButton",
-            "ChatFrame1DownButton",
-            "ChatFrame1BottomButton",
-        }
-        for _, texName in ipairs(hideTextures) do
-            local tex = _G[texName]
-            if tex then
-                tex:Hide()
-                tex.Show = function() end
-            end
-        end
-    end
-end
-
--- =========================================================================
 -- 5. IN-PLACE SELECTABLE CHAT OVERLAY (CLICK, DRAG-HIGHLIGHT, & CTRL+C)
 -- =========================================================================
 
@@ -479,7 +459,6 @@ function PUITalk:CreateSelectableOverlay(parent, modeName)
     overlay:EnableMouse(true)
     overlay:Hide()
 
-    -- Top Mini Header Toolbar
     local topBar = CreateFrame("Frame", nil, overlay)
     topBar:SetPoint("TOPLEFT", overlay, "TOPLEFT", 4, -4)
     topBar:SetPoint("TOPRIGHT", overlay, "TOPRIGHT", -4, -4)
@@ -524,7 +503,6 @@ function PUITalk:CreateSelectableOverlay(parent, modeName)
     infoText:SetJustifyH("LEFT")
     infoText:SetText(Utils.ColorText("Selectable Mode", "69ccf0") .. " |cffaaaaaa// Drag to highlight, Ctrl+C to copy|r")
 
-    -- Scrollable Multiline EditBox Container
     local scroll = CreateFrame("ScrollFrame", "Primus_PUITalkSelectScroll_" .. (modeName or "Chat"), overlay, "UIPanelScrollFrameTemplate")
     scroll:SetPoint("TOPLEFT", topBar, "BOTTOMLEFT", 4, -4)
     scroll:SetPoint("BOTTOMRIGHT", overlay, "BOTTOMRIGHT", -24, 6)
@@ -564,14 +542,13 @@ function PUITalk:ToggleSelectableMode(tabIndex)
     if not masterFrame then return end
 
     if tabIndex == 1 then
-        -- Tab 1: Chat Stream
         local viewChat = masterFrame.viewChat
         if not viewChat then return end
         local overlay = viewChat.selectOverlay or self:CreateSelectableOverlay(viewChat, "Chat")
 
         if overlay:IsShown() then
             overlay:Hide()
-            if ChatFrame1 then ChatFrame1:Show() end
+            if viewChat.msgFrame then viewChat.msgFrame:Show() end
         else
             local buffer = self.chatBuffers[1] or {}
             local totalLines = table.getn(buffer)
@@ -584,13 +561,12 @@ function PUITalk:ToggleSelectableMode(tabIndex)
             local fullText = table.concat(lines, "\n")
             overlay.editBox:SetText(fullText)
             overlay:Show()
-            if ChatFrame1 then ChatFrame1:Hide() end
+            if viewChat.msgFrame then viewChat.msgFrame:Hide() end
             overlay.editBox:SetFocus()
             overlay.scroll:ScrollToBottom()
             DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[Primus Talk]: Selectable chat mode active! Click & drag mouse to highlight, Ctrl+C to copy.", "69ccf0"))
         end
     elseif tabIndex == 2 then
-        -- Tab 2: Messages / DMs
         local viewMessages = masterFrame.viewMessages
         if not viewMessages then return end
         local overlay = viewMessages.selectOverlay or self:CreateSelectableOverlay(viewMessages, "Messages")
