@@ -151,6 +151,12 @@ function PUITalk:CreateUniversalInput(f)
     editBox:SetFont(Media:Fetch("font", "Default"), 10, "")
     editBox:SetAutoFocus(false)
     editBox:SetHistoryLines(30)
+    editBox:SetScript("OnUpdate", function()
+        if this.pendingText ~= nil then
+            this:SetText(this.pendingText)
+            this.pendingText = nil
+        end
+    end)
     editBox:SetScript("OnEnterPressed", function()
         local text = this:GetText()
         if text and text ~= "" then
@@ -161,6 +167,7 @@ function PUITalk:CreateUniversalInput(f)
         this:ClearFocus()
     end)
     editBox:SetScript("OnEscapePressed", function()
+        this.pendingText = nil
         this:SetText("")
         this:ClearFocus()
     end)
@@ -287,21 +294,26 @@ function PUITalk:FocusInput(text)
         self.masterFrame:Show()
     end
 
+    local editBox = self.masterFrame.editBox
+
     if text and text ~= "" then
         -- Check if it's a whisper command e.g. "/w Name " or "/whisper Name "
         local _, _, cmd, target = string.find(text, "^/(%a+)%s+([^%s]+)%s*$")
         if (cmd == "w" or cmd == "whisper" or cmd == "tell" or cmd == "t") and target and self.db:Get("divertWhispers", true) then
             self:OpenDMConversation(target)
             self:SelectMasterTab(2)
-            self.masterFrame.editBox:SetText("")
+            editBox.pendingText = ""
+            editBox:SetText("")
         else
-            self.masterFrame.editBox:SetText(text)
+            editBox.pendingText = text
+            editBox:SetText("")
         end
     else
-        self.masterFrame.editBox:SetText("")
+        editBox.pendingText = ""
+        editBox:SetText("")
     end
 
-    self.masterFrame.editBox:SetFocus()
+    editBox:SetFocus()
 
     -- Ensure default Blizzard ChatFrameEditBox stays hidden
     if ChatFrameEditBox and ChatFrameEditBox:IsShown() then
