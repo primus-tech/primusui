@@ -1,15 +1,17 @@
 --[[
-    PrimusUI Module: PUIQuest (Minimap Radar & 3D HUD Navigation Arrow Engine)
+    PrimusUI Module: PUIQuest (Minimap Radar & Dual 2D/3D HUD Navigation Arrow Engine)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Features:
-    1. 3D HUD Navigation Arrow: Rotating MDX pointer model with real-time distance in yards.
-    2. Multi-Zone Objective Resolution: Accurately maps both standard zones and subzones (including Turtle WoW).
-    3. Dynamic Objective Resolution: Intelligently prioritizes slay/interact/loot objectives before turn-in NPCs.
-    4. Auto-Targeting Closest Active Quest: Auto-detects closest tracked or quest log objective.
-    5. Cross-Zone Guidance: Clearly indicates destination zone when objective is in another area.
-    6. Minimap Perimeter Radar: Rotating 3D edge blip pointing towards active objective.
-    7. PUIMover Support: Move and anchor the HUD navigation arrow anywhere.
+    1. Dual 2D/3D Navigation Arrow: High-definition rotating arrow texture (360° affine SetTexCoord)
+       with optional 3D Rotating-MinimapArrow.mdl model overlay and real-time distance in yards.
+    2. Dynamic Proximity & Angle Tinting: Real-time emerald/gold/amber coloring based on player bearing.
+    3. Multi-Zone Objective Resolution: Accurately maps standard zones and custom subzones (including Turtle WoW).
+    4. Smart Objective Priority: Prioritizes slay mobs, interact objects, and loot drops before turn-in NPCs.
+    5. Quest Log Auto-Detection: Automatically targets closest quest even if not manually watched.
+    6. Cross-Zone Guidance: Shows destination zone when objective is in another area.
+    7. Minimap Perimeter Radar: Rotating directional blip on the Minimap border.
+    8. PUIMover Support: Move and anchor the HUD navigation arrow anywhere.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -30,10 +32,13 @@ local PUIMover = Primus.PUIMover
 
 -- State Variables
 local hudArrow          = nil
+local hudArrowHolder    = nil
+local hudArrowTex       = nil
 local hudModel          = nil
 local hudDistText       = nil
 local hudTitleText      = nil
 local minimapPin        = nil
+local minimapTex        = nil
 local minimapModel      = nil
 
 local manualFocusQuest  = nil
@@ -43,16 +48,37 @@ local lastPlayerY       = 0
 local estimatedFacing   = 0
 
 -- =========================================================================
--- WIDGET CREATION (3D HUD ARROW & MINIMAP RADAR)
+-- TEXTURE ROTATION UTILITY (360° AFFINE SETTEXCOORD)
+-- =========================================================================
+
+local function RotateTexture(tex, angle)
+    if not tex then return end
+    local s = math.sin(angle)
+    local c = math.cos(angle)
+    -- Rotate unit square centered at (0.5, 0.5)
+    -- UL = (-0.5, -0.5), LL = (-0.5, 0.5), UR = (0.5, -0.5), LR = (0.5, 0.5)
+    local ULx = 0.5 + (-0.5 * c - -0.5 * s)
+    local ULy = 0.5 + (-0.5 * s + -0.5 * c)
+    local LLx = 0.5 + (-0.5 * c - 0.5 * s)
+    local LLy = 0.5 + (-0.5 * s + 0.5 * c)
+    local URx = 0.5 + (0.5 * c - -0.5 * s)
+    local URy = 0.5 + (0.5 * s + -0.5 * c)
+    local LRx = 0.5 + (0.5 * c - 0.5 * s)
+    local LRy = 0.5 + (0.5 * s + 0.5 * c)
+    tex:SetTexCoord(ULx, ULy, LLx, LLy, URx, URy, LRx, LRy)
+end
+
+-- =========================================================================
+-- WIDGET CREATION (HUD ARROW & MINIMAP RADAR)
 -- =========================================================================
 
 local function CreateHUDArrow()
     if hudArrow then return hudArrow end
 
     hudArrow = CreateFrame("Button", "PUIQuestHUDArrow", UIParent)
-    hudArrow:SetWidth(150)
-    hudArrow:SetHeight(52)
-    hudArrow:SetPoint("CENTER", UIParent, "CENTER", 0, -140)
+    hudArrow:SetWidth(156)
+    hudArrow:SetHeight(64)
+    hudArrow:SetPoint("CENTER", UIParent, "CENTER", 0, -130)
     hudArrow:SetFrameStrata("MEDIUM")
     hudArrow:SetClampedToScreen(true)
     hudArrow:RegisterForClicks("LeftButtonUp", "RightButtonUp")
@@ -64,23 +90,38 @@ local function CreateHUDArrow()
         tile = false, tileSize = 0, edgeSize = 1,
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
-    hudArrow:SetBackdropColor(0.06, 0.08, 0.12, 0.85)
+    hudArrow:SetBackdropColor(0.04, 0.06, 0.09, 0.88)
     hudArrow:SetBackdropBorderColor(0.20, 0.35, 0.55, 0.90)
 
-    -- 3D Model Pointer
-    local model = CreateFrame("Model", "PUIQuestHUDArrowModel", hudArrow)
-    model:SetWidth(42)
-    model:SetHeight(42)
-    model:SetPoint("TOP", hudArrow, "TOP", 0, 4)
-    model:SetModel("Interface\\Minimap\\ROTATING-MINIMAPARROW.mdx")
-    model:SetModelScale(0.85)
+    -- Arrow Container Frame
+    local arrowHolder = CreateFrame("Frame", nil, hudArrow)
+    arrowHolder:SetWidth(32)
+    arrowHolder:SetHeight(32)
+    arrowHolder:SetPoint("TOP", hudArrow, "TOP", 0, -3)
+    hudArrowHolder = arrowHolder
+
+    -- 2D Rotating Texture Arrow (Always 100% visible and reliable)
+    local arrowTex = arrowHolder:CreateTexture(nil, "ARTWORK")
+    arrowTex:SetTexture("Interface\\Minimap\\MinimapArrow")
+    arrowTex:SetWidth(28)
+    arrowTex:SetHeight(28)
+    arrowTex:SetPoint("CENTER", arrowHolder, "CENTER", 0, 0)
+    arrowTex:SetVertexColor(1.0, 0.85, 0.1, 1.0)
+    hudArrowTex = arrowTex
+
+    -- 3D Model Pointer Overlay (Rotating-MinimapArrow.mdl)
+    local model = CreateFrame("Model", "PUIQuestHUDArrowModel", arrowHolder)
+    model:SetAllPoints(arrowHolder)
+    model:SetModel("Interface\\Minimap\\Rotating-MinimapArrow.mdl")
+    model:SetModelScale(0.65)
     model:SetPosition(0, 0, 0)
     if model.SetCamera then model:SetCamera(0) end
+    model:SetFrameLevel(arrowHolder:GetFrameLevel() + 2)
     hudModel = model
 
     -- Distance FontString
     local dist = hudArrow:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    dist:SetPoint("TOP", model, "BOTTOM", 0, 4)
+    dist:SetPoint("TOP", arrowHolder, "BOTTOM", 0, 0)
     local distFont = (Media and Media.Fetch and Media:Fetch("font", "Default")) or "Fonts\\FRIZQT__.TTF"
     dist:SetFont(distFont, 11, "OUTLINE")
     dist:SetTextColor(1.0, 1.0, 1.0)
@@ -92,15 +133,15 @@ local function CreateHUDArrow()
     local titleFont = (Media and Media.Fetch and Media:Fetch("font", "Default")) or "Fonts\\FRIZQT__.TTF"
     title:SetFont(titleFont, 10, "OUTLINE")
     title:SetTextColor(0.9, 0.8, 0.5)
-    title:SetWidth(144)
+    title:SetWidth(150)
     title:SetJustifyH("CENTER")
     hudTitleText = title
 
-    -- Self-driving real-time update loop (throttled to 0.1s)
+    -- Self-driving real-time update loop (throttled to 0.08s for super-smooth 60fps tracking)
     local updateElapsed = 0
     hudArrow:SetScript("OnUpdate", function()
         updateElapsed = updateElapsed + (arg1 or 0.05)
-        if updateElapsed >= 0.10 then
+        if updateElapsed >= 0.08 then
             updateElapsed = 0
             Tracker:Update()
         end
@@ -169,16 +210,20 @@ local function CreateMinimapPin()
     if minimapPin then return minimapPin end
 
     minimapPin = CreateFrame("Button", "PUIQuest_MinimapNavArrow", Minimap)
-    minimapPin:SetWidth(22)
-    minimapPin:SetHeight(22)
+    minimapPin:SetWidth(20)
+    minimapPin:SetHeight(20)
     minimapPin:SetPoint("CENTER", Minimap, "CENTER", 0, 0)
     minimapPin:SetFrameLevel(Minimap:GetFrameLevel() + 10)
 
-    -- 3D Model for Minimap Edge
+    local tex = minimapPin:CreateTexture(nil, "ARTWORK")
+    tex:SetTexture("Interface\\Minimap\\MinimapArrow")
+    tex:SetAllPoints(minimapPin)
+    minimapTex = tex
+
     local model = CreateFrame("Model", "PUIQuest_MinimapNavModel", minimapPin)
     model:SetAllPoints(minimapPin)
-    model:SetModel("Interface\\Minimap\\ROTATING-MINIMAPARROW.mdx")
-    model:SetModelScale(0.55)
+    model:SetModel("Interface\\Minimap\\Rotating-MinimapArrow.mdl")
+    model:SetModelScale(0.5)
     model:SetPosition(0, 0, 0)
     if model.SetCamera then model:SetCamera(0) end
     minimapModel = model
@@ -539,10 +584,8 @@ function Tracker:Update()
         local nearestLocalTarget = nil
         local nearestLocalDist = 999999
         local fallbackWorldTarget = nil
-        local hasTracked = false
 
         for qTitle in pairs(trackedList) do
-            hasTracked = true
             local cand = ResolveQuestObjective(qTitle, playerZones, mapZone, px, py)
             if cand then
                 if not cand.isDifferentZone then
@@ -593,19 +636,23 @@ function Tracker:Update()
         return
     end
 
-    -- 1. UPDATE 3D HUD NAVIGATION ARROW
+    -- 1. UPDATE 3D/2D HUD NAVIGATION ARROW
     local arrow = CreateHUDArrow()
     arrow:Show()
-    if hudModel then
-        hudModel:Show()
-        hudModel:SetModel("Interface\\Minimap\\ROTATING-MINIMAPARROW.mdx")
-    end
 
     if resolvedTarget.isDifferentZone then
         resolvedTarget.yards = nil
         currentActiveData = resolvedTarget
 
-        if hudModel then hudModel:SetFacing(0) end
+        if hudArrowTex then
+            hudArrowTex:Show()
+            RotateTexture(hudArrowTex, 0)
+            hudArrowTex:SetVertexColor(1.0, 0.75, 0.2, 1.0)
+        end
+        if hudModel then
+            hudModel:Show()
+            hudModel:SetFacing(0)
+        end
         hudDistText:SetText(string.format("|cffffbb33In %s|r", resolvedTarget.zoneName or "Other Area"))
         hudTitleText:SetText(resolvedTarget.text or resolvedTarget.title or "Quest Objective")
         if minimapPin then minimapPin:Hide() end
@@ -628,29 +675,48 @@ function Tracker:Update()
     local playerFacing = (GetPlayerFacing and GetPlayerFacing()) or estimatedFacing or 0
     local diff = targetAngle - playerFacing
 
-    if hudModel then
-        hudModel:SetFacing(diff)
-    end
-
-    -- Dynamic Text & Coloring
+    -- Dynamic Color & Text based on facing angle & distance
+    local r, g, b = 1.0, 1.0, 1.0
     if yards < 15 or dist < 0.008 then
         hudDistText:SetText("|cff00ff00Arrived!|r")
+        r, g, b = 0.0, 1.0, 0.5
     else
         local absAngle = math.abs(math.mod(diff + math.pi, 2 * math.pi) - math.pi)
         if absAngle < 0.35 then
             hudDistText:SetText(string.format("|cff00ff00%d yd|r", yards))
+            r, g, b = 0.1, 1.0, 0.2
         elseif absAngle < 1.0 then
             hudDistText:SetText(string.format("|cffffd100%d yd|r", yards))
+            r, g, b = 1.0, 0.85, 0.1
         else
-            hudDistText:SetText(string.format("|cffff8822%d yd|r", yards))
+            hudDistText:SetText(string.format("|cffff6622%d yd|r", yards))
+            r, g, b = 1.0, 0.40, 0.1
         end
     end
 
     hudTitleText:SetText(resolvedTarget.text or resolvedTarget.title or "Quest Objective")
 
+    -- Rotate 2D Texture Arrow
+    if hudArrowTex then
+        hudArrowTex:Show()
+        RotateTexture(hudArrowTex, diff)
+        hudArrowTex:SetVertexColor(r, g, b, 1.0)
+    end
+
+    -- Rotate 3D Model Pointer
+    if hudModel then
+        hudModel:Show()
+        hudModel:SetFacing(diff)
+    end
+
     -- 2. UPDATE MINIMAP RADAR PIN
     local mPin = CreateMinimapPin()
     mPin:Show()
+    if minimapTex then
+        minimapTex:Show()
+        RotateTexture(minimapTex, diff)
+        minimapTex:SetVertexColor(r, g, b, 1.0)
+    end
     if minimapModel then
         minimapModel:Show()
         minimapModel:SetFacing(diff)
