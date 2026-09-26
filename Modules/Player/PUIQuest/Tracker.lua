@@ -1,13 +1,15 @@
 --[[
-    PrimusUI Module: PUIQuest (Minimap Radar & 3D HUD Navigation Arrow)
+    PrimusUI Module: PUIQuest (Minimap Radar & 3D HUD Navigation Arrow Engine)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Features:
     1. 3D HUD Navigation Arrow: Rotating MDX pointer model with real-time distance in yards.
-    2. Dynamic Closest-Objective Auto-Targeting: Automatically guides to nearest tracked quest objective.
-    3. Minimap Perimeter Radar: Edge-tracking radar blip pointing towards active objective.
-    4. PUIMover Support: Move and anchor the HUD navigation arrow anywhere.
-    5. Interactive Tooltips & Click Routing: 1-click open quest log or clear manual lock.
+    2. Multi-Zone Objective Resolution: Accurately maps both standard zones and subzones (including Turtle WoW).
+    3. Dynamic Objective Resolution: Intelligently prioritizes slay/interact/loot objectives before turn-in NPCs.
+    4. Auto-Targeting Closest Active Quest: Auto-detects closest tracked or quest log objective.
+    5. Cross-Zone Guidance: Clearly indicates destination zone when objective is in another area.
+    6. Minimap Perimeter Radar: Rotating 3D edge blip pointing towards active objective.
+    7. PUIMover Support: Move and anchor the HUD navigation arrow anywhere.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -29,13 +31,13 @@ local PUIMover = Primus.PUIMover
 -- State Variables
 local hudArrow          = nil
 local hudModel          = nil
-local hudFallback       = nil
 local hudDistText       = nil
 local hudTitleText      = nil
 local minimapPin        = nil
+local minimapModel      = nil
 
 local manualFocusQuest  = nil
-local currentActiveData = nil -- { x = 0.5, y = 0.5, title = "...", text = "...", yards = 0 }
+local currentActiveData = nil
 local lastPlayerX       = 0
 local lastPlayerY       = 0
 local estimatedFacing   = 0
@@ -48,35 +50,37 @@ local function CreateHUDArrow()
     if hudArrow then return hudArrow end
 
     hudArrow = CreateFrame("Button", "PUIQuestHUDArrow", UIParent)
-    hudArrow:SetWidth(140)
-    hudArrow:SetHeight(54)
+    hudArrow:SetWidth(150)
+    hudArrow:SetHeight(52)
     hudArrow:SetPoint("CENTER", UIParent, "CENTER", 0, -140)
     hudArrow:SetFrameStrata("MEDIUM")
     hudArrow:SetClampedToScreen(true)
     hudArrow:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
+    -- Glassmorphic pill backdrop
+    hudArrow:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    hudArrow:SetBackdropColor(0.06, 0.08, 0.12, 0.85)
+    hudArrow:SetBackdropBorderColor(0.20, 0.35, 0.55, 0.90)
+
     -- 3D Model Pointer
     local model = CreateFrame("Model", "PUIQuestHUDArrowModel", hudArrow)
-    model:SetWidth(44)
-    model:SetHeight(44)
-    model:SetPoint("TOP", hudArrow, "TOP", 0, 2)
+    model:SetWidth(42)
+    model:SetHeight(42)
+    model:SetPoint("TOP", hudArrow, "TOP", 0, 4)
     model:SetModel("Interface\\Minimap\\ROTATING-MINIMAPARROW.mdx")
     model:SetModelScale(0.85)
     model:SetPosition(0, 0, 0)
+    if model.SetCamera then model:SetCamera(0) end
     hudModel = model
-
-    -- 2D Fallback Texture
-    local fallback = hudArrow:CreateTexture(nil, "ARTWORK")
-    fallback:SetTexture("Interface\\Minimap\\ROTATING-MINIMAPARROW")
-    fallback:SetPoint("CENTER", model, "CENTER", 0, 0)
-    fallback:SetWidth(26)
-    fallback:SetHeight(26)
-    fallback:Hide()
-    hudFallback = fallback
 
     -- Distance FontString
     local dist = hudArrow:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    dist:SetPoint("TOP", model, "BOTTOM", 0, 2)
+    dist:SetPoint("TOP", model, "BOTTOM", 0, 4)
     local distFont = (Media and Media.Fetch and Media:Fetch("font", "Default")) or "Fonts\\FRIZQT__.TTF"
     dist:SetFont(distFont, 11, "OUTLINE")
     dist:SetTextColor(1.0, 1.0, 1.0)
@@ -88,18 +92,26 @@ local function CreateHUDArrow()
     local titleFont = (Media and Media.Fetch and Media:Fetch("font", "Default")) or "Fonts\\FRIZQT__.TTF"
     title:SetFont(titleFont, 10, "OUTLINE")
     title:SetTextColor(0.9, 0.8, 0.5)
-    title:SetWidth(138)
+    title:SetWidth(144)
     title:SetJustifyH("CENTER")
     hudTitleText = title
+
+    -- Self-driving real-time update loop (throttled to 0.1s)
+    local updateElapsed = 0
+    hudArrow:SetScript("OnUpdate", function()
+        updateElapsed = updateElapsed + (arg1 or 0.05)
+        if updateElapsed >= 0.10 then
+            updateElapsed = 0
+            Tracker:Update()
+        end
+    end)
 
     -- Interactive Scripts
     hudArrow:SetScript("OnClick", function()
         if arg1 == "RightButton" then
-            -- Right click: Clear manual lock
             Tracker:SetFocus(nil)
             DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuest]: Reset to automatic closest-quest navigation.", "69ccf0"))
         else
-            -- Left click: Open Quest Log to focused quest
             if currentActiveData and currentActiveData.title then
                 if not QuestLogFrame:IsVisible() then
                     ShowUIPanel(QuestLogFrame)
@@ -123,10 +135,12 @@ local function CreateHUDArrow()
         if currentActiveData.text and currentActiveData.text ~= "" then
             GameTooltip:AddLine(string.format("Objective: |cffffffff%s|r", currentActiveData.text), 0.4, 0.85, 1.0)
         end
-        if currentActiveData.yards then
+        if currentActiveData.isDifferentZone then
+            GameTooltip:AddLine(string.format("Destination: |cffffbb33%s|r", currentActiveData.zoneName or "Other Zone"), 1.0, 0.82, 0.2)
+        elseif currentActiveData.yards then
             GameTooltip:AddLine(string.format("Distance: |cffffffff%d yards|r", currentActiveData.yards), 0.7, 0.7, 0.7)
         end
-        if currentActiveData.x and currentActiveData.y then
+        if currentActiveData.x and currentActiveData.y and not currentActiveData.isDifferentZone then
             GameTooltip:AddLine(string.format("Coords: |cffffd100%.1f, %.1f|r", currentActiveData.x * 100, currentActiveData.y * 100), 0.6, 0.6, 0.6)
         end
         if manualFocusQuest then
@@ -155,15 +169,19 @@ local function CreateMinimapPin()
     if minimapPin then return minimapPin end
 
     minimapPin = CreateFrame("Button", "PUIQuest_MinimapNavArrow", Minimap)
-    minimapPin:SetWidth(24)
-    minimapPin:SetHeight(24)
+    minimapPin:SetWidth(22)
+    minimapPin:SetHeight(22)
     minimapPin:SetPoint("CENTER", Minimap, "CENTER", 0, 0)
     minimapPin:SetFrameLevel(Minimap:GetFrameLevel() + 10)
 
-    local tex = minimapPin:CreateTexture(nil, "OVERLAY")
-    tex:SetTexture("Interface\\Minimap\\ROTATING-MINIMAPARROW")
-    tex:SetAllPoints(minimapPin)
-    minimapPin.texture = tex
+    -- 3D Model for Minimap Edge
+    local model = CreateFrame("Model", "PUIQuest_MinimapNavModel", minimapPin)
+    model:SetAllPoints(minimapPin)
+    model:SetModel("Interface\\Minimap\\ROTATING-MINIMAPARROW.mdx")
+    model:SetModelScale(0.55)
+    model:SetPosition(0, 0, 0)
+    if model.SetCamera then model:SetCamera(0) end
+    minimapModel = model
 
     minimapPin:SetScript("OnClick", function()
         if currentActiveData and currentActiveData.title then
@@ -176,125 +194,284 @@ local function CreateMinimapPin()
 end
 
 -- =========================================================================
--- COORDINATE EXTRACTION & ZONE RESOLUTION
+-- ZONE ALIASES & MULTI-ZONE COORDINATE RESOLVER
 -- =========================================================================
 
-local function GetZoneCoords(spawnsTbl, currentZoneName, currentZoneID)
-    if not spawnsTbl or not spawnsTbl.coords then return {} end
+local function GetPlayerZoneAliases()
+    local aliases = {}
+
+    local mapContinent = GetCurrentMapContinent()
+    local mapZone = GetCurrentMapZone()
+    if mapContinent > 0 and mapZone > 0 then
+        local zoneNames = { GetMapZones(mapContinent) }
+        local mzName = zoneNames[mapZone]
+        if mzName and mzName ~= "" then
+            aliases[string.lower(mzName)] = true
+        end
+    end
+
+    local z = GetZoneText and GetZoneText()
+    if z and z ~= "" then aliases[string.lower(z)] = true end
+
+    local rz = GetRealZoneText and GetRealZoneText()
+    if rz and rz ~= "" then aliases[string.lower(rz)] = true end
+
+    local sz = GetSubZoneText and GetSubZoneText()
+    if sz and sz ~= "" then aliases[string.lower(sz)] = true end
+
+    local mz = GetMinimapZoneText and GetMinimapZoneText()
+    if mz and mz ~= "" then aliases[string.lower(mz)] = true end
+
+    return aliases, mapZone
+end
+
+local function ExtractZoneCoords(spawnsTbl, playerZones, currentMapZoneID)
+    if not spawnsTbl then return {}, {} end
+    local coordsList = spawnsTbl.coords or (type(spawnsTbl[1]) == "table" and spawnsTbl)
+    if not coordsList then return {}, {} end
+
     local DB = PUIQuest.DB
-    if not DB or not DB["zones"] then return {} end
+    if not DB or not DB["zones"] then return {}, {} end
 
     local zonesLoc = DB["zones"]["enUS"] or DB["zones"]["loc"]
     local zonesData = DB["zones"]["data"]
-    if not zonesLoc then return {} end
+    if not zonesLoc then return {}, {} end
 
-    local results = {}
-    for _, c in pairs(spawnsTbl.coords) do
+    local localResults = {}
+    local worldResults = {}
+
+    for _, c in pairs(coordsList) do
         local x = c[1]
         local y = c[2]
         local zID = c[3]
 
         if zID and x and y then
             local zName = zonesLoc[zID]
-            if zName and (zName == currentZoneName or zID == currentZoneID) then
-                table.insert(results, { x = x / 100, y = y / 100, zoneID = zID })
+            local isLocal = false
+            local resolvedX = x / 100
+            local resolvedY = y / 100
+            local resolvedZoneName = zName or "Zone"
+
+            -- Direct zone match
+            if zName and playerZones[string.lower(zName)] then
+                isLocal = true
+            elseif currentMapZoneID and currentMapZoneID > 0 and zID == currentMapZoneID then
+                isLocal = true
             elseif zonesData and zonesData[zID] then
+                -- Parent zone projection
                 local pID, w, h, ox, oy = unpack(zonesData[zID])
-                local pName = zonesLoc[pID]
-                if pName and (pName == currentZoneName or pID == currentZoneID) then
-                    local px = (x * (w or 100) / 100) + (ox or 0)
-                    local py = (y * (h or 100) / 100) + (oy or 0)
-                    table.insert(results, { x = px / 100, y = py / 100, zoneID = pID })
+                if pID and pID > 0 then
+                    local pName = zonesLoc[pID]
+                    if pName and (playerZones[string.lower(pName)] or (currentMapZoneID and pID == currentMapZoneID)) then
+                        resolvedX = ((x * (w or 100) / 100) + (ox or 0)) / 100
+                        resolvedY = ((y * (h or 100) / 100) + (oy or 0)) / 100
+                        resolvedZoneName = pName
+                        isLocal = true
+                    end
                 end
+            end
+
+            local entry = {
+                x = resolvedX,
+                y = resolvedY,
+                zoneID = zID,
+                zoneName = resolvedZoneName,
+            }
+
+            if isLocal then
+                table.insert(localResults, entry)
+            else
+                table.insert(worldResults, entry)
             end
         end
     end
-    return results
+
+    return localResults, worldResults
 end
 
--- Find the best/nearest objective coordinate for a given quest
-local function ResolveQuestObjective(questTitle, currentZoneName, currentZoneID, playerX, playerY)
+-- Find the best objective coordinate for a given quest
+local function ResolveQuestObjective(questTitle, playerZones, currentMapZoneID, playerX, playerY, isComplete)
     if not questTitle or questTitle == "" then return nil end
     local q = PUIQuest.Database:FindQuest(questTitle)
     if not q or not q.data then return nil end
 
-    local bestCoord = nil
-    local bestDist = 999999
-    local bestText = nil
+    -- Check completion state if not explicitly passed
+    if isComplete == nil then
+        local numEntries = GetNumQuestLogEntries() or 0
+        for i = 1, numEntries do
+            local title, _, _, isHeader, _, comp = GetQuestLogTitle(i)
+            if not isHeader and title and string.lower(title) == string.lower(questTitle) then
+                isComplete = comp
+                break
+            end
+        end
+    end
 
-    local function EvaluateCoords(coords, labelText)
-        for _, coord in ipairs(coords) do
+    local bestLocalCoord = nil
+    local bestLocalDist = 999999
+    local bestLocalText = nil
+
+    local firstWorldCoord = nil
+    local firstWorldText = nil
+
+    local function Evaluate(spawns, labelText)
+        if not spawns then return end
+        local localCoords, worldCoords = ExtractZoneCoords(spawns, playerZones, currentMapZoneID)
+
+        for _, coord in ipairs(localCoords) do
             local dx = coord.x - playerX
             local dy = coord.y - playerY
             local distSq = dx * dx + dy * dy
-            if distSq < bestDist then
-                bestDist = distSq
-                bestCoord = coord
-                bestText = labelText
+            if distSq < bestLocalDist then
+                bestLocalDist = distSq
+                bestLocalCoord = coord
+                bestLocalText = labelText
             end
+        end
+
+        if not firstWorldCoord and table.getn(worldCoords) > 0 then
+            firstWorldCoord = worldCoords[1]
+            firstWorldText = labelText
         end
     end
 
-    -- 1. Check Turn-in NPC (if complete)
-    local endUnits = q.data["end"] and q.data["end"]["U"]
-    if endUnits then
-        for _, uID in pairs(endUnits) do
-            local unit = PUIQuest.Database:FindUnit(uID)
-            if unit and unit.spawns then
-                local coords = GetZoneCoords(unit.spawns, currentZoneName, currentZoneID)
-                EvaluateCoords(coords, "Turn in: " .. unit.name)
+    -- If Quest is COMPLETE: Point to Turn-in NPC / Object
+    if isComplete == 1 or isComplete == true then
+        local endUnits = q.data["end"] and q.data["end"]["U"]
+        if endUnits then
+            for _, uID in pairs(endUnits) do
+                local unit = PUIQuest.Database:FindUnit(uID)
+                if unit and unit.spawns then
+                    Evaluate(unit.spawns, "Turn in: " .. unit.name)
+                end
             end
         end
-    end
-
-    -- 2. Check Unit Objectives
-    local objUnits = q.data["obj"] and q.data["obj"]["U"]
-    if objUnits then
-        for _, uID in pairs(objUnits) do
-            local unit = PUIQuest.Database:FindUnit(uID)
-            if unit and unit.spawns then
-                local coords = GetZoneCoords(unit.spawns, currentZoneName, currentZoneID)
-                EvaluateCoords(coords, "Slay: " .. unit.name)
+        local endObjects = q.data["end"] and q.data["end"]["O"]
+        if endObjects then
+            for _, oID in pairs(endObjects) do
+                local obj = PUIQuest.Database:FindObject(oID)
+                if obj and obj.spawns then
+                    Evaluate(obj.spawns, "Turn in: " .. obj.name)
+                end
             end
         end
-    end
+    else
+        -- If Quest is IN PROGRESS: Check Slay/Interact/Loot objectives FIRST
 
-    -- 3. Check Object Objectives
-    local objObjects = q.data["obj"] and q.data["obj"]["O"]
-    if objObjects then
-        for _, oID in pairs(objObjects) do
-            local obj = PUIQuest.Database:FindObject(oID)
-            if obj and obj.spawns then
-                local coords = GetZoneCoords(obj.spawns, currentZoneName, currentZoneID)
-                EvaluateCoords(coords, "Interact: " .. obj.name)
+        -- 1. Unit Objectives (Slay / Talk)
+        local objUnits = q.data["obj"] and q.data["obj"]["U"]
+        if objUnits then
+            for _, uID in pairs(objUnits) do
+                local unit = PUIQuest.Database:FindUnit(uID)
+                if unit and unit.spawns then
+                    Evaluate(unit.spawns, "Slay: " .. unit.name)
+                end
             end
         end
-    end
 
-    -- 4. Check Item Drops
-    local objItems = q.data["obj"] and q.data["obj"]["I"]
-    if objItems then
-        for _, iID in pairs(objItems) do
-            local item = PUIQuest.Database:FindItem(iID)
-            if item and item.data and item.data["U"] then
-                for uID in pairs(item.data["U"]) do
+        -- 2. Object Objectives (Interact / Nodes)
+        local objObjects = q.data["obj"] and q.data["obj"]["O"]
+        if objObjects then
+            for _, oID in pairs(objObjects) do
+                local obj = PUIQuest.Database:FindObject(oID)
+                if obj and obj.spawns then
+                    Evaluate(obj.spawns, "Interact: " .. obj.name)
+                end
+            end
+        end
+
+        -- 3. Item Objectives (Drops / Chests / Vendors)
+        local objItems = q.data["obj"] and q.data["obj"]["I"]
+        if objItems then
+            for _, iID in pairs(objItems) do
+                local item = PUIQuest.Database:FindItem(iID)
+                if item and item.data then
+                    -- Dropped by Units
+                    if item.data["U"] then
+                        for uID in pairs(item.data["U"]) do
+                            local unit = PUIQuest.Database:FindUnit(uID)
+                            if unit and unit.spawns then
+                                Evaluate(unit.spawns, "Loot: " .. item.name .. " (" .. unit.name .. ")")
+                            end
+                        end
+                    end
+                    -- Looted from Objects / Containers
+                    if item.data["O"] then
+                        for oID in pairs(item.data["O"]) do
+                            local obj = PUIQuest.Database:FindObject(oID)
+                            if obj and obj.spawns then
+                                Evaluate(obj.spawns, "Gather: " .. item.name)
+                            end
+                        end
+                    end
+                    -- Purchased from Vendors
+                    if item.data["V"] then
+                        for vID in pairs(item.data["V"]) do
+                            local vendor = PUIQuest.Database:FindUnit(vID)
+                            if vendor and vendor.spawns then
+                                Evaluate(vendor.spawns, "Buy: " .. item.name)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        -- 4. Fallback if no specific objective coords: Check Turn-In
+        if not bestLocalCoord and not firstWorldCoord then
+            local endUnits = q.data["end"] and q.data["end"]["U"]
+            if endUnits then
+                for _, uID in pairs(endUnits) do
                     local unit = PUIQuest.Database:FindUnit(uID)
                     if unit and unit.spawns then
-                        local coords = GetZoneCoords(unit.spawns, currentZoneName, currentZoneID)
-                        EvaluateCoords(coords, "Loot: " .. item.name)
+                        Evaluate(unit.spawns, "Turn in: " .. unit.name)
+                    end
+                end
+            end
+            local endObjects = q.data["end"] and q.data["end"]["O"]
+            if endObjects then
+                for _, oID in pairs(endObjects) do
+                    local obj = PUIQuest.Database:FindObject(oID)
+                    if obj and obj.spawns then
+                        Evaluate(obj.spawns, "Turn in: " .. obj.name)
+                    end
+                end
+            end
+        end
+
+        -- 5. Final Fallback: Starter NPC
+        if not bestLocalCoord and not firstWorldCoord then
+            local startUnits = q.data["start"] and q.data["start"]["U"]
+            if startUnits then
+                for _, uID in pairs(startUnits) do
+                    local unit = PUIQuest.Database:FindUnit(uID)
+                    if unit and unit.spawns then
+                        Evaluate(unit.spawns, "Start: " .. unit.name)
                     end
                 end
             end
         end
     end
 
-    if bestCoord then
+    if bestLocalCoord then
         return {
-            x = bestCoord.x,
-            y = bestCoord.y,
+            x = bestLocalCoord.x,
+            y = bestLocalCoord.y,
             title = questTitle,
-            text = bestText or questTitle,
-            zoneID = bestCoord.zoneID,
+            text = bestLocalText or questTitle,
+            zoneID = bestLocalCoord.zoneID,
+            zoneName = bestLocalCoord.zoneName,
+            isDifferentZone = false,
+        }
+    elseif firstWorldCoord then
+        return {
+            x = firstWorldCoord.x,
+            y = firstWorldCoord.y,
+            title = questTitle,
+            text = firstWorldText or questTitle,
+            zoneID = firstWorldCoord.zoneID,
+            zoneName = firstWorldCoord.zoneName,
+            isDifferentZone = true,
         }
     end
 
@@ -330,21 +507,17 @@ function Tracker:Update()
         return
     end
 
-    -- Ensure map engine is synchronized with current zone when map isn't open
+    -- Ensure map engine is synchronized with current player location
     if not WorldMapFrame or not WorldMapFrame:IsVisible() then
         SetMapToCurrentZone()
     end
 
     local px, py = GetPlayerMapPosition("player")
-    if not px or not py or (px == 0 and py == 0) then
-        if hudArrow then hudArrow:Hide() end
-        if minimapPin then minimapPin:Hide() end
-        currentActiveData = nil
-        return
-    end
+    px = px or 0
+    py = py or 0
 
     -- Estimate player facing if GetPlayerFacing is unavailable
-    if px ~= lastPlayerX or py ~= lastPlayerY then
+    if px > 0 and py > 0 and (px ~= lastPlayerX or py ~= lastPlayerY) then
         local mdx = px - lastPlayerX
         local mdy = py - lastPlayerY
         if (mdx * mdx + mdy * mdy) > 0.000001 then
@@ -354,42 +527,63 @@ function Tracker:Update()
         lastPlayerY = py
     end
 
-    local mapContinent = GetCurrentMapContinent()
-    local mapZone = GetCurrentMapZone()
-    local currentZoneName = nil
-    if mapContinent > 0 and mapZone > 0 then
-        local zoneNames = { GetMapZones(mapContinent) }
-        currentZoneName = zoneNames[mapZone]
-    end
-    if not currentZoneName then
-        currentZoneName = GetZoneText and GetZoneText() or ""
-    end
+    local playerZones, mapZone = GetPlayerZoneAliases()
 
-    -- Find target: either manual focus or nearest tracked quest
+    -- Find target: either manual focus, tracked list, or active quest log
     local resolvedTarget = nil
 
     if manualFocusQuest then
-        resolvedTarget = ResolveQuestObjective(manualFocusQuest, currentZoneName, mapZone, px, py)
+        resolvedTarget = ResolveQuestObjective(manualFocusQuest, playerZones, mapZone, px, py)
     else
-        -- Auto-Target: Scan all tracked quests in PUIQuestWatch
         local trackedList = Primus.PUIQuestWatch and Primus.PUIQuestWatch.GetTrackedList and Primus.PUIQuestWatch:GetTrackedList() or {}
-        local nearestTarget = nil
-        local nearestDist = 999999
+        local nearestLocalTarget = nil
+        local nearestLocalDist = 999999
+        local fallbackWorldTarget = nil
+        local hasTracked = false
 
         for qTitle in pairs(trackedList) do
-            local cand = ResolveQuestObjective(qTitle, currentZoneName, mapZone, px, py)
+            hasTracked = true
+            local cand = ResolveQuestObjective(qTitle, playerZones, mapZone, px, py)
             if cand then
-                local cdx = cand.x - px
-                local cdy = cand.y - py
-                local cdist = cdx * cdx + cdy * cdy
-                if cdist < nearestDist then
-                    nearestDist = cdist
-                    nearestTarget = cand
+                if not cand.isDifferentZone then
+                    local cdx = cand.x - px
+                    local cdy = cand.y - py
+                    local cdist = cdx * cdx + cdy * cdy
+                    if cdist < nearestLocalDist then
+                        nearestLocalDist = cdist
+                        nearestLocalTarget = cand
+                    end
+                elseif not fallbackWorldTarget then
+                    fallbackWorldTarget = cand
                 end
             end
         end
 
-        resolvedTarget = nearestTarget
+        -- Fallback: If no target found from tracked list, check all active Quest Log entries
+        if not nearestLocalTarget and not fallbackWorldTarget then
+            local numEntries = GetNumQuestLogEntries() or 0
+            for i = 1, numEntries do
+                local title, _, _, isHeader, _, isComplete = GetQuestLogTitle(i)
+                if not isHeader and title then
+                    local cand = ResolveQuestObjective(title, playerZones, mapZone, px, py, isComplete)
+                    if cand then
+                        if not cand.isDifferentZone then
+                            local cdx = cand.x - px
+                            local cdy = cand.y - py
+                            local cdist = cdx * cdx + cdy * cdy
+                            if cdist < nearestLocalDist then
+                                nearestLocalDist = cdist
+                                nearestLocalTarget = cand
+                            end
+                        elseif not fallbackWorldTarget then
+                            fallbackWorldTarget = cand
+                        end
+                    end
+                end
+            end
+        end
+
+        resolvedTarget = nearestLocalTarget or fallbackWorldTarget
     end
 
     if not resolvedTarget then
@@ -399,7 +593,26 @@ function Tracker:Update()
         return
     end
 
-    -- Target Math & Distance
+    -- 1. UPDATE 3D HUD NAVIGATION ARROW
+    local arrow = CreateHUDArrow()
+    arrow:Show()
+    if hudModel then
+        hudModel:Show()
+        hudModel:SetModel("Interface\\Minimap\\ROTATING-MINIMAPARROW.mdx")
+    end
+
+    if resolvedTarget.isDifferentZone then
+        resolvedTarget.yards = nil
+        currentActiveData = resolvedTarget
+
+        if hudModel then hudModel:SetFacing(0) end
+        hudDistText:SetText(string.format("|cffffbb33In %s|r", resolvedTarget.zoneName or "Other Area"))
+        hudTitleText:SetText(resolvedTarget.text or resolvedTarget.title or "Quest Objective")
+        if minimapPin then minimapPin:Hide() end
+        return
+    end
+
+    -- In-zone calculations
     local tx = resolvedTarget.x
     local ty = resolvedTarget.y
     local dx = tx - px
@@ -415,10 +628,6 @@ function Tracker:Update()
     local playerFacing = (GetPlayerFacing and GetPlayerFacing()) or estimatedFacing or 0
     local diff = targetAngle - playerFacing
 
-    -- 1. UPDATE 3D HUD NAVIGATION ARROW
-    local arrow = CreateHUDArrow()
-    arrow:Show()
-
     if hudModel then
         hudModel:SetFacing(diff)
     end
@@ -427,7 +636,6 @@ function Tracker:Update()
     if yards < 15 or dist < 0.008 then
         hudDistText:SetText("|cff00ff00Arrived!|r")
     else
-        -- Proximity angle coloring
         local absAngle = math.abs(math.mod(diff + math.pi, 2 * math.pi) - math.pi)
         if absAngle < 0.35 then
             hudDistText:SetText(string.format("|cff00ff00%d yd|r", yards))
@@ -443,6 +651,10 @@ function Tracker:Update()
     -- 2. UPDATE MINIMAP RADAR PIN
     local mPin = CreateMinimapPin()
     mPin:Show()
+    if minimapModel then
+        minimapModel:Show()
+        minimapModel:SetFacing(diff)
+    end
 
     local radius = 54
     local mmDist = dist * 250

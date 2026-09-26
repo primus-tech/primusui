@@ -30,22 +30,29 @@ function Database:BuildIndices()
     local DB = PUIQuest.DB
     if not DB then return end
 
+    -- Ensure Turtle WoW delta patches are applied if enabled
+    if PUIQuest.Patchtable and PUIQuest.Patchtable.Apply and not PUIQuest.Patchtable:IsPatched() then
+        if not PUIQuest.db or PUIQuest.db:Get("turtleMode", true) then
+            PUIQuest.Patchtable:Apply()
+        end
+    end
+
     -- 1. Index Items
     local itemLoc = DB["items"] and (DB["items"]["enUS"] or DB["items"]["loc"])
     if itemLoc then
         for id, name in pairs(itemLoc) do
-            if type(name) == "string" then
+            if type(name) == "string" and name ~= "_" then
                 itemIndex[string.lower(name)] = id
             end
         end
     end
 
-    -- 2. Index Quests
+    -- 2. Index Quests (Supports both standard [1]="Title" and Turtle ["T"]="Title")
     local questLoc = DB["quests"] and (DB["quests"]["enUS"] or DB["quests"]["loc"])
     if questLoc then
         for id, qData in pairs(questLoc) do
-            local title = type(qData) == "table" and qData[1] or qData
-            if type(title) == "string" then
+            local title = type(qData) == "table" and (qData[1] or qData["T"] or qData["title"]) or qData
+            if type(title) == "string" and title ~= "_" then
                 questIndex[string.lower(title)] = id
             end
         end
@@ -55,7 +62,7 @@ function Database:BuildIndices()
     local unitLoc = DB["units"] and (DB["units"]["enUS"] or DB["units"]["loc"])
     if unitLoc then
         for id, name in pairs(unitLoc) do
-            if type(name) == "string" then
+            if type(name) == "string" and name ~= "_" then
                 unitIndex[string.lower(name)] = id
             end
         end
@@ -65,7 +72,7 @@ function Database:BuildIndices()
     local objectLoc = DB["objects"] and (DB["objects"]["enUS"] or DB["objects"]["loc"])
     if objectLoc then
         for id, name in pairs(objectLoc) do
-            if type(name) == "string" then
+            if type(name) == "string" and name ~= "_" then
                 objectIndex[string.lower(name)] = id
             end
         end
@@ -82,6 +89,15 @@ function Database:Reload()
     self:BuildIndices()
 end
 
+local function CleanName(str)
+    if not str or type(str) ~= "string" then return "" end
+    local clean = string.gsub(str, "|c%x%x%x%x%x%x%x%x", "")
+    clean = string.gsub(clean, "|r", "")
+    clean = string.gsub(clean, "%b[]", "")
+    clean = string.gsub(clean, "^%s*(.-)%s*$", "%1")
+    return string.lower(clean)
+end
+
 -- =========================================================================
 -- QUERY PRIMITIVES
 -- =========================================================================
@@ -93,7 +109,8 @@ function Database:FindItem(nameOrID)
 
     local id = tonumber(nameOrID)
     if not id and type(nameOrID) == "string" then
-        id = itemIndex[string.lower(nameOrID)]
+        local raw = string.lower(nameOrID)
+        id = itemIndex[raw] or itemIndex[CleanName(nameOrID)]
     end
     if not id then return nil end
 
@@ -113,15 +130,28 @@ function Database:FindQuest(nameOrID)
 
     local id = tonumber(nameOrID)
     if not id and type(nameOrID) == "string" then
-        id = questIndex[string.lower(nameOrID)]
+        local raw = string.lower(nameOrID)
+        id = questIndex[raw]
+        if not id then
+            local clean = CleanName(nameOrID)
+            id = questIndex[clean]
+            if not id and clean ~= "" then
+                for qName, qID in pairs(questIndex) do
+                    if string.find(clean, qName, 1, true) or string.find(qName, clean, 1, true) then
+                        id = qID
+                        break
+                    end
+                end
+            end
+        end
     end
     if not id then return nil end
 
     local data = DB["quests"]["data"] and DB["quests"]["data"][id]
     local loc = DB["quests"]["enUS"] and DB["quests"]["enUS"][id]
-    local title = type(loc) == "table" and loc[1] or loc
-    local desc = type(loc) == "table" and loc[2] or ""
-    local objText = type(loc) == "table" and loc[3] or ""
+    local title = type(loc) == "table" and (loc[1] or loc["T"] or loc["title"]) or loc
+    local desc = type(loc) == "table" and (loc[2] or loc["D"] or loc["desc"]) or ""
+    local objText = type(loc) == "table" and (loc[3] or loc["O"] or loc["objText"]) or ""
 
     return {
         id = id,
@@ -182,7 +212,6 @@ function Database:GetItemVendorPrice(itemID)
     local v = item.data["V"]
     if v then
         for vendorID, count in pairs(v) do
-            -- In pfDB, V table contains vendor info
             return tonumber(count) or 0
         end
     end

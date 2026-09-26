@@ -217,12 +217,12 @@ function PUIQuest:OnEnable()
     end)
 
     -- Real-time HUD Navigation & Radar Ticker (0.15s)
-    Time:Every(0.15, "PUIQuest", function()
+    Time:Every(0.15, function()
         if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
         if WorldMapFrame and WorldMapFrame:IsVisible() and PUIQuest.Map then
             PUIQuest.Map:Update()
         end
-    end)
+    end, nil, "PUIQuest")
 end
 
 function PUIQuest:OnDisable()
@@ -246,7 +246,7 @@ function PUIQuest:HandleSlashCommand(args)
         local turtleActive = PUIQuest.db:Get("turtleMode", true)
         DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PrimusUI: PUIQuest Engine Status ===", "69ccf0"))
         DEFAULT_CHAT_FRAME:AddMessage(string.format("• Turtle WoW Extensions: |cffffd100%s|r", turtleActive and "ACTIVE" or "DISABLED"))
-        DEFAULT_CHAT_FRAME:AddMessage("• Subcommands: |cffffffff/pui db|r (Browser), |cffffffff/pui quest focus <title>|r, |cffffffff/pui quest turtle <on|off>|r")
+        DEFAULT_CHAT_FRAME:AddMessage("• Subcommands: |cffffffff/pui db|r (Browser), |cffffffff/pui quest focus <title>|r, |cffffffff/pui quest arrow|r (Test Arrow), |cffffffff/pui quest debug|r")
         return
     end
 
@@ -274,6 +274,26 @@ function PUIQuest:HandleSlashCommand(args)
         else
             self:FocusQuest(nil)
             DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuest]: Reset to automatic closest-quest navigation.", "ffbb33"))
+        end
+    elseif cmd == "arrow" or cmd == "debug" then
+        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PUIQuest Navigation Diagnostics ===", "69ccf0"))
+        local px, py = GetPlayerMapPosition("player")
+        DEFAULT_CHAT_FRAME:AddMessage(string.format("• Player Pos: |cffffd100%.2f, %.2f|r (Zone: %s / %s)", (px or 0)*100, (py or 0)*100, tostring(GetZoneText()), tostring(GetRealZoneText())))
+        local activeTarget = PUIQuest.Tracker and PUIQuest.Tracker:GetActiveTarget()
+        if activeTarget then
+            DEFAULT_CHAT_FRAME:AddMessage(string.format("• Active Target: |cff00ff00%s|r (%s)", activeTarget.title or "None", activeTarget.text or ""))
+            if activeTarget.isDifferentZone then
+                DEFAULT_CHAT_FRAME:AddMessage(string.format("• Target Zone: |cffffbb33%s|r (Different Zone)", activeTarget.zoneName or "Unknown"))
+            else
+                DEFAULT_CHAT_FRAME:AddMessage(string.format("• Distance: |cffffffff%d yd|r (Coords: %.1f, %.1f)", activeTarget.yards or 0, (activeTarget.x or 0)*100, (activeTarget.y or 0)*100))
+            end
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("• Active Target: |cffff4444None found (Check quest log)|r")
+        end
+        local numLog = GetNumQuestLogEntries() or 0
+        DEFAULT_CHAT_FRAME:AddMessage(string.format("• Quest Log Entries: |cffffffff%d|r", numLog))
+        if PUIQuest.Tracker then
+            PUIQuest.Tracker:Update()
         end
     else
         DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuest]: Unknown subcommand. Use '/pui quest' for status.", "ff4444"))

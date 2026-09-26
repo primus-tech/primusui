@@ -5,8 +5,9 @@
     Features:
     1. High-Performance Pooled POI Pins: Available (!), Turn-in (?), and Objective (1, 2) markers on WorldMapButton.
     2. Real-Time Dynamic Route Connection Lines: Glowing dotted GPS trails connecting player -> active quest targets.
-    3. Interactive Tooltips & Navigation Lock: Click any map pin to immediately focus HUD navigation.
-    4. Zero Memory Churn: Reusable object pools for all pins and route dots.
+    3. Multi-Zone & Turtle WoW Support: Accurate mapping for standard zones, subzones, and custom regions.
+    4. Interactive Tooltips & Navigation Lock: Click any map pin to immediately focus HUD navigation.
+    5. Zero Memory Churn: Reusable object pools for all pins and route dots.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -226,7 +227,9 @@ local function GetZoneCoords(spawnsTbl, currentZoneName, currentZoneID)
     local zonesData = DB["zones"]["data"]
     if not zonesLoc then return {} end
 
+    local targetLower = currentZoneName and string.lower(currentZoneName) or ""
     local results = {}
+
     for _, c in pairs(spawnsTbl.coords) do
         local x = c[1]
         local y = c[2]
@@ -234,12 +237,16 @@ local function GetZoneCoords(spawnsTbl, currentZoneName, currentZoneID)
 
         if zID and x and y then
             local zName = zonesLoc[zID]
-            if zName and (zName == currentZoneName or zID == currentZoneID) then
+            local zLower = zName and string.lower(zName) or ""
+
+            if (targetLower ~= "" and zLower == targetLower) or (currentZoneID and zID == currentZoneID) then
                 table.insert(results, { x = x, y = y, zoneID = zID })
             elseif zonesData and zonesData[zID] then
                 local pID, w, h, ox, oy = unpack(zonesData[zID])
                 local pName = zonesLoc[pID]
-                if pName and (pName == currentZoneName or pID == currentZoneID) then
+                local pLower = pName and string.lower(pName) or ""
+
+                if (targetLower ~= "" and pLower == targetLower) or (currentZoneID and pID == currentZoneID) then
                     local px = (x * (w or 100) / 100) + (ox or 0)
                     local py = (y * (h or 100) / 100) + (oy or 0)
                     table.insert(results, { x = px, y = py, zoneID = pID })
@@ -467,7 +474,7 @@ function Map:Update()
         local px, py = GetPlayerMapPosition("player")
         if px and py and (px > 0 or py > 0) then
             local target = PUIQuest.Tracker and PUIQuest.Tracker.GetActiveTarget and PUIQuest.Tracker:GetActiveTarget()
-            if target and target.x and target.y then
+            if target and target.x and target.y and not target.isDifferentZone then
                 self:DrawRouteLine(px * 100, py * 100, target.x * 100, target.y * 100, 0.25, 0.85, 1.0, 0.85)
             end
         end
