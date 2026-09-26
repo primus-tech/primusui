@@ -44,9 +44,7 @@ function PUITalk:CreateMasterFrame()
     f:RegisterForDrag("LeftButton")
     f:SetScript("OnDragStart", function() this:StartMoving() end)
     f:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
-
-    tinsert(UISpecialFrames, "Primus_PUITalkFrame")
-
+    f:Show()
     -- ---------------------------------------------------------------------
     -- Top Master Rail (3 Master Tabs + Utility Buttons)
     -- ---------------------------------------------------------------------
@@ -101,24 +99,11 @@ function PUITalk:CreateMasterFrame()
     tabSocial:SetScript("OnClick", function() PUITalk:SelectMasterTab(3) end)
     f.tabSocial = tabSocial
 
-    -- Window Controls on Right ([C] Copy, [⚙️] Config, [✖] Close)
-    local closeBtn = CreateFrame("Button", nil, header)
-    closeBtn:SetWidth(18)
-    closeBtn:SetHeight(18)
-    closeBtn:SetPoint("RIGHT", header, "RIGHT", -4, 0)
-    closeBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
-    closeBtn:SetBackdropColor(0.6, 0.1, 0.1, 0.8)
-    closeBtn:SetBackdropBorderColor(0.8, 0.2, 0.2, 1)
-    local closeText = closeBtn:CreateFontString(nil, "OVERLAY")
-    closeText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
-    closeText:SetPoint("CENTER", 0, 0)
-    closeText:SetText("X")
-    closeBtn:SetScript("OnClick", function() f:Hide() end)
-
+    -- Window Controls on Right ([C] Chat Copy) - Master Frame is permanent & non-closable
     local copyBtn = CreateFrame("Button", nil, header)
-    copyBtn:SetWidth(18)
-    copyBtn:SetHeight(18)
-    copyBtn:SetPoint("RIGHT", closeBtn, "LEFT", -4, 0)
+    copyBtn:SetWidth(20)
+    copyBtn:SetHeight(20)
+    copyBtn:SetPoint("RIGHT", header, "RIGHT", -4, 0)
     copyBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
     copyBtn:SetBackdropColor(0.1, 0.2, 0.35, 0.9)
     copyBtn:SetBackdropBorderColor(0.3, 0.6, 0.9, 1)
@@ -312,6 +297,7 @@ end
 
 function PUITalk:SelectMasterTab(tabIndex)
     if not masterFrame then return end
+    masterFrame:Show()
     self.db:Set("activeMasterTab", tabIndex)
 
     -- Update Tab Button Visuals
@@ -495,15 +481,29 @@ function PUITalk:OnInitialize()
             if parts and parts[2] == "copy" then
                 local idx = tonumber(parts[3]) or 1
                 PUITalk:OpenCopyFrame(idx)
-            else
-                if masterFrame and masterFrame:IsShown() then
-                    masterFrame:Hide()
-                else
-                    PUITalk:CreateMasterFrame()
+            elseif parts and (parts[2] == "msg" or parts[2] == "messages" or parts[2] == "im") then
+                PUITalk:CreateMasterFrame()
+                if masterFrame then
                     masterFrame:Show()
+                    PUITalk:SelectMasterTab(2)
+                end
+            elseif parts and (parts[2] == "social" or parts[2] == "friends" or parts[2] == "guild") then
+                PUITalk:CreateMasterFrame()
+                if masterFrame then
+                    masterFrame:Show()
+                    PUITalk:SelectMasterTab(3)
+                end
+            else
+                PUITalk:CreateMasterFrame()
+                if masterFrame then
+                    masterFrame:Show()
+                    PUITalk:SelectMasterTab(1)
+                    if masterFrame.editBox and not UnitAffectingCombat("player") then
+                        masterFrame.editBox:SetFocus()
+                    end
                 end
             end
-        end, "PUITalk Unified Communication Suite (/pui talk [copy 1-7])")
+        end, "PUITalk Unified Communication Suite (/pui talk [copy 1-7|msg|social])")
 
         -- Backward compatibility aliases
         Primus.Console:RegisterAlias("chat", "talk")
