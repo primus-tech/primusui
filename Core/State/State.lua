@@ -52,7 +52,7 @@ local function SyncStandardFrames()
 
     -- 1. Minimap & Zone Header
     if stateDB:Get("fadeMinimap", true) then
-        local mm = MinimapCluster or Minimap
+        local mm = _G["Primus_Minimap"] or MinimapCluster or Minimap
         if mm then
             Hider:RegisterDynamic(mm, "Minimap", {
                 mode = "fade",
@@ -66,7 +66,7 @@ local function SyncStandardFrames()
         end
     else
         Hider:UnregisterDynamic("Minimap")
-        local mm = MinimapCluster or Minimap
+        local mm = _G["Primus_Minimap"] or MinimapCluster or Minimap
         if mm then mm:SetAlpha(idleAlpha) end
     end
 

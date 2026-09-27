@@ -35,6 +35,11 @@ Modules\Utility\PUIDock\PUIDock.lua
 Modules\Utility\PUIFastLoot\PUIFastLoot.lua
 Modules\Utility\PUIAutoMechanics\PUIAutoMechanics.lua
 Modules\Utility\PUIItemCompare\PUIItemCompare.lua
+Modules\Utility\PUIMinimapper\PUIMapCore.lua
+Modules\Utility\PUIMinimapper\PUIZoneHeader.lua
+Modules\Utility\PUIMinimapper\PUICoordinates.lua
+Modules\Utility\PUIMinimapper\PUISideDock.lua
+Modules\Utility\PUIMinimapper\PUIMinimapper.lua
 Modules\Utility\PUIMinimapOrbit\PUIMinimapOrbit.lua
 Modules\Utility\PUIMailbox\PUIMailbox.lua
 Modules\Utility\PUIMerchant\PUIMerchant.lua

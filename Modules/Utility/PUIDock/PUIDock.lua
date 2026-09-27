@@ -46,8 +46,7 @@ PUIDock.BlizzardCatalog = {
     { frame = "PartyMemberFrame4", name = "Party Member 4" },
     { frame = "ComboFrame", name = "Combo Points" },
 
-    -- HUD & System
-    { frame = "MinimapCluster", name = "Minimap" },
+    -- HUD & System (Minimap is exclusively managed by PUIMinimapper)
     { frame = "DurabilityFrame", name = "Durability Doll" },
     { frame = "QuestWatchFrame", name = "Quest Tracker" },
     { frame = "UIErrorsFrame", name = "UI Warnings / Errors" },
@@ -469,7 +468,6 @@ local function HookBlizzardRedraws()
             PUIDock:ApplyElementHiding()
             local mover = Primus.PUIMover or PUIMover
             if mover and mover.RestorePosition then
-                mover:RestorePosition("MinimapCluster")
                 mover:RestorePosition("QuestWatchFrame")
                 mover:RestorePosition("DurabilityFrame")
                 mover:RestorePosition("WorldStateAlwaysUpFrame")

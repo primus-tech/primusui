@@ -174,6 +174,11 @@ end
 
 -- Safely restore Blizzard default frames (e.g. Zone Text Button) to their standard anchor
 local function RestoreBlizzardFrames()
+    local minimapper = Primus.PUIMinimapper or _G.PUIMinimapper
+    if minimapper and minimapper.isModuleEnabled then
+        return
+    end
+
     if MinimapZoneTextButton then
         if MinimapZoneTextButton.GetParent and MinimapZoneTextButton:GetParent() ~= MinimapCluster then
             MinimapZoneTextButton:SetParent(MinimapCluster)
@@ -347,6 +352,7 @@ function PUIMinimapOrbit:RestoreButtons()
 end
 
 -- Collect and dock discovered addon minimap buttons
+-- Collect and dock discovered addon minimap buttons
 function PUIMinimapOrbit:CollectButtons()
     if not dockFrame or not orbitDB:Get("enabled") then return end
 
@@ -366,12 +372,24 @@ function PUIMinimapOrbit:CollectButtons()
         end
     end
 
+    if not dockFrame.emptyText then
+        local et = dockFrame:CreateFontString(nil, "OVERLAY")
+        et:SetFont(Media:Fetch("font", "Default") or "Fonts\\FRIZQT__.TTF", 8, "OUTLINE")
+        et:SetPoint("CENTER", dockFrame, "CENTER", 0, 0)
+        et:SetTextColor(0.6, 0.6, 0.7)
+        et:SetText("No Addon Buttons")
+        dockFrame.emptyText = et
+    end
+
     local count = table.getn(dockedButtons)
     if count == 0 then
-        dockFrame:SetWidth(36)
-        dockFrame:SetHeight(36)
+        dockFrame:SetWidth(110)
+        dockFrame:SetHeight(28)
+        dockFrame.emptyText:Show()
         return
     end
+
+    dockFrame.emptyText:Hide()
 
     -- Responsive grid layout: 1 column for <= 6 buttons, 2 columns for > 6 buttons
     local cols = (count > 6) and 2 or 1
@@ -391,11 +409,43 @@ function PUIMinimapOrbit:CollectButtons()
         btn:SetParent(dockFrame)
         btn:SetPoint("TOPLEFT", dockFrame, "TOPLEFT", x, y)
         SkinDockedButton(btn)
+        btn:Show()
     end
 
     local numRows = math.ceil(count / cols)
     dockFrame:SetWidth(pad * 2 + cols * btnSize + (cols - 1) * gap)
     dockFrame:SetHeight(pad * 2 + numRows * btnSize + (numRows - 1) * gap)
+end
+
+-- Public Toggle Method for Dock Flyout Drawer
+function PUIMinimapOrbit:ToggleDock(anchorBtn, side)
+    if not dockFrame then return end
+    anchorBtn = anchorBtn or toggleButton
+
+    if dockFrame:IsShown() then
+        dockFrame:Hide()
+        orbitDB:Set("collapsed", true)
+    else
+        self:CollectButtons()
+        dockFrame:ClearAllPoints()
+        dockFrame:SetParent(UIParent)
+        dockFrame:SetFrameStrata("DIALOG")
+        dockFrame:SetFrameLevel(100)
+
+        side = side or "LEFT"
+        if side == "LEFT" then
+            dockFrame:SetPoint("TOPRIGHT", anchorBtn, "TOPLEFT", -4, 0)
+        elseif side == "RIGHT" then
+            dockFrame:SetPoint("TOPLEFT", anchorBtn, "TOPRIGHT", 4, 0)
+        elseif side == "BOTTOM" then
+            dockFrame:SetPoint("TOPRIGHT", anchorBtn, "BOTTOMRIGHT", 0, -4)
+        else
+            dockFrame:SetPoint("TOPRIGHT", anchorBtn, "TOPLEFT", -4, 0)
+        end
+
+        dockFrame:Show()
+        orbitDB:Set("collapsed", false)
+    end
 end
 
 function PUIMinimapOrbit:RegisterOptionsFlare()
@@ -412,7 +462,7 @@ end
 function PUIMinimapOrbit:OnInitialize()
     self:RegisterOptionsFlare()
 
-    -- Ensure Blizzard zone text is restored immediately
+    -- Ensure Blizzard zone text is restored immediately if not managed by PUIMinimapper
     RestoreBlizzardFrames()
 
     -- Create Main Orbit Toggle Button on UIParent (defaults anchored to Minimap)
@@ -440,10 +490,10 @@ function PUIMinimapOrbit:OnInitialize()
         mover:Register(toggleButton, "PUIMinimapOrbit", "Minimap Orbit Pill", "UTILITY")
     end
 
-    -- Create Dock Container Frame
-    dockFrame = CreateFrame("Frame", "Primus_MinimapOrbitDock", toggleButton)
-    dockFrame:SetFrameStrata("HIGH")
-    dockFrame:SetFrameLevel(toggleButton:GetFrameLevel() + 1)
+    -- Create Dock Container Frame on UIParent so it is never suppressed by hidden parents
+    dockFrame = CreateFrame("Frame", "Primus_MinimapOrbitDock", UIParent)
+    dockFrame:SetFrameStrata("DIALOG")
+    dockFrame:SetFrameLevel(100)
     dockFrame:SetWidth(36)
     dockFrame:SetHeight(36)
     dockFrame:SetPoint("TOPRIGHT", toggleButton, "BOTTOMRIGHT", 0, -4)
@@ -451,6 +501,7 @@ function PUIMinimapOrbit:OnInitialize()
     dockFrame:SetBackdropColor(0.06, 0.06, 0.08, 0.95)
     dockFrame:SetBackdropBorderColor(0.25, 0.25, 0.32, 1.0)
     dockFrame:Hide()
+    PUIMinimapOrbit.dockFrame = dockFrame
 
     -- Hover highlight & Tooltips
     toggleButton:SetScript("OnEnter", function()
@@ -475,14 +526,7 @@ function PUIMinimapOrbit:OnInitialize()
                 Primus.Console:Print("Minimap Orbit rescanned and consolidated buttons.")
             end
         else
-            if dockFrame:IsShown() then
-                dockFrame:Hide()
-                orbitDB:Set("collapsed", true)
-            else
-                PUIMinimapOrbit:CollectButtons()
-                dockFrame:Show()
-                orbitDB:Set("collapsed", false)
-            end
+            PUIMinimapOrbit:ToggleDock(toggleButton, "BOTTOM")
         end
     end)
 

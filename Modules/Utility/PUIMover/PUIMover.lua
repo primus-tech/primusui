@@ -53,7 +53,6 @@ local moverDB = DB:RegisterNamespace("PUIMover", {
 
 -- Default dimensions for frames that have 0 width/height when inactive
 local DEFAULT_DIMS = {
-    ["MinimapCluster"]          = { w = 192, h = 192 },
     ["BuffFrame"]               = { w = 180, h = 50 },
     ["DurabilityFrame"]         = { w = 60,  h = 60 },
     ["QuestWatchFrame"]         = { w = 220, h = 150 },
@@ -72,6 +71,7 @@ local DEFAULT_DIMS = {
     ["PUIHotbars_Micro"]        = { w = 200, h = 28 },
     ["PUIHotbars_Bags"]         = { w = 180, h = 36 },
     ["PUIMinimapOrbit"]         = { w = 24,  h = 24 },
+    ["PUIMinimapper"]           = { w = 160, h = 160 },
     ["PUIAuras"]                = { w = 280, h = 120 },
     ["PUIHud"]                  = { w = 360, h = 290 },
 }
@@ -116,7 +116,7 @@ local function SyncOverlayToFrame(overlay, frame, key)
         else
             -- Intelligent defaults based on known keys if unanchored/hidden
             local defaultAnchors = {
-                ["MinimapCluster"]          = { point = "TOPRIGHT", rel = "TOPRIGHT", x = 0, y = 0 },
+                ["PUIMinimapper"]           = { point = "TOPRIGHT", rel = "TOPRIGHT", x = -10, y = -10 },
                 ["QuestWatchFrame"]         = { point = "TOPRIGHT", rel = "TOPRIGHT", x = -10, y = -200 },
                 ["DurabilityFrame"]         = { point = "TOPRIGHT", rel = "TOPRIGHT", x = -170, y = -200 },
                 ["WorldStateAlwaysUpFrame"] = { point = "TOP",      rel = "TOP",      x = 0, y = -15 },
@@ -553,28 +553,9 @@ end
 
 -- Clamp a frame so it never extends outside UIParent viewport
 function PUIMover:ClampFrameToScreen(frame)
-    if not frame or not frame.GetRight or not frame.GetLeft or not UIParent or not UIParent.GetWidth then return end
-    local screenW = UIParent:GetWidth()
-    local screenH = UIParent:GetHeight()
-    if not screenW or screenW <= 0 then return end
-
-    local right = frame:GetRight()
-    local left = frame:GetLeft()
-
-    if right and right > screenW then
-        local overflow = right - screenW + 6
-        local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
-        if point then
-            frame:ClearAllPoints()
-            frame:SetPoint(point, relativeTo or UIParent, relativePoint or point, (xOfs or 0) - overflow, yOfs or 0)
-        end
-    elseif left and left < 0 then
-        local underflow = -left + 6
-        local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
-        if point then
-            frame:ClearAllPoints()
-            frame:SetPoint(point, relativeTo or UIParent, relativePoint or point, (xOfs or 0) + underflow, yOfs or 0)
-        end
+    if not frame then return end
+    if frame.SetClampedToScreen then
+        frame:SetClampedToScreen(true)
     end
 end
 

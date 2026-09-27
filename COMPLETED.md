@@ -177,17 +177,27 @@
   - Side-by-side equipment comparison tooltips for Bags, Bank, Quests, Loot, and Chat links with stat delta diffs.
   - Dynamic screen-edge positioning (automatically positioning comparison tooltips to the left or right of parent tooltips based on available screen margins).
   - Cleanly skins Blizzard's native `ShoppingTooltip1` and `ShoppingTooltip2` at merchants with 1-pixel borders and dark glass styling while suppressing duplicate custom popups.
+- [x] **PUIMinimapper: Minimap Shaper, Sizer, Zoom, Side Dock & Coordinates HUD (`Modules/Utility/PUIMinimapper/`):**
+  - **Modular 5-Subfile Architecture**: Deconstructed into clean single-domain subsystems:
+    - `PUIMapCore.lua`: Container frame (`Primus_Minimap`), Vanilla 1.12.1 single-anchor centering (`CENTER, 0, 0`), geometry masking (Modern Square, Classic Round, Frameless Minimalist), and `PUIMover` integration.
+    - `PUIZoneHeader.lua`: 1px dark glass zone title bar, PvP/difficulty colorization, zone resolution fallback cascade (`GetMinimapZoneText` &rarr; `GetSubZoneText` &rarr; `GetZoneText`), and 1-click World Map toggle.
+    - `PUICoordinates.lua`: Real-time high-precision Player (`XX.X, YY.Y`) and Cursor coordinates HUD with yard projection math and $0.08\text{s}$ throttled poller.
+    - `PUISideDock.lua`: 1-pixel utility side rail (configurable Left or Right), hosting the interactive Clock button (Local/Server/Date tooltips, 12h/24h toggle) and Addon Orbit button.
+    - `PUIMinimapper.lua`: Master lifecycle coordinator, smooth mouse-wheel zoom engine with 10s auto-reset inactivity timer, Blizzard clutter neutralization, and Options Flare.
+  - **Blizzard Art Neutralization**: Permanently stripped compass rings (`MinimapBorder`, `MinimapBorderTop`), redundant zoom buttons (`MinimapZoomIn/Out`), `GameTimeFrame`, and neutralized native `MinimapZoneTextButton` / `MinimapZoneText` ghosting.
+  - **Shape Awareness**: Seamless shape detection handshake with `PUIQuest` tracker perimeter radar pins via `PUIMinimapper:GetShape()`.
 - [x] **PUIMinimapOrbit: Non-Destructive Minimap Button Consolidation Dock (`Modules/Utility/PUIMinimapOrbit/`):**
-  - Discovers and docks 3rd-party minimap buttons (`AtlasButton`, `Gatherer`, `KLHTM`, `WIM`, `CT_RASets`, `LibDBIcon*`, etc.) into a collapsible drawer.
-  - Strict Blizzard HUD protection: explicitly blacklists and preserves `MinimapZoneTextButton`, `MinimapZoneText`, `MiniMapTracking*`, `MiniMapMail*`, `MiniMapMeetingStone*`, `MiniMapBattlefield*`, `MinimapZoom*`, and `GameTimeFrame`.
-  - Standardized button face skinning: suppresses oversized 52×52 circular border textures that occlude neighboring icons, anchors primary textures to `ARTWORK`, and applies sleek 1px backdrops.
-  - Responsive grid layout: dynamically sizes dock into 1 column ($\le 6$ buttons) or 2 columns ($> 6$ buttons) to prevent vertical screen overflow.
-  - PUIMover integration: registered under `"UTILITY"` as `"Minimap Orbit Pill"` for drag-and-drop repositioning with persistent coordinates.
-- [x] **PUIMover Alignment & Anchor Stabilization (`Modules/Utility/PUIMover/`, `PUIDock/`, `PUIQuestWatch/`):**
+  - **Directional Flyout Drawer**: Dynamic expandable drawer on `UIParent` (`DIALOG` strata, frame level 100) that automatically opens to the side where the Orbit button is docked (expanding to the Left when docked Left, or to the Right when docked Right).
+  - **Discovers and Docks 3rd-Party Minimap Buttons**: Scans and docks `AtlasButton`, `Gatherer`, `KLHTM`, `WIM`, `CT_RASets`, `LibDBIcon*`, DBM, BigWigs, etc., with automatic state restoration.
+  - **Standardized Button Face Skinning**: Suppresses oversized 52×52 circular border textures that occlude neighboring icons, anchors primary textures to `ARTWORK`, and applies sleek 1px backdrops.
+  - **Responsive Grid & Empty State**: Dynamically sizes dock into 1 column ($\le 6$ buttons) or 2 columns ($> 6$ buttons) and displays a clean `"No Addon Buttons"` indicator when no 3rd-party addons are detected.
+  - **PUIMover Integration**: Registered under `"UTILITY"` as `"Minimap Orbit Pill"` for drag-and-drop repositioning with persistent coordinates.
+- [x] **PUIMover Alignment, Clamping & Anchor Stabilization (`Modules/Utility/PUIMover/`, `PUIDock/`, `PUIQuestWatch/`):**
+  - Replaced manual overflow coordinate mutation in `ClampFrameToScreen` with native client-level `frame:SetClampedToScreen(true)`, preventing UI-scale coordinate drift and horizontal displacement.
   - Resolved `relativeTo = nil` screen anchor resolution bug in `SyncOverlayToFrame`, ensuring bounding boxes accurately encapsulate frames on boot.
-  - Added default dimension constants for `MinimapCluster` ($192 \times 192$) and `QuestWatchFrame` ($220 \times 150$) in `DEFAULT_DIMS`.
+  - Added default dimension constants for `PUIMinimapper` ($160 \times 160$), `PUIMinimapOrbit` ($24 \times 24$), and `QuestWatchFrame` ($220 \times 150$) in `DEFAULT_DIMS`.
   - Implemented `PUIMover:GetPosition(key)` and `PUIMover:HasCustomPosition(key)` public query APIs.
-  - Stabilized Blizzard frame anchors on `UIParent_ManageFramePositions` preventing Blizzard from resetting custom positions for `MinimapCluster`, `QuestWatchFrame`, `DurabilityFrame`, and `WorldStateAlwaysUpFrame`.
+  - Stabilized Blizzard frame anchors on `UIParent_ManageFramePositions` preventing Blizzard from resetting custom positions for `QuestWatchFrame`, `DurabilityFrame`, and `WorldStateAlwaysUpFrame`.
 - [x] **PUISpellbook: Traditional 2-Page Spellbook Spread (`Modules/Player/PUISpellbook/`):**
   - Classic 2-column, 2-page spread (6 spells left + 6 spells right = 12 per view) with central spine divider.
   - Multi-rank flyout dropdown per spell card enabling 1-click downranking and `PickupSpell` drag-to-bar assignment.

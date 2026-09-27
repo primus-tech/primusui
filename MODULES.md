@@ -54,7 +54,7 @@ To achieve total architectural consistency, all modular components in PrimusUI a
 
 ---
 
-### 4. Utility & Meta-UI Suite (9 Modules)
+### 4. Utility & Meta-UI Suite (10 Modules)
 
 | Current Name | Target Standard Name | File Path | Status |
 | :--- | :--- | :--- | :--- |
@@ -64,6 +64,7 @@ To achieve total architectural consistency, all modular components in PrimusUI a
 | `PUIFastLoot` | `PUIFastLoot` | `Modules/Utility/PUIFastLoot/PUIFastLoot.lua` | ✅ **DONE** |
 | `PUIAutoMechanics` | `PUIAutoMechanics` | `Modules/Utility/PUIAutoMechanics/PUIAutoMechanics.lua` | ✅ **DONE** |
 | `PUIItemCompare` | `PUIItemCompare` | `Modules/Utility/PUIItemCompare/PUIItemCompare.lua` | ✅ **DONE** |
+| `PUIMinimapper` | `PUIMinimapper` | `Modules/Utility/PUIMinimapper/`<br>• `PUIMapCore.lua` (Container, Masking & Sizing)<br>• `PUIZoneHeader.lua` (Zone Title & PvP Colors)<br>• `PUICoordinates.lua` (Real-Time Coordinate HUD)<br>• `PUISideDock.lua` (Clock, Orbit & Tracking Dock)<br>• `PUIMinimapper.lua` (Master Coordinator & Flare) | ✅ **DONE** |
 | `PUIMinimapOrbit` | `PUIMinimapOrbit` | `Modules/Utility/PUIMinimapOrbit/PUIMinimapOrbit.lua` | ✅ **DONE** |
 | `PUIMailbox` | `PUIMailbox` | `Modules/Utility/PUIMailbox/PUIMailbox.lua` | ✅ **DONE** |
 | `PUIInspect` | `PUIInspect` | `Modules/Utility/PUIInspect/PUIInspect.lua` | ✅ **DONE** |

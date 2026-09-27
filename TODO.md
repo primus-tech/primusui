@@ -151,21 +151,21 @@
 
 ---
 
-### 5. PUIMinimapper: Minimap Shaper, Sizer & Coordinates (`Modules/Navigation/PUIMinimapper/`)
-- [ ] **Multi-Geometry Minimap Masking:**
-  - [ ] Implement shape shaders/masks: Modern Square, Sleek Hexagon, Octagon, Classic Round, and Frameless Minimalist.
-- [ ] **Sizing, Scaling & Alpha:**
-  - [ ] Dimension sliders (120px to 260px) and global scale multiplier.
-  - [ ] Situational alpha adjustments (exploration vs combat fading via Combat Zen).
-- [ ] **Integrated Coordinate HUD:**
-  - [ ] Real-time high-precision Player coordinates (`XX.X, YY.Y`) and Cursor coordinates.
-  - [ ] Configurable font styling and anchor snapping (Top, Bottom, or Inside-Overlay).
-- [ ] **Controls & Art Stripping:**
-  - [ ] Mouse-wheel scroll zoom in/out with 10s auto-reset back to default outer view.
-  - [ ] Suppress default Blizzard compass ring, zone header, and redundant border textures.
-- [ ] **PUIMover Integration:**
-  - [ ] Register minimap container with `PUIMover` under `HUD` / `UTILITY` category for visual dragging and snapping.
-- [ ] **Options Flare:** Build `PUIMinimapper` settings panel (shape picker, dimension sliders, coordinate toggles).
+### 5. PUIMinimapper: Minimap Shaper, Sizer & Coordinates (`Modules/Utility/PUIMinimapper/`)
+- [x] **Multi-Geometry Minimap Masking:**
+  - [x] Implement shape masks: Modern Square, Classic Round, and Frameless Minimalist.
+- [x] **Sizing, Scaling & Alpha:**
+  - [x] Dimension sliders (120px to 260px) and global scale multiplier.
+  - [x] Situational alpha adjustments (exploration vs combat fading via Combat Zen).
+- [x] **Integrated Coordinate HUD:**
+  - [x] Real-time high-precision Player coordinates (`XX.X, YY.Y`) and Cursor coordinates.
+  - [x] Configurable font styling and anchor snapping (Top, Bottom, or Inside-Overlay).
+- [x] **Controls & Art Stripping:**
+  - [x] Mouse-wheel scroll zoom in/out with 10s auto-reset back to default outer view.
+  - [x] Suppress default Blizzard compass ring, zone header, and redundant border textures.
+- [x] **PUIMover Integration:**
+  - [x] Register minimap container with `PUIMover` under `HUD` / `UTILITY` category for visual dragging and snapping.
+- [x] **Options Flare:** Build `PUIMinimapper` settings panel (shape picker, dimension sliders, coordinate toggles).
 
 ---
 
