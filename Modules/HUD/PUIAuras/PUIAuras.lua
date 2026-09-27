@@ -31,11 +31,27 @@ local aurasDB = DB:RegisterNamespace("PUIAuras", {
     spacing = 4,
     buffsPerRow = 8,
     growthDirection = "LEFT", -- LEFT or RIGHT
+    hideWithHud = true,       -- Auto-hide when PUIHud is active
 })
 
 local auraButtons = {}
 local containerFrame = nil
 local maxAuraSlots = 32
+
+-- Check if PUIHud is active and enabled
+function PUIAuras:IsHudActive()
+    local hud = Primus.PUIHud
+    if hud then
+        if hud.IsHudActive then
+            return hud:IsHudActive()
+        end
+        local hudDB = DB:GetNamespace("PUIHud")
+        if hudDB and hudDB:Get("enabled", true) then
+            return true
+        end
+    end
+    return false
+end
 
 -- Format remaining duration (seconds to string)
 local function FormatDuration(seconds)
@@ -110,6 +126,18 @@ end
 -- Refresh and update all player aura icons
 function PUIAuras:UpdateAuras()
     if not containerFrame then return end
+
+    -- Auto-hide when PUIHud is active and hideWithHud option is enabled
+    if aurasDB:Get("hideWithHud", true) and self:IsHudActive() then
+        if containerFrame:IsShown() then
+            containerFrame:Hide()
+        end
+        return
+    else
+        if not containerFrame:IsShown() then
+            containerFrame:Show()
+        end
+    end
 
     local size = aurasDB:Get("iconSize", 30) or 30
     local spacing = aurasDB:Get("spacing", 4) or 4
@@ -215,13 +243,69 @@ function PUIAuras:UpdateAuras()
 end
 
 function PUIAuras:RegisterOptionsFlare()
-    if not Primus.Options or not Primus.Options.RegisterModuleOptions then return end
-    Primus.Options:RegisterModuleOptions("PUIAuras", {
-        name = "PUIAuras",
-        category = "HUD",
-        label = "Auras & Buffs",
-        icon = "Interface\Icons\Spell_Holy_AuraMastery",
-        desc = "Modern player buff, debuff, and weapon enchant display with duration sweeps.",
+    local optionsHub = Primus.Options
+    if not optionsHub or not optionsHub.RegisterModuleOptions then return end
+
+    optionsHub:RegisterModuleOptions("PUIAuras", "HUD", {
+        title = "PUIAuras: Buff & Debuff Grid",
+        description = "Modern player buff, debuff, and weapon enchant display with live duration sweeps.",
+        icon = "Interface\\Icons\\Spell_Holy_AuraMastery",
+        fields = {
+            {
+                key = "hideWithHud",
+                label = "Hide When PUIHud Is Active",
+                type = "checkbox",
+                desc = "Automatically hide the top-right aura grid while the central combat HUD is active.",
+                default = true,
+                get = function() return aurasDB:Get("hideWithHud", true) end,
+                set = function(val)
+                    aurasDB:Set("hideWithHud", val)
+                    PUIAuras:UpdateAuras()
+                end,
+            },
+            {
+                key = "buffsPerRow",
+                label = "Buffs Per Row",
+                type = "slider",
+                min = 4,
+                max = 16,
+                step = 1,
+                default = 8,
+                get = function() return aurasDB:Get("buffsPerRow", 8) end,
+                set = function(val)
+                    aurasDB:Set("buffsPerRow", val)
+                    PUIAuras:UpdateAuras()
+                end,
+            },
+            {
+                key = "iconSize",
+                label = "Icon Size (px)",
+                type = "slider",
+                min = 20,
+                max = 48,
+                step = 2,
+                default = 30,
+                get = function() return aurasDB:Get("iconSize", 30) end,
+                set = function(val)
+                    aurasDB:Set("iconSize", val)
+                    PUIAuras:UpdateAuras()
+                end,
+            },
+            {
+                key = "spacing",
+                label = "Icon Spacing (px)",
+                type = "slider",
+                min = 1,
+                max = 10,
+                step = 1,
+                default = 4,
+                get = function() return aurasDB:Get("spacing", 4) end,
+                set = function(val)
+                    aurasDB:Set("spacing", val)
+                    PUIAuras:UpdateAuras()
+                end,
+            },
+        },
     })
 end
 
@@ -258,6 +342,18 @@ function PUIAuras:OnInitialize()
     -- 1-second ticker for smooth duration countdowns
     Time:Every(1.0, function()
         PUIAuras:UpdateAuras()
+    end)
+
+    -- 4. Listen for module state transitions
+    Events:Listen("MODULE_ENABLED", self, function(owner, modName)
+        if modName == "PUIHud" then
+            PUIAuras:UpdateAuras()
+        end
+    end)
+    Events:Listen("MODULE_DISABLED", self, function(owner, modName)
+        if modName == "PUIHud" then
+            PUIAuras:UpdateAuras()
+        end
     end)
 
     -- Subcommand registration via Console Router

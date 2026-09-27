@@ -133,6 +133,12 @@ function PUIHud:CreateHUD()
     return hudFrame
 end
 
+function PUIHud:IsHudActive()
+    if not hudDB:Get("enabled", true) then return false end
+    if hudFrame and not hudFrame:IsShown() then return false end
+    return true
+end
+
 -- =========================================================================
 -- OPTIONS FLARE REGISTRATION
 -- =========================================================================
@@ -154,6 +160,9 @@ function PUIHud:RegisterOptionsFlare()
                 set = function(val)
                     hudDB:Set("enabled", val)
                     if val then PUIHud:OnEnable() else PUIHud:OnDisable() end
+                    if Primus.PUIAuras and Primus.PUIAuras.UpdateAuras then
+                        Primus.PUIAuras:UpdateAuras()
+                    end
                 end,
             },
             {
@@ -255,7 +264,10 @@ function PUIHud:OnInitialize()
             elseif argParam == "toggle" then
                 local cur = hudDB:Get("enabled", true)
                 hudDB:Set("enabled", not cur)
-                if cur then PUIHud:OnDisable() else PUIHud:OnEnable() end
+                if not cur then PUIHud:OnEnable() else PUIHud:OnDisable() end
+                if Primus.PUIAuras and Primus.PUIAuras.UpdateAuras then
+                    Primus.PUIAuras:UpdateAuras()
+                end
                 DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIHud]: Precision Combat HUD is now " .. (not cur and "ENABLED" or "DISABLED"), "69ccf0"))
             elseif parts and parts[2] == "gap" and parts[3] then
                 local g = tonumber(parts[3]) or 120
@@ -428,6 +440,10 @@ function PUIHud:OnEnable()
     self:UpdateRightActiveAssist()
     self:UpdateTriageArray()
     self:UpdateAuras()
+
+    if Primus.PUIAuras and Primus.PUIAuras.UpdateAuras then
+        Primus.PUIAuras:UpdateAuras()
+    end
 end
 
 function PUIHud:OnDisable()
@@ -436,5 +452,9 @@ function PUIHud:OnDisable()
 
     if hudFrame then
         hudFrame:Hide()
+    end
+
+    if Primus.PUIAuras and Primus.PUIAuras.UpdateAuras then
+        Primus.PUIAuras:UpdateAuras()
     end
 end

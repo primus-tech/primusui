@@ -72,6 +72,8 @@ local DEFAULT_DIMS = {
     ["PUIHotbars_Micro"]        = { w = 200, h = 28 },
     ["PUIHotbars_Bags"]         = { w = 180, h = 36 },
     ["PUIMinimapOrbit"]         = { w = 24,  h = 24 },
+    ["PUIAuras"]                = { w = 280, h = 120 },
+    ["PUIHud"]                  = { w = 360, h = 290 },
 }
 
 -- Synchronize overlay coordinates from frame without circular SetAllPoints
