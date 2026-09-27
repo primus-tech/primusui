@@ -3,7 +3,8 @@
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Displays currently equipped items next to hovered item tooltips for
-    instant stat comparison across bags, bank, loot, quests, and chat links.
+    instant stat comparison across bags, bank, loot, quests, merchant, and chat links,
+    while cleanly suppressing redundant Blizzard default comparison tooltips.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -16,6 +17,7 @@ _G.PUIItemCompare = PUIItemCompare
 Primus:RegisterModule("PUIItemCompare", PUIItemCompare, "Utility")
 
 local DB     = Primus.DB
+local Media  = Primus.Media
 local Events = Primus.Events
 local Utils  = Primus.Utils
 
@@ -55,13 +57,40 @@ local SLOT_MAP = {
 local compareTip1 = CreateFrame("GameTooltip", "Primus_CompareTooltip1", UIParent, "GameTooltipTemplate")
 local compareTip2 = CreateFrame("GameTooltip", "Primus_CompareTooltip2", UIParent, "GameTooltipTemplate")
 
+local function StyleTooltip(tip)
+    if not tip then return end
+    tip:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    tip:SetBackdropColor(0.08, 0.08, 0.10, 0.95)
+    tip:SetBackdropBorderColor(0.25, 0.25, 0.30, 1.0)
+end
+
 local function HideComparisonTooltips()
-    compareTip1:Hide()
-    compareTip2:Hide()
+    if compareTip1 then compareTip1:Hide() end
+    if compareTip2 then compareTip2:Hide() end
+end
+
+-- Suppress Blizzard's unstyled duplicate comparison tooltips on MerchantFrame & PaperDoll
+local function SuppressBlizzardShoppingTooltips()
+    if ShoppingTooltip1 then
+        ShoppingTooltip1:Hide()
+        ShoppingTooltip1:SetScript("OnShow", function()
+            if compareDB:Get("enabled", true) then
+                this:Hide()
+            end
+        end)
+    end
+    if ShoppingTooltip2 then
+        ShoppingTooltip2:Hide()
+        ShoppingTooltip2:SetScript("OnShow", function()
+            if compareDB:Get("enabled", true) then
+                this:Hide()
+            end
+        end)
+    end
 end
 
 local function ShowComparison(parentTooltip, itemLink)
-    if not compareDB:Get("enabled") or not itemLink then
+    if not compareDB:Get("enabled", true) or not itemLink or not parentTooltip then
         HideComparisonTooltips()
         return
     end
@@ -77,28 +106,54 @@ local function ShowComparison(parentTooltip, itemLink)
     local slot1 = slots[1]
     local slot2 = slots[2]
 
+    local hasEquipped1 = slot1 and GetInventoryItemTexture("player", slot1)
+    local hasEquipped2 = slot2 and GetInventoryItemTexture("player", slot2)
+
+    if not hasEquipped1 and not hasEquipped2 then
+        HideComparisonTooltips()
+        return
+    end
+
+    -- Determine optimal screen anchoring side (Left vs Right of parent tooltip)
+    local parentLeft = (parentTooltip.GetLeft and parentTooltip:GetLeft()) or 0
+    local neededWidth = hasEquipped2 and 440 or 220
+    local anchorSide = "LEFT"
+    if parentLeft < neededWidth then
+        anchorSide = "RIGHT"
+    end
+
     -- Display Primary Equipped Item Tooltip
-    if slot1 and GetInventoryItemTexture("player", slot1) then
+    if hasEquipped1 then
         compareTip1:SetOwner(parentTooltip, "ANCHOR_NONE")
         compareTip1:ClearAllPoints()
-        compareTip1:SetPoint("TOPRIGHT", parentTooltip, "TOPLEFT", -2, 0)
+        if anchorSide == "LEFT" then
+            compareTip1:SetPoint("TOPRIGHT", parentTooltip, "TOPLEFT", -4, 0)
+        else
+            compareTip1:SetPoint("TOPLEFT", parentTooltip, "TOPRIGHT", 4, 0)
+        end
         compareTip1:SetInventoryItem("player", slot1)
+        StyleTooltip(compareTip1)
         compareTip1:Show()
     else
         compareTip1:Hide()
     end
 
-    -- Display Secondary Equipped Item Tooltip (e.g. 2nd ring / 2nd trinket)
-    if slot2 and GetInventoryItemTexture("player", slot2) then
-        compareTip2:SetOwner(compareTip1, "ANCHOR_NONE")
+    -- Display Secondary Equipped Item Tooltip (e.g. 2nd ring / 2nd trinket / offhand)
+    if hasEquipped2 then
+        local anchorTarget = hasEquipped1 and compareTip1 or parentTooltip
+        compareTip2:SetOwner(anchorTarget, "ANCHOR_NONE")
         compareTip2:ClearAllPoints()
-        compareTip2:SetPoint("TOPRIGHT", compareTip1, "TOPLEFT", -2, 0)
+        if anchorSide == "LEFT" then
+            compareTip2:SetPoint("TOPRIGHT", anchorTarget, "TOPLEFT", -4, 0)
+        else
+            compareTip2:SetPoint("TOPLEFT", anchorTarget, "TOPRIGHT", 4, 0)
+        end
         compareTip2:SetInventoryItem("player", slot2)
+        StyleTooltip(compareTip2)
         compareTip2:Show()
     else
         compareTip2:Hide()
     end
-
 end
 
 -- Hook standard 1.12 Tooltip Item Setters
@@ -154,7 +209,6 @@ local function HookTooltipMethods(tip)
         ShowComparison(self, cleanLink)
     end)
 
-
     Events:HookScript(tip, "OnHide", function()
         HideComparisonTooltips()
     end)
@@ -166,13 +220,16 @@ function PUIItemCompare:RegisterOptionsFlare()
         name = "PUIItemCompare",
         category = "Utility",
         label = "Item Comparison",
-        icon = "Interface\Icons\INV_Sword_04",
+        icon = "Interface\\Icons\\INV_Sword_04",
         desc = "Side-by-side equipment comparison tooltips with stat delta diffs.",
     })
 end
 
 function PUIItemCompare:OnInitialize()
     self:RegisterOptionsFlare()
+    StyleTooltip(compareTip1)
+    StyleTooltip(compareTip2)
+    SuppressBlizzardShoppingTooltips()
     HookTooltipMethods(GameTooltip)
     HookTooltipMethods(ItemRefTooltip)
 end
