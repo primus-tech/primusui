@@ -136,17 +136,18 @@
 
 ## 🧭 Navigation & Minimap Suite (Tier 2 Roadmap)
 
-### 4. PUIMMButtons: Minimap Button Collector (`Modules/Utility/PUIMMButtons/`)
-- [ ] **Automated Addon Button Discovery:**
-  - [ ] Implement recursive scanner detecting non-Blizzard addon minimap buttons (`*_MinimapButton`, `*MinimapFrame`, `LibDBIcon*`, DBM, KTM, Atlas, etc.).
-  - [ ] Re-parent discovered buttons to the `PUIMMButtons` dock without breaking click handlers or scripts.
-- [ ] **Blizzard Button Inclusion Controls:**
-  - [ ] Option to capture standard Blizzard icons (Mail, Tracking, Battlefield/PvP queue, Day/Night clock, Zoom buttons).
-- [ ] **Dock Layouts & Presentation:**
-  - [ ] Configurable dock styles: Horizontal strip, Vertical bar, or Pop-out drawer (`◀️`) with mouseover auto-collapse.
-  - [ ] Normalize icons into crisp 20x20px or 24x24px squares with 1-pixel border styling.
-  - [ ] Reposition mouseover tooltips cleanly away from the dock edges.
-- [ ] **Options Flare:** Build `PUIMMButtons` settings panel (dock mode, icon size, spacing, Blizzard toggles).
+### 4. PUIMinimapOrbit: Minimap Button Collector (`Modules/Utility/PUIMinimapOrbit/`)
+- [x] **Automated Addon Button Discovery:**
+  - [x] Recursive scanner detecting non-Blizzard addon minimap buttons (`*_MinimapButton`, `*MinimapFrame`, `LibDBIcon*`, DBM, KTM, Atlas, etc.).
+  - [x] Re-parent discovered buttons to the `PUIMinimapOrbit` dock without breaking click handlers or scripts.
+- [x] **Blizzard Frame Protection & Blacklist:**
+  - [x] Strict exclusion of Blizzard default HUD elements (`MinimapZoneTextButton`, `MinimapZoneText`, `MiniMapTracking*`, `MiniMapMail*`, `MiniMapMeetingStone*`, `MiniMapBattlefield*`, `MinimapZoom*`, `GameTimeFrame`).
+- [x] **Dock Layouts & Presentation:**
+  - [x] Responsive layout (1 column for $\le 6$ buttons, 2 columns for $> 6$ buttons) with 1-pixel dark glass backdrop.
+  - [x] Normalize icons into crisp $28 \times 28\text{ px}$ squares with suppressed oversized 52px circular borders and `ARTWORK` icon layer positioning.
+- [x] **PUIMover Integration:**
+  - [x] Registered under `"UTILITY"` category as `"Minimap Orbit Pill"` for visual drag-and-drop repositioning.
+- [x] **Options Flare:** `PUIMinimapOrbit` settings panel in Options Flare hub.
 
 ---
 
