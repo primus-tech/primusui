@@ -4,7 +4,7 @@
     
     Displays currently equipped items next to hovered item tooltips for
     instant stat comparison across bags, bank, loot, quests, merchant, and chat links,
-    while cleanly suppressing redundant Blizzard default comparison tooltips.
+    seamlessly unifying native Merchant comparison with universal bag/loot/quest comparison.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -69,28 +69,26 @@ local function HideComparisonTooltips()
     if compareTip2 then compareTip2:Hide() end
 end
 
--- Suppress Blizzard's unstyled duplicate comparison tooltips on MerchantFrame & PaperDoll
-local function SuppressBlizzardShoppingTooltips()
+-- Hook Blizzard's native Merchant comparison tooltips for consistent Primus styling
+local function SkinBlizzardShoppingTooltips()
     if ShoppingTooltip1 then
-        ShoppingTooltip1:Hide()
-        ShoppingTooltip1:SetScript("OnShow", function()
-            if compareDB:Get("enabled", true) then
-                this:Hide()
-            end
-        end)
+        StyleTooltip(ShoppingTooltip1)
+        ShoppingTooltip1:SetFrameStrata("TOOLTIP")
     end
     if ShoppingTooltip2 then
-        ShoppingTooltip2:Hide()
-        ShoppingTooltip2:SetScript("OnShow", function()
-            if compareDB:Get("enabled", true) then
-                this:Hide()
-            end
-        end)
+        StyleTooltip(ShoppingTooltip2)
+        ShoppingTooltip2:SetFrameStrata("TOOLTIP")
     end
 end
 
 local function ShowComparison(parentTooltip, itemLink)
     if not compareDB:Get("enabled", true) or not itemLink or not parentTooltip then
+        HideComparisonTooltips()
+        return
+    end
+
+    -- If MerchantFrame is open and showing native ShoppingTooltips, avoid spawning duplicate compare tips
+    if MerchantFrame and MerchantFrame:IsShown() and parentTooltip == GameTooltip and MerchantFrame.itemHover then
         HideComparisonTooltips()
         return
     end
@@ -179,11 +177,6 @@ local function HookTooltipMethods(tip)
         end
     end)
 
-    Events:Hook(tip, "SetMerchantItem", function(self, slot)
-        local link = GetMerchantItemLink(slot)
-        ShowComparison(self, link)
-    end)
-
     Events:Hook(tip, "SetQuestItem", function(self, qtype, slot)
         local link = GetQuestItemLink(qtype, slot)
         ShowComparison(self, link)
@@ -221,7 +214,7 @@ function PUIItemCompare:RegisterOptionsFlare()
         category = "Utility",
         label = "Item Comparison",
         icon = "Interface\\Icons\\INV_Sword_04",
-        desc = "Side-by-side equipment comparison tooltips with stat delta diffs.",
+        desc = "Side-by-side equipment comparison tooltips across merchant, bags, bank, loot, and chat.",
     })
 end
 
@@ -229,7 +222,12 @@ function PUIItemCompare:OnInitialize()
     self:RegisterOptionsFlare()
     StyleTooltip(compareTip1)
     StyleTooltip(compareTip2)
-    SuppressBlizzardShoppingTooltips()
+    SkinBlizzardShoppingTooltips()
     HookTooltipMethods(GameTooltip)
     HookTooltipMethods(ItemRefTooltip)
+
+    -- Re-skin ShoppingTooltips whenever MerchantFrame opens
+    Events:Register("MERCHANT_SHOW", "PUIItemCompare", function()
+        SkinBlizzardShoppingTooltips()
+    end)
 end
