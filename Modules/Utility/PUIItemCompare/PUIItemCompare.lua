@@ -73,19 +73,23 @@ local function HideComparisonTooltips()
 end
 
 -- Synchronize comparison tooltip visibility with parent tooltip
-local function SyncVisibility(self)
-    local owner = self:GetOwner()
-    if not owner or not owner:IsShown() then
-        self:Hide()
-        return
-    end
+local function SyncVisibility()
     if not GameTooltip:IsShown() and not ItemRefTooltip:IsShown() then
-        self:Hide()
-        return
+        HideComparisonTooltips()
     end
 end
 compareTip1:SetScript("OnUpdate", SyncVisibility)
 compareTip2:SetScript("OnUpdate", SyncVisibility)
+
+-- Safe helper to get tooltip owner frame in Vanilla 1.12
+local function GetTooltipOwner(tip)
+    if not tip then return nil end
+    if tip._owner then return tip._owner end
+    if this and (type(this) == "table" or type(this) == "userdata") then
+        return this
+    end
+    return nil
+end
 
 -- Hook Blizzard's native Merchant comparison tooltips for consistent Primus styling
 local function SkinBlizzardShoppingTooltips()
@@ -122,22 +126,24 @@ local function ShowComparison(parentTooltip, itemLink)
     -- =========================================================================
     -- CONSTRAINT 1: Suppress on Action Buttons, Hotbars, Spells & Character Slots
     -- =========================================================================
-    local owner = parentTooltip:GetOwner()
-    if owner then
-        local name = owner:GetName() or ""
+    local owner = GetTooltipOwner(parentTooltip)
+    if owner and (type(owner) == "table" or type(owner) == "userdata") then
+        local name = (owner.GetName and owner:GetName()) or ""
         if owner.action
-            or string.find(name, "ActionButton")
-            or string.find(name, "MultiBar")
-            or string.find(name, "BonusActionButton")
-            or string.find(name, "PetActionButton")
-            or string.find(name, "Shapeshift")
-            or string.find(name, "PUIHotbar")
-            or string.find(name, "PUIButton")
-            or string.find(name, "PUI_Hotbar")
-            or string.find(name, "MainMenuBar")
-            or string.find(name, "SpellButton")
-            or string.find(name, "PaperDollItemSlotButton")
-            or string.find(name, "Character.*Slot") then
+            or (name ~= "" and (
+                string.find(name, "ActionButton")
+                or string.find(name, "MultiBar")
+                or string.find(name, "BonusActionButton")
+                or string.find(name, "PetActionButton")
+                or string.find(name, "Shapeshift")
+                or string.find(name, "PUIHotbar")
+                or string.find(name, "PUIButton")
+                or string.find(name, "PUI_Hotbar")
+                or string.find(name, "MainMenuBar")
+                or string.find(name, "SpellButton")
+                or string.find(name, "PaperDollItemSlotButton")
+                or string.find(name, "Character.*Slot")
+            )) then
             HideComparisonTooltips()
             return
         end
@@ -265,6 +271,15 @@ end
 -- Hook standard 1.12 Tooltip Item Setters & Non-Item Suppressors
 local function HookTooltipMethods(tip)
     if not tip then return end
+
+    -- Track owner safely on SetOwner
+    if tip.SetOwner then
+        local origSetOwner = tip.SetOwner
+        tip.SetOwner = function(self, owner, anchor, a1, a2, a3)
+            self._owner = owner
+            return origSetOwner(self, owner, anchor, a1, a2, a3)
+        end
+    end
 
     -- Item setters that trigger comparison
     Events:Hook(tip, "SetBagItem", function(self, bag, slot)
