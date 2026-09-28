@@ -1,8 +1,8 @@
 --[[
-    PrimusLib: VanillaItemPrices (Canonical 13,321 Item Valuation Dataset)
+    PrimusLib: VanillaItemPrices (Canonical 17,718 Item Valuation Dataset)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
-    Contains 13,321 items with buy price (b) and sell price (s) in copper.
+    Contains 17,718 items with buy price (b) and sell price (s) in copper.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -46,6 +46,7 @@ VanillaItemPrices = {
     [153] = { b = 5, s = 1 }, -- Primitive Kilt
     [154] = { b = 1, s = 1 }, -- Primitive Mantle
     [159] = { b = 25, s = 1 }, -- Refreshing Spring Water
+    [182] = { b = 0, s = 0 }, -- Garrick's Head
     [193] = { b = 48, s = 9 }, -- Tattered Cloth Vest
     [194] = { b = 49, s = 9 }, -- Tattered Cloth Pants
     [195] = { b = 36, s = 7 }, -- Tattered Cloth Boots
@@ -76,6 +77,7 @@ VanillaItemPrices = {
     [720] = { b = 5350, s = 1070 }, -- Brawler Gloves
     [723] = { b = 60, s = 15 }, -- Goretusk Liver
     [724] = { b = 100, s = 25 }, -- Goretusk Liver Pie
+    [725] = { b = 0, s = 0 }, -- Gnoll Paw
     [727] = { b = 1224, s = 244 }, -- Notched Shortsword
     [728] = { b = 200, s = 50 }, -- Recipe: Westfall Stew
     [729] = { b = 70, s = 17 }, -- Stringy Vulture Meat
@@ -83,7 +85,18 @@ VanillaItemPrices = {
     [731] = { b = 110, s = 27 }, -- Goretusk Snout
     [732] = { b = 25, s = 6 }, -- Okra
     [733] = { b = 400, s = 100 }, -- Westfall Stew
+    [735] = { b = 0, s = 0 }, -- Rolf and Malakai's Medallions
+    [737] = { b = 0, s = 0 }, -- Holy Spring Water
+    [738] = { b = 0, s = 0 }, -- Sack of Barley
+    [739] = { b = 0, s = 0 }, -- Sack of Corn
+    [740] = { b = 0, s = 0 }, -- Sack of Rye
+    [742] = { b = 0, s = 0 }, -- A Sycamore Branch
+    [743] = { b = 0, s = 0 }, -- Bundle of Charred Oak
     [744] = { b = 40000, s = 10000 }, -- Thunderbrew's Boot Flask
+    [745] = { b = 0, s = 0 }, -- Marshal McBride's Documents
+    [748] = { b = 0, s = 0 }, -- Stormwind Armor Marker
+    [750] = { b = 0, s = 0 }, -- Tough Wolf Meat
+    [752] = { b = 0, s = 0 }, -- Red Burlap Bandana
     [753] = { b = 19211, s = 3842 }, -- Dragonmaw Shortsword
     [754] = { b = 117784, s = 23556 }, -- Shortsword of Vengeance
     [755] = { b = 4, s = 1 }, -- Melted Candle
@@ -96,12 +109,16 @@ VanillaItemPrices = {
     [769] = { b = 15, s = 3 }, -- Chunk of Boar Meat
     [770] = { b = 1265, s = 316 }, -- Pointy Crocolisk Tooth
     [771] = { b = 155, s = 38 }, -- Chipped Boar Tusk
+    [772] = { b = 0, s = 0 }, -- Large Candle
+    [773] = { b = 0, s = 0 }, -- Gold Dust
     [774] = { b = 60, s = 15 }, -- Malachite
     [776] = { b = 28826, s = 5765 }, -- Vendetta
     [777] = { b = 86, s = 21 }, -- Prowler Teeth
     [778] = { b = 278, s = 55 }, -- Kobold Excavation Pick
     [779] = { b = 75, s = 18 }, -- Shiny Seashell
+    [780] = { b = 0, s = 0 }, -- Torn Murloc Fin
     [781] = { b = 552, s = 110 }, -- Stone Gnoll Hammer
+    [782] = { b = 0, s = 0 }, -- Painted Gnoll Armband
     [783] = { b = 200, s = 50 }, -- Light Hide
     [785] = { b = 80, s = 20 }, -- Mageroyal
     [787] = { b = 25, s = 1 }, -- Slitherskin Mackerel
@@ -130,6 +147,7 @@ VanillaItemPrices = {
     [826] = { b = 3661, s = 732 }, -- Brutish Riverpaw Axe
     [827] = { b = 4858, s = 971 }, -- Wicked Blackjack
     [828] = { b = 1000, s = 250 }, -- Small Blue Pouch
+    [829] = { b = 0, s = 0 }, -- Red Leather Bandana
     [832] = { b = 1015, s = 203 }, -- Silver Defias Belt
     [833] = { b = 112000, s = 28000 }, -- Lifestone
     [835] = { b = 95, s = 23 }, -- Large Rope Net
@@ -137,6 +155,7 @@ VanillaItemPrices = {
     [838] = { b = 1128, s = 225 }, -- Heavy Weave Pants
     [839] = { b = 566, s = 113 }, -- Heavy Weave Gloves
     [840] = { b = 853, s = 170 }, -- Heavy Weave Shoes
+    [841] = { b = 0, s = 0 }, -- Furlbrow's Pocket Watch
     [843] = { b = 1077, s = 215 }, -- Tanned Leather Boots
     [844] = { b = 720, s = 144 }, -- Tanned Leather Gloves
     [845] = { b = 1447, s = 289 }, -- Tanned Leather Pants
@@ -168,19 +187,27 @@ VanillaItemPrices = {
     [873] = { b = 108853, s = 21770 }, -- Staff of Jordan
     [878] = { b = 225, s = 56 }, -- Fist-sized Spinneret
     [880] = { b = 13460, s = 2692 }, -- Staff of Horrors
+    [884] = { b = 0, s = 0 }, -- Ghoul Rib
     [885] = { b = 11504, s = 2300 }, -- Black Metal Axe
     [886] = { b = 14747, s = 2949 }, -- Black Metal Shortsword
     [887] = { b = 330, s = 82 }, -- Pound of Flesh
     [888] = { b = 4903, s = 980 }, -- Naga Battle Gloves
+    [889] = { b = 0, s = 0 }, -- A Dusty Unsent Letter
     [890] = { b = 17588, s = 3517 }, -- Twisted Chanter's Staff
     [892] = { b = 1849, s = 369 }, -- Gnoll Casting Gloves
     [893] = { b = 550, s = 137 }, -- Dire Wolf Fang
+    [895] = { b = 0, s = 0 }, -- Worgen Skull
+    [896] = { b = 0, s = 0 }, -- Worgen Fang
     [897] = { b = 5112, s = 1022 }, -- Madwolf Bracers
     [899] = { b = 6241, s = 1248 }, -- Venom Web Fang
+    [910] = { b = 0, s = 0 }, -- An Undelivered Letter
     [911] = { b = 16622, s = 3324 }, -- Ironwood Treebranch
     [914] = { b = 13347, s = 2669 }, -- Large Ogre Chain Armor
+    [915] = { b = 0, s = 0 }, -- Red Silk Bandana
+    [916] = { b = 0, s = 0 }, -- A Torn Journal Page
     [918] = { b = 5000, s = 1250 }, -- Deviate Hide Pack
     [920] = { b = 14106, s = 2821 }, -- Wicked Spiked Mace
+    [921] = { b = 0, s = 0 }, -- A Faded Journal Page
     [922] = { b = 12038, s = 2407 }, -- Dacian Falx
     [923] = { b = 8743, s = 1748 }, -- Longsword
     [924] = { b = 10972, s = 2194 }, -- Maul
@@ -195,30 +222,45 @@ VanillaItemPrices = {
     [935] = { b = 8712, s = 1742 }, -- Night Watch Shortsword
     [936] = { b = 58104, s = 11620 }, -- Midnight Mace
     [937] = { b = 72885, s = 14577 }, -- Black Duskwood Staff
+    [938] = { b = 0, s = 0 }, -- Muddy Journal Pages
+    [939] = { b = 0, s = 0 }, -- A Bloodstained Journal Page
     [940] = { b = 62830, s = 12566 }, -- Robes of Insight
     [942] = { b = 18000, s = 4500 }, -- Freezing Band
     [943] = { b = 214318, s = 42863 }, -- Warden Staff
     [944] = { b = 415003, s = 83000 }, -- Elemental Mage Staff
     [954] = { b = 200, s = 50 }, -- Scroll of Strength
     [955] = { b = 150, s = 37 }, -- Scroll of Intellect
+    [957] = { b = 0, s = 0 }, -- William's Shipment
     [961] = { b = 10, s = 2 }, -- Healing Herb
+    [962] = { b = 0, s = 0 }, -- Pork Belly Pie
+    [981] = { b = 0, s = 0 }, -- Bernice's Necklace
     [983] = { b = 108, s = 21 }, -- Red Linen Sash
+    [1006] = { b = 0, s = 0 }, -- Brass Collar
     [1008] = { b = 720, s = 144 }, -- Well-used Sword
     [1009] = { b = 2451, s = 490 }, -- Compact Hammer
     [1010] = { b = 498, s = 99 }, -- Gnarled Short Staff
     [1011] = { b = 400, s = 80 }, -- Sharp Axe
+    [1013] = { b = 0, s = 0 }, -- Iron Rivet
     [1015] = { b = 96, s = 24 }, -- Lean Wolf Flank
     [1017] = { b = 400, s = 100 }, -- Seasoned Wolf Kabob
+    [1019] = { b = 0, s = 0 }, -- Red Linen Bandana
     [1074] = { b = 1965, s = 491 }, -- Hard Spider Leg Tip
+    [1075] = { b = 0, s = 0 }, -- Shadowhide Pendant
     [1076] = { b = 2600, s = 650 }, -- Defias Renegade Ring
     [1077] = { b = 100, s = 25 }, -- Defias Mage Ring
     [1080] = { b = 315, s = 78 }, -- Tough Condor Meat
     [1081] = { b = 200, s = 50 }, -- Crisp Spider Meat
     [1082] = { b = 600, s = 150 }, -- Redridge Goulash
+    [1083] = { b = 0, s = 0 }, -- Glyph of Azora
+    [1113] = { b = 0, s = 0 }, -- Conjured Bread
+    [1114] = { b = 0, s = 0 }, -- Conjured Rye
     [1116] = { b = 5000, s = 1250 }, -- Ring of Pure Silver
     [1121] = { b = 5375, s = 1075 }, -- Feet of the Lynx
     [1127] = { b = 100, s = 25 }, -- Flash Bundle
+    [1129] = { b = 0, s = 0 }, -- Ghoul Fang
+    [1130] = { b = 0, s = 0 }, -- Vial of Spider Venom
     [1131] = { b = 4545, s = 1136 }, -- Totem of Infliction
+    [1132] = { b = 100000, s = 0 }, -- Horn of the Timber Wolf
     [1154] = { b = 513, s = 102 }, -- Belt of the People's Militia
     [1155] = { b = 29770, s = 5954 }, -- Rod of the Sleepwalker
     [1156] = { b = 3250, s = 812 }, -- Lavishly Jeweled Ring
@@ -258,6 +300,7 @@ VanillaItemPrices = {
     [1205] = { b = 500, s = 25 }, -- Melon Juice
     [1206] = { b = 1600, s = 400 }, -- Moss Agate
     [1207] = { b = 49460, s = 9892 }, -- Murphstar
+    [1208] = { b = 0, s = 0 }, -- Maybell's Love Letter
     [1210] = { b = 1000, s = 250 }, -- Shadowgem
     [1211] = { b = 1738, s = 347 }, -- Gnoll War Harness
     [1212] = { b = 85, s = 21 }, -- Gnoll Spittle
@@ -267,7 +310,14 @@ VanillaItemPrices = {
     [1218] = { b = 10321, s = 2064 }, -- Heavy Gnoll War Club
     [1219] = { b = 4119, s = 823 }, -- Redridge Machete
     [1220] = { b = 9039, s = 1807 }, -- Lupine Axe
+    [1221] = { b = 0, s = 0 }, -- Underbelly Whelp Scale
     [1251] = { b = 40, s = 10 }, -- Linen Bandage
+    [1252] = { b = 0, s = 0 }, -- Gramma Stonefield's Note
+    [1254] = { b = 0, s = 0 }, -- Lesser Firestone
+    [1256] = { b = 0, s = 0 }, -- Crystal Kelp Frond
+    [1257] = { b = 0, s = 0 }, -- Invisibility Liquor
+    [1260] = { b = 0, s = 0 }, -- Tharil'zun's Head
+    [1261] = { b = 0, s = 0 }, -- Midnight Orb
     [1262] = { b = 445, s = 111 }, -- Keg of Thunderbrew Lager
     [1263] = { b = 395323, s = 79064 }, -- Brain Hacker
     [1264] = { b = 18357, s = 3671 }, -- Headbasher
@@ -279,9 +329,13 @@ VanillaItemPrices = {
     [1276] = { b = 11101, s = 2220 }, -- Fire Hardened Buckler
     [1280] = { b = 18481, s = 3696 }, -- Cloaked Hood
     [1282] = { b = 14125, s = 2825 }, -- Sparkmetal Coif
+    [1283] = { b = 0, s = 0 }, -- Verner's Note
+    [1284] = { b = 0, s = 0 }, -- Crate of Horseshoes
     [1287] = { b = 3518, s = 703 }, -- Giant Tarantula Fang
     [1288] = { b = 740, s = 185 }, -- Large Venom Sac
     [1292] = { b = 16504, s = 3300 }, -- Butcher's Cleaver
+    [1293] = { b = 0, s = 0 }, -- The State of Lakeshire
+    [1294] = { b = 0, s = 0 }, -- The General's Response
     [1296] = { b = 8408, s = 1681 }, -- Blackrock Mace
     [1297] = { b = 10193, s = 2038 }, -- Robes of the Shadowcaster
     [1299] = { b = 1953, s = 390 }, -- Lesser Belt of the Spire
@@ -290,6 +344,8 @@ VanillaItemPrices = {
     [1303] = { b = 2091, s = 418 }, -- Bridgeworker's Gloves
     [1304] = { b = 1398, s = 279 }, -- Riding Gloves
     [1306] = { b = 1761, s = 352 }, -- Wolfmane Wristguards
+    [1307] = { b = 0, s = 0 }, -- Gold Pickup Schedule
+    [1309] = { b = 0, s = 0 }, -- Oslow's Toolbox
     [1310] = { b = 3576, s = 715 }, -- Smith's Trousers
     [1314] = { b = 1814, s = 362 }, -- Ghoul Fingers
     [1315] = { b = 52000, s = 13000 }, -- Lei of Lilies
@@ -297,11 +353,19 @@ VanillaItemPrices = {
     [1318] = { b = 15332, s = 3066 }, -- Night Reaver
     [1319] = { b = 1850, s = 462 }, -- Ring of Iron Will
     [1322] = { b = 275, s = 68 }, -- Fishliver Oil
+    [1325] = { b = 0, s = 0 }, -- Daffodil Bouquet
     [1326] = { b = 40, s = 10 }, -- Sauteed Sunfish
+    [1327] = { b = 0, s = 0 }, -- Wiley's Note
+    [1349] = { b = 0, s = 0 }, -- Abercrombie's Crate
     [1351] = { b = 3843, s = 768 }, -- Fingerbone Bracers
+    [1353] = { b = 0, s = 0 }, -- Shaw's Report
     [1355] = { b = 1259, s = 251 }, -- Buckskin Cape
+    [1357] = { b = 0, s = 0 }, -- Captain Sander's Treasure Map
+    [1358] = { b = 0, s = 0 }, -- A Clue to Sander's Treasure
     [1359] = { b = 95, s = 19 }, -- Lion-stamped Gloves
     [1360] = { b = 210, s = 42 }, -- Stormwind Chain Gloves
+    [1361] = { b = 0, s = 0 }, -- Another Clue to Sander's Treasure
+    [1362] = { b = 0, s = 0 }, -- Final Clue to Sander's Treasure
     [1364] = { b = 41, s = 8 }, -- Ragged Leather Vest
     [1366] = { b = 11, s = 2 }, -- Ragged Leather Pants
     [1367] = { b = 14, s = 2 }, -- Ragged Leather Boots
@@ -314,6 +378,7 @@ VanillaItemPrices = {
     [1377] = { b = 6, s = 1 }, -- Frayed Gloves
     [1378] = { b = 9, s = 1 }, -- Frayed Pants
     [1380] = { b = 21, s = 4 }, -- Frayed Robe
+    [1381] = { b = 0, s = 0 }, -- A Mysterious Message
     [1382] = { b = 122, s = 24 }, -- Rock Mace
     [1383] = { b = 126, s = 25 }, -- Stone Tomahawk
     [1384] = { b = 56, s = 11 }, -- Dull Blade
@@ -330,6 +395,10 @@ VanillaItemPrices = {
     [1404] = { b = 41225, s = 10306 }, -- Tidal Charm
     [1405] = { b = 5923, s = 1184 }, -- Foamspittle Staff
     [1406] = { b = 10398, s = 2079 }, -- Pearl-encrusted Spear
+    [1407] = { b = 0, s = 0 }, -- Solomon's Plea to Westfall
+    [1408] = { b = 0, s = 0 }, -- Stoutmantle's Response to Solomon
+    [1409] = { b = 0, s = 0 }, -- Solomon's Plea to Darkshire
+    [1410] = { b = 0, s = 0 }, -- Ebonlocke's Response to Solomon
     [1411] = { b = 343, s = 68 }, -- Withered Staff
     [1412] = { b = 246, s = 49 }, -- Crude Bastard Sword
     [1413] = { b = 276, s = 55 }, -- Feeble Sword
@@ -359,6 +428,8 @@ VanillaItemPrices = {
     [1447] = { b = 91100, s = 22775 }, -- Ring of Saviors
     [1448] = { b = 2027, s = 405 }, -- Blackrock Gauntlets
     [1449] = { b = 7500, s = 1875 }, -- Minor Channeling Ring
+    [1451] = { b = 0, s = 0 }, -- Bottle of Zombie Juice
+    [1453] = { b = 0, s = 0 }, -- Spectral Comb
     [1454] = { b = 19689, s = 3937 }, -- Axe of the Enforcer
     [1455] = { b = 14657, s = 2931 }, -- Blackrock Champion's Axe
     [1457] = { b = 9251, s = 1850 }, -- Shadowhide Mace
@@ -369,6 +440,7 @@ VanillaItemPrices = {
     [1462] = { b = 5225, s = 1306 }, -- Ring of the Shadow
     [1464] = { b = 285, s = 71 }, -- Buzzard Talon
     [1465] = { b = 49124, s = 9824 }, -- Tigerbane
+    [1467] = { b = 0, s = 0 }, -- Spotted Sunfish
     [1468] = { b = 115, s = 28 }, -- Murloc Fin
     [1469] = { b = 5900, s = 1180 }, -- Scimitar of Atun
     [1470] = { b = 3500, s = 875 }, -- Murloc Skin Bag
@@ -385,6 +457,7 @@ VanillaItemPrices = {
     [1484] = { b = 14612, s = 2922 }, -- Witching Stave
     [1485] = { b = 7053, s = 1410 }, -- Pitchfork
     [1486] = { b = 6012, s = 1202 }, -- Tree Bark Jacket
+    [1487] = { b = 0, s = 0 }, -- Conjured Pumpernickel
     [1488] = { b = 16899, s = 3379 }, -- Avenger's Armor
     [1489] = { b = 7767, s = 1553 }, -- Gloomshroud Armor
     [1490] = { b = 35640, s = 8910 }, -- Guardian Talisman
@@ -409,11 +482,16 @@ VanillaItemPrices = {
     [1514] = { b = 1470, s = 294 }, -- Rusty Warhammer
     [1515] = { b = 984, s = 196 }, -- Rough Wooden Staff
     [1516] = { b = 1185, s = 237 }, -- Worn Hatchet
+    [1518] = { b = 0, s = 0 }, -- Ghost Hair Comb
+    [1519] = { b = 0, s = 0 }, -- Bloodscalp Ear
     [1520] = { b = 285, s = 71 }, -- Troll Sweat
     [1521] = { b = 96027, s = 19205 }, -- Lumbering Ogre Axe
     [1522] = { b = 51121, s = 10224 }, -- Headhunting Spear
     [1523] = { b = 51305, s = 10261 }, -- Huge Stone Club
+    [1524] = { b = 0, s = 0 }, -- Skullsplitter Tusk
+    [1528] = { b = 0, s = 0 }, -- Handful of Oats
     [1529] = { b = 2800, s = 700 }, -- Jade
+    [1532] = { b = 0, s = 0 }, -- Shrunken Head
     [1537] = { b = 250, s = 62 }, -- Old Blanchy's Feed Pouch
     [1539] = { b = 7861, s = 1572 }, -- Gnarled Hermit's Staff
     [1547] = { b = 13978, s = 2795 }, -- Shield of the Faith
@@ -421,6 +499,8 @@ VanillaItemPrices = {
     [1560] = { b = 2568, s = 513 }, -- Bluegill Sandals
     [1561] = { b = 1343, s = 268 }, -- Harvester's Robe
     [1566] = { b = 5663, s = 1132 }, -- Edge of the People's Militia
+    [1596] = { b = 0, s = 0 }, -- Ghost Hair Thread
+    [1598] = { b = 0, s = 0 }, -- Rot Blossom
     [1602] = { b = 58427, s = 11685 }, -- Sickle Axe
     [1604] = { b = 97319, s = 19463 }, -- Chromatic Sword
     [1607] = { b = 217103, s = 43420 }, -- Soulkeeper
@@ -429,10 +509,12 @@ VanillaItemPrices = {
     [1624] = { b = 30862, s = 6172 }, -- Skullsplitter Helm
     [1625] = { b = 73773, s = 14754 }, -- Exquisite Flamberge
     [1630] = { b = 265, s = 66 }, -- Broken Electro-lantern
+    [1637] = { b = 0, s = 0 }, -- Letter to Ello
     [1639] = { b = 142301, s = 28460 }, -- Grinning Axe
     [1640] = { b = 78188, s = 15637 }, -- Monstrous War Axe
     [1645] = { b = 2000, s = 100 }, -- Moonberry Juice
     [1652] = { b = 20000, s = 5000 }, -- Sturdy Lunchbox
+    [1656] = { b = 0, s = 0 }, -- Translated Letter
     [1659] = { b = 10682, s = 2136 }, -- Engineering Gloves
     [1664] = { b = 73475, s = 14695 }, -- Spellforce Rod
     [1677] = { b = 50466, s = 10093 }, -- Drake-scale Vest
@@ -576,15 +658,20 @@ VanillaItemPrices = {
     [1850] = { b = 1393, s = 278 }, -- Cured Leather Bracers
     [1852] = { b = 1684, s = 336 }, -- Scalemail Bracers
     [1853] = { b = 1690, s = 338 }, -- Scalemail Belt
+    [1875] = { b = 0, s = 0 }, -- Thistlenettle's Badge
     [1893] = { b = 8876, s = 1775 }, -- Miner's Revenge
+    [1894] = { b = 0, s = 0 }, -- Miners' Union Card
     [1913] = { b = 742, s = 148 }, -- Studded Blackjack
     [1917] = { b = 1256, s = 251 }, -- Jeweled Dagger
+    [1922] = { b = 0, s = 0 }, -- Supplies for Sven
+    [1923] = { b = 0, s = 0 }, -- Ambassador's Satchel
     [1925] = { b = 3938, s = 787 }, -- Defias Rapier
     [1926] = { b = 3438, s = 687 }, -- Weighted Sap
     [1927] = { b = 3451, s = 690 }, -- Deadmines Cleaver
     [1928] = { b = 4979, s = 995 }, -- Defias Mage Staff
     [1929] = { b = 2171, s = 434 }, -- Silk-threaded Trousers
     [1930] = { b = 2044, s = 408 }, -- Stonemason Cloak
+    [1931] = { b = 0, s = 0 }, -- Huge Gnoll Claw
     [1933] = { b = 4529, s = 905 }, -- Staff of Conjuring
     [1934] = { b = 3656, s = 731 }, -- Stonemason Trousers
     [1935] = { b = 14874, s = 2974 }, -- Assassin's Blade
@@ -597,12 +684,18 @@ VanillaItemPrices = {
     [1943] = { b = 3566, s = 713 }, -- Goblin Mail Leggings
     [1944] = { b = 1296, s = 259 }, -- Metalworking Gloves
     [1945] = { b = 1337, s = 267 }, -- Woodworking Gloves
+    [1946] = { b = 0, s = 0 }, -- Mary's Looking Glass
     [1951] = { b = 6290, s = 1258 }, -- Blackwater Cutlass
     [1955] = { b = 7868, s = 1573 }, -- Dragonmaw Chain Boots
+    [1956] = { b = 0, s = 0 }, -- Faded Shadowhide Pendant
     [1958] = { b = 4876, s = 975 }, -- Petrified Shinbone
     [1959] = { b = 6117, s = 1223 }, -- Cold Iron Pick
+    [1962] = { b = 0, s = 0 }, -- Glowing Shadowhide Pendant
     [1965] = { b = 180, s = 36 }, -- White Wolf Gloves
+    [1968] = { b = 0, s = 0 }, -- Ogre's Monocle
     [1970] = { b = 480, s = 120 }, -- Restoring Balm
+    [1971] = { b = 0, s = 0 }, -- Furlbrow's Deed
+    [1972] = { b = 0, s = 0 }, -- Westfall Deed
     [1973] = { b = 18475, s = 4618 }, -- Orb of Deception
     [1974] = { b = 2320, s = 464 }, -- Mindthrust Bracers
     [1975] = { b = 28721, s = 5744 }, -- Pysan's Old Greatsword
@@ -613,6 +706,7 @@ VanillaItemPrices = {
     [1981] = { b = 70566, s = 14113 }, -- Icemail Jerkin
     [1982] = { b = 147568, s = 29513 }, -- Nightblade
     [1986] = { b = 74309, s = 14861 }, -- Gutrender
+    [1987] = { b = 0, s = 0 }, -- Krazek's Fixed Pot
     [1988] = { b = 14260, s = 2852 }, -- Chief Brigadier Gauntlets
     [1990] = { b = 50385, s = 10077 }, -- Ballast Maul
     [1991] = { b = 41788, s = 8357 }, -- Goblin Power Shovel
@@ -623,6 +717,11 @@ VanillaItemPrices = {
     [1997] = { b = 12694, s = 2538 }, -- Pressed Felt Robe
     [1998] = { b = 36199, s = 7239 }, -- Bloodscalp Channeling Staff
     [2000] = { b = 44136, s = 8827 }, -- Archeus
+    [2004] = { b = 0, s = 0 }, -- Grelin Whitebeard's Journal
+    [2005] = { b = 0, s = 0 }, -- The First Troll Legend
+    [2006] = { b = 0, s = 0 }, -- The Second Troll Legend
+    [2007] = { b = 0, s = 0 }, -- The Third Troll Legend
+    [2008] = { b = 0, s = 0 }, -- The Fourth Troll Legend
     [2011] = { b = 19200, s = 3840 }, -- Twisted Sabre
     [2013] = { b = 18222, s = 3644 }, -- Cryptbone Staff
     [2014] = { b = 24346, s = 4869 }, -- Black Metal Greatsword
@@ -690,6 +789,7 @@ VanillaItemPrices = {
     [2109] = { b = 72, s = 14 }, -- Frostmane Chain Vest
     [2110] = { b = 31, s = 6 }, -- Light Magesmith Robe
     [2112] = { b = 271, s = 54 }, -- Lumberjack Jerkin
+    [2113] = { b = 0, s = 0 }, -- Calor's Note
     [2114] = { b = 155, s = 31 }, -- Snowy Robe
     [2117] = { b = 37, s = 7 }, -- Thin Cloth Shoes
     [2119] = { b = 25, s = 4 }, -- Thin Cloth Gloves
@@ -707,6 +807,7 @@ VanillaItemPrices = {
     [2132] = { b = 102, s = 20 }, -- Short Staff
     [2133] = { b = 79, s = 15 }, -- Small Shield
     [2134] = { b = 82, s = 16 }, -- Hand Axe
+    [2136] = { b = 0, s = 0 }, -- Conjured Purified Water
     [2137] = { b = 124, s = 24 }, -- Whittling Knife
     [2138] = { b = 192, s = 38 }, -- Sharpened Letter Opener
     [2139] = { b = 57, s = 11 }, -- Dirk
@@ -723,10 +824,13 @@ VanillaItemPrices = {
     [2151] = { b = 2941, s = 588 }, -- Polished Scale Gloves
     [2152] = { b = 5906, s = 1181 }, -- Polished Scale Leggings
     [2153] = { b = 5927, s = 1185 }, -- Polished Scale Vest
+    [2154] = { b = 0, s = 0 }, -- The Story of Morgan Ladimore
     [2156] = { b = 3077, s = 615 }, -- Padded Boots
     [2158] = { b = 2066, s = 413 }, -- Padded Gloves
     [2159] = { b = 4148, s = 829 }, -- Padded Pants
     [2160] = { b = 4163, s = 832 }, -- Padded Armor
+    [2161] = { b = 0, s = 0 }, -- Book from Sven's Farm
+    [2162] = { b = 0, s = 0 }, -- Sarah's Ring
     [2163] = { b = 233550, s = 46710 }, -- Shadowblade
     [2164] = { b = 135159, s = 27031 }, -- Gut Ripper
     [2165] = { b = 227, s = 45 }, -- Old Blanchy's Blanket
@@ -738,6 +842,8 @@ VanillaItemPrices = {
     [2173] = { b = 31, s = 6 }, -- Old Leather Belt
     [2175] = { b = 13416, s = 2683 }, -- Shadowhide Battle Axe
     [2186] = { b = 30, s = 6 }, -- Outfitter Belt
+    [2187] = { b = 0, s = 0 }, -- A Stack of Letters
+    [2188] = { b = 0, s = 0 }, -- A Letter to Grelin Whitebeard
     [2194] = { b = 16383, s = 3276 }, -- Diamond Hammer
     [2195] = { b = 127, s = 25 }, -- Anvilmar Knife
     [2203] = { b = 7463, s = 1492 }, -- Brashclaw's Chopper
@@ -759,6 +865,7 @@ VanillaItemPrices = {
     [2220] = { b = 2596, s = 519 }, -- Box Shield
     [2221] = { b = 4550, s = 910 }, -- Targe Shield
     [2222] = { b = 5025, s = 1005 }, -- Tower Shield
+    [2223] = { b = 0, s = 0 }, -- The Collector's Schedule
     [2224] = { b = 122, s = 24 }, -- Militia Dagger
     [2225] = { b = 916, s = 183 }, -- Sharp Kitchen Knife
     [2226] = { b = 20589, s = 4117 }, -- Ogremage Staff
@@ -772,6 +879,7 @@ VanillaItemPrices = {
     [2236] = { b = 16931, s = 3386 }, -- Blackfang
     [2237] = { b = 377, s = 75 }, -- Patched Pants
     [2238] = { b = 303, s = 60 }, -- Urchin's Pants
+    [2239] = { b = 0, s = 0 }, -- The Collector's Ring
     [2240] = { b = 758, s = 151 }, -- Rugged Cape
     [2241] = { b = 3078, s = 615 }, -- Desperado Cape
     [2243] = { b = 352770, s = 70554 }, -- Hand of Edward the Odd
@@ -779,7 +887,9 @@ VanillaItemPrices = {
     [2245] = { b = 138183, s = 27636 }, -- Helm of Narv
     [2246] = { b = 120000, s = 30000 }, -- Myrmidon's Signet
     [2249] = { b = 457, s = 91 }, -- Militia Buckler
+    [2250] = { b = 0, s = 0 }, -- Dusky Crab Cakes
     [2251] = { b = 48, s = 12 }, -- Gooey Spider Leg
+    [2252] = { b = 0, s = 0 }, -- Miscellaneous Goblin Supplies
     [2254] = { b = 2534, s = 506 }, -- Icepane Warhammer
     [2256] = { b = 14982, s = 2996 }, -- Skeletal Club
     [2257] = { b = 944, s = 188 }, -- Frostmane Staff
@@ -804,6 +914,7 @@ VanillaItemPrices = {
     [2283] = { b = 700, s = 140 }, -- Rat Cloth Belt
     [2284] = { b = 1055, s = 211 }, -- Rat Cloth Cloak
     [2287] = { b = 125, s = 6 }, -- Haunch of Meat
+    [2288] = { b = 0, s = 0 }, -- Conjured Fresh Water
     [2289] = { b = 350, s = 87 }, -- Scroll of Strength II
     [2290] = { b = 300, s = 75 }, -- Scroll of Intellect II
     [2291] = { b = 222900, s = 44580 }, -- Kang the Decapitator
@@ -848,9 +959,11 @@ VanillaItemPrices = {
     [2375] = { b = 173, s = 34 }, -- Battered Leather Gloves
     [2376] = { b = 447, s = 89 }, -- Worn Heater Shield
     [2377] = { b = 449, s = 89 }, -- Round Buckler
+    [2378] = { b = 0, s = 0 }, -- Skeleton Finger
     [2379] = { b = 76, s = 15 }, -- Tarnished Chain Vest
     [2380] = { b = 38, s = 7 }, -- Tarnished Chain Belt
     [2381] = { b = 76, s = 15 }, -- Tarnished Chain Leggings
+    [2382] = { b = 0, s = 0 }, -- The Embalmer's Heart
     [2383] = { b = 58, s = 11 }, -- Tarnished Chain Boots
     [2384] = { b = 38, s = 7 }, -- Tarnished Chain Bracers
     [2385] = { b = 38, s = 7 }, -- Tarnished Chain Gloves
@@ -876,6 +989,8 @@ VanillaItemPrices = {
     [2407] = { b = 650, s = 162 }, -- Pattern: White Leather Jerkin
     [2408] = { b = 500, s = 125 }, -- Pattern: Fine Leather Gloves
     [2409] = { b = 1400, s = 350 }, -- Pattern: Dark Leather Tunic
+    [2411] = { b = 100000, s = 0 }, -- Black Stallion Bridle
+    [2414] = { b = 100000, s = 0 }, -- Pinto Bridle
     [2417] = { b = 15673, s = 3134 }, -- Augmented Chain Vest
     [2418] = { b = 15731, s = 3146 }, -- Augmented Chain Leggings
     [2419] = { b = 7894, s = 1578 }, -- Augmented Chain Belt
@@ -918,6 +1033,7 @@ VanillaItemPrices = {
     [2463] = { b = 13695, s = 2739 }, -- Studded Doublet
     [2464] = { b = 6871, s = 1374 }, -- Studded Belt
     [2465] = { b = 12477, s = 2495 }, -- Studded Pants
+    [2466] = { b = 0, s = 0 }, -- Skullsplitter Fetish
     [2467] = { b = 9430, s = 1886 }, -- Studded Boots
     [2468] = { b = 6310, s = 1262 }, -- Studded Bracers
     [2469] = { b = 6334, s = 1266 }, -- Studded Gloves
@@ -927,6 +1043,8 @@ VanillaItemPrices = {
     [2473] = { b = 25753, s = 5150 }, -- Reinforced Leather Boots
     [2474] = { b = 17233, s = 3446 }, -- Reinforced Leather Bracers
     [2475] = { b = 17298, s = 3459 }, -- Reinforced Leather Gloves
+    [2476] = { b = 0, s = 0 }, -- Chilled Basilisk Haunch
+    [2477] = { b = 0, s = 0 }, -- Ravager's Skull
     [2479] = { b = 108, s = 21 }, -- Broad Axe
     [2480] = { b = 72, s = 14 }, -- Large Club
     [2488] = { b = 536, s = 107 }, -- Gladius
@@ -946,6 +1064,10 @@ VanillaItemPrices = {
     [2509] = { b = 414, s = 82 }, -- Ornate Blunderbuss
     [2510] = { b = 41, s = 8 }, -- Solid Blunderbuss
     [2511] = { b = 1324, s = 264 }, -- Hunter's Boomstick
+    [2512] = { b = 10, s = 0 }, -- Rough Arrow
+    [2515] = { b = 50, s = 0 }, -- Sharp Arrow
+    [2516] = { b = 10, s = 0 }, -- Light Shot
+    [2519] = { b = 50, s = 0 }, -- Heavy Shot
     [2520] = { b = 24628, s = 4925 }, -- Broadsword
     [2521] = { b = 30896, s = 6179 }, -- Flamberge
     [2522] = { b = 22548, s = 4509 }, -- Crescent Axe
@@ -962,13 +1084,18 @@ VanillaItemPrices = {
     [2533] = { b = 61107, s = 12221 }, -- War Maul
     [2534] = { b = 45431, s = 9086 }, -- Rondel
     [2535] = { b = 61556, s = 12311 }, -- War Staff
+    [2536] = { b = 0, s = 0 }, -- Trogg Stone Tooth
     [2545] = { b = 8984, s = 1796 }, -- Malleable Chain Leggings
     [2546] = { b = 276, s = 55 }, -- Royal Frostmane Girdle
     [2547] = { b = 36, s = 7 }, -- Boar Handler Gloves
+    [2548] = { b = 0, s = 0 }, -- Barrel of Barleybrew Scalder
     [2549] = { b = 25082, s = 5016 }, -- Staff of the Shade
     [2553] = { b = 100, s = 25 }, -- Recipe: Elixir of Minor Agility
     [2555] = { b = 160, s = 40 }, -- Recipe: Swiftness Potion
+    [2560] = { b = 0, s = 0 }, -- Jitters' Completed Journal
+    [2561] = { b = 0, s = 0 }, -- Chok'sul's Head
     [2562] = { b = 2300, s = 575 }, -- Bouquet of Scarlet Begonias
+    [2563] = { b = 0, s = 0 }, -- Strange Smelling Powder
     [2564] = { b = 34085, s = 6817 }, -- Elven Spirit Claws
     [2565] = { b = 12453, s = 3113 }, -- Rod of Molten Fire
     [2566] = { b = 6613, s = 1322 }, -- Sacrificial Robes
@@ -1003,7 +1130,12 @@ VanillaItemPrices = {
     [2601] = { b = 400, s = 100 }, -- Pattern: Gray Woolen Robe
     [2604] = { b = 50, s = 12 }, -- Red Dye
     [2605] = { b = 100, s = 25 }, -- Green Dye
+    [2606] = { b = 0, s = 0 }, -- Lurker Venom
+    [2607] = { b = 0, s = 0 }, -- Mo'grosh Crystal
     [2608] = { b = 255, s = 63 }, -- Threshadon Ambergris
+    [2609] = { b = 0, s = 0 }, -- Disarming Colloid
+    [2610] = { b = 0, s = 0 }, -- Disarming Mixture
+    [2611] = { b = 0, s = 0 }, -- Crude Flint
     [2612] = { b = 163, s = 32 }, -- Plain Robe
     [2613] = { b = 607, s = 121 }, -- Double-stitched Robes
     [2614] = { b = 1161, s = 232 }, -- Robe of Apprenticeship
@@ -1011,14 +1143,23 @@ VanillaItemPrices = {
     [2616] = { b = 2659, s = 531 }, -- Shimmering Silk Robes
     [2617] = { b = 10991, s = 2198 }, -- Burning Robes
     [2618] = { b = 26639, s = 5327 }, -- Silver Dress Robes
+    [2619] = { b = 0, s = 0 }, -- Grelin's Report
     [2620] = { b = 15067, s = 3013 }, -- Augural Shroud
     [2621] = { b = 11787, s = 2357 }, -- Cowl of Necromancy
     [2622] = { b = 13015, s = 2603 }, -- Nimar's Tribal Headdress
     [2623] = { b = 17772, s = 3554 }, -- Holy Diadem
     [2624] = { b = 19264, s = 3852 }, -- Thinking Cap
+    [2625] = { b = 0, s = 0 }, -- Menethil Statuette
+    [2628] = { b = 0, s = 0 }, -- Senir's Report
+    [2629] = { b = 0, s = 0 }, -- Intrepid Strongbox Key
     [2632] = { b = 3029, s = 605 }, -- Curved Dagger
     [2633] = { b = 100, s = 25 }, -- Jungle Remedy
+    [2634] = { b = 0, s = 0 }, -- Venom Fern Extract
     [2635] = { b = 82, s = 16 }, -- Loose Chain Belt
+    [2636] = { b = 0, s = 0 }, -- Carved Stone Idol
+    [2637] = { b = 0, s = 0 }, -- Ironband's Progress Report
+    [2639] = { b = 0, s = 0 }, -- Merrin's Letter
+    [2640] = { b = 0, s = 0 }, -- Miners' Gear
     [2642] = { b = 166, s = 33 }, -- Loose Chain Boots
     [2643] = { b = 144, s = 28 }, -- Loose Chain Bracers
     [2644] = { b = 56, s = 11 }, -- Loose Chain Cloak
@@ -1033,14 +1174,23 @@ VanillaItemPrices = {
     [2654] = { b = 14, s = 2 }, -- Flimsy Chain Pants
     [2656] = { b = 48, s = 9 }, -- Flimsy Chain Vest
     [2657] = { b = 3500, s = 875 }, -- Red Leather Bag
+    [2658] = { b = 0, s = 0 }, -- Ados Fragment
+    [2659] = { b = 0, s = 0 }, -- Modr Fragment
+    [2660] = { b = 0, s = 0 }, -- Golm Fragment
+    [2661] = { b = 0, s = 0 }, -- Neru Fragment
     [2662] = { b = 35000, s = 8750 }, -- Ribbly's Quiver
     [2663] = { b = 35000, s = 8750 }, -- Ribbly's Bandolier
     [2665] = { b = 20, s = 5 }, -- Stormwind Seasoning Herbs
+    [2666] = { b = 0, s = 0 }, -- Barrel of Thunder Ale
+    [2667] = { b = 0, s = 0 }, -- MacGrann's Dried Meats
+    [2671] = { b = 0, s = 0 }, -- Wendigo Mane
     [2672] = { b = 16, s = 4 }, -- Stringy Wolf Meat
     [2673] = { b = 40, s = 10 }, -- Coyote Meat
     [2674] = { b = 48, s = 12 }, -- Crawler Meat
     [2675] = { b = 44, s = 11 }, -- Crawler Claw
+    [2676] = { b = 0, s = 0 }, -- Shimmerweed
     [2677] = { b = 60, s = 15 }, -- Boar Ribs
+    [2678] = { b = 10, s = 0 }, -- Mild Spices
     [2679] = { b = 20, s = 5 }, -- Charred Wolf Meat
     [2680] = { b = 40, s = 10 }, -- Spiced Wolf Meat
     [2681] = { b = 24, s = 6 }, -- Roasted Boar Meat
@@ -1054,13 +1204,22 @@ VanillaItemPrices = {
     [2691] = { b = 54, s = 10 }, -- Outfitter Boots
     [2692] = { b = 40, s = 10 }, -- Hot Spices
     [2694] = { b = 2697, s = 539 }, -- Settler's Leggings
+    [2696] = { b = 0, s = 0 }, -- Cask of Evershine
     [2697] = { b = 400, s = 100 }, -- Recipe: Goretusk Liver Pie
     [2698] = { b = 400, s = 100 }, -- Recipe: Cooked Crab Claw
     [2699] = { b = 800, s = 200 }, -- Recipe: Redridge Goulash
     [2700] = { b = 400, s = 100 }, -- Recipe: Succulent Pork Ribs
     [2701] = { b = 1600, s = 400 }, -- Recipe: Seasoned Wolf Kabob
+    [2702] = { b = 0, s = 0 }, -- Lightforge Ingot
+    [2712] = { b = 0, s = 0 }, -- Crate of Lightforge Ingots
+    [2713] = { b = 0, s = 0 }, -- Ol' Sooty's Head
+    [2715] = { b = 0, s = 0 }, -- Monster - Item, Lantern - Round
+    [2719] = { b = 0, s = 0 }, -- Small Brass Key
+    [2720] = { b = 0, s = 0 }, -- Muddy Note
     [2721] = { b = 9914, s = 1982 }, -- Holy Shroud
+    [2722] = { b = 0, s = 0 }, -- Wine Ticket
     [2723] = { b = 50, s = 12 }, -- Bottle of Pinot Noir
+    [2724] = { b = 0, s = 0 }, -- Cloth Request
     [2725] = { b = 1500, s = 375 }, -- Green Hills of Stranglethorn - Page 1
     [2728] = { b = 1500, s = 375 }, -- Green Hills of Stranglethorn - Page 4
     [2730] = { b = 1500, s = 375 }, -- Green Hills of Stranglethorn - Page 6
@@ -1077,6 +1236,11 @@ VanillaItemPrices = {
     [2750] = { b = 1500, s = 375 }, -- Green Hills of Stranglethorn - Page 26
     [2751] = { b = 1500, s = 375 }, -- Green Hills of Stranglethorn - Page 27
     [2754] = { b = 69, s = 13 }, -- Tarnished Bastard Sword
+    [2756] = { b = 0, s = 0 }, -- Green Hills of Stranglethorn - Chapter I
+    [2757] = { b = 0, s = 0 }, -- Green Hills of Stranglethorn - Chapter II
+    [2758] = { b = 0, s = 0 }, -- Green Hills of Stranglethorn - Chapter III
+    [2759] = { b = 0, s = 0 }, -- Green Hills of Stranglethorn - Chapter IV
+    [2760] = { b = 0, s = 0 }, -- Thurman's Sewing Kit
     [2763] = { b = 1203, s = 240 }, -- Fisherman Knife
     [2764] = { b = 2202, s = 440 }, -- Small Dagger
     [2765] = { b = 4057, s = 811 }, -- Hunting Knife
@@ -1090,19 +1254,26 @@ VanillaItemPrices = {
     [2776] = { b = 2000, s = 500 }, -- Gold Ore
     [2777] = { b = 734, s = 146 }, -- Feeble Shortbow
     [2778] = { b = 737, s = 147 }, -- Cheap Blunderbuss
+    [2779] = { b = 0, s = 0 }, -- Tear of Tilloa
     [2780] = { b = 1872, s = 374 }, -- Light Hunting Bow
     [2781] = { b = 1676, s = 335 }, -- Dirty Blunderbuss
     [2782] = { b = 3759, s = 751 }, -- Mishandled Recurve Bow
     [2783] = { b = 2954, s = 590 }, -- Shoddy Blunderbuss
+    [2784] = { b = 0, s = 0 }, -- Musquash Root
     [2785] = { b = 5311, s = 1062 }, -- Stiff Recurve Bow
     [2786] = { b = 5865, s = 1173 }, -- Oiled Blunderbuss
     [2787] = { b = 53, s = 10 }, -- Trogg Dagger
+    [2788] = { b = 0, s = 0 }, -- Black Claw Stout
+    [2794] = { b = 0, s = 0 }, -- An Old History Book
+    [2795] = { b = 0, s = 0 }, -- Book: Stresses of Iron
+    [2797] = { b = 0, s = 0 }, -- Heart of Mokk
     [2798] = { b = 100, s = 25 }, -- Rethban Ore
     [2799] = { b = 270, s = 67 }, -- Gorilla Fang
     [2800] = { b = 7625, s = 1525 }, -- Black Velvet Robes
     [2801] = { b = 523648, s = 104729 }, -- Blade of Hanna
     [2802] = { b = 6500, s = 1625 }, -- Blazing Emblem
     [2805] = { b = 11762, s = 2352 }, -- Yeti Fur Cloak
+    [2806] = { b = 0, s = 0 }, -- Package for Stormpike
     [2807] = { b = 12264, s = 2452 }, -- Guillotine Axe
     [2815] = { b = 98890, s = 19778 }, -- Curve-bladed Ripper
     [2816] = { b = 36620, s = 7324 }, -- Death Speaker Scepter
@@ -1115,14 +1286,25 @@ VanillaItemPrices = {
     [2823] = { b = 8092, s = 1618 }, -- Mo'grosh Can Opener
     [2824] = { b = 160160, s = 32032 }, -- Hurricane
     [2825] = { b = 73609, s = 14721 }, -- Bow of Searing Arrows
+    [2828] = { b = 0, s = 0 }, -- Nissa's Remains
+    [2829] = { b = 0, s = 0 }, -- Gregor's Remains
+    [2830] = { b = 0, s = 0 }, -- Thurman's Remains
+    [2831] = { b = 0, s = 0 }, -- Devlin's Remains
+    [2832] = { b = 0, s = 0 }, -- Verna's Westfall Stew Recipe
+    [2833] = { b = 0, s = 0 }, -- The Lich's Spellbook
+    [2834] = { b = 0, s = 0 }, -- Embalming Ichor
     [2835] = { b = 8, s = 2 }, -- Rough Stone
     [2836] = { b = 60, s = 15 }, -- Coarse Stone
+    [2837] = { b = 0, s = 0 }, -- Thurman's Letter
     [2838] = { b = 240, s = 60 }, -- Heavy Stone
+    [2839] = { b = 0, s = 0 }, -- A Letter to Yvette
     [2840] = { b = 40, s = 10 }, -- Copper Bar
     [2841] = { b = 200, s = 50 }, -- Bronze Bar
     [2842] = { b = 400, s = 100 }, -- Silver Bar
+    [2843] = { b = 0, s = 0 }, -- Dirty Knucklebones
     [2844] = { b = 530, s = 106 }, -- Copper Mace
     [2845] = { b = 546, s = 109 }, -- Copper Axe
+    [2846] = { b = 0, s = 0 }, -- Tirisfal Pumpkin
     [2847] = { b = 551, s = 110 }, -- Copper Shortsword
     [2848] = { b = 5595, s = 1119 }, -- Bronze Mace
     [2849] = { b = 6345, s = 1269 }, -- Bronze Axe
@@ -1131,7 +1313,11 @@ VanillaItemPrices = {
     [2852] = { b = 335, s = 67 }, -- Copper Chain Pants
     [2853] = { b = 85, s = 17 }, -- Copper Bracers
     [2854] = { b = 1127, s = 225 }, -- Runed Copper Bracers
+    [2855] = { b = 0, s = 0 }, -- Putrid Claw
+    [2856] = { b = 0, s = 0 }, -- Iron Pike
     [2857] = { b = 991, s = 198 }, -- Runed Copper Belt
+    [2858] = { b = 0, s = 0 }, -- Darkhound Blood
+    [2859] = { b = 0, s = 0 }, -- Vile Fin Scale
     [2862] = { b = 12, s = 3 }, -- Rough Sharpening Stone
     [2863] = { b = 40, s = 10 }, -- Coarse Sharpening Stone
     [2864] = { b = 3150, s = 630 }, -- Runed Copper Breastplate
@@ -1141,6 +1327,10 @@ VanillaItemPrices = {
     [2869] = { b = 9155, s = 1831 }, -- Silvered Bronze Breastplate
     [2870] = { b = 14677, s = 2935 }, -- Shining Silver Breastplate
     [2871] = { b = 160, s = 40 }, -- Heavy Sharpening Stone
+    [2872] = { b = 0, s = 0 }, -- Vicious Night Web Spider Venom
+    [2874] = { b = 0, s = 0 }, -- An Unsent Letter
+    [2875] = { b = 0, s = 0 }, -- Scarlet Insignia Ring
+    [2876] = { b = 0, s = 0 }, -- Duskbat Pelt
     [2877] = { b = 42623, s = 8524 }, -- Combatant Claymore
     [2878] = { b = 25718, s = 5143 }, -- Bearded Boneaxe
     [2879] = { b = 15605, s = 3121 }, -- Antipodean Rod
@@ -1148,6 +1338,7 @@ VanillaItemPrices = {
     [2881] = { b = 600, s = 150 }, -- Plans: Runed Copper Breastplate
     [2882] = { b = 1200, s = 300 }, -- Plans: Silvered Bronze Shoulders
     [2883] = { b = 1500, s = 375 }, -- Plans: Deadly Bronze Poniard
+    [2885] = { b = 0, s = 0 }, -- Scarlet Crusade Documents
     [2886] = { b = 20, s = 5 }, -- Crag Boar Rib
     [2888] = { b = 40, s = 10 }, -- Beer Basted Boar Ribs
     [2889] = { b = 240, s = 60 }, -- Recipe: Beer Basted Boar Ribs
@@ -1165,6 +1356,7 @@ VanillaItemPrices = {
     [2906] = { b = 9051, s = 1810 }, -- Darkshire Mail Leggings
     [2907] = { b = 8778, s = 1755 }, -- Dwarven Tree Chopper
     [2908] = { b = 7048, s = 1409 }, -- Thornblade
+    [2909] = { b = 0, s = 0 }, -- Red Wool Bandana
     [2910] = { b = 6286, s = 1257 }, -- Gold Militia Boots
     [2911] = { b = 2623, s = 524 }, -- Keller's Girdle
     [2912] = { b = 33656, s = 6731 }, -- Claw of the Shadowmancer
@@ -1173,21 +1365,28 @@ VanillaItemPrices = {
     [2916] = { b = 22028, s = 4405 }, -- Gold Lion Shield
     [2917] = { b = 2660, s = 665 }, -- Tranquil Ring
     [2924] = { b = 65, s = 16 }, -- Crocolisk Meat
+    [2925] = { b = 0, s = 0 }, -- Crocolisk Skin
+    [2926] = { b = 0, s = 0 }, -- Head of Bazil Thredd
     [2928] = { b = 20, s = 5 }, -- Dust of Decay
     [2930] = { b = 50, s = 12 }, -- Essence of Pain
     [2931] = { b = 1000, s = 250 }, -- Maiden's Anguish
     [2933] = { b = 15000, s = 3750 }, -- Seal of Wrynn
     [2934] = { b = 30, s = 7 }, -- Ruined Leather Scraps
+    [2939] = { b = 0, s = 0 }, -- Crocolisk Tear
     [2940] = { b = 175, s = 43 }, -- Bloody Bear Paw
     [2941] = { b = 17761, s = 3552 }, -- Prison Shank
     [2942] = { b = 18316, s = 3663 }, -- Iron Knuckles
     [2943] = { b = 2150, s = 537 }, -- Eye of Paleth
+    [2944] = { b = 0, s = 0 }, -- Cursed Eye of Paleth
+    [2946] = { b = 30, s = 0 }, -- Balanced Throwing Dagger
+    [2947] = { b = 15, s = 0 }, -- Small Throwing Knife
     [2949] = { b = 5196, s = 1039 }, -- Mariner Boots
     [2950] = { b = 17384, s = 3476 }, -- Icicle Rod
     [2951] = { b = 2625, s = 656 }, -- Ring of the Underwood
     [2953] = { b = 11606, s = 2321 }, -- Watch Master's Cloak
     [2954] = { b = 12425, s = 2485 }, -- Night Watch Pantaloons
     [2955] = { b = 17247, s = 3449 }, -- First Mate Hat
+    [2956] = { b = 0, s = 0 }, -- Report on the Defias Brotherhood
     [2957] = { b = 596, s = 119 }, -- Journeyman's Vest
     [2958] = { b = 473, s = 94 }, -- Journeyman's Pants
     [2959] = { b = 164, s = 32 }, -- Journeyman's Boots
@@ -1226,12 +1425,17 @@ VanillaItemPrices = {
     [2992] = { b = 2044, s = 408 }, -- Burnished Gloves
     [2996] = { b = 160, s = 40 }, -- Bolt of Linen Cloth
     [2997] = { b = 400, s = 100 }, -- Bolt of Woolen Cloth
+    [2998] = { b = 0, s = 0 }, -- A Simple Compass
+    [2999] = { b = 0, s = 0 }, -- Steelgrill's Tools
     [3000] = { b = 596, s = 119 }, -- Brood Mother Carapace
     [3008] = { b = 218, s = 43 }, -- Wendigo Fur Cloak
     [3010] = { b = 405, s = 101 }, -- Fine Sand
     [3011] = { b = 14234, s = 2846 }, -- Feathered Headdress
     [3012] = { b = 200, s = 50 }, -- Scroll of Agility
     [3013] = { b = 100, s = 25 }, -- Scroll of Protection
+    [3014] = { b = 0, s = 0 }, -- Battleworn Axe
+    [3016] = { b = 0, s = 0 }, -- Gunther's Spellbook
+    [3017] = { b = 0, s = 0 }, -- Sevren's Orders
     [3018] = { b = 3906, s = 781 }, -- Hide of Lupos
     [3019] = { b = 2115, s = 423 }, -- Noble's Robe
     [3020] = { b = 13279, s = 2655 }, -- Enduring Cap
@@ -1242,6 +1446,10 @@ VanillaItemPrices = {
     [3025] = { b = 18478, s = 3695 }, -- BKP 42 \"Ultra\"
     [3026] = { b = 3812, s = 762 }, -- Reinforced Bow
     [3027] = { b = 6349, s = 1269 }, -- Heavy Recurve Bow
+    [3030] = { b = 300, s = 0 }, -- Razor Arrow
+    [3033] = { b = 300, s = 0 }, -- Solid Shot
+    [3034] = { b = 300, s = 0 }, -- Deprecated BKP \"Impact\" Shot
+    [3035] = { b = 0, s = 0 }, -- Laced Pumpkin
     [3036] = { b = 2578, s = 515 }, -- Heavy Shortbow
     [3037] = { b = 24071, s = 4814 }, -- Whipwood Recurve Bow
     [3039] = { b = 8052, s = 1610 }, -- Short Ash Bow
@@ -1270,17 +1478,38 @@ VanillaItemPrices = {
     [3076] = { b = 3184, s = 636 }, -- Smoldering Boots
     [3078] = { b = 11572, s = 2314 }, -- Naga Heartpiercer
     [3079] = { b = 1486, s = 297 }, -- Skorn's Rifle
+    [3080] = { b = 0, s = 0 }, -- Candle of Beckoning
+    [3081] = { b = 0, s = 0 }, -- Nether Gem
+    [3082] = { b = 0, s = 0 }, -- Dargol's Skull
+    [3083] = { b = 0, s = 0 }, -- Restabilization Cog
+    [3084] = { b = 0, s = 0 }, -- Gyromechanic Gear
+    [3085] = { b = 0, s = 0 }, -- Barrel of Shimmer Stout
+    [3086] = { b = 0, s = 0 }, -- Cask of Shimmer Stout
     [3087] = { b = 45, s = 11 }, -- Mug of Shimmer Stout
     [3103] = { b = 2334, s = 466 }, -- Coldridge Hammer
+    [3107] = { b = 75, s = 0 }, -- Keen Throwing Knife
+    [3108] = { b = 200, s = 0 }, -- Heavy Throwing Dagger
+    [3110] = { b = 0, s = 0 }, -- Tunnel Rat Ear
+    [3111] = { b = 15, s = 0 }, -- Crude Throwing Axe
+    [3117] = { b = 0, s = 0 }, -- Hildelve's Journal
+    [3131] = { b = 30, s = 0 }, -- Weighted Throwing Axe
+    [3135] = { b = 75, s = 0 }, -- Sharp Throwing Axe
+    [3137] = { b = 200, s = 0 }, -- Deadly Throwing Axe
     [3148] = { b = 1, s = 1 }, -- Work Shirt
     [3151] = { b = 437, s = 87 }, -- Siege Brigade Vest
     [3152] = { b = 140, s = 28 }, -- Driving Gloves
     [3153] = { b = 169, s = 33 }, -- Oil-stained Cloak
     [3154] = { b = 5470, s = 1094 }, -- Thelsamar Axe
+    [3155] = { b = 0, s = 0 }, -- Remedy of Arugal
+    [3156] = { b = 0, s = 0 }, -- Glutton Shackle
+    [3157] = { b = 0, s = 0 }, -- Darksoul Shackle
     [3158] = { b = 303, s = 60 }, -- Burnt Hide Bracers
     [3160] = { b = 2351, s = 470 }, -- Ironplate Buckler
     [3161] = { b = 1474, s = 294 }, -- Robe of the Keeper
+    [3162] = { b = 0, s = 0 }, -- Notched Rib
+    [3163] = { b = 0, s = 0 }, -- Blackened Skull
     [3164] = { b = 135, s = 33 }, -- Discolored Worg Heart
+    [3165] = { b = 0, s = 0 }, -- Quinn's Potion
     [3166] = { b = 2039, s = 407 }, -- Ironheart Chain
     [3167] = { b = 275, s = 68 }, -- Thick Spider Hair
     [3169] = { b = 75, s = 18 }, -- Chipped Bear Tooth
@@ -1296,6 +1525,7 @@ VanillaItemPrices = {
     [3180] = { b = 675, s = 168 }, -- Flecked Raptor Scale
     [3181] = { b = 95, s = 23 }, -- Partially Digested Meat
     [3182] = { b = 1550, s = 387 }, -- Spider's Silk
+    [3183] = { b = 0, s = 0 }, -- Mangy Claw
     [3184] = { b = 6973, s = 1394 }, -- Hook Dagger
     [3185] = { b = 40440, s = 8088 }, -- Acrobatic Staff
     [3186] = { b = 22180, s = 4436 }, -- Viking Sword
@@ -1329,6 +1559,7 @@ VanillaItemPrices = {
     [3214] = { b = 169, s = 33 }, -- Warrior's Bracers
     [3216] = { b = 275, s = 55 }, -- Warm Winter Robe
     [3217] = { b = 674, s = 134 }, -- Foreman Belt
+    [3218] = { b = 0, s = 0 }, -- Pyrewood Shackle
     [3220] = { b = 160, s = 40 }, -- Blood Sausage
     [3223] = { b = 1534, s = 306 }, -- Frostmane Scepter
     [3224] = { b = 142, s = 28 }, -- Silver-lined Bracers
@@ -1339,14 +1570,31 @@ VanillaItemPrices = {
     [3230] = { b = 3842, s = 768 }, -- Black Wolf Bracers
     [3231] = { b = 6332, s = 1266 }, -- Cutthroat Pauldrons
     [3233] = { b = 850, s = 212 }, -- Gnoll Hide Sack
+    [3234] = { b = 0, s = 0 }, -- Deliah's Ring
     [3235] = { b = 1650, s = 412 }, -- Ring of Scorn
+    [3236] = { b = 0, s = 0 }, -- Rot Hide Ichor
+    [3237] = { b = 0, s = 0 }, -- Sample Ichor
+    [3238] = { b = 0, s = 0 }, -- Johaan's Findings
     [3239] = { b = 12, s = 3 }, -- Rough Weightstone
     [3240] = { b = 40, s = 10 }, -- Coarse Weightstone
     [3241] = { b = 160, s = 40 }, -- Heavy Weightstone
+    [3248] = { b = 0, s = 0 }, -- Translated Letter from The Embalmer
+    [3250] = { b = 0, s = 0 }, -- Bethor's Scroll
+    [3251] = { b = 0, s = 0 }, -- Bethor's Potion
+    [3252] = { b = 0, s = 0 }, -- Deathstalker Report
+    [3253] = { b = 0, s = 0 }, -- Grizzled Bear Heart
+    [3254] = { b = 0, s = 0 }, -- Skittering Blood
+    [3255] = { b = 0, s = 0 }, -- Berard's Journal
+    [3256] = { b = 0, s = 0 }, -- Lake Skulker Moss
+    [3257] = { b = 0, s = 0 }, -- Lake Creeper Moss
+    [3258] = { b = 0, s = 0 }, -- Hardened Tumor
     [3260] = { b = 31, s = 6 }, -- Scarlet Initiate Robes
     [3261] = { b = 35, s = 7 }, -- Webbed Cloak
     [3262] = { b = 54, s = 10 }, -- Putrid Wooden Hammer
     [3263] = { b = 22, s = 4 }, -- Webbed Pants
+    [3264] = { b = 0, s = 0 }, -- Duskbat Wing
+    [3265] = { b = 0, s = 0 }, -- Scavenger Paw
+    [3266] = { b = 0, s = 0 }, -- Scarlet Armband
     [3267] = { b = 128, s = 25 }, -- Forsaken Shortsword
     [3268] = { b = 128, s = 25 }, -- Forsaken Dagger
     [3269] = { b = 129, s = 25 }, -- Forsaken Maul
@@ -1375,6 +1623,7 @@ VanillaItemPrices = {
     [3294] = { b = 58, s = 11 }, -- Deadman Club
     [3295] = { b = 54, s = 10 }, -- Deadman Blade
     [3296] = { b = 54, s = 10 }, -- Deadman Dagger
+    [3297] = { b = 0, s = 0 }, -- Fel Moss
     [3299] = { b = 195, s = 48 }, -- Fractured Canine
     [3300] = { b = 38, s = 9 }, -- Rabbit's Foot
     [3301] = { b = 410, s = 102 }, -- Sharp Canine
@@ -1392,6 +1641,8 @@ VanillaItemPrices = {
     [3313] = { b = 2595, s = 519 }, -- Ceremonial Leather Harness
     [3314] = { b = 856, s = 171 }, -- Ceremonial Leather Gloves
     [3315] = { b = 2274, s = 454 }, -- Ceremonial Leather Loincloth
+    [3317] = { b = 0, s = 0 }, -- A Talking Head
+    [3318] = { b = 0, s = 0 }, -- Alaric's Remains
     [3319] = { b = 550, s = 110 }, -- Short Sabre
     [3321] = { b = 207, s = 41 }, -- Gray Fur Booties
     [3322] = { b = 55, s = 11 }, -- Wispy Cloak
@@ -1407,13 +1658,20 @@ VanillaItemPrices = {
     [3334] = { b = 343, s = 68 }, -- Farmer's Shovel
     [3335] = { b = 230, s = 46 }, -- Farmer's Broom
     [3336] = { b = 19933, s = 3986 }, -- Flesh Piercer
+    [3337] = { b = 0, s = 0 }, -- Dragonmaw War Banner
+    [3339] = { b = 0, s = 0 }, -- Dwarven Tinder
     [3340] = { b = 125, s = 31 }, -- Incendicite Ore
     [3341] = { b = 8108, s = 1621 }, -- Gauntlets of Ogre Strength
     [3342] = { b = 550, s = 137 }, -- Captain Sander's Shirt
     [3343] = { b = 1800, s = 450 }, -- Captain Sander's Booty Bag
     [3344] = { b = 729, s = 145 }, -- Captain Sander's Sash
     [3345] = { b = 13601, s = 2720 }, -- Silk Wizard Hat
+    [3347] = { b = 0, s = 0 }, -- Bundle of Crocolisk Skins
+    [3348] = { b = 0, s = 0 }, -- Giant Crocolisk Skin
+    [3349] = { b = 0, s = 0 }, -- Sida's Bag
     [3352] = { b = 5000, s = 1250 }, -- Ooze-covered Bag
+    [3353] = { b = 0, s = 0 }, -- Rune-inscribed Pendant
+    [3354] = { b = 0, s = 0 }, -- Dalaran Pendant
     [3355] = { b = 200, s = 50 }, -- Wild Steelbloom
     [3356] = { b = 120, s = 30 }, -- Kingsblood
     [3357] = { b = 300, s = 75 }, -- Liferoot
@@ -1449,23 +1707,33 @@ VanillaItemPrices = {
     [3394] = { b = 1000, s = 250 }, -- Recipe: Elixir of Poison Resistance
     [3395] = { b = 1000, s = 250 }, -- Recipe: Limited Invulnerability Potion
     [3396] = { b = 1000, s = 250 }, -- Recipe: Elixir of Lesser Agility
+    [3397] = { b = 0, s = 0 }, -- Young Crocolisk Skin
     [3399] = { b = 325, s = 81 }, -- Vulture Talon
     [3400] = { b = 13806, s = 2761 }, -- Lucine Longsword
     [3401] = { b = 325, s = 81 }, -- Rough Crocolisk Scale
     [3402] = { b = 2410, s = 602 }, -- Soft Patch of Fur
     [3403] = { b = 1285, s = 321 }, -- Ivory Boar Tusk
     [3404] = { b = 725, s = 181 }, -- Buzzard Wing
+    [3405] = { b = 0, s = 0 }, -- Raven Claw Talisman
+    [3406] = { b = 0, s = 0 }, -- Black Feather Quill
+    [3407] = { b = 0, s = 0 }, -- Sapphire of Sky
+    [3408] = { b = 0, s = 0 }, -- Rune of Nesting
+    [3409] = { b = 0, s = 0 }, -- Nightsaber Fang
+    [3411] = { b = 0, s = 0 }, -- Strigid Owl Feather
+    [3412] = { b = 0, s = 0 }, -- Webwood Spider Silk
     [3413] = { b = 16147, s = 3229 }, -- Doomspike
     [3414] = { b = 20144, s = 4028 }, -- Crested Scepter
     [3415] = { b = 17993, s = 3598 }, -- Staff of the Friar
     [3416] = { b = 11069, s = 2213 }, -- Martyr's Chain
     [3417] = { b = 23146, s = 4629 }, -- Onyx Claymore
+    [3418] = { b = 0, s = 0 }, -- Fel Cone
     [3419] = { b = 500, s = 125 }, -- Red Rose
     [3420] = { b = 5000, s = 1250 }, -- Black Rose
     [3421] = { b = 200, s = 50 }, -- Simple Wildflowers
     [3422] = { b = 2000, s = 500 }, -- Beautiful Wildflowers
     [3423] = { b = 20000, s = 5000 }, -- Bouquet of White Roses
     [3424] = { b = 500000, s = 125000 }, -- Bouquet of Black Roses
+    [3425] = { b = 0, s = 0 }, -- Woven Wand
     [3426] = { b = 4000, s = 1000 }, -- Bold Yellow Shirt
     [3427] = { b = 6000, s = 1500 }, -- Stylish Black Shirt
     [3428] = { b = 400, s = 100 }, -- Common Gray Shirt
@@ -1494,12 +1762,15 @@ VanillaItemPrices = {
     [3456] = { b = 25500, s = 6375 }, -- Dog Whistle
     [3457] = { b = 2220, s = 444 }, -- Stamped Trousers
     [3458] = { b = 1670, s = 334 }, -- Rugged Mail Gloves
+    [3460] = { b = 0, s = 0 }, -- Johaan's Special Drink
     [3461] = { b = 5029, s = 1005 }, -- High Robe of the Adjudicator
     [3462] = { b = 11418, s = 2283 }, -- Talonstrike
     [3463] = { b = 37, s = 9 }, -- Silver Star
     [3464] = { b = 35, s = 8 }, -- Feathered Arrow
     [3465] = { b = 36, s = 9 }, -- Exploding Shot
     [3466] = { b = 2000, s = 500 }, -- Strong Flux
+    [3467] = { b = 0, s = 0 }, -- Dull Iron Key
+    [3468] = { b = 0, s = 0 }, -- Renferrel's Findings
     [3469] = { b = 245, s = 49 }, -- Copper Chain Boots
     [3470] = { b = 20, s = 5 }, -- Rough Grinding Stone
     [3471] = { b = 712, s = 142 }, -- Copper Chain Vest
@@ -1507,6 +1778,8 @@ VanillaItemPrices = {
     [3473] = { b = 1498, s = 299 }, -- Runed Copper Pants
     [3474] = { b = 1083, s = 216 }, -- Gemmed Copper Gauntlets
     [3475] = { b = 130092, s = 26018 }, -- Cloak of Flames
+    [3476] = { b = 0, s = 0 }, -- Gray Bear Tongue
+    [3477] = { b = 0, s = 0 }, -- Creeper Ichor
     [3478] = { b = 40, s = 10 }, -- Coarse Grinding Stone
     [3480] = { b = 2660, s = 532 }, -- Rough Bronze Shoulders
     [3481] = { b = 6422, s = 1284 }, -- Silvered Bronze Shoulders
@@ -1522,9 +1795,32 @@ VanillaItemPrices = {
     [3491] = { b = 13709, s = 2741 }, -- Heavy Bronze Mace
     [3492] = { b = 22764, s = 4552 }, -- Mighty Iron Hammer
     [3493] = { b = 17133, s = 3426 }, -- Raptor's End
+    [3495] = { b = 0, s = 0 }, -- Elixir of Suffering
+    [3496] = { b = 0, s = 0 }, -- Mountain Lion Blood
+    [3497] = { b = 0, s = 0 }, -- Elixir of Pain
+    [3498] = { b = 0, s = 0 }, -- Taretha's Necklace
+    [3499] = { b = 0, s = 0 }, -- Burnished Gold Key
+    [3502] = { b = 0, s = 0 }, -- Mudsnout Blossoms
+    [3505] = { b = 0, s = 0 }, -- Alterac Signet Ring
+    [3506] = { b = 0, s = 0 }, -- Mudsnout Composite
+    [3508] = { b = 0, s = 0 }, -- Mudsnout Mixture
+    [3509] = { b = 0, s = 0 }, -- Daggerspine Scale
+    [3510] = { b = 0, s = 0 }, -- Torn Fin Eye
     [3511] = { b = 1338, s = 267 }, -- Cloak of the People's Militia
+    [3514] = { b = 0, s = 0 }, -- Mor'Ladim's Skull
+    [3515] = { b = 0, s = 0 }, -- Ataeric's Staff
+    [3516] = { b = 0, s = 0 }, -- Lescovar's Head
+    [3517] = { b = 0, s = 0 }, -- Keg of Shindigger Stout
+    [3518] = { b = 0, s = 0 }, -- Decrypted Letter
+    [3520] = { b = 0, s = 0 }, -- Tainted Keg
+    [3521] = { b = 0, s = 0 }, -- Cleverly Encrypted Letter
     [3530] = { b = 115, s = 28 }, -- Wool Bandage
     [3531] = { b = 230, s = 57 }, -- Heavy Wool Bandage
+    [3550] = { b = 0, s = 0 }, -- Targ's Head
+    [3551] = { b = 0, s = 0 }, -- Muckrake's Head
+    [3552] = { b = 0, s = 0 }, -- Glommus's Head
+    [3553] = { b = 0, s = 0 }, -- Mug'thol's Head
+    [3554] = { b = 0, s = 0 }, -- Crown of Will
     [3555] = { b = 5161, s = 1032 }, -- Robe of Solomon
     [3556] = { b = 6429, s = 1285 }, -- Dread Mage Hat
     [3558] = { b = 5220, s = 1044 }, -- Fen Keeper Robe
@@ -1533,6 +1829,7 @@ VanillaItemPrices = {
     [3561] = { b = 4475, s = 895 }, -- Resilient Poncho
     [3562] = { b = 4117, s = 823 }, -- Belt of Vindication
     [3563] = { b = 2787, s = 557 }, -- Seafarer's Pantaloons
+    [3564] = { b = 0, s = 0 }, -- Shipment of Iron
     [3565] = { b = 1403, s = 280 }, -- Beerstained Gloves
     [3566] = { b = 10116, s = 2023 }, -- Raptorbane Armor
     [3567] = { b = 4613, s = 922 }, -- Dwarven Fishing Pole
@@ -1565,6 +1862,7 @@ VanillaItemPrices = {
     [3598] = { b = 1085, s = 217 }, -- Thick Cloth Bracers
     [3599] = { b = 24, s = 4 }, -- Thin Cloth Belt
     [3600] = { b = 24, s = 4 }, -- Thin Cloth Bracers
+    [3601] = { b = 0, s = 0 }, -- Syndicate Missive
     [3602] = { b = 145, s = 29 }, -- Knitted Belt
     [3603] = { b = 145, s = 29 }, -- Knitted Bracers
     [3604] = { b = 2000, s = 500 }, -- Bandolier of the Night Watch
@@ -1576,6 +1874,32 @@ VanillaItemPrices = {
     [3610] = { b = 200, s = 50 }, -- Plans: Gemmed Copper Gauntlets
     [3611] = { b = 2000, s = 500 }, -- Plans: Green Iron Boots
     [3612] = { b = 2000, s = 500 }, -- Plans: Green Iron Gauntlets
+    [3613] = { b = 0, s = 0 }, -- Valdred's Hands
+    [3614] = { b = 0, s = 0 }, -- Yowler's Paw
+    [3615] = { b = 0, s = 0 }, -- Kurzen's Head
+    [3616] = { b = 0, s = 0 }, -- Mind's Eye
+    [3617] = { b = 0, s = 0 }, -- Pendant of Shadow
+    [3618] = { b = 0, s = 0 }, -- Gobbler's Head
+    [3619] = { b = 0, s = 0 }, -- Snellig's Snuffbox
+    [3621] = { b = 0, s = 0 }, -- Ivar's Head
+    [3622] = { b = 0, s = 0 }, -- Essence of Nightlash
+    [3623] = { b = 0, s = 0 }, -- Thule's Head
+    [3625] = { b = 0, s = 0 }, -- Nek'rosh's Head
+    [3626] = { b = 0, s = 0 }, -- Head of Baron Vardus
+    [3627] = { b = 0, s = 0 }, -- Fang of Vagash
+    [3628] = { b = 0, s = 0 }, -- Hand of Dextren Ward
+    [3629] = { b = 0, s = 0 }, -- Mistmantle Family Ring
+    [3630] = { b = 0, s = 0 }, -- Head of Targorr
+    [3631] = { b = 0, s = 0 }, -- Bellygrub's Tusk
+    [3632] = { b = 0, s = 0 }, -- Fangore's Paw
+    [3633] = { b = 0, s = 0 }, -- Head of Gath'Ilzogg
+    [3634] = { b = 0, s = 0 }, -- Head of Grimson
+    [3635] = { b = 0, s = 0 }, -- Maggot Eye's Paw
+    [3636] = { b = 0, s = 0 }, -- Scale of Old Murk-Eye
+    [3637] = { b = 0, s = 0 }, -- Head of VanCleef
+    [3638] = { b = 0, s = 0 }, -- Sarltooth's Talon
+    [3639] = { b = 0, s = 0 }, -- Ear of Balgaras
+    [3640] = { b = 0, s = 0 }, -- Head of Deepfury
     [3641] = { b = 78, s = 15 }, -- Journeyman's Bracers
     [3642] = { b = 111, s = 22 }, -- Ancestral Bracers
     [3643] = { b = 355, s = 71 }, -- Spellbinder Bracers
@@ -1590,6 +1914,10 @@ VanillaItemPrices = {
     [3654] = { b = 1834, s = 366 }, -- Brackwater Shield
     [3655] = { b = 5111, s = 1022 }, -- Burnished Shield
     [3656] = { b = 10584, s = 2116 }, -- Lambent Scale Shield
+    [3657] = { b = 0, s = 0 }, -- Hillsbrad Town Registry
+    [3658] = { b = 0, s = 0 }, -- Recovered Tome
+    [3659] = { b = 0, s = 0 }, -- Worn Leather Book
+    [3660] = { b = 0, s = 0 }, -- Tomes of Alterac
     [3661] = { b = 45, s = 9 }, -- Handcrafted Staff
     [3662] = { b = 100, s = 25 }, -- Crocolisk Steak
     [3663] = { b = 500, s = 125 }, -- Murloc Fin Soup
@@ -1597,9 +1925,11 @@ VanillaItemPrices = {
     [3665] = { b = 600, s = 150 }, -- Curiously Tasty Omelet
     [3666] = { b = 400, s = 100 }, -- Gooey Spider Cake
     [3667] = { b = 100, s = 25 }, -- Tender Crocolisk Meat
+    [3668] = { b = 0, s = 0 }, -- Assassin's Contract
     [3669] = { b = 780, s = 195 }, -- Gelatinous Goo
     [3670] = { b = 280, s = 70 }, -- Large Slimy Bone
     [3671] = { b = 805, s = 201 }, -- Lifeless Skull
+    [3672] = { b = 0, s = 0 }, -- Head of Nagaz
     [3673] = { b = 180, s = 45 }, -- Broken Arrow
     [3674] = { b = 380, s = 95 }, -- Decomposed Boot
     [3676] = { b = 425, s = 106 }, -- Slimy Ichor
@@ -1609,12 +1939,32 @@ VanillaItemPrices = {
     [3681] = { b = 1600, s = 400 }, -- Recipe: Crocolisk Gumbo
     [3682] = { b = 1600, s = 400 }, -- Recipe: Curiously Tasty Omelet
     [3683] = { b = 1600, s = 400 }, -- Recipe: Gooey Spider Cake
+    [3684] = { b = 0, s = 0 }, -- Perenolde Tiara
     [3685] = { b = 285, s = 71 }, -- Raptor Egg
+    [3688] = { b = 0, s = 0 }, -- Bloodstone Oval
+    [3689] = { b = 0, s = 0 }, -- Bloodstone Marble
+    [3690] = { b = 0, s = 0 }, -- Bloodstone Shard
+    [3691] = { b = 0, s = 0 }, -- Bloodstone Wedge
+    [3692] = { b = 0, s = 0 }, -- Hillsbrad Human Skull
+    [3693] = { b = 0, s = 0 }, -- Humbert's Sword
+    [3701] = { b = 0, s = 0 }, -- Darthalia's Sealed Commendation
     [3702] = { b = 1995, s = 498 }, -- Bear Gall Bladder
     [3703] = { b = 145, s = 36 }, -- Southshore Stout
+    [3704] = { b = 0, s = 0 }, -- Rusted Iron Key
+    [3706] = { b = 0, s = 0 }, -- Ensorcelled Parchment
+    [3708] = { b = 0, s = 0 }, -- Helcular's Rod
+    [3710] = { b = 0, s = 0 }, -- Rod of Helcular
+    [3711] = { b = 0, s = 0 }, -- Belamoore's Research Journal
     [3712] = { b = 350, s = 87 }, -- Turtle Meat
     [3713] = { b = 160, s = 40 }, -- Soothing Spices
+    [3714] = { b = 0, s = 0 }, -- Worn Stone Token
+    [3715] = { b = 0, s = 0 }, -- Bracers of Earth Binding
+    [3716] = { b = 0, s = 0 }, -- Murloc Head
+    [3717] = { b = 0, s = 0 }, -- Sack of Murloc Heads
+    [3718] = { b = 0, s = 0 }, -- Foreboding Plans
     [3719] = { b = 5139, s = 1027 }, -- Hillman's Cloak
+    [3720] = { b = 0, s = 0 }, -- Yeti Fur
+    [3721] = { b = 0, s = 0 }, -- Farren's Report
     [3722] = { b = 855, s = 213 }, -- Familiar Hide
     [3723] = { b = 275, s = 68 }, -- Familiar Fang
     [3724] = { b = 325, s = 81 }, -- Familiar Claw
@@ -1636,6 +1986,7 @@ VanillaItemPrices = {
     [3741] = { b = 4614, s = 922 }, -- Stomping Boots
     [3742] = { b = 14311, s = 2862 }, -- Bow of Plunder
     [3743] = { b = 12256, s = 2451 }, -- Sentry Buckler
+    [3745] = { b = 0, s = 0 }, -- Rune of Opening
     [3747] = { b = 5462, s = 1092 }, -- Meditative Sash
     [3748] = { b = 6524, s = 1304 }, -- Feline Mantle
     [3749] = { b = 6603, s = 1320 }, -- High Apothecary Cloak
@@ -1657,6 +2008,7 @@ VanillaItemPrices = {
     [3769] = { b = 55, s = 13 }, -- Broken Wand
     [3770] = { b = 500, s = 25 }, -- Mutton Chop
     [3771] = { b = 1000, s = 50 }, -- Wild Hog Shank
+    [3772] = { b = 0, s = 0 }, -- Conjured Spring Water
     [3775] = { b = 52, s = 13 }, -- Crippling Poison
     [3776] = { b = 700, s = 175 }, -- Crippling Poison II
     [3777] = { b = 40, s = 10 }, -- Lethargy Root
@@ -1716,6 +2068,8 @@ VanillaItemPrices = {
     [3835] = { b = 5532, s = 1106 }, -- Green Iron Bracers
     [3836] = { b = 15268, s = 3053 }, -- Green Iron Helm
     [3837] = { b = 22027, s = 4405 }, -- Golden Scale Coif
+    [3838] = { b = 0, s = 0 }, -- Shadowmaw Claw
+    [3839] = { b = 0, s = 0 }, -- Pristine Tigress Fang
     [3840] = { b = 12855, s = 2571 }, -- Green Iron Shoulders
     [3841] = { b = 15534, s = 3106 }, -- Golden Scale Shoulders
     [3842] = { b = 14531, s = 2906 }, -- Green Iron Leggings
@@ -1737,6 +2091,8 @@ VanillaItemPrices = {
     [3858] = { b = 1000, s = 250 }, -- Mithril Ore
     [3859] = { b = 240, s = 60 }, -- Steel Bar
     [3860] = { b = 1600, s = 400 }, -- Mithril Bar
+    [3862] = { b = 0, s = 0 }, -- Aged Gorilla Sinew
+    [3863] = { b = 0, s = 0 }, -- Jungle Stalker Feather
     [3864] = { b = 3200, s = 800 }, -- Citrine
     [3866] = { b = 4000, s = 1000 }, -- Plans: Jade Serpentblade
     [3867] = { b = 3800, s = 950 }, -- Plans: Golden Iron Destroyer
@@ -1748,6 +2104,10 @@ VanillaItemPrices = {
     [3873] = { b = 4400, s = 1100 }, -- Plans: Golden Scale Cuirass
     [3874] = { b = 4400, s = 1100 }, -- Plans: Polished Steel Boots
     [3875] = { b = 5000, s = 1250 }, -- Plans: Golden Scale Boots
+    [3876] = { b = 0, s = 0 }, -- Fang of Bhag'thera
+    [3877] = { b = 0, s = 0 }, -- Talon of Tethis
+    [3879] = { b = 0, s = 0 }, -- Paw of Sin'Dall
+    [3880] = { b = 0, s = 0 }, -- Head of Bangalash
     [3882] = { b = 55, s = 13 }, -- Buzzard Feather
     [3889] = { b = 7922, s = 1584 }, -- Russet Hat
     [3890] = { b = 10201, s = 2040 }, -- Studded Hat
@@ -1755,12 +2115,41 @@ VanillaItemPrices = {
     [3892] = { b = 21940, s = 4388 }, -- Embroidered Hat
     [3893] = { b = 27523, s = 5504 }, -- Reinforced Leather Cap
     [3894] = { b = 29986, s = 5997 }, -- Brigandine Helm
+    [3897] = { b = 0, s = 0 }, -- Dizzy's Eye
+    [3898] = { b = 0, s = 0 }, -- Library Scrip
     [3899] = { b = 100, s = 25 }, -- Legends of the Gurubashi, Volume 3
+    [3900] = { b = 0, s = 0 }, -- Pupellyverbos Port
+    [3901] = { b = 0, s = 0 }, -- Bloodscalp Tusk
     [3902] = { b = 6588, s = 1317 }, -- Staff of Nobles
+    [3904] = { b = 0, s = 0 }, -- Gan'zulah's Head
+    [3905] = { b = 0, s = 0 }, -- Nezzliok's Head
+    [3906] = { b = 0, s = 0 }, -- Balia'mah Trophy
+    [3907] = { b = 0, s = 0 }, -- Ziata'jai Trophy
+    [3908] = { b = 0, s = 0 }, -- Zul'Mamwe Trophy
+    [3909] = { b = 0, s = 0 }, -- Broken Armor of Ana'thek
+    [3910] = { b = 0, s = 0 }, -- Snuff
+    [3911] = { b = 0, s = 0 }, -- Pulsing Blue Shard
+    [3912] = { b = 0, s = 0 }, -- Soul Gem
+    [3913] = { b = 0, s = 0 }, -- Filled Soul Gem
     [3914] = { b = 25000, s = 6250 }, -- Journeyman's Backpack
+    [3915] = { b = 0, s = 0 }, -- Bloody Bone Necklace
+    [3916] = { b = 0, s = 0 }, -- Split Bone Necklace
+    [3917] = { b = 0, s = 0 }, -- Singing Blue Crystal
+    [3918] = { b = 0, s = 0 }, -- Singing Crystal Shard
+    [3919] = { b = 0, s = 0 }, -- Mistvale Giblets
+    [3920] = { b = 0, s = 0 }, -- Bloodsail Charts
+    [3921] = { b = 0, s = 0 }, -- Bloodsail Orders
+    [3922] = { b = 0, s = 0 }, -- Shaky's Payment
+    [3923] = { b = 0, s = 0 }, -- Water Elemental Bracers
+    [3924] = { b = 0, s = 0 }, -- Maury's Clubbed Foot
+    [3925] = { b = 0, s = 0 }, -- Jon-Jon's Golden Spyglass
+    [3926] = { b = 0, s = 0 }, -- Chucky's Huge Ring
     [3927] = { b = 2000, s = 150 }, -- Fine Aged Cheddar
     [3928] = { b = 1000, s = 250 }, -- Superior Healing Potion
+    [3930] = { b = 0, s = 0 }, -- Maury's Key
     [3931] = { b = 740, s = 185 }, -- Poisoned Spider Fang
+    [3932] = { b = 0, s = 0 }, -- Smotts' Chest
+    [3935] = { b = 0, s = 0 }, -- Smotts' Cutlass
     [3936] = { b = 4926, s = 985 }, -- Crochet Belt
     [3937] = { b = 10092, s = 2018 }, -- Crochet Boots
     [3938] = { b = 5949, s = 1189 }, -- Crochet Bracers
@@ -1777,6 +2166,7 @@ VanillaItemPrices = {
     [3949] = { b = 32586, s = 6517 }, -- Twill Pants
     [3950] = { b = 20789, s = 4157 }, -- Twill Shoulderpads
     [3951] = { b = 29487, s = 5897 }, -- Twill Vest
+    [3960] = { b = 0, s = 0 }, -- Bag of Water Elemental Bracers
     [3961] = { b = 7518, s = 1503 }, -- Thick Leather Belt
     [3962] = { b = 15399, s = 3079 }, -- Thick Leather Boots
     [3963] = { b = 7012, s = 1402 }, -- Thick Leather Bracers
@@ -1793,6 +2183,7 @@ VanillaItemPrices = {
     [3974] = { b = 27434, s = 5486 }, -- Smooth Leather Pants
     [3975] = { b = 19482, s = 3896 }, -- Smooth Leather Shoulderpads
     [3976] = { b = 34894, s = 6978 }, -- Smooth Leather Armor
+    [3985] = { b = 0, s = 0 }, -- Monogrammed Sash
     [3986] = { b = 26664, s = 5332 }, -- Protective Pavise
     [3987] = { b = 34185, s = 6837 }, -- Deflecting Tower
     [3989] = { b = 15772, s = 3154 }, -- Blocking Targe
@@ -1813,6 +2204,7 @@ VanillaItemPrices = {
     [4005] = { b = 17389, s = 3477 }, -- Overlinked Chain Pants
     [4006] = { b = 12172, s = 2434 }, -- Overlinked Chain Shoulderpads
     [4007] = { b = 18480, s = 3696 }, -- Overlinked Chain Armor
+    [4016] = { b = 0, s = 0 }, -- Zanzil's Mixture
     [4017] = { b = 34550, s = 6910 }, -- Sharp Shortsword
     [4018] = { b = 31863, s = 6372 }, -- Whetted Claymore
     [4019] = { b = 41683, s = 8336 }, -- Heavy Flint Axe
@@ -1823,6 +2215,10 @@ VanillaItemPrices = {
     [4024] = { b = 49109, s = 9821 }, -- Heavy War Staff
     [4025] = { b = 25351, s = 5070 }, -- Balanced Long Bow
     [4026] = { b = 21812, s = 4362 }, -- Sentinel Musket
+    [4027] = { b = 0, s = 0 }, -- Catelyn's Blade
+    [4028] = { b = 0, s = 0 }, -- Bundle of Akiris Reeds
+    [4029] = { b = 0, s = 0 }, -- Akiris Reed
+    [4034] = { b = 0, s = 0 }, -- Stone of the Tides
     [4035] = { b = 9944, s = 1988 }, -- Silver-thread Robe
     [4036] = { b = 3408, s = 681 }, -- Silver-thread Cuffs
     [4037] = { b = 9106, s = 1821 }, -- Silver-thread Pants
@@ -1841,8 +2237,10 @@ VanillaItemPrices = {
     [4050] = { b = 11874, s = 2374 }, -- Emblazoned Leggings
     [4051] = { b = 8349, s = 1669 }, -- Emblazoned Boots
     [4052] = { b = 13498, s = 2699 }, -- Insignia Cap
+    [4053] = { b = 0, s = 0 }, -- Large River Crocolisk Skin
     [4054] = { b = 18129, s = 3625 }, -- Insignia Leggings
     [4055] = { b = 12406, s = 2481 }, -- Insignia Boots
+    [4056] = { b = 0, s = 0 }, -- Cortello's Riddle
     [4057] = { b = 20163, s = 4032 }, -- Insignia Chestguard
     [4058] = { b = 30283, s = 6056 }, -- Glyphed Breastplate
     [4059] = { b = 11169, s = 2233 }, -- Glyphed Bracers
@@ -1870,6 +2268,7 @@ VanillaItemPrices = {
     [4082] = { b = 58495, s = 11699 }, -- Blackforge Breastplate
     [4083] = { b = 21644, s = 4328 }, -- Blackforge Gauntlets
     [4084] = { b = 50681, s = 10136 }, -- Blackforge Leggings
+    [4085] = { b = 0, s = 0 }, -- Krazek's Crock Pot
     [4086] = { b = 31934, s = 6386 }, -- Flash Rifle
     [4087] = { b = 43611, s = 8722 }, -- Trueshot Bow
     [4088] = { b = 92615, s = 18523 }, -- Dreadblade
@@ -1878,12 +2277,18 @@ VanillaItemPrices = {
     [4091] = { b = 112398, s = 22479 }, -- Widowmaker
     [4092] = { b = 5185, s = 1296 }, -- Prismatic Basilisk Scale
     [4093] = { b = 2855, s = 713 }, -- Large Basilisk Tail
+    [4094] = { b = 0, s = 0 }, -- Tablet Shard
     [4096] = { b = 2435, s = 608 }, -- Coarse Gorilla Hair
     [4097] = { b = 1220, s = 305 }, -- Chipped Gorilla Tooth
+    [4098] = { b = 0, s = 0 }, -- Carefully Folded Note
     [4099] = { b = 4525, s = 1131 }, -- Tuft of Gorilla Hair
     [4100] = { b = 95, s = 23 }, -- Crumpled Note
     [4101] = { b = 105, s = 26 }, -- Ripped Note
     [4102] = { b = 135, s = 33 }, -- Torn Note
+    [4103] = { b = 0, s = 0 }, -- Shackle Key
+    [4104] = { b = 0, s = 0 }, -- Snapjaw Crocolisk Skin
+    [4105] = { b = 0, s = 0 }, -- Elder Crocolisk Skin
+    [4106] = { b = 0, s = 0 }, -- Tumbled Crystal
     [4107] = { b = 10682, s = 2136 }, -- Tiger Hunter Gloves
     [4108] = { b = 27017, s = 5403 }, -- Panther Hunter Leggings
     [4109] = { b = 21966, s = 4393 }, -- Excelsior Boots
@@ -2091,12 +2496,18 @@ VanillaItemPrices = {
     [4425] = { b = 500, s = 125 }, -- Scroll of Agility III
     [4426] = { b = 500, s = 125 }, -- Scroll of Strength III
     [4428] = { b = 1325, s = 331 }, -- Spider Palp
+    [4429] = { b = 0, s = 0 }, -- Deepfury's Orders
     [4430] = { b = 17230, s = 4307 }, -- Ethereal Talisman
+    [4432] = { b = 0, s = 0 }, -- Sully Balloo's Letter
+    [4433] = { b = 0, s = 0 }, -- Waterlogged Envelope
     [4434] = { b = 2861, s = 572 }, -- Scarecrow Trousers
+    [4435] = { b = 0, s = 0 }, -- Mote of Myzrael
     [4436] = { b = 1657, s = 331 }, -- Jewel-encrusted Sash
     [4437] = { b = 9278, s = 1855 }, -- Channeler's Staff
     [4438] = { b = 8464, s = 1692 }, -- Pugilist Bracers
     [4439] = { b = 8944, s = 1788 }, -- Bruiser Club
+    [4440] = { b = 0, s = 0 }, -- Sigil of Strom
+    [4441] = { b = 0, s = 0 }, -- MacKreel's Moonshine
     [4443] = { b = 17360, s = 3472 }, -- Grim Pauldrons
     [4444] = { b = 7450, s = 1490 }, -- Black Husk Shield
     [4445] = { b = 10341, s = 2068 }, -- Flesh Carver
@@ -2104,10 +2515,13 @@ VanillaItemPrices = {
     [4447] = { b = 4509, s = 901 }, -- Cloak of Night
     [4448] = { b = 9959, s = 1991 }, -- Husk of Naraxis
     [4449] = { b = 16662, s = 3332 }, -- Naraxis' Fang
+    [4450] = { b = 0, s = 0 }, -- Sigil Fragment
+    [4453] = { b = 0, s = 0 }, -- Sigil of Thoradin
     [4454] = { b = 19001, s = 3800 }, -- Talon of Vultros
     [4455] = { b = 15483, s = 3096 }, -- Raptor Hide Harness
     [4456] = { b = 7768, s = 1553 }, -- Raptor Hide Belt
     [4457] = { b = 1200, s = 300 }, -- Barbecued Buzzard Wing
+    [4458] = { b = 0, s = 0 }, -- Sigil of Arathor
     [4459] = { b = 600, s = 150 }, -- Brittle Dragon Bone
     [4460] = { b = 700, s = 175 }, -- Ripped Wing Webbing
     [4461] = { b = 835, s = 208 }, -- Raptor Hide
@@ -2115,8 +2529,14 @@ VanillaItemPrices = {
     [4463] = { b = 4769, s = 953 }, -- Beaded Raptor Collar
     [4464] = { b = 11901, s = 2380 }, -- Trouncing Boots
     [4465] = { b = 7928, s = 1585 }, -- Bonefist Gauntlets
+    [4466] = { b = 0, s = 0 }, -- Sigil of Trollbane
+    [4467] = { b = 0, s = 0 }, -- Sigil of Ignaeus
+    [4468] = { b = 0, s = 0 }, -- Sheathed Trol'kalar
+    [4469] = { b = 0, s = 0 }, -- Rod of Order
     [4470] = { b = 38, s = 9 }, -- Simple Wood
     [4471] = { b = 135, s = 33 }, -- Flint and Tinder
+    [4472] = { b = 0, s = 0 }, -- Scroll of Myzrael
+    [4473] = { b = 0, s = 0 }, -- Eldritch Shackles
     [4474] = { b = 21037, s = 4207 }, -- Ravenwood Bow
     [4476] = { b = 13672, s = 2734 }, -- Beastwalker Robe
     [4477] = { b = 21953, s = 4390 }, -- Nefarious Buckler
@@ -2124,17 +2544,54 @@ VanillaItemPrices = {
     [4479] = { b = 715, s = 178 }, -- Burning Charm
     [4480] = { b = 740, s = 185 }, -- Thundering Charm
     [4481] = { b = 705, s = 176 }, -- Cresting Charm
+    [4482] = { b = 0, s = 0 }, -- Sealed Folder
+    [4483] = { b = 0, s = 0 }, -- Burning Key
+    [4484] = { b = 0, s = 0 }, -- Cresting Key
+    [4485] = { b = 0, s = 0 }, -- Thundering Key
+    [4487] = { b = 0, s = 0 }, -- Maiden's Folly Charts
+    [4488] = { b = 0, s = 0 }, -- Spirit of Silverpine Charts
+    [4489] = { b = 0, s = 0 }, -- Maiden's Folly Log
+    [4490] = { b = 0, s = 0 }, -- Spirit of Silverpine Log
+    [4491] = { b = 0, s = 0 }, -- Goggles of Gem Hunting
+    [4492] = { b = 0, s = 0 }, -- Elven Gem
+    [4493] = { b = 0, s = 0 }, -- Elven Gems
+    [4494] = { b = 0, s = 0 }, -- Seahorn's Sealed Letter
+    [4495] = { b = 0, s = 0 }, -- Bloodstone Amulet
     [4496] = { b = 500, s = 125 }, -- Small Brown Pouch
     [4497] = { b = 20000, s = 5000 }, -- Heavy Brown Bag
     [4498] = { b = 2500, s = 625 }, -- Brown Leather Satchel
     [4499] = { b = 100000, s = 25000 }, -- Huge Brown Sack
     [4500] = { b = 35000, s = 8750 }, -- Traveler's Backpack
+    [4502] = { b = 0, s = 0 }, -- Sample Elven Gem
+    [4503] = { b = 0, s = 0 }, -- Witherbark Tusk
     [4504] = { b = 11112, s = 2222 }, -- Dwarven Guard Cloak
     [4505] = { b = 9871, s = 1974 }, -- Swampland Trousers
+    [4506] = { b = 0, s = 0 }, -- Stromgarde Badge
     [4507] = { b = 41411, s = 8282 }, -- Pit Fighter's Shield
     [4508] = { b = 38965, s = 7793 }, -- Blood-tinged Armor
     [4509] = { b = 13970, s = 2794 }, -- Seawolf Gloves
+    [4510] = { b = 0, s = 0 }, -- Befouled Bloodstone Orb
     [4511] = { b = 56284, s = 11256 }, -- Black Water Hammer
+    [4512] = { b = 0, s = 0 }, -- Highland Raptor Eye
+    [4513] = { b = 0, s = 0 }, -- Raptor Heart
+    [4514] = { b = 0, s = 0 }, -- Sara Balloo's Plea
+    [4515] = { b = 0, s = 0 }, -- Marez's Head
+    [4516] = { b = 0, s = 0 }, -- Otto's Head
+    [4517] = { b = 0, s = 0 }, -- Falconcrest's Head
+    [4518] = { b = 0, s = 0 }, -- Torn Scroll Fragment
+    [4519] = { b = 0, s = 0 }, -- Crumpled Scroll Fragment
+    [4520] = { b = 0, s = 0 }, -- Singed Scroll Fragment
+    [4521] = { b = 0, s = 0 }, -- Alterac Granite
+    [4522] = { b = 0, s = 0 }, -- Witherbark Medicine Pouch
+    [4525] = { b = 0, s = 0 }, -- Trelane's Wand of Invocation
+    [4526] = { b = 0, s = 0 }, -- Raptor Talon Amulet
+    [4527] = { b = 0, s = 0 }, -- Azure Agate
+    [4528] = { b = 0, s = 0 }, -- Tor'gan's Orb
+    [4529] = { b = 0, s = 0 }, -- Enchanted Agate
+    [4530] = { b = 0, s = 0 }, -- Trelane's Phylactery
+    [4531] = { b = 0, s = 0 }, -- Trelane's Orb
+    [4532] = { b = 0, s = 0 }, -- Trelane's Ember Agate
+    [4533] = { b = 0, s = 0 }, -- Sealed Letter to Archmage Malin
     [4534] = { b = 5868, s = 1173 }, -- Steel-clasped Bracers
     [4535] = { b = 3530, s = 882 }, -- Ironforge Memorial Ring
     [4536] = { b = 25, s = 1 }, -- Shiny Red Apple
@@ -2152,6 +2609,7 @@ VanillaItemPrices = {
     [4548] = { b = 75143, s = 15028 }, -- Servomechanic Sledgehammer
     [4549] = { b = 8370, s = 2092 }, -- Seafire Band
     [4550] = { b = 8370, s = 2092 }, -- Coldwater Ring
+    [4551] = { b = 0, s = 0 }, -- Or'Kalar's Head
     [4552] = { b = 2120, s = 530 }, -- Smooth Stone Chip
     [4553] = { b = 1645, s = 411 }, -- Jagged Piece of Stone
     [4554] = { b = 2835, s = 708 }, -- Shiny Polished Stone
@@ -2204,21 +2662,45 @@ VanillaItemPrices = {
     [4607] = { b = 1000, s = 50 }, -- Delicious Cave Mold
     [4608] = { b = 2000, s = 100 }, -- Raw Black Truffle
     [4609] = { b = 1000, s = 250 }, -- Recipe: Barbecued Buzzard Wing
+    [4610] = { b = 0, s = 0 }, -- Carved Stone Urn
     [4611] = { b = 200, s = 50 }, -- Blue Pearl
+    [4612] = { b = 0, s = 0 }, -- Black Drake's Heart
+    [4613] = { b = 0, s = 0 }, -- Corroded Black Box
+    [4614] = { b = 0, s = 0 }, -- Pendant of Myzrael
+    [4615] = { b = 0, s = 0 }, -- Blacklash's Bindings
     [4616] = { b = 17, s = 3 }, -- Ryedol's Lucky Pick
+    [4621] = { b = 0, s = 0 }, -- Ambassador Infernus' Bracer
+    [4622] = { b = 0, s = 0 }, -- Sealed Note to Advisor Belgrum
     [4623] = { b = 1500, s = 375 }, -- Lesser Stoneshield Potion
     [4624] = { b = 2200, s = 550 }, -- Recipe: Lesser Stoneshield Potion
     [4625] = { b = 1000, s = 250 }, -- Firebloom
+    [4626] = { b = 0, s = 0 }, -- Small Stone Shard
+    [4627] = { b = 0, s = 0 }, -- Large Stone Slab
+    [4628] = { b = 0, s = 0 }, -- Bracers of Rock Binding
+    [4629] = { b = 0, s = 0 }, -- Supply Crate
+    [4630] = { b = 0, s = 0 }, -- Scrap Metal
+    [4631] = { b = 0, s = 0 }, -- Tablet of Ryun'eh
     [4632] = { b = 200, s = 50 }, -- Ornate Bronze Lockbox
     [4633] = { b = 280, s = 70 }, -- Heavy Bronze Lockbox
     [4634] = { b = 350, s = 87 }, -- Iron Lockbox
+    [4635] = { b = 0, s = 0 }, -- Hammertoe's Amulet
     [4636] = { b = 440, s = 110 }, -- Strong Iron Lockbox
     [4637] = { b = 600, s = 150 }, -- Steel Lockbox
     [4638] = { b = 800, s = 200 }, -- Reinforced Steel Lockbox
     [4639] = { b = 650, s = 162 }, -- Enchanted Sea Kelp
+    [4640] = { b = 0, s = 0 }, -- Sign of the Earth
+    [4641] = { b = 0, s = 0 }, -- Hand of Dagun
     [4643] = { b = 13741, s = 2748 }, -- Grimsteel Cape
+    [4644] = { b = 0, s = 0 }, -- The Legacy Heart
+    [4645] = { b = 0, s = 0 }, -- Chains of Hematus
+    [4646] = { b = 0, s = 0 }, -- Star of Xil'yeh
+    [4647] = { b = 0, s = 0 }, -- Yagyin's Digest
+    [4648] = { b = 0, s = 0 }, -- Sigil of the Hammer
+    [4649] = { b = 0, s = 0 }, -- Bonegrip's Note
+    [4650] = { b = 0, s = 0 }, -- Bel'dugur's Note
     [4652] = { b = 50631, s = 10126 }, -- Salbac Shield
     [4653] = { b = 35890, s = 7178 }, -- Ironheel Boots
+    [4654] = { b = 0, s = 0 }, -- Mysterious Fossil
     [4655] = { b = 285, s = 71 }, -- Giant Clam Meat
     [4656] = { b = 25, s = 1 }, -- Small Pumpkin
     [4658] = { b = 118, s = 23 }, -- Warrior's Cloak
@@ -2256,6 +2738,8 @@ VanillaItemPrices = {
     [4699] = { b = 1105, s = 221 }, -- Seer's Belt
     [4700] = { b = 1899, s = 379 }, -- Inscribed Leather Spaulders
     [4701] = { b = 1263, s = 252 }, -- Inscribed Cloak
+    [4702] = { b = 0, s = 0 }, -- Prospector's Pick
+    [4703] = { b = 0, s = 0 }, -- Broken Tools
     [4705] = { b = 7248, s = 1449 }, -- Lambent Scale Pauldrons
     [4706] = { b = 3438, s = 687 }, -- Lambent Scale Cloak
     [4707] = { b = 4407, s = 881 }, -- Lambent Scale Girdle
@@ -2288,16 +2772,27 @@ VanillaItemPrices = {
     [4736] = { b = 13081, s = 2616 }, -- Mistscape Sash
     [4737] = { b = 28715, s = 5743 }, -- Imperial Leather Spaulders
     [4738] = { b = 16471, s = 3294 }, -- Imperial Leather Belt
+    [4739] = { b = 0, s = 0 }, -- Plainstrider Meat
+    [4740] = { b = 0, s = 0 }, -- Plainstrider Feather
     [4741] = { b = 27194, s = 5438 }, -- Stromgarde Cavalry Leggings
+    [4742] = { b = 0, s = 0 }, -- Mountain Cougar Pelt
     [4743] = { b = 21720, s = 5430 }, -- Pulsating Crystalline Shard
     [4744] = { b = 9933, s = 1986 }, -- Arcane Runed Bracers
     [4745] = { b = 16153, s = 3230 }, -- War Rider Bracers
     [4746] = { b = 21620, s = 4324 }, -- Doomsayer's Robe
+    [4751] = { b = 0, s = 0 }, -- Windfury Talon
+    [4752] = { b = 0, s = 0 }, -- Azure Feather
+    [4753] = { b = 0, s = 0 }, -- Bronze Feather
+    [4755] = { b = 0, s = 0 }, -- Water Pitcher
     [4757] = { b = 19, s = 4 }, -- Cracked Egg Shells
+    [4758] = { b = 0, s = 0 }, -- Prairie Wolf Paw
+    [4759] = { b = 0, s = 0 }, -- Plainstrider Talon
     [4765] = { b = 2877, s = 575 }, -- Enamelled Broadsword
     [4766] = { b = 2407, s = 481 }, -- Feral Blade
     [4767] = { b = 695, s = 139 }, -- Coppercloth Gloves
     [4768] = { b = 698, s = 139 }, -- Adept's Gloves
+    [4769] = { b = 0, s = 0 }, -- Trophy Swoop Quill
+    [4770] = { b = 0, s = 0 }, -- Bristleback Belt
     [4771] = { b = 1324, s = 264 }, -- Harvest Cloak
     [4772] = { b = 353, s = 70 }, -- Warm Cloak
     [4775] = { b = 115, s = 28 }, -- Cracked Bill
@@ -2308,6 +2803,7 @@ VanillaItemPrices = {
     [4780] = { b = 225, s = 56 }, -- Kodo Horn Fragment
     [4781] = { b = 2735, s = 547 }, -- Whispering Vest
     [4782] = { b = 2076, s = 415 }, -- Solstice Robe
+    [4783] = { b = 0, s = 0 }, -- Totem of Hawkwind
     [4784] = { b = 1440, s = 360 }, -- Lifeless Stone
     [4785] = { b = 2345, s = 469 }, -- Brimstone Belt
     [4786] = { b = 1393, s = 278 }, -- Wise Man's Belt
@@ -2325,15 +2821,26 @@ VanillaItemPrices = {
     [4798] = { b = 5832, s = 1166 }, -- Heavy Runed Cloak
     [4799] = { b = 3042, s = 608 }, -- Antiquated Cloak
     [4800] = { b = 6109, s = 1221 }, -- Mighty Chain Pants
+    [4801] = { b = 0, s = 0 }, -- Stalker Claws
+    [4802] = { b = 0, s = 0 }, -- Cougar Claws
+    [4803] = { b = 0, s = 0 }, -- Prairie Alpha Tooth
+    [4804] = { b = 0, s = 0 }, -- Prairie Wolf Heart
+    [4805] = { b = 0, s = 0 }, -- Flatland Cougar Femur
+    [4806] = { b = 0, s = 0 }, -- Plainstrider Scale
+    [4807] = { b = 0, s = 0 }, -- Swoop Gizzard
+    [4808] = { b = 0, s = 0 }, -- Well Stone
+    [4809] = { b = 0, s = 0 }, -- Ambercorn
     [4810] = { b = 16759, s = 3351 }, -- Boulder Pads
     [4813] = { b = 135, s = 33 }, -- Small Leather Collar
     [4814] = { b = 25, s = 6 }, -- Discolored Fang
     [4816] = { b = 7518, s = 1503 }, -- Legionnaire's Leggings
     [4817] = { b = 12311, s = 2462 }, -- Blessed Claymore
     [4818] = { b = 14273, s = 2854 }, -- Executioner's Sword
+    [4819] = { b = 0, s = 0 }, -- Fizsprocket's Clipboard
     [4820] = { b = 8320, s = 1664 }, -- Guardian Buckler
     [4821] = { b = 6541, s = 1308 }, -- Bear Buckler
     [4822] = { b = 6746, s = 1349 }, -- Owl's Disk
+    [4823] = { b = 0, s = 0 }, -- Water of the Seers
     [4824] = { b = 16856, s = 3371 }, -- Blurred Axe
     [4825] = { b = 20472, s = 4094 }, -- Callous Axe
     [4826] = { b = 15436, s = 3087 }, -- Marauder Axe
@@ -2344,16 +2851,36 @@ VanillaItemPrices = {
     [4831] = { b = 7858, s = 1571 }, -- Stalking Pants
     [4832] = { b = 10497, s = 2099 }, -- Mystic Sarong
     [4833] = { b = 8658, s = 1731 }, -- Glorious Shoulders
+    [4834] = { b = 0, s = 0 }, -- Venture Co. Documents
     [4835] = { b = 10550, s = 2110 }, -- Elite Shoulders
     [4836] = { b = 8002, s = 2000 }, -- Fireproof Orb
     [4837] = { b = 8002, s = 2000 }, -- Strength of Will
     [4838] = { b = 8002, s = 2000 }, -- Orb of Power
     [4840] = { b = 713, s = 142 }, -- Long Bayonet
+    [4841] = { b = 0, s = 0 }, -- Horn of Arra'chea
+    [4843] = { b = 0, s = 0 }, -- Amethyst Runestone
+    [4844] = { b = 0, s = 0 }, -- Opal Runestone
+    [4845] = { b = 0, s = 0 }, -- Diamond Runestone
+    [4846] = { b = 0, s = 0 }, -- Cog #5
+    [4847] = { b = 0, s = 0 }, -- Lotwil's Shackles of Elemental Binding
+    [4848] = { b = 0, s = 0 }, -- Battleboar Snout
+    [4849] = { b = 0, s = 0 }, -- Battleboar Flank
+    [4850] = { b = 0, s = 0 }, -- Bristleback Attack Plans
+    [4851] = { b = 0, s = 0 }, -- Dirt-stained Map
     [4852] = { b = 1200, s = 300 }, -- Flash Bomb
+    [4854] = { b = 0, s = 0 }, -- Demon Scarred Cloak
+    [4859] = { b = 0, s = 0 }, -- Burning Blade Medallion
     [4860] = { b = 2965, s = 741 }, -- Glistening Frenzy Scale
     [4861] = { b = 596, s = 119 }, -- Sleek Feathered Tunic
+    [4862] = { b = 0, s = 0 }, -- Scorpid Worker Tail
+    [4863] = { b = 0, s = 0 }, -- Gnomish Tools
+    [4864] = { b = 0, s = 0 }, -- Minshina's Skull
     [4865] = { b = 20, s = 5 }, -- Ruined Pelt
+    [4866] = { b = 0, s = 0 }, -- Zalazane's Head
     [4867] = { b = 35, s = 8 }, -- Broken Scorpid Leg
+    [4869] = { b = 0, s = 0 }, -- Fizzle's Claw
+    [4870] = { b = 0, s = 0 }, -- Canvas Scraps
+    [4871] = { b = 0, s = 0 }, -- Searing Collar
     [4872] = { b = 380, s = 95 }, -- Dry Scorpid Eye
     [4873] = { b = 60, s = 15 }, -- Dry Hardened Barnacle
     [4874] = { b = 185, s = 46 }, -- Clean Fishbones
@@ -2363,6 +2890,24 @@ VanillaItemPrices = {
     [4878] = { b = 225, s = 56 }, -- Broken Bloodstained Bow
     [4879] = { b = 30, s = 7 }, -- Squashed Rabbit Carcass
     [4880] = { b = 345, s = 86 }, -- Broken Spear
+    [4881] = { b = 0, s = 0 }, -- Aged Envelope
+    [4882] = { b = 0, s = 0 }, -- Benedict's Key
+    [4883] = { b = 0, s = 0 }, -- Admiral Proudmoore's Orders
+    [4886] = { b = 0, s = 0 }, -- Venomtail Poison Sac
+    [4887] = { b = 0, s = 0 }, -- Intact Makrura Eye
+    [4888] = { b = 0, s = 0 }, -- Crawler Mucus
+    [4890] = { b = 0, s = 0 }, -- Taillasher Egg
+    [4891] = { b = 0, s = 0 }, -- Kron's Amulet
+    [4892] = { b = 0, s = 0 }, -- Durotar Tiger Fur
+    [4893] = { b = 0, s = 0 }, -- Savannah Lion Tusk
+    [4894] = { b = 0, s = 0 }, -- Plainstrider Kidney
+    [4895] = { b = 0, s = 0 }, -- Thunder Lizard Horn
+    [4896] = { b = 0, s = 0 }, -- Kodo Liver
+    [4897] = { b = 0, s = 0 }, -- Thunderhawk Saliva Gland
+    [4898] = { b = 0, s = 0 }, -- Lightning Gland
+    [4903] = { b = 0, s = 0 }, -- Eye of Burning Shadow
+    [4904] = { b = 0, s = 0 }, -- Venomtail Antidote
+    [4905] = { b = 0, s = 0 }, -- Sarkoth's Mangled Claw
     [4906] = { b = 109, s = 21 }, -- Rainwalker Boots
     [4907] = { b = 65, s = 13 }, -- Woodland Tunic
     [4908] = { b = 32, s = 6 }, -- Nomadic Bracers
@@ -2374,6 +2919,7 @@ VanillaItemPrices = {
     [4915] = { b = 35, s = 7 }, -- Soft Wool Boots
     [4916] = { b = 48, s = 9 }, -- Soft Wool Vest
     [4917] = { b = 72, s = 14 }, -- Battleworn Chain Leggings
+    [4918] = { b = 0, s = 0 }, -- Sack of Supplies
     [4919] = { b = 25, s = 5 }, -- Soft Wool Belt
     [4920] = { b = 37, s = 7 }, -- Battleworn Cape
     [4921] = { b = 63, s = 12 }, -- Dust-covered Leggings
@@ -2381,6 +2927,7 @@ VanillaItemPrices = {
     [4923] = { b = 128, s = 25 }, -- Primitive Hatchet
     [4924] = { b = 129, s = 25 }, -- Primitive Club
     [4925] = { b = 129, s = 25 }, -- Primitive Hand Blade
+    [4926] = { b = 0, s = 0 }, -- Chen's Empty Keg
     [4928] = { b = 102, s = 20 }, -- Sandrunner Wristguards
     [4929] = { b = 291, s = 58 }, -- Light Scorpid Armor
     [4931] = { b = 671, s = 134 }, -- Hickory Shortbow
@@ -2428,36 +2975,92 @@ VanillaItemPrices = {
     [4982] = { b = 4807, s = 961 }, -- Ripped Prospector Belt
     [4983] = { b = 84185, s = 16837 }, -- Rock Pulverizer
     [4984] = { b = 22520, s = 5630 }, -- Skull of Impending Doom
+    [4986] = { b = 0, s = 0 }, -- Flawed Power Stone
     [4987] = { b = 77920, s = 15584 }, -- Dwarf Captain's Sword
+    [4992] = { b = 0, s = 0 }, -- Recruitment Letter
+    [4995] = { b = 0, s = 0 }, -- Signed Recruitment Letter
     [4998] = { b = 3350, s = 837 }, -- Blood Ring
     [4999] = { b = 4210, s = 1052 }, -- Azora's Will
     [5001] = { b = 4155, s = 1038 }, -- Heart Ring
     [5002] = { b = 6140, s = 1535 }, -- Glowing Green Talisman
     [5003] = { b = 6855, s = 1713 }, -- Crystal Starfire Medallion
     [5005] = { b = 7360, s = 1840 }, -- Emberspark Pendant
+    [5006] = { b = 0, s = 0 }, -- Khazgorm's Journal
     [5007] = { b = 6530, s = 1632 }, -- Band of Thorns
     [5009] = { b = 6785, s = 1696 }, -- Mindbender Loop
     [5011] = { b = 7650, s = 1912 }, -- Welken Ring
+    [5012] = { b = 0, s = 0 }, -- Fungal Spores
     [5016] = { b = 14775, s = 2955 }, -- Artisan's Trousers
+    [5017] = { b = 0, s = 0 }, -- Nitroglycerin
+    [5018] = { b = 0, s = 0 }, -- Wood Pulp
+    [5019] = { b = 0, s = 0 }, -- Sodium Nitrate
     [5020] = { b = 15, s = 3 }, -- Kolkar Booty Key
+    [5021] = { b = 0, s = 0 }, -- Explosive Stick of Gann
+    [5022] = { b = 0, s = 0 }, -- Barak's Head
+    [5023] = { b = 0, s = 0 }, -- Verog's Head
+    [5025] = { b = 0, s = 0 }, -- Hezrul's Head
+    [5026] = { b = 0, s = 0 }, -- Fire Tar
+    [5027] = { b = 0, s = 0 }, -- Rendered Spores
     [5028] = { b = 22150, s = 5537 }, -- Lord Sakrasis' Scepter
     [5029] = { b = 21130, s = 5282 }, -- Talisman of the Naga Lord
+    [5030] = { b = 0, s = 0 }, -- Centaur Bracers
+    [5038] = { b = 0, s = 0 }, -- Tear of the Moons
+    [5040] = { b = 0, s = 0 }, -- Shadow Hunter Knife
     [5042] = { b = 50, s = 12 }, -- Red Ribboned Wrapping Paper
+    [5043] = { b = 0, s = 0 }, -- Red Ribboned Gift
+    [5044] = { b = 0, s = 0 }, -- Blue Ribboned Gift
     [5048] = { b = 50, s = 12 }, -- Blue Ribboned Wrapping Paper
+    [5050] = { b = 0, s = 0 }, -- Ignition Key
     [5051] = { b = 1, s = 1 }, -- Dig Rat
+    [5052] = { b = 0, s = 0 }, -- Unconscious Dig Rat
+    [5054] = { b = 0, s = 0 }, -- Samophlange
+    [5055] = { b = 0, s = 0 }, -- Intact Raptor Horn
+    [5056] = { b = 0, s = 0 }, -- Root Sample
     [5057] = { b = 25, s = 1 }, -- Ripe Watermelon
+    [5058] = { b = 0, s = 0 }, -- Silithid Egg
+    [5059] = { b = 0, s = 0 }, -- Digging Claw
+    [5060] = { b = 1500, s = 0 }, -- Thieves' Tools
+    [5061] = { b = 0, s = 0 }, -- Stolen Silver
+    [5062] = { b = 0, s = 0 }, -- Raptor Head
+    [5063] = { b = 0, s = 0 }, -- Kreenig Snarlsnout's Tusk
+    [5064] = { b = 0, s = 0 }, -- Witchwing Talon
+    [5065] = { b = 0, s = 0 }, -- Harpy Lieutenant Ring
     [5066] = { b = 85, s = 21 }, -- Fissure Plant
+    [5067] = { b = 0, s = 0 }, -- Serena's Head
+    [5068] = { b = 0, s = 0 }, -- Dried Seeds
     [5069] = { b = 1466, s = 293 }, -- Fire Wand
     [5071] = { b = 2216, s = 443 }, -- Shadow Wand
+    [5072] = { b = 0, s = 0 }, -- Lok's Skull
+    [5073] = { b = 0, s = 0 }, -- Nak's Skull
+    [5074] = { b = 0, s = 0 }, -- Kuz's Skull
     [5075] = { b = 100, s = 25 }, -- Blood Shard
+    [5076] = { b = 0, s = 0 }, -- Shipment of Boots
+    [5077] = { b = 0, s = 0 }, -- Telescopic Lens
+    [5078] = { b = 0, s = 0 }, -- Theramore Medal
     [5079] = { b = 18570, s = 4642 }, -- Cold Basilisk Eye
+    [5080] = { b = 0, s = 0 }, -- Gazlowe's Ledger
     [5081] = { b = 1000, s = 250 }, -- Kodo Hide Bag
     [5082] = { b = 100, s = 25 }, -- Thin Kodo Leather
     [5083] = { b = 200, s = 50 }, -- Pattern: Kodo Hide Bag
+    [5084] = { b = 0, s = 0 }, -- Baron Longshore's Head
+    [5085] = { b = 0, s = 0 }, -- Bristleback Quilboar Tusk
+    [5086] = { b = 0, s = 0 }, -- Zhevra Hooves
+    [5087] = { b = 0, s = 0 }, -- Plainstrider Beak
+    [5088] = { b = 0, s = 0 }, -- Control Console Operating Manual
+    [5089] = { b = 0, s = 0 }, -- Console Key
     [5092] = { b = 1203, s = 240 }, -- Charred Razormane Wand
     [5093] = { b = 1238, s = 247 }, -- Razormane Backstabber
     [5094] = { b = 1168, s = 233 }, -- Razormane War Shield
     [5095] = { b = 125, s = 3 }, -- Rainbow Fin Albacore
+    [5096] = { b = 0, s = 0 }, -- Prowler Claws
+    [5097] = { b = 0, s = 0 }, -- Cats Eye Emerald
+    [5098] = { b = 0, s = 0 }, -- Altered Snapjaw Shell
+    [5099] = { b = 0, s = 0 }, -- Hoof of Lakota'mani
+    [5100] = { b = 0, s = 0 }, -- Echeyakee's Hide
+    [5101] = { b = 0, s = 0 }, -- Ishamuhale's Fang
+    [5102] = { b = 0, s = 0 }, -- Owatanka's Tailspike
+    [5103] = { b = 0, s = 0 }, -- Washte Pawne's Feather
+    [5104] = { b = 0, s = 0 }, -- Heart of Isha Awak
     [5105] = { b = 100, s = 5 }, -- Explosive Shell
     [5107] = { b = 698, s = 139 }, -- Deckhand's Shirt
     [5109] = { b = 1116, s = 223 }, -- Stonesplinter Rags
@@ -2483,13 +3086,33 @@ VanillaItemPrices = {
     [5135] = { b = 570, s = 142 }, -- Thin Black Claw
     [5136] = { b = 710, s = 177 }, -- Torn Furry Ear
     [5137] = { b = 870, s = 217 }, -- Bright Eyeball
+    [5138] = { b = 0, s = 0 }, -- Harvester's Head
     [5140] = { b = 25, s = 6 }, -- Flash Powder
+    [5143] = { b = 0, s = 0 }, -- Thunder Lizard Blood
+    [5164] = { b = 0, s = 0 }, -- Thunderhawk Wings
+    [5165] = { b = 0, s = 0 }, -- Sunscale Feather
+    [5166] = { b = 0, s = 0 }, -- Webwood Venom Sac
+    [5167] = { b = 0, s = 0 }, -- Webwood Egg
+    [5168] = { b = 0, s = 0 }, -- Timberling Seed
+    [5169] = { b = 0, s = 0 }, -- Timberling Sprout
+    [5170] = { b = 0, s = 0 }, -- Mossy Tumor
     [5173] = { b = 100, s = 25 }, -- Deathweed
+    [5175] = { b = 0, s = 0 }, -- Earth Totem
+    [5176] = { b = 0, s = 0 }, -- Fire Totem
+    [5177] = { b = 0, s = 0 }, -- Water Totem
+    [5178] = { b = 0, s = 0 }, -- Air Totem
+    [5179] = { b = 0, s = 0 }, -- Moss-twined Heart
     [5180] = { b = 11110, s = 2777 }, -- Necklace of Harmony
     [5181] = { b = 8890, s = 1778 }, -- Vibrant Silk Cape
     [5182] = { b = 8849, s = 1769 }, -- Shiver Blade
     [5183] = { b = 6300, s = 1575 }, -- Pulsating Hydra Heart
+    [5184] = { b = 0, s = 0 }, -- Filled Crystal Phial
+    [5185] = { b = 0, s = 0 }, -- Crystal Phial
+    [5186] = { b = 0, s = 0 }, -- Partially Filled Vessel
     [5187] = { b = 5407, s = 1081 }, -- Rhahk'Zor's Hammer
+    [5188] = { b = 0, s = 0 }, -- Filled Vessel
+    [5189] = { b = 0, s = 0 }, -- Glowing Fruit
+    [5190] = { b = 0, s = 0 }, -- Shimmering Frond
     [5191] = { b = 14822, s = 2964 }, -- Cruel Barb
     [5192] = { b = 9015, s = 1803 }, -- Thief's Blade
     [5193] = { b = 4700, s = 940 }, -- Cape of the Brotherhood
@@ -2502,6 +3125,8 @@ VanillaItemPrices = {
     [5200] = { b = 11615, s = 2323 }, -- Impaling Harpoon
     [5201] = { b = 15809, s = 3161 }, -- Emberstone Staff
     [5202] = { b = 5737, s = 1147 }, -- Corsair's Overshirt
+    [5203] = { b = 0, s = 0 }, -- Flatland Prowler Claw
+    [5204] = { b = 0, s = 0 }, -- Bloodfeather Belt
     [5205] = { b = 125, s = 31 }, -- Sprouted Frond
     [5206] = { b = 150, s = 37 }, -- Bogling Root
     [5207] = { b = 5406, s = 1081 }, -- Opaque Wand
@@ -2514,7 +3139,15 @@ VanillaItemPrices = {
     [5214] = { b = 19678, s = 3935 }, -- Wand of Eventide
     [5215] = { b = 43281, s = 8656 }, -- Ember Wand
     [5216] = { b = 59109, s = 11821 }, -- Umbral Wand
+    [5217] = { b = 0, s = 0 }, -- Tainted Heart
+    [5218] = { b = 0, s = 0 }, -- Cleansed Timberling Heart
+    [5219] = { b = 0, s = 0 }, -- Inscribed Bark
+    [5220] = { b = 0, s = 0 }, -- Gnarlpine Fang
+    [5221] = { b = 0, s = 0 }, -- Melenas' Head
     [5229] = { b = 143, s = 28 }, -- Handstitched Leather Bracers
+    [5232] = { b = 0, s = 0 }, -- Minor Soulstone
+    [5233] = { b = 0, s = 0 }, -- Stone of Relu
+    [5234] = { b = 0, s = 0 }, -- Flagongut's Fossil
     [5236] = { b = 14394, s = 2878 }, -- Combustible Wand
     [5237] = { b = 72, s = 18 }, -- Mind-numbing Poison
     [5238] = { b = 35727, s = 7145 }, -- Pitchwood Wand
@@ -2530,6 +3163,7 @@ VanillaItemPrices = {
     [5248] = { b = 34245, s = 6849 }, -- Flash Wand
     [5249] = { b = 43292, s = 8658 }, -- Burning Sliver
     [5250] = { b = 13233, s = 2646 }, -- Charred Wand
+    [5251] = { b = 0, s = 0 }, -- Phial of Scrying
     [5252] = { b = 5877, s = 1175 }, -- Wand of Decay
     [5253] = { b = 39761, s = 7952 }, -- Goblin Igniter
     [5254] = { b = 1544, s = 308 }, -- Rugged Spaulders
@@ -2540,6 +3174,10 @@ VanillaItemPrices = {
     [5267] = { b = 299255, s = 59851 }, -- Scarlet Kris
     [5268] = { b = 875, s = 218 }, -- Cracked Silithid Shell
     [5269] = { b = 380, s = 95 }, -- Silithid Ichor
+    [5270] = { b = 0, s = 0 }, -- Death Cap
+    [5271] = { b = 0, s = 0 }, -- Scaber Stalk
+    [5272] = { b = 0, s = 0 }, -- Insane Scribbles
+    [5273] = { b = 0, s = 0 }, -- Mathystra Relic
     [5274] = { b = 5018, s = 1003 }, -- Rose Mantle
     [5275] = { b = 879, s = 175 }, -- Binding Girdle
     [5279] = { b = 7184, s = 1436 }, -- Harpy Skinner
@@ -2568,7 +3206,12 @@ VanillaItemPrices = {
     [5328] = { b = 1028, s = 205 }, -- Cinched Belt
     [5329] = { b = 60, s = 15 }, -- Cat Figurine
     [5332] = { b = 60, s = 15 }, -- Glowing Cat Figurine
+    [5334] = { b = 0, s = 0 }, -- 99-Year-Old Port
+    [5335] = { b = 0, s = 0 }, -- A Sack of Coins
+    [5336] = { b = 0, s = 0 }, -- Grell Earring
     [5337] = { b = 836, s = 167 }, -- Wayfaring Gloves
+    [5338] = { b = 0, s = 0 }, -- Ancient Moonstone Seal
+    [5339] = { b = 0, s = 0 }, -- Serpentbloom
     [5340] = { b = 4596, s = 919 }, -- Cauldron Stirrer
     [5341] = { b = 1844, s = 368 }, -- Spore-covered Tunic
     [5342] = { b = 355, s = 88 }, -- Raptor Punch
@@ -2577,14 +3220,22 @@ VanillaItemPrices = {
     [5345] = { b = 3529, s = 705 }, -- Stonewood Hammer
     [5346] = { b = 2125, s = 425 }, -- Orcish Battle Bow
     [5347] = { b = 15713, s = 3142 }, -- Pestilent Wand
+    [5348] = { b = 0, s = 0 }, -- Worn Parchment
+    [5349] = { b = 0, s = 0 }, -- Conjured Muffin
+    [5350] = { b = 0, s = 0 }, -- Conjured Water
     [5351] = { b = 1615, s = 403 }, -- Bounty Hunter's Ring
+    [5352] = { b = 0, s = 0 }, -- Book: The Powers Below
+    [5354] = { b = 0, s = 0 }, -- Letter to Delgren
     [5355] = { b = 4738, s = 947 }, -- Beastmaster's Girdle
     [5356] = { b = 12971, s = 2594 }, -- Branding Rod
     [5357] = { b = 11107, s = 2221 }, -- Ward of the Vale
+    [5359] = { b = 0, s = 0 }, -- Lorgalis Manuscript
+    [5360] = { b = 0, s = 0 }, -- Highborne Relic
     [5361] = { b = 65, s = 16 }, -- Fishbone Toothpick
     [5362] = { b = 75, s = 18 }, -- Chew Toy
     [5363] = { b = 80, s = 20 }, -- Folded Handkerchief
     [5364] = { b = 110, s = 27 }, -- Dry Salt Lick
+    [5366] = { b = 0, s = 0 }, -- Glowing Soul Gem
     [5367] = { b = 90, s = 22 }, -- Primitive Rock Tool
     [5368] = { b = 195, s = 48 }, -- Empty Wallet
     [5369] = { b = 130, s = 32 }, -- Gnawed Bone
@@ -2595,19 +3246,40 @@ VanillaItemPrices = {
     [5375] = { b = 380, s = 95 }, -- Scratching Stick
     [5376] = { b = 265, s = 66 }, -- Broken Mirror
     [5377] = { b = 230, s = 57 }, -- Scallop Shell
+    [5379] = { b = 0, s = 0 }, -- Boot Knife
+    [5382] = { b = 0, s = 0 }, -- Anaya's Pendant
+    [5383] = { b = 0, s = 0 }, -- Athrikus Narassin's Head
+    [5385] = { b = 0, s = 0 }, -- Crawler Leg
+    [5386] = { b = 0, s = 0 }, -- Fine Moonstalker Pelt
+    [5387] = { b = 0, s = 0 }, -- Enchanted Moonstalker Cloak
+    [5388] = { b = 0, s = 0 }, -- Ran Bloodtooth's Skull
+    [5389] = { b = 0, s = 0 }, -- Corrupted Furbolg Totem
+    [5390] = { b = 0, s = 0 }, -- Fandral's Message
+    [5391] = { b = 0, s = 0 }, -- Rare Earth
     [5392] = { b = 127, s = 25 }, -- Thistlewood Dagger
     [5393] = { b = 160, s = 32 }, -- Thistlewood Staff
     [5394] = { b = 31, s = 6 }, -- Archery Training Gloves
     [5395] = { b = 82, s = 16 }, -- Woodland Shield
+    [5396] = { b = 0, s = 0 }, -- Key to Searing Gorge
+    [5397] = { b = 0, s = 0 }, -- Defias Gunpowder
     [5398] = { b = 65, s = 13 }, -- Canopy Leggings
     [5399] = { b = 59, s = 11 }, -- Tracking Boots
     [5404] = { b = 2345, s = 469 }, -- Serpent's Shoulders
     [5405] = { b = 36, s = 7 }, -- Draped Cloak
+    [5411] = { b = 0, s = 0 }, -- Winterhoof Cleansing Totem
+    [5412] = { b = 0, s = 0 }, -- Thresher Eye
+    [5413] = { b = 0, s = 0 }, -- Moonstalker Fang
+    [5414] = { b = 0, s = 0 }, -- Grizzled Scalp
+    [5415] = { b = 0, s = 0 }, -- Thunderhorn Cleansing Totem
+    [5416] = { b = 0, s = 0 }, -- Wildmane Cleansing Totem
+    [5417] = { b = 0, s = 0 }, -- Weapon of Massive Destruction (test)
+    [5418] = { b = 0, s = 0 }, -- Weapon of Mass Destruction (test)
     [5419] = { b = 68, s = 13 }, -- Feral Bracers
     [5420] = { b = 1138, s = 227 }, -- Banshee Armor
     [5421] = { b = 2600, s = 650 }, -- Fiery Blaze Enchantment
     [5422] = { b = 3460, s = 692 }, -- Brambleweed Leggings
     [5423] = { b = 10421, s = 2084 }, -- Boahn's Fang
+    [5424] = { b = 0, s = 0 }, -- Ancient Statuette
     [5425] = { b = 2099, s = 419 }, -- Runescale Girdle
     [5426] = { b = 8431, s = 1686 }, -- Serpent's Kiss
     [5427] = { b = 590, s = 147 }, -- Crude Pocket Watch
@@ -2618,17 +3290,28 @@ VanillaItemPrices = {
     [5432] = { b = 1320, s = 330 }, -- Hickory Pipe
     [5433] = { b = 555, s = 138 }, -- Rag Doll
     [5435] = { b = 1090, s = 272 }, -- Shiny Dinglehopper
+    [5437] = { b = 0, s = 0 }, -- Bathran's Hair
     [5439] = { b = 100, s = 25 }, -- Small Quiver
+    [5440] = { b = 0, s = 0 }, -- Bottle of Disease
     [5441] = { b = 1000, s = 250 }, -- Small Shot Pouch
+    [5442] = { b = 0, s = 0 }, -- Head of Arugal
     [5443] = { b = 5335, s = 1067 }, -- Gold-plated Buckler
     [5444] = { b = 2740, s = 548 }, -- Miner's Cape
+    [5445] = { b = 0, s = 0 }, -- Ring of Zoram
     [5446] = { b = 55, s = 13 }, -- Broken Elemental Bracer
     [5447] = { b = 80, s = 20 }, -- Damaged Elemental Bracer
     [5448] = { b = 70, s = 17 }, -- Fractured Elemental Bracer
     [5451] = { b = 90, s = 22 }, -- Crushed Elemental Bracer
+    [5455] = { b = 0, s = 0 }, -- Divined Scroll
+    [5456] = { b = 0, s = 0 }, -- Divining Scroll
     [5457] = { b = 95, s = 23 }, -- Severed Voodoo Claw
     [5458] = { b = 138, s = 27 }, -- Dirtwood Belt
     [5459] = { b = 2361, s = 472 }, -- Defender Axe
+    [5460] = { b = 0, s = 0 }, -- Orendil's Cure
+    [5461] = { b = 0, s = 0 }, -- Branch of Cenarius
+    [5462] = { b = 0, s = 0 }, -- Dartol's Rod of Transformation
+    [5463] = { b = 0, s = 0 }, -- Glowing Gem
+    [5464] = { b = 0, s = 0 }, -- Iron Shaft
     [5465] = { b = 12, s = 3 }, -- Small Spider Leg
     [5466] = { b = 32, s = 8 }, -- Scorpid Stinger
     [5467] = { b = 30, s = 7 }, -- Kodo Meat
@@ -2639,11 +3322,13 @@ VanillaItemPrices = {
     [5472] = { b = 40, s = 10 }, -- Kaldorei Spider Kabob
     [5473] = { b = 40, s = 10 }, -- Scorpid Surprise
     [5474] = { b = 36, s = 9 }, -- Roasted Kodo Meat
+    [5475] = { b = 0, s = 0 }, -- Wooden Key
     [5476] = { b = 12, s = 3 }, -- Fillet of Frenzy
     [5477] = { b = 74, s = 18 }, -- Strider Stew
     [5478] = { b = 280, s = 70 }, -- Dig Rat Stew
     [5479] = { b = 500, s = 125 }, -- Crispy Lizard Tail
     [5480] = { b = 380, s = 95 }, -- Lean Venison
+    [5481] = { b = 0, s = 0 }, -- Satyr Horns
     [5482] = { b = 40, s = 10 }, -- Recipe: Kaldorei Spider Kabob
     [5483] = { b = 140, s = 35 }, -- Recipe: Scorpid Surprise
     [5484] = { b = 240, s = 60 }, -- Recipe: Roasted Kodo Meat
@@ -2652,15 +3337,30 @@ VanillaItemPrices = {
     [5487] = { b = 800, s = 200 }, -- Recipe: Dig Rat Stew
     [5488] = { b = 400, s = 100 }, -- Recipe: Crispy Lizard Tail
     [5489] = { b = 1200, s = 300 }, -- Recipe: Lean Venison
+    [5490] = { b = 0, s = 0 }, -- Wrathtail Head
+    [5493] = { b = 0, s = 0 }, -- Elune's Tear
+    [5494] = { b = 0, s = 0 }, -- Handful of Stardust
     [5498] = { b = 800, s = 200 }, -- Small Lustrous Pearl
     [5500] = { b = 3000, s = 750 }, -- Iridescent Pearl
     [5503] = { b = 65, s = 16 }, -- Clam Meat
     [5504] = { b = 90, s = 22 }, -- Tangy Clam Meat
+    [5505] = { b = 0, s = 0 }, -- Teronis' Journal
     [5506] = { b = 285, s = 71 }, -- Beady Eye Stalk
     [5507] = { b = 2400, s = 600 }, -- Ornate Spyglass
+    [5508] = { b = 0, s = 0 }, -- Fallen Moonstone
+    [5509] = { b = 0, s = 0 }, -- Healthstone
+    [5510] = { b = 0, s = 0 }, -- Greater Healthstone
+    [5511] = { b = 0, s = 0 }, -- Lesser Healthstone
+    [5512] = { b = 0, s = 0 }, -- Minor Healthstone
+    [5513] = { b = 0, s = 0 }, -- Mana Jade
+    [5514] = { b = 0, s = 0 }, -- Mana Agate
     [5516] = { b = 1589, s = 317 }, -- Threshadon Fang
     [5517] = { b = 200, s = 50 }, -- Tiny Bronze Key
     [5518] = { b = 600, s = 150 }, -- Tiny Iron Key
+    [5519] = { b = 0, s = 0 }, -- Iron Pommel
+    [5520] = { b = 0, s = 0 }, -- Velinde's Journal
+    [5521] = { b = 0, s = 0 }, -- Velinde's Key
+    [5522] = { b = 0, s = 0 }, -- Spellstone
     [5523] = { b = 60, s = 15 }, -- Small Barnacled Clam
     [5524] = { b = 85, s = 21 }, -- Thick-shelled Clam
     [5525] = { b = 80, s = 20 }, -- Boiled Clams
@@ -2669,15 +3369,25 @@ VanillaItemPrices = {
     [5528] = { b = 800, s = 200 }, -- Recipe: Clam Chowder
     [5529] = { b = 500, s = 125 }, -- Tomb Dust
     [5530] = { b = 500, s = 125 }, -- Blinding Powder
+    [5533] = { b = 0, s = 0 }, -- Ilkrud Magthrull's Tome
+    [5534] = { b = 0, s = 0 }, -- Parker's Lunch
+    [5535] = { b = 0, s = 0 }, -- Compendium of the Fallen
+    [5536] = { b = 0, s = 0 }, -- Mythology of the Titans
+    [5537] = { b = 0, s = 0 }, -- Sarilus Foulborne's Head
+    [5538] = { b = 0, s = 0 }, -- Vorrel's Wedding Ring
+    [5539] = { b = 0, s = 0 }, -- Letter of Commendation
     [5540] = { b = 10539, s = 2107 }, -- Pearl-handled Dagger
     [5541] = { b = 18469, s = 3693 }, -- Iridescent Hammer
     [5542] = { b = 1852, s = 370 }, -- Pearl-clasped Cloak
     [5543] = { b = 1800, s = 450 }, -- Plans: Iridescent Hammer
+    [5544] = { b = 0, s = 0 }, -- Dal Bloodclaw's Skull
+    [5547] = { b = 0, s = 0 }, -- Reconstructed Rod
     [5565] = { b = 5000, s = 1250 }, -- Infernal Stone
     [5566] = { b = 420, s = 105 }, -- Broken Antler
     [5567] = { b = 785, s = 196 }, -- Silver Hook
     [5568] = { b = 16, s = 4 }, -- Smooth Pebble
     [5569] = { b = 815, s = 203 }, -- Seaweed
+    [5570] = { b = 0, s = 0 }, -- Deepmoss Egg
     [5571] = { b = 1000, s = 250 }, -- Small Black Pouch
     [5572] = { b = 1000, s = 250 }, -- Small Green Pouch
     [5573] = { b = 3500, s = 875 }, -- Green Leather Bag
@@ -2688,13 +3398,19 @@ VanillaItemPrices = {
     [5579] = { b = 160, s = 32 }, -- Militia Warhammer
     [5580] = { b = 128, s = 25 }, -- Militia Hammer
     [5581] = { b = 161, s = 32 }, -- Smooth Walking Staff
+    [5582] = { b = 0, s = 0 }, -- Stonetalon Sap
+    [5583] = { b = 0, s = 0 }, -- Fey Dragon Scale
+    [5584] = { b = 0, s = 0 }, -- Twilight Whisker
+    [5585] = { b = 0, s = 0 }, -- Courser Eye
     [5586] = { b = 130, s = 26 }, -- Thistlewood Blade
     [5587] = { b = 2562, s = 512 }, -- Thornroot Club
+    [5588] = { b = 0, s = 0 }, -- Lydon's Toxin
     [5589] = { b = 206, s = 41 }, -- Moss-covered Gauntlets
     [5590] = { b = 179, s = 35 }, -- Cord Bracers
     [5591] = { b = 338, s = 67 }, -- Rain-spotted Cape
     [5592] = { b = 271, s = 54 }, -- Shackled Girdle
     [5593] = { b = 582, s = 116 }, -- Crag Buckler
+    [5594] = { b = 0, s = 0 }, -- Letter to Jin'Zil
     [5595] = { b = 1177, s = 235 }, -- Thicket Hammer
     [5596] = { b = 708, s = 141 }, -- Ashwood Bow
     [5601] = { b = 90, s = 22 }, -- Hatched Egg Sac
@@ -2713,10 +3429,15 @@ VanillaItemPrices = {
     [5616] = { b = 113690, s = 22738 }, -- Gutwrencher
     [5617] = { b = 1235, s = 247 }, -- Vagabond Leggings
     [5618] = { b = 430, s = 86 }, -- Scout's Cloak
+    [5619] = { b = 0, s = 0 }, -- Jade Phial
+    [5620] = { b = 0, s = 0 }, -- Vial of Innocent Blood
+    [5621] = { b = 0, s = 0 }, -- Tourmaline Phial
     [5622] = { b = 2225, s = 556 }, -- Clergy Ring
+    [5623] = { b = 0, s = 0 }, -- Amethyst Phial
     [5624] = { b = 14634, s = 2926 }, -- Circlet of the Order
     [5626] = { b = 8587, s = 1717 }, -- Skullchipper
     [5627] = { b = 6896, s = 1379 }, -- Relic Blade
+    [5628] = { b = 0, s = 0 }, -- Zamah's Note
     [5629] = { b = 1736, s = 347 }, -- Hammerfist Gloves
     [5630] = { b = 1743, s = 348 }, -- Windfelt Gloves
     [5631] = { b = 120, s = 30 }, -- Rage Potion
@@ -2725,9 +3446,41 @@ VanillaItemPrices = {
     [5635] = { b = 180, s = 45 }, -- Sharp Claw
     [5636] = { b = 300, s = 75 }, -- Delicate Feather
     [5637] = { b = 300, s = 75 }, -- Large Fang
+    [5638] = { b = 0, s = 0 }, -- Toxic Fogger
+    [5639] = { b = 0, s = 0 }, -- Filled Jade Phial
     [5640] = { b = 100, s = 25 }, -- Recipe: Rage Potion
     [5642] = { b = 1800, s = 450 }, -- Recipe: Free Action Potion
     [5643] = { b = 2000, s = 500 }, -- Recipe: Great Rage Potion
+    [5645] = { b = 0, s = 0 }, -- Filled Tourmaline Phial
+    [5646] = { b = 0, s = 0 }, -- Vial of Blessed Water
+    [5655] = { b = 100000, s = 0 }, -- Chestnut Mare Bridle
+    [5656] = { b = 100000, s = 0 }, -- Brown Horse Bridle
+    [5659] = { b = 0, s = 0 }, -- Smoldering Embers
+    [5664] = { b = 0, s = 0 }, -- Corroded Shrapnel
+    [5665] = { b = 100000, s = 0 }, -- Horn of the Dire Wolf
+    [5668] = { b = 100000, s = 0 }, -- Horn of the Brown Wolf
+    [5669] = { b = 0, s = 0 }, -- Dust Devil Debris
+    [5675] = { b = 0, s = 0 }, -- Crystalized Scales
+    [5681] = { b = 0, s = 0 }, -- Corrosive Sap
+    [5686] = { b = 0, s = 0 }, -- Ordanus' Head
+    [5687] = { b = 0, s = 0 }, -- Gatekeeper's Key
+    [5689] = { b = 0, s = 0 }, -- Sleepers' Key
+    [5690] = { b = 0, s = 0 }, -- Claw Key
+    [5691] = { b = 0, s = 0 }, -- Barrow Key
+    [5692] = { b = 0, s = 0 }, -- Remote Detonator (Red)
+    [5693] = { b = 0, s = 0 }, -- Remote Detonator (Blue)
+    [5694] = { b = 0, s = 0 }, -- NG-5 Explosives (Red)
+    [5695] = { b = 0, s = 0 }, -- NG-5 Explosives (Blue)
+    [5717] = { b = 0, s = 0 }, -- Venture Co. Letters
+    [5718] = { b = 0, s = 0 }, -- Venture Co. Engineering Plans
+    [5731] = { b = 0, s = 0 }, -- Scroll of Messaging
+    [5732] = { b = 0, s = 0 }, -- NG-5
+    [5733] = { b = 0, s = 0 }, -- Unidentified Ore
+    [5734] = { b = 0, s = 0 }, -- Super Reaper 6000 Blueprints
+    [5735] = { b = 0, s = 0 }, -- Sealed Envelope
+    [5736] = { b = 0, s = 0 }, -- Gerenzo's Mechanical Arm
+    [5737] = { b = 0, s = 0 }, -- Covert Ops Plans: Alpha & Beta
+    [5738] = { b = 0, s = 0 }, -- Covert Ops Pack
     [5739] = { b = 13694, s = 2738 }, -- Barbaric Harness
     [5740] = { b = 100, s = 25 }, -- Red Fireworks Rocket
     [5741] = { b = 445, s = 111 }, -- Rock Chip
@@ -2771,6 +3524,28 @@ VanillaItemPrices = {
     [5787] = { b = 600, s = 150 }, -- Pattern: Murloc Scale Breastplate
     [5788] = { b = 650, s = 162 }, -- Pattern: Thick Murloc Armor
     [5789] = { b = 2800, s = 700 }, -- Pattern: Murloc Scale Bracers
+    [5790] = { b = 0, s = 0 }, -- Lonebrow's Journal
+    [5791] = { b = 0, s = 0 }, -- Henrig Lonebrow's Journal
+    [5792] = { b = 0, s = 0 }, -- Razorflank's Medallion
+    [5793] = { b = 0, s = 0 }, -- Razorflank's Heart
+    [5794] = { b = 0, s = 0 }, -- Salty Scorpid Venom
+    [5795] = { b = 0, s = 0 }, -- Hardened Tortoise Shell
+    [5796] = { b = 0, s = 0 }, -- Encrusted Tail Fin
+    [5797] = { b = 0, s = 0 }, -- Indurium Flake
+    [5798] = { b = 0, s = 0 }, -- Rocket Car Parts
+    [5799] = { b = 0, s = 0 }, -- Kravel's Parts Order
+    [5800] = { b = 0, s = 0 }, -- Kravel's Parts
+    [5801] = { b = 0, s = 0 }, -- Kraul Guano
+    [5802] = { b = 0, s = 0 }, -- Delicate Car Parts
+    [5803] = { b = 0, s = 0 }, -- Speck of Dream Dust
+    [5804] = { b = 0, s = 0 }, -- Goblin Rumors
+    [5805] = { b = 0, s = 0 }, -- Heart of Zeal
+    [5806] = { b = 0, s = 0 }, -- Fool's Stout
+    [5807] = { b = 0, s = 0 }, -- Fool's Stout Report
+    [5808] = { b = 0, s = 0 }, -- Pridewing Venom Sac
+    [5809] = { b = 0, s = 0 }, -- Highperch Venom Sac
+    [5810] = { b = 0, s = 0 }, -- Fresh Carcass
+    [5811] = { b = 0, s = 0 }, -- Frostmaw's Mane
     [5812] = { b = 5645, s = 1129 }, -- Robes of Antiquity
     [5813] = { b = 35439, s = 7087 }, -- Emil's Brand
     [5814] = { b = 11756, s = 2351 }, -- Snapbrook Armor
@@ -2780,19 +3555,81 @@ VanillaItemPrices = {
     [5818] = { b = 16197, s = 3239 }, -- Moonbeam Wand
     [5819] = { b = 16009, s = 3201 }, -- Sunblaze Coif
     [5820] = { b = 8114, s = 1622 }, -- Faerie Mantle
+    [5824] = { b = 0, s = 0 }, -- Tablet of Will
+    [5825] = { b = 0, s = 0 }, -- Treshala's Pendant
+    [5826] = { b = 0, s = 0 }, -- Kravel's Scheme
+    [5827] = { b = 0, s = 0 }, -- Fizzle Brassbolts' Letter
     [5829] = { b = 3216, s = 804 }, -- Razor-sharp Beak
+    [5830] = { b = 0, s = 0 }, -- Kenata's Head
+    [5831] = { b = 0, s = 0 }, -- Fardel's Head
+    [5832] = { b = 0, s = 0 }, -- Marcel's Head
+    [5833] = { b = 0, s = 0 }, -- Indurium Ore
+    [5834] = { b = 0, s = 0 }, -- Mok'Morokk's Snuff
+    [5835] = { b = 0, s = 0 }, -- Mok'Morokk's Grog
+    [5836] = { b = 0, s = 0 }, -- Mok'Morokk's Strongbox
+    [5837] = { b = 0, s = 0 }, -- Steelsnap's Rib
+    [5838] = { b = 0, s = 0 }, -- Kodo Skin Scroll
     [5839] = { b = 4, s = 1 }, -- Journal Page
+    [5840] = { b = 0, s = 0 }, -- Searing Tongue
+    [5841] = { b = 0, s = 0 }, -- Searing Heart
+    [5842] = { b = 0, s = 0 }, -- Unrefined Ore Sample
+    [5843] = { b = 0, s = 0 }, -- Grenka's Claw
+    [5844] = { b = 0, s = 0 }, -- Fragments of Rok'Alim
+    [5846] = { b = 0, s = 0 }, -- Korran's Sealed Note
+    [5847] = { b = 0, s = 0 }, -- Mirefin Head
+    [5848] = { b = 0, s = 0 }, -- Hollow Vulture Bone
+    [5849] = { b = 0, s = 0 }, -- Crate of Crash Helmets
+    [5850] = { b = 0, s = 0 }, -- Belgrom's Sealed Note
+    [5851] = { b = 0, s = 0 }, -- Cozzle's Key
+    [5852] = { b = 0, s = 0 }, -- Fuel Regulator Blueprints
+    [5853] = { b = 0, s = 0 }, -- Intact Silithid Carapace
+    [5854] = { b = 0, s = 0 }, -- Silithid Talon
+    [5855] = { b = 0, s = 0 }, -- Silithid Heart
+    [5860] = { b = 0, s = 0 }, -- Legacy of the Aspects
+    [5861] = { b = 0, s = 0 }, -- Beginnings of the Undead Threat
+    [5862] = { b = 0, s = 0 }, -- Seaforium Booster
+    [5863] = { b = 0, s = 0 }, -- Guild Charter
+    [5864] = { b = 100000, s = 0 }, -- Gray Ram
+    [5865] = { b = 0, s = 0 }, -- Modified Seaforium Booster
+    [5866] = { b = 0, s = 0 }, -- Sample of Indurium Ore
+    [5867] = { b = 0, s = 0 }, -- Etched Phial
+    [5868] = { b = 0, s = 0 }, -- Filled Etched Phial
+    [5869] = { b = 0, s = 0 }, -- Cloven Hoof
     [5871] = { b = 1275, s = 318 }, -- Large Hoof
+    [5872] = { b = 100000, s = 0 }, -- Brown Ram
+    [5873] = { b = 100000, s = 0 }, -- White Ram
+    [5876] = { b = 0, s = 0 }, -- Blueleaf Tuber
+    [5877] = { b = 0, s = 0 }, -- Cracked Silithid Carapace
+    [5879] = { b = 0, s = 0 }, -- Twilight Pendant
+    [5880] = { b = 0, s = 0 }, -- Crate With Holes
+    [5881] = { b = 0, s = 0 }, -- Head of Kelris
+    [5882] = { b = 0, s = 0 }, -- Captain's Documents
+    [5883] = { b = 0, s = 0 }, -- Forked Mudrock Tongue
+    [5884] = { b = 0, s = 0 }, -- Unpopped Darkmist Eye
+    [5897] = { b = 0, s = 0 }, -- Snufflenose Owner's Manual
+    [5917] = { b = 0, s = 0 }, -- Spy's Report
+    [5918] = { b = 0, s = 0 }, -- Defiant Orc Head
+    [5919] = { b = 0, s = 0 }, -- Blackened Iron Shield
     [5936] = { b = 99, s = 19 }, -- Animal Skin Belt
+    [5938] = { b = 0, s = 0 }, -- Pristine Crawler Leg
     [5939] = { b = 100, s = 20 }, -- Sewing Gloves
     [5940] = { b = 769, s = 153 }, -- Bone Buckler
     [5941] = { b = 578, s = 115 }, -- Brass Scale Pants
+    [5942] = { b = 0, s = 0 }, -- Jeweled Pendant
     [5943] = { b = 4202, s = 840 }, -- Rift Bracers
     [5944] = { b = 1655, s = 331 }, -- Greaves of the People's Militia
+    [5945] = { b = 0, s = 0 }, -- Deadmire's Tooth
+    [5946] = { b = 0, s = 0 }, -- Sealed Note to Elling
+    [5947] = { b = 0, s = 0 }, -- Defias Docket
+    [5948] = { b = 0, s = 0 }, -- Letter to Jorgen
+    [5950] = { b = 0, s = 0 }, -- Reethe's Badge
     [5951] = { b = 165, s = 41 }, -- Moist Towelette
+    [5952] = { b = 0, s = 0 }, -- Corrupted Brain Stem
     [5956] = { b = 18, s = 3 }, -- Blacksmith Hammer
     [5957] = { b = 200, s = 40 }, -- Handstitched Leather Vest
     [5958] = { b = 4145, s = 829 }, -- Fine Leather Pants
+    [5959] = { b = 0, s = 0 }, -- Acidic Venom Sac
+    [5960] = { b = 0, s = 0 }, -- Sealed Note to Watcher Backus
     [5961] = { b = 5446, s = 1089 }, -- Dark Leather Pants
     [5962] = { b = 13972, s = 2794 }, -- Guardian Pants
     [5963] = { b = 15756, s = 3151 }, -- Barbaric Leggings
@@ -2810,6 +3647,8 @@ VanillaItemPrices = {
     [5976] = { b = 10000, s = 2500 }, -- Guild Tabard
     [5996] = { b = 380, s = 95 }, -- Elixir of Water Breathing
     [5997] = { b = 20, s = 5 }, -- Elixir of Minor Defense
+    [5998] = { b = 0, s = 0 }, -- Stormpike's Request
+    [6016] = { b = 0, s = 0 }, -- Wolf Heart Sample
     [6037] = { b = 5000, s = 1250 }, -- Truesilver Bar
     [6038] = { b = 1250, s = 312 }, -- Giant Clam Scorcho
     [6039] = { b = 5000, s = 1250 }, -- Recipe: Giant Clam Scorcho
@@ -2837,13 +3676,32 @@ VanillaItemPrices = {
     [6061] = { b = 116, s = 23 }, -- Graystone Bracers
     [6062] = { b = 142, s = 28 }, -- Heavy Cord Bracers
     [6063] = { b = 117, s = 23 }, -- Cold Steel Gauntlets
+    [6064] = { b = 0, s = 0 }, -- Miniature Platinum Discs
+    [6065] = { b = 0, s = 0 }, -- Khadgar's Essays on Dimensional Convergence
+    [6066] = { b = 0, s = 0 }, -- Khan Dez'hepah's Head
+    [6067] = { b = 0, s = 0 }, -- Centaur Ear
     [6068] = { b = 1500, s = 375 }, -- Recipe: Shadow Oil
+    [6069] = { b = 0, s = 0 }, -- Crudely Dried Meat
     [6070] = { b = 31, s = 6 }, -- Wolfskin Bracers
+    [6071] = { b = 0, s = 0 }, -- Draenethyst Crystal
+    [6072] = { b = 0, s = 0 }, -- Khan Jehn's Head
+    [6073] = { b = 0, s = 0 }, -- Khan Shaka's Head
+    [6074] = { b = 0, s = 0 }, -- War Horn Mouthpiece
+    [6075] = { b = 0, s = 0 }, -- Vimes's Report
     [6076] = { b = 47, s = 9 }, -- Tapered Pants
+    [6077] = { b = 0, s = 0 }, -- Maraudine Key Fragment
     [6078] = { b = 78, s = 15 }, -- Pikeman Shield
+    [6079] = { b = 0, s = 0 }, -- Crude Charm
+    [6080] = { b = 0, s = 0 }, -- Shadow Panther Heart
+    [6081] = { b = 0, s = 0 }, -- Mire Lord Fungus
+    [6082] = { b = 0, s = 0 }, -- Deepstrider Tumor
+    [6083] = { b = 0, s = 0 }, -- Broken Tears
     [6084] = { b = 1454, s = 290 }, -- Stormwind Guard Leggings
     [6085] = { b = 1217, s = 243 }, -- Footman Tunic
+    [6086] = { b = 0, s = 0 }, -- Faustin's Truth Serum
     [6087] = { b = 8639, s = 1727 }, -- Chausses of Westfall
+    [6089] = { b = 0, s = 0 }, -- Zraedus's Brew
+    [6091] = { b = 0, s = 0 }, -- Crate of Power Stones
     [6092] = { b = 2104, s = 420 }, -- Black Whelp Boots
     [6093] = { b = 22091, s = 4418 }, -- Orc Crusher
     [6094] = { b = 6393, s = 1278 }, -- Piercing Axe
@@ -2872,25 +3730,41 @@ VanillaItemPrices = {
     [6139] = { b = 4, s = 1 }, -- Novice's Robe
     [6140] = { b = 4, s = 1 }, -- Apprentice's Robe
     [6144] = { b = 5, s = 1 }, -- Neophyte's Robe
+    [6145] = { b = 0, s = 0 }, -- Clarice's Pendant
+    [6146] = { b = 0, s = 0 }, -- Sundried Driftwood
     [6147] = { b = 185, s = 37 }, -- Ratty Old Belt
     [6148] = { b = 223, s = 44 }, -- Web-covered Boots
     [6149] = { b = 480, s = 120 }, -- Greater Mana Potion
     [6150] = { b = 90, s = 22 }, -- A Frayed Knot
+    [6166] = { b = 0, s = 0 }, -- Coyote Jawbone
+    [6167] = { b = 0, s = 0 }, -- Neeka's Report
+    [6168] = { b = 0, s = 0 }, -- Sawtooth Snapper Claw
+    [6169] = { b = 0, s = 0 }, -- Unprepared Sawtooth Flank
+    [6170] = { b = 0, s = 0 }, -- Wizards' Reagents
     [6171] = { b = 32, s = 6 }, -- Wolf Handler Gloves
+    [6172] = { b = 0, s = 0 }, -- Lost Supplies
     [6173] = { b = 36, s = 7 }, -- Snow Boots
+    [6175] = { b = 0, s = 0 }, -- Atal'ai Artifact
     [6176] = { b = 79, s = 15 }, -- Dwarven Kite Shield
     [6177] = { b = 348, s = 69 }, -- Ironwrought Bracers
+    [6178] = { b = 0, s = 0 }, -- Shipment to Nethergarde
     [6179] = { b = 2782, s = 556 }, -- Privateer's Cape
     [6180] = { b = 2119, s = 423 }, -- Slarkskin
+    [6181] = { b = 0, s = 0 }, -- Fetish of Hakkar
+    [6182] = { b = 0, s = 0 }, -- Dim Torch
     [6183] = { b = 10, s = 2 }, -- Unlit Poor Torch
+    [6184] = { b = 0, s = 0 }, -- Monstrous Crawler Leg
     [6185] = { b = 47, s = 9 }, -- Bear Shawl
     [6186] = { b = 6864, s = 1372 }, -- Trogg Slicer
     [6187] = { b = 3066, s = 613 }, -- Dwarven Defender
     [6188] = { b = 1525, s = 305 }, -- Mud Stompers
     [6189] = { b = 3122, s = 624 }, -- Durable Chain Shoulders
+    [6190] = { b = 0, s = 0 }, -- Draenethyst Shard
     [6191] = { b = 3079, s = 615 }, -- Kimbra Boots
+    [6193] = { b = 0, s = 0 }, -- Bundle of Atal'ai Artifacts
     [6194] = { b = 26543, s = 5308 }, -- Barreling Reaper
     [6195] = { b = 2080, s = 416 }, -- Wax-polished Armor
+    [6196] = { b = 0, s = 0 }, -- Noboru's Cudgel
     [6197] = { b = 4646, s = 929 }, -- Loch Croc Hide Vest
     [6198] = { b = 5566, s = 1113 }, -- Jurassic Wristguards
     [6199] = { b = 2600, s = 650 }, -- Black Widow Band
@@ -2902,6 +3776,7 @@ VanillaItemPrices = {
     [6205] = { b = 4613, s = 922 }, -- Burrowing Shovel
     [6206] = { b = 2777, s = 555 }, -- Rock Chipper
     [6211] = { b = 1800, s = 450 }, -- Recipe: Elixir of Ogre's Strength
+    [6212] = { b = 0, s = 0 }, -- Head of Jammal'an
     [6214] = { b = 2978, s = 595 }, -- Heavy Copper Maul
     [6215] = { b = 3009, s = 601 }, -- Balanced Fighting Stick
     [6217] = { b = 124, s = 24 }, -- Copper Rod
@@ -2915,11 +3790,24 @@ VanillaItemPrices = {
     [6240] = { b = 805, s = 161 }, -- Blue Linen Vest
     [6241] = { b = 496, s = 99 }, -- White Linen Robe
     [6242] = { b = 1217, s = 243 }, -- Blue Linen Robe
+    [6245] = { b = 0, s = 0 }, -- Karnitol's Satchel
+    [6246] = { b = 0, s = 0 }, -- Hatefury Claw
+    [6247] = { b = 0, s = 0 }, -- Hatefury Horn
+    [6248] = { b = 0, s = 0 }, -- Scorpashi Venom
+    [6249] = { b = 0, s = 0 }, -- Aged Kodo Hide
+    [6250] = { b = 0, s = 0 }, -- Felhound Brain
+    [6251] = { b = 0, s = 0 }, -- Nether Wing
+    [6252] = { b = 0, s = 0 }, -- Doomwarder Blood
+    [6253] = { b = 0, s = 0 }, -- Leftwitch's Package
     [6256] = { b = 23, s = 4 }, -- Fishing Pole
+    [6257] = { b = 0, s = 0 }, -- Roc Gizzard
+    [6258] = { b = 0, s = 0 }, -- Ironfur Liver
+    [6259] = { b = 0, s = 0 }, -- Groddoc Liver
     [6260] = { b = 50, s = 12 }, -- Blue Dye
     [6261] = { b = 1000, s = 250 }, -- Orange Dye
     [6263] = { b = 2947, s = 589 }, -- Blue Overalls
     [6264] = { b = 4420, s = 884 }, -- Greater Adept's Robe
+    [6265] = { b = 0, s = 0 }, -- Soul Shard
     [6266] = { b = 1028, s = 205 }, -- Disciple's Vest
     [6267] = { b = 747, s = 149 }, -- Disciple's Pants
     [6268] = { b = 1171, s = 234 }, -- Pioneer Tunic
@@ -2929,7 +3817,14 @@ VanillaItemPrices = {
     [6272] = { b = 300, s = 75 }, -- Pattern: Blue Linen Robe
     [6274] = { b = 400, s = 100 }, -- Pattern: Blue Overalls
     [6275] = { b = 800, s = 200 }, -- Pattern: Greater Adept's Robe
+    [6281] = { b = 0, s = 0 }, -- Rattlecage Skull
     [6282] = { b = 11219, s = 2243 }, -- Sacred Burial Trousers
+    [6283] = { b = 0, s = 0 }, -- The Book of Ur
+    [6284] = { b = 0, s = 0 }, -- Runes of Summoning
+    [6285] = { b = 0, s = 0 }, -- Egalin's Grimoire
+    [6286] = { b = 0, s = 0 }, -- Pure Hearts
+    [6287] = { b = 0, s = 0 }, -- Atal'ai Tablet Fragment
+    [6288] = { b = 0, s = 0 }, -- Atal'ai Tablet
     [6289] = { b = 20, s = 1 }, -- Raw Longjaw Mud Snapper
     [6290] = { b = 25, s = 1 }, -- Brilliant Smallfish
     [6291] = { b = 20, s = 1 }, -- Raw Brilliant Smallfish
@@ -2953,6 +3848,8 @@ VanillaItemPrices = {
     [6309] = { b = 400, s = 100 }, -- 17 Pound Catfish
     [6310] = { b = 600, s = 150 }, -- 19 Pound Catfish
     [6311] = { b = 750, s = 187 }, -- 22 Pound Catfish
+    [6312] = { b = 0, s = 0 }, -- Dalin's Heart
+    [6313] = { b = 0, s = 0 }, -- Comar's Heart
     [6314] = { b = 6343, s = 1268 }, -- Wolfmaster Cape
     [6315] = { b = 12733, s = 2546 }, -- Steelarrow Crossbow
     [6316] = { b = 60, s = 3 }, -- Loch Frenzy Delight
@@ -3067,9 +3964,14 @@ VanillaItemPrices = {
     [6431] = { b = 27181, s = 5436 }, -- Imperial Leather Boots
     [6432] = { b = 18708, s = 3741 }, -- Imperial Cloak
     [6433] = { b = 24767, s = 4953 }, -- Imperial Leather Helm
+    [6435] = { b = 0, s = 0 }, -- Infused Burning Gem
+    [6436] = { b = 0, s = 0 }, -- Burning Gem
     [6438] = { b = 1450, s = 362 }, -- Dull Elemental Bracer
     [6439] = { b = 950, s = 237 }, -- Broken Binding Bracer
     [6440] = { b = 63250, s = 15812 }, -- Brainlash
+    [6441] = { b = 0, s = 0 }, -- Shadowstalker Scalp
+    [6442] = { b = 0, s = 0 }, -- Oracle Crystal
+    [6443] = { b = 0, s = 0 }, -- Deviate Hide
     [6444] = { b = 915, s = 228 }, -- Forked Tongue
     [6445] = { b = 352, s = 88 }, -- Brittle Molting
     [6446] = { b = 2130, s = 532 }, -- Snakeskin Bag
@@ -3088,7 +3990,9 @@ VanillaItemPrices = {
     [6459] = { b = 4674, s = 934 }, -- Savage Trodders
     [6460] = { b = 4222, s = 844 }, -- Cobrahn's Grasp
     [6461] = { b = 5954, s = 1190 }, -- Slime-encrusted Pads
+    [6462] = { b = 0, s = 0 }, -- Secure Crate
     [6463] = { b = 6110, s = 1527 }, -- Deep Fathom Ring
+    [6464] = { b = 0, s = 0 }, -- Wailing Essence
     [6465] = { b = 3843, s = 768 }, -- Robe of the Moccasin
     [6466] = { b = 2067, s = 413 }, -- Deviate Scale Cloak
     [6467] = { b = 2103, s = 420 }, -- Deviate Scale Gloves
@@ -3102,9 +4006,13 @@ VanillaItemPrices = {
     [6475] = { b = 1500, s = 375 }, -- Pattern: Deviate Scale Gloves
     [6476] = { b = 2000, s = 500 }, -- Pattern: Deviate Scale Belt
     [6477] = { b = 1372, s = 274 }, -- Grassland Sash
+    [6479] = { b = 0, s = 0 }, -- Malem Pendant
     [6480] = { b = 3566, s = 713 }, -- Slick Deviate Leggings
     [6481] = { b = 3209, s = 641 }, -- Dagmire Gauntlets
     [6482] = { b = 3640, s = 728 }, -- Firewalker Boots
+    [6486] = { b = 0, s = 0 }, -- Singed Scale
+    [6487] = { b = 0, s = 0 }, -- Vile Familiar Head
+    [6488] = { b = 0, s = 0 }, -- Simple Tablet
     [6502] = { b = 5701, s = 1140 }, -- Violet Scale Armor
     [6503] = { b = 3814, s = 762 }, -- Harlequin Robes
     [6504] = { b = 14667, s = 2933 }, -- Wingblade
@@ -3136,6 +4044,8 @@ VanillaItemPrices = {
     [6531] = { b = 2085, s = 417 }, -- Barbaric Cloth Robe
     [6532] = { b = 250, s = 62 }, -- Bright Baubles
     [6533] = { b = 250, s = 62 }, -- Aquadynamic Fish Attractor
+    [6534] = { b = 0, s = 0 }, -- Forged Steel Bars
+    [6535] = { b = 0, s = 0 }, -- Tablet of Verga
     [6536] = { b = 2443, s = 488 }, -- Willow Vest
     [6537] = { b = 1051, s = 210 }, -- Willow Boots
     [6538] = { b = 2461, s = 492 }, -- Willow Robe
@@ -3216,6 +4126,9 @@ VanillaItemPrices = {
     [6616] = { b = 11019, s = 2203 }, -- Sage's Pants
     [6617] = { b = 6855, s = 1371 }, -- Sage's Mantle
     [6622] = { b = 277000, s = 55400 }, -- Sword of Zeal
+    [6624] = { b = 0, s = 0 }, -- Ken'zigla's Draught
+    [6625] = { b = 0, s = 0 }, -- Dirt-caked Pendant
+    [6626] = { b = 0, s = 0 }, -- Dogran's Pendant
     [6627] = { b = 13104, s = 2620 }, -- Mutant Scale Breastplate
     [6628] = { b = 1851, s = 370 }, -- Raven's Claws
     [6629] = { b = 3150, s = 630 }, -- Sporid Cape
@@ -3223,13 +4136,24 @@ VanillaItemPrices = {
     [6631] = { b = 20266, s = 4053 }, -- Living Root
     [6632] = { b = 3211, s = 642 }, -- Feyscale Cloak
     [6633] = { b = 10659, s = 2131 }, -- Butcher's Slicer
+    [6634] = { b = 0, s = 0 }, -- Ritual Salve
+    [6635] = { b = 0, s = 0 }, -- Earth Sapta
+    [6636] = { b = 0, s = 0 }, -- Fire Sapta
+    [6637] = { b = 0, s = 0 }, -- Water Sapta
+    [6640] = { b = 0, s = 0 }, -- Felstalker Hoof
     [6641] = { b = 18376, s = 3675 }, -- Haunting Blade
     [6642] = { b = 9402, s = 1880 }, -- Phantom Armor
     [6643] = { b = 25, s = 6 }, -- Bloated Smallfish
     [6645] = { b = 100, s = 25 }, -- Bloated Mud Snapper
     [6647] = { b = 160, s = 40 }, -- Bloated Catfish
     [6651] = { b = 1173, s = 234 }, -- Broken Wine Bottle
+    [6652] = { b = 0, s = 0 }, -- Reagent Pouch
+    [6653] = { b = 0, s = 0 }, -- Torch of the Dormant Flame
+    [6654] = { b = 0, s = 0 }, -- Torch of the Eternal Flame
+    [6655] = { b = 0, s = 0 }, -- Glowing Ember
+    [6656] = { b = 0, s = 0 }, -- Rough Quartz
     [6657] = { b = 20, s = 5 }, -- Savory Deviate Delight
+    [6658] = { b = 0, s = 0 }, -- Example Collar
     [6659] = { b = 2705, s = 541 }, -- Scarab Trousers
     [6660] = { b = 180788, s = 36157 }, -- Julie's Dagger
     [6661] = { b = 460, s = 115 }, -- Recipe: Savory Deviate Delight
@@ -3251,6 +4175,7 @@ VanillaItemPrices = {
     [6679] = { b = 24264, s = 4852 }, -- Armor Piercer
     [6681] = { b = 15622, s = 3124 }, -- Thornspike
     [6682] = { b = 9504, s = 1900 }, -- Death Speaker Robes
+    [6684] = { b = 0, s = 0 }, -- Snufflenose Command Stick
     [6685] = { b = 6554, s = 1310 }, -- Death Speaker Mantle
     [6686] = { b = 13135, s = 2627 }, -- Tusken Helm
     [6687] = { b = 49652, s = 9930 }, -- Corpsemaker
@@ -3271,6 +4196,8 @@ VanillaItemPrices = {
     [6714] = { b = 300, s = 75 }, -- Ez-Thro Dynamite
     [6715] = { b = 85, s = 21 }, -- Ruined Jumper Cables
     [6716] = { b = 800, s = 200 }, -- Schematic: EZ-Thro Dynamite
+    [6717] = { b = 0, s = 0 }, -- Gaffer Jack
+    [6718] = { b = 0, s = 0 }, -- Electropeller
     [6719] = { b = 5485, s = 1097 }, -- Windborne Belt
     [6720] = { b = 16094, s = 3218 }, -- Spirit Hunter Headdress
     [6721] = { b = 7094, s = 1418 }, -- Chestplate of Kor
@@ -3299,12 +4226,22 @@ VanillaItemPrices = {
     [6750] = { b = 3590, s = 897 }, -- Snake Hoop
     [6751] = { b = 7057, s = 1411 }, -- Mourning Shawl
     [6752] = { b = 8009, s = 1601 }, -- Lancer Boots
+    [6753] = { b = 0, s = 0 }, -- Feather Charm
+    [6755] = { b = 0, s = 0 }, -- A Small Container of Gems
     [6756] = { b = 5500, s = 1375 }, -- Jewelry Box
     [6757] = { b = 18520, s = 4630 }, -- Jaina's Signet Ring
+    [6766] = { b = 0, s = 0 }, -- Flayed Demon Skin (old2)
+    [6767] = { b = 0, s = 0 }, -- Tyranis' Pendant
     [6773] = { b = 36831, s = 7366 }, -- Gelkis Marauder Chain
     [6774] = { b = 11540, s = 2885 }, -- Uthek's Finger
+    [6775] = { b = 0, s = 0 }, -- Tome of Divinity
+    [6776] = { b = 0, s = 0 }, -- Tome of Valor
     [6780] = { b = 7800, s = 1560 }, -- Lilac Sash
+    [6781] = { b = 0, s = 0 }, -- Bartleby's Mug
+    [6782] = { b = 0, s = 0 }, -- Marshal Haggard's Badge
+    [6783] = { b = 0, s = 0 }, -- Dead-tooth's Key
     [6784] = { b = 10159, s = 2031 }, -- Braced Handguards
+    [6785] = { b = 0, s = 0 }, -- Powers of the Void
     [6786] = { b = 298, s = 59 }, -- Simple Dress
     [6787] = { b = 2331, s = 466 }, -- White Woolen Dress
     [6788] = { b = 16658, s = 3331 }, -- Magram Hunter's Belt
@@ -3318,13 +4255,20 @@ VanillaItemPrices = {
     [6796] = { b = 3000, s = 750 }, -- Red Swashbuckler's Shirt
     [6797] = { b = 31813, s = 6362 }, -- Eyepoker
     [6798] = { b = 31934, s = 6386 }, -- Blasting Hackbut
+    [6799] = { b = 0, s = 0 }, -- Vejrek's Head
+    [6800] = { b = 0, s = 0 }, -- Umbral Ore
     [6801] = { b = 22282, s = 4456 }, -- Baroque Apron
     [6802] = { b = 91277, s = 18255 }, -- Sword of Omen
     [6803] = { b = 19540, s = 4885 }, -- Prophetic Cane
     [6804] = { b = 56312, s = 11262 }, -- Windstorm Hammer
+    [6805] = { b = 0, s = 0 }, -- Horn of Vorlus
     [6806] = { b = 42540, s = 8508 }, -- Dancing Flame
     [6807] = { b = 1250, s = 62 }, -- Frog Leg Stew
+    [6808] = { b = 0, s = 0 }, -- Elunite Ore
+    [6809] = { b = 0, s = 0 }, -- Elura's Medallion
+    [6810] = { b = 0, s = 0 }, -- Surena's Choker
     [6811] = { b = 100, s = 25 }, -- Aquadynamic Fish Lens
+    [6812] = { b = 0, s = 0 }, -- Case of Elunite
     [6826] = { b = 2195, s = 548 }, -- Brilliant Scale
     [6827] = { b = 600, s = 150 }, -- Box of Supplies
     [6828] = { b = 31340, s = 6268 }, -- Visionary Buckler
@@ -3336,11 +4280,28 @@ VanillaItemPrices = {
     [6834] = { b = 6, s = 1 }, -- Black Tuxedo
     [6835] = { b = 2521, s = 504 }, -- Black Tuxedo Pants
     [6836] = { b = 5, s = 1 }, -- Dress Shoes
+    [6838] = { b = 0, s = 0 }, -- Scorched Spider Fang
+    [6839] = { b = 0, s = 0 }, -- Charred Horn
+    [6840] = { b = 0, s = 0 }, -- Galvanized Horn
+    [6841] = { b = 0, s = 0 }, -- Vial of Phlogiston
+    [6842] = { b = 0, s = 0 }, -- Furen's Instructions
+    [6843] = { b = 0, s = 0 }, -- Cask of Scalder
+    [6844] = { b = 0, s = 0 }, -- Burning Blood
+    [6845] = { b = 0, s = 0 }, -- Burning Rock
+    [6846] = { b = 0, s = 0 }, -- Defias Script
+    [6847] = { b = 0, s = 0 }, -- Dark Iron Script
+    [6848] = { b = 0, s = 0 }, -- Searing Coral
+    [6849] = { b = 0, s = 0 }, -- Sunscorched Shell
+    [6851] = { b = 0, s = 0 }, -- Essence of the Exile
+    [6866] = { b = 0, s = 0 }, -- Symbol of Life
     [6887] = { b = 2000, s = 5 }, -- Spotted Yellowtail
     [6888] = { b = 40, s = 10 }, -- Herb Baked Egg
     [6889] = { b = 16, s = 4 }, -- Small Egg
     [6890] = { b = 125, s = 6 }, -- Smoked Bear Meat
     [6892] = { b = 250, s = 62 }, -- Recipe: Smoked Bear Meat
+    [6893] = { b = 0, s = 0 }, -- Workshop Key
+    [6894] = { b = 0, s = 0 }, -- Whirlwind Heart
+    [6895] = { b = 0, s = 0 }, -- Jordan's Smithing Hammer
     [6898] = { b = 16530, s = 4132 }, -- Orb of Soran'ruk
     [6900] = { b = 23427, s = 4685 }, -- Enchanted Gold Bloodrobe
     [6901] = { b = 7615, s = 1523 }, -- Glowing Thresher Cape
@@ -3354,10 +4315,23 @@ VanillaItemPrices = {
     [6909] = { b = 35777, s = 7155 }, -- Strike of the Hydra
     [6910] = { b = 11492, s = 2298 }, -- Leech Pants
     [6911] = { b = 7210, s = 1442 }, -- Moss Cinch
+    [6912] = { b = 0, s = 0 }, -- Heartswood
+    [6913] = { b = 0, s = 0 }, -- Heartswood Core
+    [6914] = { b = 0, s = 0 }, -- Soran'ruk Fragment
+    [6915] = { b = 0, s = 0 }, -- Large Soran'ruk Fragment
+    [6916] = { b = 0, s = 0 }, -- Tome of Divinity
+    [6926] = { b = 0, s = 0 }, -- Furen's Notes
+    [6927] = { b = 0, s = 0 }, -- Big Will's Ear
+    [6928] = { b = 0, s = 0 }, -- Bloodstone Choker
+    [6929] = { b = 0, s = 0 }, -- Bath'rah's Parchment
+    [6930] = { b = 0, s = 0 }, -- Rod of Channeling
+    [6931] = { b = 0, s = 0 }, -- Moldy Tome
     [6947] = { b = 22, s = 5 }, -- Instant Poison
+    [6948] = { b = 0, s = 0 }, -- Hearthstone
     [6949] = { b = 80, s = 20 }, -- Instant Poison II
     [6950] = { b = 120, s = 30 }, -- Instant Poison III
     [6951] = { b = 300, s = 75 }, -- Mind-numbing Poison II
+    [6952] = { b = 0, s = 0 }, -- Thick Bear Fur
     [6953] = { b = 37297, s = 7459 }, -- Verigan's Fist
     [6966] = { b = 3468, s = 693 }, -- Elunite Axe
     [6967] = { b = 3481, s = 696 }, -- Elunite Sword
@@ -3381,13 +4355,24 @@ VanillaItemPrices = {
     [6985] = { b = 3454, s = 690 }, -- Haggard's Sword
     [6986] = { b = 200, s = 50 }, -- Crimson Lotus
     [6987] = { b = 55, s = 13 }, -- Fish Scale
+    [6989] = { b = 0, s = 0 }, -- Vial of Hatefury Blood
+    [6990] = { b = 0, s = 0 }, -- Lesser Infernal Stone
+    [6991] = { b = 0, s = 0 }, -- Smoldering Coal
+    [6992] = { b = 0, s = 0 }, -- Jordan's Ore Shipment
+    [6993] = { b = 0, s = 0 }, -- Jordan's Refined Ore Shipment
+    [6994] = { b = 0, s = 0 }, -- Whitestone Oak Lumber
+    [6995] = { b = 0, s = 0 }, -- Corrupted Kor Gem
+    [6996] = { b = 0, s = 0 }, -- Jordan's Weapon Notes
+    [6997] = { b = 0, s = 0 }, -- Tattered Manuscript
     [6998] = { b = 3872, s = 774 }, -- Nimbus Boots
+    [6999] = { b = 0, s = 0 }, -- Tome of the Cabal
     [7000] = { b = 3252, s = 650 }, -- Heartwood Girdle
     [7001] = { b = 17677, s = 3535 }, -- Gravestone Scepter
     [7002] = { b = 15141, s = 3028 }, -- Arctic Buckler
     [7003] = { b = 4906, s = 981 }, -- Beetle Clasps
     [7004] = { b = 4924, s = 984 }, -- Prelacy Cape
     [7005] = { b = 82, s = 16 }, -- Skinning Knife
+    [7006] = { b = 0, s = 0 }, -- Reconstructed Tome
     [7026] = { b = 111, s = 22 }, -- Linen Belt
     [7027] = { b = 5625, s = 1125 }, -- Boots of Darkness
     [7046] = { b = 7473, s = 1494 }, -- Azure Silk Pants
@@ -3426,6 +4411,7 @@ VanillaItemPrices = {
     [7080] = { b = 1600, s = 400 }, -- Essence of Water
     [7081] = { b = 1600, s = 400 }, -- Breath of Wind
     [7082] = { b = 1600, s = 400 }, -- Essence of Air
+    [7083] = { b = 0, s = 0 }, -- Purified Kor Gem
     [7084] = { b = 1400, s = 350 }, -- Pattern: Crimson Silk Shoulders
     [7085] = { b = 1400, s = 350 }, -- Pattern: Azure Shoulders
     [7086] = { b = 1500, s = 375 }, -- Pattern: Earthen Silk Belt
@@ -3456,17 +4442,45 @@ VanillaItemPrices = {
     [7116] = { b = 3428, s = 685 }, -- Heirloom Dagger
     [7117] = { b = 3441, s = 688 }, -- Heirloom Hammer
     [7118] = { b = 3454, s = 690 }, -- Heirloom Sword
+    [7119] = { b = 0, s = 0 }, -- Twitching Antenna
     [7120] = { b = 4479, s = 895 }, -- Ruga's Bulwark
+    [7126] = { b = 0, s = 0 }, -- Smoky Iron Ingot
+    [7127] = { b = 0, s = 0 }, -- Powdered Azurite
+    [7128] = { b = 0, s = 0 }, -- Uncloven Satyr Hoof
     [7129] = { b = 7734, s = 1546 }, -- Brutal Gauntlets
     [7130] = { b = 11642, s = 2328 }, -- Brutal Helm
+    [7131] = { b = 0, s = 0 }, -- Dragonmaw Shinbone
     [7132] = { b = 11692, s = 2338 }, -- Brutal Legguards
     [7133] = { b = 15494, s = 3098 }, -- Brutal Hauberk
+    [7134] = { b = 0, s = 0 }, -- Sturdy Dragonmaw Shinbone
+    [7135] = { b = 0, s = 0 }, -- Broken Dragonmaw Shinbone
+    [7146] = { b = 0, s = 0 }, -- The Scarlet Key
     [7148] = { b = 85, s = 21 }, -- Goblin Jumper Cables
     [7166] = { b = 973, s = 194 }, -- Copper Dagger
     [7189] = { b = 23563, s = 4712 }, -- Goblin Rocket Boots
+    [7190] = { b = 0, s = 0 }, -- Scorched Rocket Boots
+    [7191] = { b = 0, s = 0 }, -- Fused Wiring
+    [7206] = { b = 0, s = 0 }, -- Mirror Lake Water Sample
+    [7207] = { b = 0, s = 0 }, -- Jennea's Flask
+    [7208] = { b = 0, s = 0 }, -- Tazan's Key
+    [7209] = { b = 0, s = 0 }, -- Tazan's Satchel
+    [7226] = { b = 0, s = 0 }, -- Mage-tastic Gizmonitor
+    [7227] = { b = 0, s = 0 }, -- Balnir Snapdragons
     [7228] = { b = 500, s = 25 }, -- Tigule and Foror's Strawberry Ice Cream
     [7229] = { b = 1427, s = 285 }, -- Explorer's Vest
     [7230] = { b = 15515, s = 3103 }, -- Smite's Mighty Hammer
+    [7231] = { b = 0, s = 0 }, -- Astor's Letter of Introduction
+    [7247] = { b = 0, s = 0 }, -- Chest of Containment Coffers
+    [7249] = { b = 0, s = 0 }, -- Charged Rift Gem
+    [7266] = { b = 0, s = 0 }, -- Ur's Treatise on Shadow Magic
+    [7267] = { b = 0, s = 0 }, -- Pristine Spider Silk
+    [7268] = { b = 0, s = 0 }, -- Xavian Water Sample
+    [7269] = { b = 0, s = 0 }, -- Deino's Flask
+    [7270] = { b = 0, s = 0 }, -- Laughing Sister's Hair
+    [7271] = { b = 0, s = 0 }, -- Flawless Ivory Tusk
+    [7272] = { b = 0, s = 0 }, -- Bolt Charged Bramble
+    [7273] = { b = 0, s = 0 }, -- Witherbark Totem Stick
+    [7274] = { b = 0, s = 0 }, -- Rituals of Power
     [7276] = { b = 170, s = 34 }, -- Handstitched Leather Cloak
     [7277] = { b = 142, s = 28 }, -- Handstitched Leather Bracers
     [7278] = { b = 100, s = 25 }, -- Light Leather Quiver
@@ -3482,9 +4496,18 @@ VanillaItemPrices = {
     [7288] = { b = 500, s = 125 }, -- Pattern: Rugged Leather Pants
     [7289] = { b = 650, s = 162 }, -- Pattern: Black Whelp Cloak
     [7290] = { b = 1600, s = 400 }, -- Pattern: Red Whelp Gloves
+    [7291] = { b = 0, s = 0 }, -- Infernal Orb
+    [7292] = { b = 0, s = 0 }, -- Filled Containment Coffer
+    [7293] = { b = 0, s = 0 }, -- Dalaran Mana Gem
+    [7294] = { b = 0, s = 0 }, -- Andron's Ledger
+    [7295] = { b = 0, s = 0 }, -- Tazan's Logbook
     [7296] = { b = 225, s = 56 }, -- Extinguished Torch
+    [7297] = { b = 0, s = 0 }, -- Morbent's Bane
     [7298] = { b = 2344, s = 468 }, -- Blade of Cunning
+    [7306] = { b = 0, s = 0 }, -- Fenwick's Head
     [7307] = { b = 250, s = 62 }, -- Flesh Eating Worm
+    [7308] = { b = 0, s = 0 }, -- Cantation of Manifestation
+    [7309] = { b = 0, s = 0 }, -- Dalaran Status Report
     [7326] = { b = 3480, s = 696 }, -- Thun'grim's Axe
     [7327] = { b = 3493, s = 698 }, -- Thun'grim's Dagger
     [7328] = { b = 3506, s = 701 }, -- Thun'grim's Mace
@@ -3492,6 +4515,7 @@ VanillaItemPrices = {
     [7330] = { b = 19615, s = 3923 }, -- Infiltrator Buckler
     [7331] = { b = 21654, s = 4330 }, -- Phalanx Shield
     [7332] = { b = 33462, s = 6692 }, -- Regal Armor
+    [7333] = { b = 0, s = 0 }, -- Overseer's Whistle
     [7334] = { b = 7721, s = 1544 }, -- Efflorescent Robe
     [7335] = { b = 9685, s = 1937 }, -- Grizzly Tunic
     [7336] = { b = 7548, s = 1509 }, -- Wildwood Chain
@@ -3501,7 +4525,10 @@ VanillaItemPrices = {
     [7340] = { b = 500000, s = 125000 }, -- Flawless Diamond Solitaire
     [7341] = { b = 50000, s = 12500 }, -- Cubic Zirconia Ring
     [7342] = { b = 100000, s = 25000 }, -- Silver Piffeny Band
+    [7343] = { b = 0, s = 0 }, -- Bingles' Wrench
     [7344] = { b = 20000, s = 5000 }, -- Torch of Holy Flame
+    [7345] = { b = 0, s = 0 }, -- Bingles' Screwdriver
+    [7346] = { b = 0, s = 0 }, -- Bingles' Hammer
     [7348] = { b = 3454, s = 690 }, -- Fletcher's Gloves
     [7349] = { b = 4308, s = 861 }, -- Herbalist's Gloves
     [7350] = { b = 148, s = 29 }, -- Disciple's Bracers
@@ -3519,6 +4546,7 @@ VanillaItemPrices = {
     [7362] = { b = 2000, s = 500 }, -- Pattern: Earthen Leather Shoulders
     [7363] = { b = 2100, s = 525 }, -- Pattern: Pilferer's Gloves
     [7364] = { b = 2200, s = 550 }, -- Pattern: Heavy Earthen Gloves
+    [7365] = { b = 0, s = 0 }, -- Gnoam Sprecklesprocket
     [7366] = { b = 5490, s = 1098 }, -- Elder's Gloves
     [7367] = { b = 9093, s = 1818 }, -- Elder's Mantle
     [7368] = { b = 13385, s = 2677 }, -- Elder's Pants
@@ -3529,10 +4557,12 @@ VanillaItemPrices = {
     [7373] = { b = 15485, s = 3097 }, -- Dusky Leather Leggings
     [7374] = { b = 18804, s = 3760 }, -- Dusky Leather Armor
     [7375] = { b = 18869, s = 3773 }, -- Green Whelp Armor
+    [7376] = { b = 0, s = 0 }, -- Bingles' Blastencapper
     [7377] = { b = 11347, s = 2269 }, -- Frost Leather Cloak
     [7378] = { b = 10731, s = 2146 }, -- Dusky Bracers
     [7386] = { b = 11937, s = 2387 }, -- Green Whelp Bracers
     [7387] = { b = 12939, s = 2587 }, -- Dusky Belt
+    [7389] = { b = 0, s = 0 }, -- Venture Co. Ledger
     [7390] = { b = 21188, s = 4237 }, -- Dusky Boots
     [7391] = { b = 21266, s = 4253 }, -- Swift Boots
     [7392] = { b = 800, s = 200 }, -- Green Whelp Scale
@@ -3569,6 +4599,7 @@ VanillaItemPrices = {
     [7439] = { b = 27127, s = 5425 }, -- Sentinel Breastplate
     [7440] = { b = 25212, s = 5042 }, -- Sentinel Trousers
     [7441] = { b = 17573, s = 3514 }, -- Sentinel Cap
+    [7442] = { b = 0, s = 0 }, -- Gyromast's Key
     [7443] = { b = 11217, s = 2243 }, -- Sentinel Gloves
     [7444] = { b = 16887, s = 3377 }, -- Sentinel Boots
     [7445] = { b = 18303, s = 3660 }, -- Sentinel Shoulders
@@ -3590,6 +4621,7 @@ VanillaItemPrices = {
     [7461] = { b = 12149, s = 2429 }, -- Knight's Bracers
     [7462] = { b = 13412, s = 2682 }, -- Knight's Girdle
     [7463] = { b = 31013, s = 6202 }, -- Sentinel Buckler
+    [7464] = { b = 0, s = 0 }, -- Glyphs of Summoning
     [7465] = { b = 33735, s = 6747 }, -- Knight's Crest
     [7468] = { b = 33815, s = 6763 }, -- Regal Robe
     [7469] = { b = 31421, s = 6284 }, -- Regal Leggings
@@ -3620,6 +4652,9 @@ VanillaItemPrices = {
     [7494] = { b = 17717, s = 3543 }, -- Captain's Waistguard
     [7495] = { b = 47792, s = 9558 }, -- Captain's Buckler
     [7496] = { b = 44412, s = 8882 }, -- Field Plate Shield
+    [7498] = { b = 0, s = 0 }, -- Top of Gelkak's Key
+    [7499] = { b = 0, s = 0 }, -- Middle of Gelkak's Key
+    [7500] = { b = 0, s = 0 }, -- Bottom of Gelkak's Key
     [7506] = { b = 2000, s = 500 }, -- Gnomish Universal Remote
     [7507] = { b = 1600, s = 400 }, -- Arcane Orb
     [7508] = { b = 1600, s = 400 }, -- Ley Orb
@@ -3630,6 +4665,7 @@ VanillaItemPrices = {
     [7513] = { b = 49028, s = 9805 }, -- Ragefire Wand
     [7514] = { b = 49212, s = 9842 }, -- Icefury Wand
     [7515] = { b = 21530, s = 5382 }, -- Celestial Orb
+    [7516] = { b = 0, s = 0 }, -- Tabetha's Instructions
     [7517] = { b = 46863, s = 9372 }, -- Gossamer Tunic
     [7518] = { b = 47031, s = 9406 }, -- Gossamer Robe
     [7519] = { b = 38175, s = 7635 }, -- Gossamer Pants
@@ -3672,6 +4708,12 @@ VanillaItemPrices = {
     [7559] = { b = 2665, s = 666 }, -- Runic Cane
     [7560] = { b = 1200, s = 300 }, -- Schematic: Gnomish Universal Remote
     [7561] = { b = 2000, s = 500 }, -- Schematic: Goblin Jumper Cables
+    [7566] = { b = 0, s = 0 }, -- Agamand Family Sword
+    [7567] = { b = 0, s = 0 }, -- Agamand Family Axe
+    [7568] = { b = 0, s = 0 }, -- Agamand Family Dagger
+    [7569] = { b = 0, s = 0 }, -- Agamand Family Mace
+    [7586] = { b = 0, s = 0 }, -- Tharnariun's Hope
+    [7587] = { b = 0, s = 0 }, -- Thun'grim's Instructions
     [7606] = { b = 2788, s = 557 }, -- Polar Gauntlets
     [7607] = { b = 6998, s = 1399 }, -- Sable Wand
     [7608] = { b = 4425, s = 1106 }, -- Seer's Fine Stein
@@ -3679,9 +4721,25 @@ VanillaItemPrices = {
     [7610] = { b = 23245, s = 5811 }, -- Aurora Sphere
     [7611] = { b = 29458, s = 7364 }, -- Mistscape Stave
     [7613] = { b = 2000, s = 500 }, -- Pattern: Green Leather Armor
+    [7626] = { b = 0, s = 0 }, -- Bundle of Furs
+    [7627] = { b = 0, s = 0 }, -- Dolanaar Delivery
+    [7628] = { b = 0, s = 0 }, -- Nondescript Letter
+    [7629] = { b = 0, s = 0 }, -- Ukor's Burden
+    [7646] = { b = 0, s = 0 }, -- Crate of Inn Supplies
+    [7666] = { b = 0, s = 0 }, -- Shattered Necklace
+    [7667] = { b = 0, s = 0 }, -- Talvash's Phial of Scrying
+    [7668] = { b = 0, s = 0 }, -- Bloodstained Journal
+    [7669] = { b = 0, s = 0 }, -- Shattered Necklace Ruby
+    [7670] = { b = 0, s = 0 }, -- Shattered Necklace Sapphire
+    [7671] = { b = 0, s = 0 }, -- Shattered Necklace Topaz
+    [7672] = { b = 0, s = 0 }, -- Shattered Necklace Power Source
     [7673] = { b = 35961, s = 8990 }, -- Talvash's Enhancing Necklace
+    [7674] = { b = 0, s = 0 }, -- Delivery to Mathias
+    [7675] = { b = 0, s = 0 }, -- Defias Shipping Schedule
     [7676] = { b = 120, s = 30 }, -- Thistle Tea
     [7678] = { b = 200, s = 50 }, -- Recipe: Thistle Tea
+    [7679] = { b = 0, s = 0 }, -- Shrike Bat Fang
+    [7680] = { b = 0, s = 0 }, -- Jadespine Basilisk Scale
     [7682] = { b = 38392, s = 7678 }, -- Torturing Poker
     [7683] = { b = 19792, s = 3958 }, -- Bloody Brass Knuckles
     [7684] = { b = 10924, s = 2184 }, -- Bloodmage Mantle
@@ -3699,6 +4757,7 @@ VanillaItemPrices = {
     [7712] = { b = 4407, s = 881 }, -- Mantle of Doan
     [7713] = { b = 23886, s = 4777 }, -- Illusionary Rod
     [7714] = { b = 19175, s = 3835 }, -- Hypnotic Blade
+    [7715] = { b = 0, s = 0 }, -- Onin's Report
     [7717] = { b = 94616, s = 18923 }, -- Ravager
     [7718] = { b = 34338, s = 6867 }, -- Herod's Shoulder
     [7719] = { b = 34315, s = 6863 }, -- Raging Berserker's Helm
@@ -3713,10 +4772,15 @@ VanillaItemPrices = {
     [7729] = { b = 27573, s = 5514 }, -- Chesterfall Musket
     [7730] = { b = 50732, s = 10146 }, -- Cobalt Crusher
     [7731] = { b = 13930, s = 3482 }, -- Ghostshard Talisman
+    [7733] = { b = 0, s = 0 }, -- Staff of Prehistoria
     [7734] = { b = 61980, s = 15495 }, -- Six Demon Bag
+    [7735] = { b = 0, s = 0 }, -- Jannok's Rose
     [7736] = { b = 59854, s = 11970 }, -- Fight Club
+    [7737] = { b = 0, s = 0 }, -- Sethir's Journal
     [7738] = { b = 1058, s = 211 }, -- Evergreen Gloves
     [7739] = { b = 2401, s = 480 }, -- Timberland Cape
+    [7740] = { b = 0, s = 0 }, -- Gni'kiv Medallion
+    [7741] = { b = 0, s = 0 }, -- The Shaft of Tsol
     [7742] = { b = 2400, s = 600 }, -- Schematic: Gnomish Cloaking Device
     [7746] = { b = 33720, s = 8430 }, -- Explorers' League Commendation
     [7747] = { b = 38774, s = 7754 }, -- Vile Protector
@@ -3734,13 +4798,35 @@ VanillaItemPrices = {
     [7759] = { b = 33619, s = 6723 }, -- Archon Chestpiece
     [7760] = { b = 30371, s = 6074 }, -- Warchief Kilt
     [7761] = { b = 56453, s = 11290 }, -- Steelclaw Reaver
+    [7766] = { b = 0, s = 0 }, -- Empty Brown Waterskin
+    [7767] = { b = 0, s = 0 }, -- Empty Blue Waterskin
+    [7768] = { b = 0, s = 0 }, -- Empty Red Waterskin
+    [7769] = { b = 0, s = 0 }, -- Filled Brown Waterskin
+    [7770] = { b = 0, s = 0 }, -- Filled Blue Waterskin
+    [7771] = { b = 0, s = 0 }, -- Filled Red Waterskin
     [7786] = { b = 28028, s = 5605 }, -- Headsplitter
     [7787] = { b = 19802, s = 3960 }, -- Resplendent Guardian
     [7806] = { b = 40, s = 10 }, -- Lollipop
     [7807] = { b = 40, s = 10 }, -- Candy Bar
     [7808] = { b = 40, s = 10 }, -- Chocolate Square
     [7809] = { b = 5124, s = 1024 }, -- Easter Dress
+    [7810] = { b = 0, s = 0 }, -- Vial of Purest Water
+    [7811] = { b = 0, s = 0 }, -- Remaining Drops of Purest Water
+    [7812] = { b = 0, s = 0 }, -- Corrupt Manifestation's Bracers
+    [7813] = { b = 0, s = 0 }, -- Shard of Water
+    [7846] = { b = 0, s = 0 }, -- Crag Coyote Fang
+    [7847] = { b = 0, s = 0 }, -- Buzzard Gizzard
+    [7848] = { b = 0, s = 0 }, -- Rock Elemental Shard
+    [7866] = { b = 0, s = 0 }, -- Empty Thaumaturgy Vessel
+    [7867] = { b = 0, s = 0 }, -- Vessel of Dragon's Blood
+    [7870] = { b = 0, s = 0 }, -- Thaumaturgy Vessel Lockbox
+    [7871] = { b = 0, s = 0 }, -- Token of Thievery
+    [7886] = { b = 0, s = 0 }, -- Untranslated Journal
+    [7887] = { b = 0, s = 0 }, -- Necklace and Gem Salvage
     [7888] = { b = 35961, s = 8990 }, -- Jarkal's Enhancing Necklace
+    [7906] = { b = 0, s = 0 }, -- Horns of Nez'ra
+    [7907] = { b = 0, s = 0 }, -- Certificate of Thievery
+    [7908] = { b = 0, s = 0 }, -- Klaven Mortwake's Journal
     [7909] = { b = 4000, s = 1000 }, -- Aquamarine
     [7910] = { b = 20000, s = 5000 }, -- Star Ruby
     [7911] = { b = 2000, s = 500 }, -- Truesilver Ore
@@ -3755,6 +4841,7 @@ VanillaItemPrices = {
     [7920] = { b = 40265, s = 8053 }, -- Mithril Scale Pants
     [7921] = { b = 26936, s = 5387 }, -- Heavy Mithril Pants
     [7922] = { b = 11885, s = 2377 }, -- Steel Plate Helm
+    [7923] = { b = 0, s = 0 }, -- Defias Tower Key
     [7924] = { b = 20516, s = 4103 }, -- Mithril Scale Bracers
     [7926] = { b = 29761, s = 5952 }, -- Ornate Mithril Pants
     [7927] = { b = 14935, s = 2987 }, -- Ornate Mithril Gloves
@@ -3790,7 +4877,9 @@ VanillaItemPrices = {
     [7965] = { b = 160, s = 40 }, -- Solid Weightstone
     [7966] = { b = 800, s = 200 }, -- Solid Grinding Stone
     [7967] = { b = 1000, s = 250 }, -- Mithril Shield Spike
+    [7968] = { b = 0, s = 0 }, -- Southsea Treasure
     [7969] = { b = 1000, s = 250 }, -- Mithril Spurs
+    [7970] = { b = 0, s = 0 }, -- E.C.A.C.
     [7971] = { b = 4000, s = 1000 }, -- Black Pearl
     [7972] = { b = 1600, s = 400 }, -- Ichor of Undeath
     [7973] = { b = 185, s = 46 }, -- Big-mouth Clam
@@ -3814,10 +4903,36 @@ VanillaItemPrices = {
     [7996] = { b = 1222, s = 244 }, -- Lucky Fishing Hat
     [7997] = { b = 406, s = 81 }, -- Red Defias Mask
     [8006] = { b = 62360, s = 12472 }, -- The Ziggler
+    [8007] = { b = 0, s = 0 }, -- Mana Citrine
+    [8008] = { b = 0, s = 0 }, -- Mana Ruby
+    [8009] = { b = 0, s = 0 }, -- Dentrium Power Stone
+    [8026] = { b = 0, s = 0 }, -- Garrett Family Treasure
+    [8027] = { b = 0, s = 0 }, -- Krom Stoutarm's Treasure
     [8028] = { b = 10000, s = 2500 }, -- Plans: Runed Mithril Hammer
     [8029] = { b = 8000, s = 2000 }, -- Plans: Wicked Mithril Blade
     [8030] = { b = 10000, s = 2500 }, -- Plans: Ebon Shiv
+    [8046] = { b = 0, s = 0 }, -- Kearnen's Journal
+    [8047] = { b = 0, s = 0 }, -- Magenta Fungus Cap
+    [8048] = { b = 0, s = 0 }, -- Emerald Dreamcatcher
+    [8049] = { b = 0, s = 0 }, -- Gnarlpine Necklace
+    [8050] = { b = 0, s = 0 }, -- Tallonkai's Jewel
+    [8051] = { b = 0, s = 0 }, -- Flare Gun
+    [8052] = { b = 0, s = 0 }, -- An'Alleum Power Stone
+    [8053] = { b = 0, s = 0 }, -- Obsidian Power Source
+    [8066] = { b = 0, s = 0 }, -- Fizzule's Whistle
+    [8067] = { b = 10, s = 0 }, -- Crafted Light Shot
+    [8068] = { b = 50, s = 0 }, -- Crafted Heavy Shot
+    [8069] = { b = 300, s = 0 }, -- Crafted Solid Shot
+    [8070] = { b = 0, s = 0 }, -- Reward Voucher
     [8071] = { b = 7673, s = 1534 }, -- Sizzle Stick
+    [8072] = { b = 0, s = 0 }, -- Silixiz's Tower Key
+    [8073] = { b = 0, s = 0 }, -- Cache of Zanzil's Altered Mixture
+    [8074] = { b = 0, s = 0 }, -- Gallywix's Head
+    [8075] = { b = 0, s = 0 }, -- Conjured Sourdough
+    [8076] = { b = 0, s = 0 }, -- Conjured Sweet Roll
+    [8077] = { b = 0, s = 0 }, -- Conjured Mineral Water
+    [8078] = { b = 0, s = 0 }, -- Conjured Sparkling Water
+    [8079] = { b = 0, s = 0 }, -- Conjured Crystal Water
     [8080] = { b = 29936, s = 5987 }, -- Light Plate Chestpiece
     [8081] = { b = 14172, s = 2834 }, -- Light Plate Belt
     [8082] = { b = 15945, s = 3189 }, -- Light Plate Boots
@@ -3825,6 +4940,7 @@ VanillaItemPrices = {
     [8084] = { b = 13517, s = 2703 }, -- Light Plate Gloves
     [8085] = { b = 26269, s = 5253 }, -- Light Plate Pants
     [8086] = { b = 18652, s = 3730 }, -- Light Plate Shoulderpads
+    [8087] = { b = 0, s = 0 }, -- Sample of Zanzil's Altered Mixture
     [8088] = { b = 13335, s = 2667 }, -- Platemail Belt
     [8089] = { b = 20081, s = 4016 }, -- Platemail Boots
     [8090] = { b = 13439, s = 2687 }, -- Platemail Bracers
@@ -3832,6 +4948,7 @@ VanillaItemPrices = {
     [8092] = { b = 20312, s = 4062 }, -- Platemail Helm
     [8093] = { b = 27186, s = 5437 }, -- Platemail Leggings
     [8094] = { b = 27290, s = 5458 }, -- Platemail Armor
+    [8095] = { b = 0, s = 0 }, -- Hinott's Oil
     [8106] = { b = 52194, s = 10438 }, -- Hibernal Armor
     [8107] = { b = 29692, s = 5938 }, -- Hibernal Boots
     [8108] = { b = 17972, s = 3594 }, -- Hibernal Bracers
@@ -3862,6 +4979,7 @@ VanillaItemPrices = {
     [8133] = { b = 52585, s = 10517 }, -- Myrmidon's Pauldrons
     [8134] = { b = 79966, s = 15993 }, -- Myrmidon's Defender
     [8135] = { b = 56171, s = 11234 }, -- Chromite Shield
+    [8136] = { b = 0, s = 0 }, -- Gargantuan Tumor
     [8137] = { b = 14035, s = 2807 }, -- Chromite Bracers
     [8138] = { b = 38330, s = 7666 }, -- Chromite Chestplate
     [8139] = { b = 15269, s = 3053 }, -- Chromite Gauntlets
@@ -3871,11 +4989,13 @@ VanillaItemPrices = {
     [8143] = { b = 36135, s = 7227 }, -- Chromite Legplates
     [8144] = { b = 25181, s = 5036 }, -- Chromite Pauldrons
     [8146] = { b = 2000, s = 500 }, -- Wicked Claw
+    [8149] = { b = 0, s = 0 }, -- Voodoo Charm
     [8150] = { b = 1000, s = 250 }, -- Deeprock Salt
     [8151] = { b = 1000, s = 250 }, -- Flask of Mojo
     [8152] = { b = 2000, s = 500 }, -- Flask of Big Mojo
     [8153] = { b = 20, s = 5 }, -- Wildvine
     [8154] = { b = 1000, s = 250 }, -- Scorpid Scale
+    [8155] = { b = 0, s = 0 }, -- Sathrah's Sacrifice
     [8156] = { b = 11099, s = 2219 }, -- Jouster's Wristguards
     [8157] = { b = 25989, s = 5197 }, -- Jouster's Chestplate
     [8158] = { b = 11181, s = 2236 }, -- Jouster's Gauntlets
@@ -4019,34 +5139,61 @@ VanillaItemPrices = {
     [8319] = { b = 45906, s = 9181 }, -- Alabaster Plate Pauldrons
     [8320] = { b = 110461, s = 22092 }, -- Alabaster Shield
     [8343] = { b = 2000, s = 500 }, -- Heavy Silken Thread
+    [8344] = { b = 0, s = 0 }, -- Silvery Spinnerets
     [8345] = { b = 37109, s = 7421 }, -- Wolfshead Helm
     [8346] = { b = 26816, s = 5363 }, -- Gauntlets of the Sea
     [8347] = { b = 29899, s = 5979 }, -- Dragonscale Gauntlets
     [8348] = { b = 54099, s = 10819 }, -- Helm of Fire
     [8349] = { b = 72391, s = 14478 }, -- Feathered Breastplate
     [8350] = { b = 4520, s = 1130 }, -- The 1 Ring
+    [8363] = { b = 0, s = 0 }, -- Shaman Voodoo Charm
     [8364] = { b = 1250, s = 6 }, -- Mithril Head Trout
     [8365] = { b = 80, s = 4 }, -- Raw Mithril Head Trout
     [8366] = { b = 400, s = 100 }, -- Bloated Trout
     [8367] = { b = 92276, s = 18455 }, -- Dragonscale Breastplate
     [8368] = { b = 4000, s = 1000 }, -- Thick Wolfhide
+    [8383] = { b = 0, s = 0 }, -- Plain Letter
     [8384] = { b = 3500, s = 875 }, -- Pattern: Comfortable Leather Hat
     [8385] = { b = 3500, s = 875 }, -- Pattern: Turtle Scale Gloves
     [8386] = { b = 4000, s = 1000 }, -- Pattern: Big Voodoo Robe
     [8387] = { b = 4000, s = 1000 }, -- Pattern: Big Voodoo Mask
     [8389] = { b = 5000, s = 1250 }, -- Pattern: Big Voodoo Pants
     [8390] = { b = 5000, s = 1250 }, -- Pattern: Big Voodoo Cloak
+    [8391] = { b = 0, s = 0 }, -- Snickerfang Jowl
+    [8392] = { b = 0, s = 0 }, -- Blasted Boar Lung
+    [8393] = { b = 0, s = 0 }, -- Scorpok Pincer
+    [8394] = { b = 0, s = 0 }, -- Basilisk Brain
     [8395] = { b = 4000, s = 1000 }, -- Pattern: Tough Scorpid Breastplate
+    [8396] = { b = 0, s = 0 }, -- Vulture Gizzard
     [8397] = { b = 4000, s = 1000 }, -- Pattern: Tough Scorpid Bracers
     [8398] = { b = 4500, s = 1125 }, -- Pattern: Tough Scorpid Gloves
     [8399] = { b = 5000, s = 1250 }, -- Pattern: Tough Scorpid Boots
     [8400] = { b = 5000, s = 1250 }, -- Pattern: Tough Scorpid Shoulders
     [8401] = { b = 5500, s = 1375 }, -- Pattern: Tough Scorpid Leggings
     [8402] = { b = 5500, s = 1375 }, -- Pattern: Tough Scorpid Helm
+    [8403] = { b = 0, s = 0 }, -- Pattern: Wild Leather Shoulders
+    [8404] = { b = 0, s = 0 }, -- Pattern: Wild Leather Vest
+    [8405] = { b = 0, s = 0 }, -- Pattern: Wild Leather Helmet
+    [8406] = { b = 0, s = 0 }, -- Pattern: Wild Leather Boots
+    [8407] = { b = 0, s = 0 }, -- Pattern: Wild Leather Leggings
+    [8408] = { b = 0, s = 0 }, -- Pattern: Wild Leather Cloak
     [8409] = { b = 4000, s = 1000 }, -- Pattern: Nightscape Shoulders
+    [8410] = { b = 0, s = 0 }, -- R.O.I.D.S.
+    [8411] = { b = 0, s = 0 }, -- Lung Juice Cocktail
+    [8412] = { b = 0, s = 0 }, -- Ground Scorpok Assay
+    [8423] = { b = 0, s = 0 }, -- Cerebral Cortex Compound
+    [8424] = { b = 0, s = 0 }, -- Gizzard Gum
+    [8425] = { b = 0, s = 0 }, -- Parrot Droppings
     [8426] = { b = 12, s = 25 }, -- Large Ruffled Feather
+    [8427] = { b = 0, s = 0 }, -- Mutilated Rat Carcass
+    [8428] = { b = 0, s = 0 }, -- Laden Dew Gland
     [8429] = { b = 125, s = 31 }, -- Punctured Dew Gland
     [8430] = { b = 185, s = 46 }, -- Empty Dew Gland
+    [8431] = { b = 0, s = 0 }, -- Spool of Light Chartreuse Silk Thread
+    [8432] = { b = 0, s = 0 }, -- Eau de Mixilpixil
+    [8443] = { b = 0, s = 0 }, -- Gahz'ridian Ornament
+    [8444] = { b = 0, s = 0 }, -- Executioner's Key
+    [8463] = { b = 0, s = 0 }, -- Warchief's Orders
     [8483] = { b = 685, s = 171 }, -- Wastewander Water Pouch
     [8484] = { b = 275, s = 68 }, -- Gadgetzan Water Co. Care Package
     [8485] = { b = 4000, s = 1000 }, -- Cat Carrier (Bombay)
@@ -4066,19 +5213,55 @@ VanillaItemPrices = {
     [8500] = { b = 5000, s = 1250 }, -- Great Horned Owl
     [8501] = { b = 5000, s = 1250 }, -- Hawk Owl
     [8508] = { b = 715, s = 178 }, -- Large Fin
+    [8523] = { b = 1000, s = 0 }, -- Field Testing Kit
+    [8524] = { b = 0, s = 0 }, -- Model 4711-FTZ Power Source
+    [8525] = { b = 0, s = 0 }, -- Zinge's Purchase Order
+    [8526] = { b = 0, s = 0 }, -- Violet Tragan
+    [8527] = { b = 0, s = 0 }, -- Sealed Field Testing Kit
+    [8528] = { b = 0, s = 0 }, -- Violet Powder
     [8529] = { b = 3500, s = 175 }, -- Noggenfogger Elixir
     [8544] = { b = 1600, s = 400 }, -- Mageweave Bandage
     [8545] = { b = 2400, s = 600 }, -- Heavy Mageweave Bandage
+    [8548] = { b = 0, s = 0 }, -- Divino-matic Rod
+    [8563] = { b = 100000, s = 0 }, -- Red Mechanostrider
     [8564] = { b = 800, s = 200 }, -- Hippogryph Egg
+    [8584] = { b = 0, s = 0 }, -- Untapped Dowsing Widget
+    [8585] = { b = 0, s = 0 }, -- Tapped Dowsing Widget
+    [8586] = { b = 10000000, s = 0 }, -- Whistle of the Mottled Red Raptor
+    [8587] = { b = 0, s = 0 }, -- Centipaar Insect Parts
+    [8588] = { b = 100000, s = 0 }, -- Whistle of the Emerald Raptor
+    [8591] = { b = 100000, s = 0 }, -- Whistle of the Turquoise Raptor
+    [8592] = { b = 100000, s = 0 }, -- Whistle of the Violet Raptor
+    [8593] = { b = 0, s = 0 }, -- Scrimshank's Surveying Gear
+    [8594] = { b = 0, s = 0 }, -- Insect Analysis Report
+    [8595] = { b = 100000, s = 0 }, -- Blue Mechanostrider
+    [8603] = { b = 0, s = 0 }, -- Thistleshrub Dew
+    [8623] = { b = 0, s = 0 }, -- OOX-17/TN Distress Beacon
     [8624] = { b = 1000, s = 250 }, -- Red Sparkler
     [8625] = { b = 1000, s = 250 }, -- White Sparkler
     [8626] = { b = 1000, s = 250 }, -- Blue Sparkler
+    [8628] = { b = 800000, s = 0 }, -- Reins of the Spotted Nightsaber
+    [8629] = { b = 100000, s = 0 }, -- Reins of the Striped Nightsaber
+    [8631] = { b = 100000, s = 0 }, -- Reins of the Striped Frostsaber
+    [8632] = { b = 100000, s = 0 }, -- Reins of the Spotted Frostsaber
     [8643] = { b = 10000, s = 2500 }, -- Extraordinary Egg
     [8644] = { b = 6000, s = 1500 }, -- Fine Egg
     [8645] = { b = 3000, s = 750 }, -- Ordinary Egg
     [8646] = { b = 1000, s = 250 }, -- Bad Egg
+    [8647] = { b = 0, s = 0 }, -- Egg Crate
+    [8663] = { b = 0, s = 0 }, -- Mithril Insignia
     [8683] = { b = 4, s = 1 }, -- Clara's Fresh Apple
+    [8684] = { b = 0, s = 0 }, -- Hinterlands Honey Ripple
+    [8685] = { b = 0, s = 0 }, -- Dran's Ripple Delivery
+    [8686] = { b = 0, s = 0 }, -- Mithril Pendant
+    [8687] = { b = 0, s = 0 }, -- Sealed Description of Thredd's Visitor
     [8703] = { b = 25968, s = 6492 }, -- Signet of Expertise
+    [8704] = { b = 0, s = 0 }, -- OOX-09/HL Distress Beacon
+    [8705] = { b = 0, s = 0 }, -- OOX-22/FE Distress Beacon
+    [8707] = { b = 0, s = 0 }, -- Gahz'rilla's Electrified Scale
+    [8708] = { b = 0, s = 0 }, -- Hammer of Expertise
+    [8723] = { b = 0, s = 0 }, -- Caliph Scorpidsting's Head
+    [8724] = { b = 0, s = 0 }, -- Rin'ji's Secret
     [8746] = { b = 3411, s = 682 }, -- Interlaced Cowl
     [8747] = { b = 5181, s = 1036 }, -- Hardened Leather Helm
     [8748] = { b = 3874, s = 774 }, -- Double Mail Coif
@@ -4114,6 +5297,7 @@ VanillaItemPrices = {
     [8957] = { b = 4000, s = 200 }, -- Spinefin Halibut
     [8959] = { b = 3200, s = 160 }, -- Raw Spinefin Halibut
     [8964] = { b = 2900, s = 725 }, -- Codex of Flash Heal
+    [8973] = { b = 0, s = 0 }, -- Thick Yeti Hide
     [8984] = { b = 400, s = 100 }, -- Deadly Poison III
     [8985] = { b = 600, s = 150 }, -- Deadly Poison IV
     [9030] = { b = 800, s = 200 }, -- Restorative Potion
@@ -4123,32 +5307,63 @@ VanillaItemPrices = {
     [9088] = { b = 1000, s = 250 }, -- Gift of Arthas
     [9144] = { b = 1000, s = 250 }, -- Wildvine Potion
     [9149] = { b = 1000, s = 250 }, -- Philosopher's Stone
+    [9153] = { b = 0, s = 0 }, -- Rig Blueprints
     [9154] = { b = 1200, s = 300 }, -- Elixir of Detect Undead
     [9155] = { b = 1600, s = 400 }, -- Arcane Elixir
     [9172] = { b = 2000, s = 500 }, -- Invisibility Potion
+    [9173] = { b = 0, s = 0 }, -- Goblin Transponder
     [9179] = { b = 4000, s = 1000 }, -- Elixir of Greater Intellect
     [9186] = { b = 700, s = 175 }, -- Mind-numbing Poison III
     [9187] = { b = 2400, s = 600 }, -- Elixir of Greater Agility
+    [9189] = { b = 0, s = 0 }, -- Shay's Bell
     [9197] = { b = 2400, s = 600 }, -- Elixir of Dream Vision
     [9206] = { b = 2800, s = 700 }, -- Elixir of Giants
     [9210] = { b = 3000, s = 750 }, -- Ghost Dye
     [9214] = { b = 10000, s = 2500 }, -- Grimoire of Inferno
     [9224] = { b = 2800, s = 700 }, -- Elixir of Demonslaying
     [9233] = { b = 2000, s = 500 }, -- Elixir of Detect Demon
+    [9234] = { b = 0, s = 0 }, -- Tiara of the Deep
+    [9235] = { b = 0, s = 0 }, -- Pratt's Letter
+    [9236] = { b = 0, s = 0 }, -- Jangdor's Letter
+    [9237] = { b = 0, s = 0 }, -- Woodpaw Gnoll Mane
+    [9238] = { b = 0, s = 0 }, -- Uncracked Scarab Shell
+    [9240] = { b = 0, s = 0 }, -- Mallet of Zul'Farrak
+    [9241] = { b = 0, s = 0 }, -- Sacred Mallet
     [9242] = { b = 9685, s = 2421 }, -- Ancient Tablet
     [9243] = { b = 32620, s = 8155 }, -- Shriveled Heart
+    [9244] = { b = 0, s = 0 }, -- Stoley's Shipment
+    [9245] = { b = 0, s = 0 }, -- Stoley's Bottle
+    [9246] = { b = 0, s = 0 }, -- Firebeard's Head
+    [9247] = { b = 0, s = 0 }, -- Hatecrest Naga Scale
+    [9248] = { b = 0, s = 0 }, -- Mysterious Relic
     [9249] = { b = 6215, s = 1553 }, -- Captain's Key
+    [9250] = { b = 0, s = 0 }, -- Ship Schedule
     [9251] = { b = 250, s = 62 }, -- Upper Map Fragment
     [9252] = { b = 250, s = 62 }, -- Lower Map Fragment
     [9253] = { b = 250, s = 62 }, -- Middle Map Fragment
+    [9254] = { b = 0, s = 0 }, -- Cuergo's Treasure Map
+    [9255] = { b = 0, s = 0 }, -- Lahassa Essence
+    [9256] = { b = 0, s = 0 }, -- Imbel Essence
+    [9257] = { b = 0, s = 0 }, -- Samha Essence
+    [9258] = { b = 0, s = 0 }, -- Byltan Essence
     [9259] = { b = 258, s = 64 }, -- Troll Tribal Necklace
     [9260] = { b = 1600, s = 400 }, -- Volatile Rum
     [9261] = { b = 1000, s = 250 }, -- Lead Ore
     [9262] = { b = 4000, s = 1000 }, -- Black Vitriol
+    [9263] = { b = 0, s = 0 }, -- Troyas' Stave
     [9264] = { b = 140, s = 35 }, -- Elixir of Shadow Power
     [9265] = { b = 60, s = 15 }, -- Cuergo's Hidden Treasure
+    [9266] = { b = 0, s = 0 }, -- Woodpaw Battle Plans
+    [9275] = { b = 0, s = 0 }, -- Cuergo's Key
     [9276] = { b = 400, s = 100 }, -- Pirate's Footlocker
+    [9277] = { b = 0, s = 0 }, -- Techbot's Memory Core
+    [9278] = { b = 0, s = 0 }, -- Essential Artificial
     [9279] = { b = 180, s = 45 }, -- White Punch Card
+    [9280] = { b = 0, s = 0 }, -- Yellow Punch Card
+    [9281] = { b = 0, s = 0 }, -- Red Punch Card
+    [9282] = { b = 0, s = 0 }, -- Blue Punch Card
+    [9283] = { b = 0, s = 0 }, -- Empty Leaden Collection Phial
+    [9284] = { b = 0, s = 0 }, -- Full Leaden Collection Phial
     [9285] = { b = 11943, s = 2388 }, -- Field Plate Vambraces
     [9286] = { b = 30203, s = 6040 }, -- Field Plate Armor
     [9287] = { b = 12031, s = 2406 }, -- Field Plate Gauntlets
@@ -4163,20 +5378,37 @@ VanillaItemPrices = {
     [9296] = { b = 8000, s = 2000 }, -- Recipe: Gift of Arthas
     [9297] = { b = 10000, s = 2500 }, -- Recipe: Elixir of Dream Vision
     [9298] = { b = 9000, s = 2250 }, -- Recipe: Elixir of Giants
+    [9299] = { b = 0, s = 0 }, -- Thermaplugg's Safe Combination
     [9300] = { b = 10000, s = 2500 }, -- Recipe: Elixir of Demonslaying
     [9301] = { b = 10000, s = 2500 }, -- Recipe: Elixir of Shadow Power
     [9302] = { b = 9000, s = 2250 }, -- Recipe: Ghost Dye
     [9303] = { b = 8000, s = 2000 }, -- Recipe: Philosopher's Stone
     [9304] = { b = 8000, s = 2000 }, -- Recipe: Transmute Iron to Gold
     [9305] = { b = 8000, s = 2000 }, -- Recipe: Transmute Mithril to Truesilver
+    [9306] = { b = 0, s = 0 }, -- Stave of Equinex
+    [9307] = { b = 0, s = 0 }, -- A Sparkling Stone
     [9308] = { b = 152, s = 38 }, -- Grime-Encrusted Object
+    [9309] = { b = 0, s = 0 }, -- Robo-mechanical Guts
+    [9311] = { b = 0, s = 0 }, -- Default Stationery
     [9312] = { b = 20, s = 5 }, -- Blue Firework
     [9313] = { b = 20, s = 5 }, -- Green Firework
     [9314] = { b = 50, s = 12 }, -- Red Streaks Firework
     [9315] = { b = 40, s = 10 }, -- Yellow Rose Firework
+    [9316] = { b = 0, s = 0 }, -- Prismatic Punch Card
     [9317] = { b = 100, s = 25 }, -- Red, White and Blue Firework
     [9318] = { b = 20, s = 5 }, -- Red Firework
+    [9319] = { b = 0, s = 0 }, -- Nimboya's Laden Pike
+    [9320] = { b = 0, s = 0 }, -- Witherbark Skull
+    [9321] = { b = 0, s = 0 }, -- Venom Bottle
+    [9322] = { b = 0, s = 0 }, -- Undamaged Venom Sac
+    [9323] = { b = 0, s = 0 }, -- Gadrin's Parchment
+    [9324] = { b = 0, s = 0 }, -- Shadra's Venom
+    [9326] = { b = 0, s = 0 }, -- Grime-Encrusted Ring
     [9327] = { b = 2500, s = 625 }, -- Security DELTA Data Access Card
+    [9328] = { b = 0, s = 0 }, -- Super Snapper FX
+    [9329] = { b = 0, s = 0 }, -- A Short Note
+    [9330] = { b = 0, s = 0 }, -- Snapshot of Gammerita
+    [9331] = { b = 0, s = 0 }, -- Feralas: A History
     [9332] = { b = 155, s = 38 }, -- Crusted Bandages
     [9333] = { b = 295, s = 73 }, -- Tarnished Silver Necklace
     [9334] = { b = 190, s = 47 }, -- Cracked Pottery
@@ -4189,9 +5421,16 @@ VanillaItemPrices = {
     [9359] = { b = 97888, s = 19577 }, -- Wirt's Third Leg
     [9360] = { b = 1600, s = 400 }, -- Cuergo's Gold
     [9361] = { b = 1600, s = 400 }, -- Cuergo's Gold with Worm
+    [9362] = { b = 0, s = 0 }, -- Brilliant Gold Ring
     [9363] = { b = 50, s = 12 }, -- Sparklematic-Wrapped Box
+    [9364] = { b = 0, s = 0 }, -- Heavy Leaden Collection Phial
+    [9365] = { b = 0, s = 0 }, -- High Potency Radioactive Fallout
     [9366] = { b = 18446, s = 3689 }, -- Golden Scale Gauntlets
     [9367] = { b = 5000, s = 1250 }, -- Plans: Golden Scale Gauntlets
+    [9368] = { b = 0, s = 0 }, -- Jer'kai's Signet Ring
+    [9369] = { b = 0, s = 0 }, -- Iridescent Sprite Darter Wing
+    [9370] = { b = 0, s = 0 }, -- Gordunni Scroll
+    [9371] = { b = 0, s = 0 }, -- Gordunni Orb
     [9372] = { b = 309681, s = 61936 }, -- Sul'thraze the Lasher
     [9375] = { b = 21101, s = 4220 }, -- Expert Goldminer's Helmet
     [9378] = { b = 56901, s = 11380 }, -- Shovelphlange's Mining Axe
@@ -4235,6 +5474,7 @@ VanillaItemPrices = {
     [9418] = { b = 164258, s = 32851 }, -- Stoneslayer
     [9419] = { b = 90384, s = 18076 }, -- Galgann's Firehammer
     [9420] = { b = 20416, s = 4083 }, -- Adventurer's Pith Helmet
+    [9421] = { b = 0, s = 0 }, -- Major Healthstone
     [9422] = { b = 65262, s = 13052 }, -- Shadowforge Bushmaster
     [9423] = { b = 127319, s = 25463 }, -- The Jackhammer
     [9424] = { b = 67970, s = 13594 }, -- Ginn-su Sword
@@ -4249,6 +5489,13 @@ VanillaItemPrices = {
     [9433] = { b = 20669, s = 4133 }, -- Forgotten Wraps
     [9434] = { b = 28240, s = 5648 }, -- Elemental Raiment
     [9435] = { b = 14583, s = 2916 }, -- Reticulated Bone Gauntlets
+    [9436] = { b = 0, s = 0 }, -- Faranell's Parcel
+    [9437] = { b = 0, s = 0 }, -- Untested Basilisk Sample
+    [9438] = { b = 0, s = 0 }, -- Acceptable Scorpid Sample
+    [9439] = { b = 0, s = 0 }, -- Untested Hyena Sample
+    [9440] = { b = 0, s = 0 }, -- Acceptable Basilisk Sample
+    [9441] = { b = 0, s = 0 }, -- Acceptable Hyena Sample
+    [9442] = { b = 0, s = 0 }, -- Untested Scorpid Sample
     [9444] = { b = 5602, s = 1120 }, -- Techbot CPU Shell
     [9445] = { b = 11302, s = 2260 }, -- Grubbis Paws
     [9446] = { b = 37820, s = 7564 }, -- Electrocutioner Leg
@@ -4265,11 +5512,18 @@ VanillaItemPrices = {
     [9457] = { b = 44510, s = 8902 }, -- Royal Diplomatic Scepter
     [9458] = { b = 34589, s = 6917 }, -- Thermaplugg's Central Core
     [9459] = { b = 67801, s = 13560 }, -- Thermaplugg's Left Arm
+    [9460] = { b = 0, s = 0 }, -- Grimtotem Horn
     [9461] = { b = 18345, s = 4586 }, -- Charged Gear
+    [9462] = { b = 0, s = 0 }, -- Crate of Grimtotem Horns
+    [9463] = { b = 0, s = 0 }, -- Gordunni Cobalt
     [9465] = { b = 92804, s = 18560 }, -- Digmaster 5000
+    [9466] = { b = 0, s = 0 }, -- Orwin's Shovel
     [9467] = { b = 93409, s = 18681 }, -- Gahz'rilla Fang
+    [9468] = { b = 0, s = 0 }, -- Sharpbeak's Feather
     [9469] = { b = 73171, s = 14634 }, -- Gahz'rilla Scale Armor
     [9470] = { b = 39292, s = 7858 }, -- Bad Mojo Mask
+    [9471] = { b = 0, s = 0 }, -- Nekrum's Medallion
+    [9472] = { b = 0, s = 0 }, -- Hexx's Key
     [9473] = { b = 66207, s = 13241 }, -- Jinxed Hoodoo Skin
     [9474] = { b = 66450, s = 13290 }, -- Jinxed Hoodoo Kilt
     [9475] = { b = 166732, s = 33346 }, -- Diabolic Skiver
@@ -4290,6 +5544,7 @@ VanillaItemPrices = {
     [9490] = { b = 30609, s = 6121 }, -- Gizmotron Megachopper
     [9491] = { b = 6542, s = 1308 }, -- Hotshot Pilot's Gloves
     [9492] = { b = 15862, s = 3172 }, -- Electromagnetic Gigaflux Reactivator
+    [9507] = { b = 0, s = 0 }, -- A Carefully-packed Crate
     [9508] = { b = 11762, s = 2352 }, -- Mechbuilder's Overalls
     [9509] = { b = 13416, s = 2683 }, -- Petrolspill Leggings
     [9510] = { b = 14729, s = 2945 }, -- Caverndeep Trudgers
@@ -4305,7 +5560,10 @@ VanillaItemPrices = {
     [9520] = { b = 57309, s = 11461 }, -- Silent Hunter
     [9521] = { b = 71912, s = 14382 }, -- Skullsplitter
     [9522] = { b = 24694, s = 4938 }, -- Energized Stone Circle
+    [9523] = { b = 0, s = 0 }, -- Troll Temper
     [9527] = { b = 108069, s = 21613 }, -- Spellshifter Rod
+    [9528] = { b = 0, s = 0 }, -- Edana's Dark Heart
+    [9530] = { b = 0, s = 0 }, -- Horn of Hatetalon
     [9531] = { b = 26322, s = 5264 }, -- Gemshale Pauldrons
     [9533] = { b = 28370, s = 7092 }, -- Masons Fraternity Ring
     [9534] = { b = 44236, s = 8847 }, -- Engineer's Guild Headpiece
@@ -4315,8 +5573,56 @@ VanillaItemPrices = {
     [9539] = { b = 200, s = 50 }, -- Box of Rations
     [9540] = { b = 600, s = 150 }, -- Box of Spells
     [9541] = { b = 800, s = 200 }, -- Box of Goodies
+    [9542] = { b = 0, s = 0 }, -- Simple Letter
+    [9543] = { b = 0, s = 0 }, -- Simple Rune
+    [9544] = { b = 0, s = 0 }, -- Simple Memorandum
+    [9545] = { b = 0, s = 0 }, -- Simple Sigil
+    [9546] = { b = 0, s = 0 }, -- Simple Scroll
+    [9547] = { b = 0, s = 0 }, -- Simple Note
+    [9548] = { b = 0, s = 0 }, -- Hallowed Letter
+    [9550] = { b = 0, s = 0 }, -- Encrypted Rune
+    [9551] = { b = 0, s = 0 }, -- Encrypted Sigil
+    [9552] = { b = 0, s = 0 }, -- Rune-Inscribed Note
+    [9553] = { b = 0, s = 0 }, -- Etched Parchment
+    [9554] = { b = 0, s = 0 }, -- Encrypted Tablet
+    [9555] = { b = 0, s = 0 }, -- Encrypted Letter
+    [9556] = { b = 0, s = 0 }, -- Hallowed Rune
+    [9557] = { b = 0, s = 0 }, -- Hallowed Sigil
+    [9558] = { b = 0, s = 0 }, -- Encrypted Memorandum
+    [9559] = { b = 0, s = 0 }, -- Encrypted Scroll
+    [9560] = { b = 0, s = 0 }, -- Encrypted Parchment
+    [9561] = { b = 0, s = 0 }, -- Hallowed Tablet
+    [9562] = { b = 0, s = 0 }, -- Rune-Inscribed Tablet
+    [9563] = { b = 0, s = 0 }, -- Consecrated Rune
+    [9564] = { b = 0, s = 0 }, -- Etched Tablet
+    [9565] = { b = 0, s = 0 }, -- Etched Note
+    [9566] = { b = 0, s = 0 }, -- Etched Rune
+    [9567] = { b = 0, s = 0 }, -- Etched Sigil
+    [9568] = { b = 0, s = 0 }, -- Rune-Inscribed Parchment
+    [9569] = { b = 0, s = 0 }, -- Hallowed Scroll
+    [9570] = { b = 0, s = 0 }, -- Consecrated Letter
+    [9571] = { b = 0, s = 0 }, -- Glyphic Letter
+    [9572] = { b = 0, s = 0 }, -- Glyphic Rune
+    [9573] = { b = 0, s = 0 }, -- Glyphic Memorandum
+    [9574] = { b = 0, s = 0 }, -- Glyphic Scroll
+    [9575] = { b = 0, s = 0 }, -- Glyphic Tablet
+    [9576] = { b = 0, s = 0 }, -- Tainted Letter
+    [9577] = { b = 0, s = 0 }, -- Tainted Memorandum
+    [9578] = { b = 0, s = 0 }, -- Tainted Scroll
+    [9579] = { b = 0, s = 0 }, -- Tainted Parchment
+    [9580] = { b = 0, s = 0 }, -- Verdant Sigil
+    [9581] = { b = 0, s = 0 }, -- Verdant Note
     [9587] = { b = 25000, s = 6250 }, -- Thawpelt Sack
     [9588] = { b = 25852, s = 6463 }, -- Nogg's Gold Ring
+    [9589] = { b = 0, s = 0 }, -- Encrusted Minerals
+    [9590] = { b = 0, s = 0 }, -- Splintered Log
+    [9591] = { b = 0, s = 0 }, -- Resilient Sinew
+    [9592] = { b = 0, s = 0 }, -- Metallic Fragments
+    [9593] = { b = 0, s = 0 }, -- Treant Muisek
+    [9594] = { b = 0, s = 0 }, -- Wildkin Muisek
+    [9595] = { b = 0, s = 0 }, -- Hippogryph Muisek
+    [9596] = { b = 0, s = 0 }, -- Faerie Dragon Muisek
+    [9597] = { b = 0, s = 0 }, -- Mountain Giant Muisek
     [9598] = { b = 473, s = 94 }, -- Sleeping Robes
     [9599] = { b = 713, s = 142 }, -- Barkmail Leggings
     [9600] = { b = 465, s = 93 }, -- Lace Pants
@@ -4325,15 +5631,22 @@ VanillaItemPrices = {
     [9603] = { b = 1510, s = 302 }, -- Gritroot Staff
     [9604] = { b = 28160, s = 5632 }, -- Mechanic's Pipehammer
     [9605] = { b = 6783, s = 1356 }, -- Repairman's Cape
+    [9606] = { b = 0, s = 0 }, -- Treant Muisek Vessel
     [9607] = { b = 8810, s = 1762 }, -- Bastion of Stormwind
     [9608] = { b = 25144, s = 5028 }, -- Shoni's Disarming Tool
     [9609] = { b = 5046, s = 1009 }, -- Shilly Mitts
+    [9618] = { b = 0, s = 0 }, -- Wildkin Muisek Vessel
+    [9619] = { b = 0, s = 0 }, -- Hippogryph Muisek Vessel
+    [9620] = { b = 0, s = 0 }, -- Faerie Dragon Muisek Vessel
+    [9621] = { b = 0, s = 0 }, -- Mountain Giant Muisek Vessel
     [9622] = { b = 22660, s = 5665 }, -- Reedknot Ring
     [9623] = { b = 20992, s = 4198 }, -- Civinad Robes
     [9624] = { b = 26338, s = 5267 }, -- Triprunner Dungarees
     [9625] = { b = 31721, s = 6344 }, -- Dual Reinforced Leggings
     [9626] = { b = 81219, s = 16243 }, -- Dwarven Charge
     [9627] = { b = 10170, s = 2542 }, -- Explorer's League Lodestar
+    [9628] = { b = 0, s = 0 }, -- Neeru's Herb Pouch
+    [9629] = { b = 0, s = 0 }, -- A Shrunken Head
     [9630] = { b = 28903, s = 5780 }, -- Pratt's Handcrafted Boots
     [9631] = { b = 19341, s = 3868 }, -- Pratt's Handcrafted Gloves
     [9632] = { b = 19416, s = 3883 }, -- Jangdor's Handcrafted Gloves
@@ -4387,6 +5700,10 @@ VanillaItemPrices = {
     [9706] = { b = 46062, s = 9212 }, -- Tharg's Disk
     [9718] = { b = 57106, s = 11421 }, -- Reforged Blade of Heroes
     [9719] = { b = 25000, s = 6250 }, -- Broken Blade of Heroes
+    [9738] = { b = 0, s = 0 }, -- Gem of Cobrahn
+    [9739] = { b = 0, s = 0 }, -- Gem of Anacondra
+    [9740] = { b = 0, s = 0 }, -- Gem of Pythas
+    [9741] = { b = 0, s = 0 }, -- Gem of Serpentis
     [9742] = { b = 246, s = 49 }, -- Simple Cord
     [9743] = { b = 335, s = 67 }, -- Simple Shoes
     [9744] = { b = 224, s = 44 }, -- Simple Bands
@@ -4619,18 +5936,22 @@ VanillaItemPrices = {
     [9972] = { b = 12378, s = 2475 }, -- Embossed Plate Bracers
     [9973] = { b = 18637, s = 3727 }, -- Embossed Plate Boots
     [9974] = { b = 82246, s = 16449 }, -- Overlord's Shield
+    [9978] = { b = 0, s = 0 }, -- Gahz'ridian Detector
     [9998] = { b = 24076, s = 4815 }, -- Black Mageweave Vest
     [9999] = { b = 24164, s = 4832 }, -- Black Mageweave Leggings
+    [10000] = { b = 0, s = 0 }, -- Margol's Horn
     [10001] = { b = 26285, s = 5257 }, -- Black Mageweave Robe
     [10002] = { b = 26380, s = 5276 }, -- Shadoweave Pants
     [10003] = { b = 14296, s = 2859 }, -- Black Mageweave Gloves
     [10004] = { b = 28694, s = 5738 }, -- Shadoweave Robe
+    [10005] = { b = 0, s = 0 }, -- Margol's Gigantic Horn
     [10007] = { b = 28999, s = 5799 }, -- Red Mageweave Vest
     [10008] = { b = 21826, s = 4365 }, -- White Bandit Mask
     [10009] = { b = 26424, s = 5284 }, -- Red Mageweave Pants
     [10018] = { b = 16376, s = 3275 }, -- Red Mageweave Gloves
     [10019] = { b = 19721, s = 3944 }, -- Dreamweave Gloves
     [10021] = { b = 39731, s = 7946 }, -- Dreamweave Vest
+    [10022] = { b = 0, s = 0 }, -- Proof of Deed
     [10023] = { b = 16672, s = 3334 }, -- Shadoweave Gloves
     [10024] = { b = 27107, s = 5421 }, -- Black Mageweave Headband
     [10025] = { b = 33952, s = 6790 }, -- Shadoweave Mask
@@ -4882,6 +6203,7 @@ VanillaItemPrices = {
     [10280] = { b = 78615, s = 15723 }, -- Emerald Legplates
     [10281] = { b = 56362, s = 11272 }, -- Emerald Pauldrons
     [10282] = { b = 33561, s = 6712 }, -- Emerald Vambraces
+    [10283] = { b = 0, s = 0 }, -- Wolf Heart Samples
     [10285] = { b = 4000, s = 1000 }, -- Shadow Silk
     [10286] = { b = 1600, s = 400 }, -- Heart of the Wild
     [10287] = { b = 4822, s = 964 }, -- Greenweave Mantle
@@ -4911,12 +6233,14 @@ VanillaItemPrices = {
     [10323] = { b = 4500, s = 1125 }, -- Pattern: Tuxedo Pants
     [10325] = { b = 10000, s = 2500 }, -- Pattern: White Wedding Dress
     [10326] = { b = 5000, s = 1250 }, -- Pattern: Tuxedo Jacket
+    [10327] = { b = 0, s = 0 }, -- Horn of Echeyakee
     [10328] = { b = 34964, s = 6992 }, -- Scarlet Chestpiece
     [10329] = { b = 12538, s = 2507 }, -- Scarlet Belt
     [10330] = { b = 47938, s = 9587 }, -- Scarlet Leggings
     [10331] = { b = 13644, s = 2728 }, -- Scarlet Gauntlets
     [10332] = { b = 18950, s = 3790 }, -- Scarlet Boots
     [10333] = { b = 11574, s = 2314 }, -- Scarlet Wristguards
+    [10338] = { b = 0, s = 0 }, -- Fresh Zhevra Carcass
     [10358] = { b = 12107, s = 2421 }, -- Duracin Bracers
     [10359] = { b = 12151, s = 2430 }, -- Everlast Boots
     [10360] = { b = 5000, s = 1250 }, -- Black Kingsnake
@@ -4970,17 +6294,37 @@ VanillaItemPrices = {
     [10411] = { b = 3939, s = 787 }, -- Footpads of the Fang
     [10412] = { b = 2028, s = 405 }, -- Belt of the Fang
     [10413] = { b = 1539, s = 307 }, -- Gloves of the Fang
+    [10414] = { b = 0, s = 0 }, -- Sample Snapjaw Shell
     [10418] = { b = 65859, s = 16464 }, -- Glimmering Mithril Insignia
+    [10420] = { b = 0, s = 0 }, -- Skull of the Coldbringer
     [10421] = { b = 161, s = 32 }, -- Rough Copper Vest
     [10423] = { b = 14211, s = 2842 }, -- Silvered Bronze Leggings
     [10424] = { b = 3000, s = 750 }, -- Plans: Silvered Bronze Leggings
+    [10438] = { b = 0, s = 0 }, -- Felix's Box
+    [10439] = { b = 0, s = 0 }, -- Durnan's Scalding Mornbrew
+    [10440] = { b = 0, s = 0 }, -- Nori's Mug
+    [10441] = { b = 0, s = 0 }, -- Glowing Shard
+    [10442] = { b = 0, s = 0 }, -- Mysterious Artifact
+    [10443] = { b = 0, s = 0 }, -- Singed Letter
+    [10444] = { b = 0, s = 0 }, -- Standard Issue Flare Gun
+    [10445] = { b = 0, s = 0 }, -- Drawing Kit
+    [10446] = { b = 0, s = 0 }, -- Heart of Obsidion
+    [10447] = { b = 0, s = 0 }, -- Head of Lathoric the Black
     [10450] = { b = 1585, s = 396 }, -- Undamaged Hippogryph Feather
+    [10454] = { b = 0, s = 0 }, -- Essence of Eranikus
     [10455] = { b = 25859, s = 6464 }, -- Chained Essence of Eranikus
+    [10456] = { b = 0, s = 0 }, -- A Bulging Coin Purse
     [10457] = { b = 570, s = 142 }, -- Empty Sea Snail Shell
+    [10458] = { b = 0, s = 0 }, -- Prayer to Elune
+    [10459] = { b = 0, s = 0 }, -- Chief Sharptusk Thornmantle's Head
     [10460] = { b = 2518, s = 629 }, -- Hakkari Blood
     [10461] = { b = 15410, s = 3082 }, -- Shadowy Bracers
     [10462] = { b = 18044, s = 3608 }, -- Shadowy Belt
     [10463] = { b = 7000, s = 1750 }, -- Pattern: Shadoweave Mask
+    [10464] = { b = 0, s = 0 }, -- Staff of Command
+    [10465] = { b = 0, s = 0 }, -- Egg of Hakkar
+    [10466] = { b = 0, s = 0 }, -- Atal'ai Stone Circle
+    [10467] = { b = 0, s = 0 }, -- Trader's Satchel
     [10479] = { b = 48, s = 24 }, -- Kovic's Trading Satchel
     [10498] = { b = 81, s = 16 }, -- Gyromatic Micro-Adjustor
     [10499] = { b = 10526, s = 2105 }, -- Bright-Eye Goggles
@@ -4993,11 +6337,18 @@ VanillaItemPrices = {
     [10506] = { b = 26136, s = 5227 }, -- Deepdive Helmet
     [10507] = { b = 1400, s = 350 }, -- Solid Dynamite
     [10508] = { b = 44794, s = 8958 }, -- Mithril Blunderbuss
+    [10509] = { b = 0, s = 0 }, -- Heart of Flame
     [10510] = { b = 56845, s = 11369 }, -- Mithril Heavy-bore Rifle
+    [10511] = { b = 0, s = 0 }, -- Golem Oil
     [10512] = { b = 1000, s = 2 }, -- Hi-Impact Mithril Slugs
     [10513] = { b = 2000, s = 5 }, -- Mithril Gyro-Shot
     [10514] = { b = 3000, s = 750 }, -- Mithril Frag Bomb
+    [10515] = { b = 0, s = 0 }, -- Torch of Retribution
     [10518] = { b = 23482, s = 4696 }, -- Parachute Cloak
+    [10538] = { b = 0, s = 0 }, -- Tablet of Beth'Amara
+    [10539] = { b = 0, s = 0 }, -- Tablet of Jin'yael
+    [10540] = { b = 0, s = 0 }, -- Tablet of Markri
+    [10541] = { b = 0, s = 0 }, -- Tablet of Sael'hai
     [10542] = { b = 26279, s = 5255 }, -- Goblin Mining Helmet
     [10543] = { b = 17586, s = 3517 }, -- Goblin Construction Helmet
     [10544] = { b = 127, s = 25 }, -- Thistlewood Maul
@@ -5007,19 +6358,28 @@ VanillaItemPrices = {
     [10548] = { b = 10000, s = 2500 }, -- Sniper Scope
     [10549] = { b = 811, s = 162 }, -- Rancher's Trousers
     [10550] = { b = 243, s = 48 }, -- Wooly Mittens
+    [10551] = { b = 0, s = 0 }, -- Thorium Plated Dagger
+    [10552] = { b = 0, s = 0 }, -- Symbol of Ragnaros
     [10553] = { b = 657, s = 131 }, -- Foreman Vest
     [10554] = { b = 597, s = 119 }, -- Foreman Pants
+    [10556] = { b = 0, s = 0 }, -- Stone Circle
     [10558] = { b = 1000, s = 250 }, -- Gold Power Core
     [10559] = { b = 3000, s = 750 }, -- Mithril Tube
     [10560] = { b = 4000, s = 1000 }, -- Unstable Trigger
     [10561] = { b = 4000, s = 1000 }, -- Mithril Casing
     [10562] = { b = 3000, s = 750 }, -- Hi-Explosive Bomb
+    [10563] = { b = 0, s = 0 }, -- Rubbing: Rune of Beth'Amara
+    [10564] = { b = 0, s = 0 }, -- Rubbing: Rune of Jin'yael
+    [10565] = { b = 0, s = 0 }, -- Rubbing: Rune of Markri
+    [10566] = { b = 0, s = 0 }, -- Rubbing: Rune of Sael'hai
     [10567] = { b = 43628, s = 8725 }, -- Quillshooter
+    [10569] = { b = 0, s = 0 }, -- Hoard of the Black Dragonflight
     [10570] = { b = 79375, s = 15875 }, -- Manslayer
     [10571] = { b = 54635, s = 10927 }, -- Ebony Boneclub
     [10572] = { b = 47960, s = 9592 }, -- Freezing Shard
     [10573] = { b = 68773, s = 13754 }, -- Boneslasher
     [10574] = { b = 18878, s = 3775 }, -- Corpseshroud
+    [10575] = { b = 0, s = 0 }, -- Black Dragonflight Molt
     [10576] = { b = 24000, s = 6000 }, -- Mithril Mechanical Dragonling
     [10577] = { b = 8000, s = 2000 }, -- Goblin Mortar
     [10578] = { b = 16885, s = 3377 }, -- Thoughtcast Boots
@@ -5030,7 +6390,14 @@ VanillaItemPrices = {
     [10586] = { b = 3000, s = 750 }, -- The Big One
     [10587] = { b = 6000, s = 1500 }, -- Goblin Bomb Dispenser
     [10588] = { b = 29171, s = 5834 }, -- Goblin Rocket Helmet
+    [10589] = { b = 0, s = 0 }, -- Oathstone of Ysera's Dragonflight
+    [10590] = { b = 0, s = 0 }, -- Pocked Black Box
     [10592] = { b = 600, s = 150 }, -- Catseye Elixir
+    [10593] = { b = 0, s = 0 }, -- Imperfect Draenethyst Fragment
+    [10597] = { b = 0, s = 0 }, -- Head of Magus Rimtori
+    [10598] = { b = 0, s = 0 }, -- Hetaera's Bloodied Head
+    [10599] = { b = 0, s = 0 }, -- Hetaera's Beaten Head
+    [10600] = { b = 0, s = 0 }, -- Hetaera's Bruised Head
     [10601] = { b = 2000, s = 500 }, -- Schematic: Bright-Eye Goggles
     [10602] = { b = 3000, s = 750 }, -- Schematic: Deadly Scope
     [10603] = { b = 3300, s = 825 }, -- Schematic: Catseye Ultra Goggles
@@ -5040,7 +6407,10 @@ VanillaItemPrices = {
     [10607] = { b = 3600, s = 900 }, -- Schematic: Deepdive Helmet
     [10608] = { b = 3800, s = 950 }, -- Schematic: Sniper Scope
     [10609] = { b = 4000, s = 1000 }, -- Schematic: Mithril Mechanical Dragonling
+    [10610] = { b = 0, s = 0 }, -- Hetaera's Blood
     [10620] = { b = 1000, s = 250 }, -- Thorium Ore
+    [10621] = { b = 0, s = 0 }, -- Runed Scroll
+    [10622] = { b = 0, s = 0 }, -- Kadrak's Flag
     [10623] = { b = 123740, s = 24748 }, -- Winter's Bite
     [10624] = { b = 86246, s = 17249 }, -- Stinging Bow
     [10625] = { b = 136831, s = 27366 }, -- Stealthblade
@@ -5057,11 +6427,17 @@ VanillaItemPrices = {
     [10636] = { b = 30, s = 6 }, -- Nomadic Gloves
     [10637] = { b = 698, s = 139 }, -- Brewer's Gloves
     [10638] = { b = 1052, s = 210 }, -- Long Draping Cape
+    [10639] = { b = 0, s = 0 }, -- Hyacinth Mushroom
+    [10640] = { b = 0, s = 0 }, -- Webwood Ichor
+    [10641] = { b = 0, s = 0 }, -- Moonpetal Lily
+    [10642] = { b = 0, s = 0 }, -- Iverron's Antidote
+    [10643] = { b = 0, s = 0 }, -- Sealed Letter to Ag'tor
     [10644] = { b = 2000, s = 500 }, -- Recipe: Goblin Rocket Fuel
     [10645] = { b = 3000, s = 750 }, -- Gnomish Death Ray
     [10646] = { b = 2000, s = 500 }, -- Goblin Sapper Charge
     [10647] = { b = 2000, s = 500 }, -- Engineer's Ink
     [10648] = { b = 500, s = 125 }, -- Blank Parchment
+    [10649] = { b = 0, s = 0 }, -- Nightmare Shard
     [10652] = { b = 151543, s = 30308 }, -- Will of the Mountain Giant
     [10653] = { b = 8197, s = 1639 }, -- Trailblazer Boots
     [10654] = { b = 4827, s = 965 }, -- Jutebraid Gloves
@@ -5070,11 +6446,31 @@ VanillaItemPrices = {
     [10657] = { b = 4669, s = 933 }, -- Talbar Mantle
     [10658] = { b = 6248, s = 1249 }, -- Quagmire Galoshes
     [10659] = { b = 18650, s = 4662 }, -- Shard of Afrasa
+    [10660] = { b = 0, s = 0 }, -- First Mosh'aru Tablet
+    [10661] = { b = 0, s = 0 }, -- Second Mosh'aru Tablet
+    [10662] = { b = 0, s = 0 }, -- Filled Egg of Hakkar
+    [10663] = { b = 0, s = 0 }, -- Essence of Hakkar
+    [10664] = { b = 0, s = 0 }, -- A Note to Magus Rimtori
+    [10678] = { b = 0, s = 0 }, -- Magatha's Note
+    [10679] = { b = 0, s = 0 }, -- Andron's Note
+    [10680] = { b = 0, s = 0 }, -- Jes'rimon's Note
+    [10681] = { b = 0, s = 0 }, -- Xylem's Note
+    [10682] = { b = 0, s = 0 }, -- Belnistrasz's Oathstone
     [10684] = { b = 2000, s = 500 }, -- Colossal Parachute
     [10686] = { b = 105815, s = 21163 }, -- Aegis of Battle
+    [10687] = { b = 0, s = 0 }, -- Empty Vial Labeled #1
+    [10688] = { b = 0, s = 0 }, -- Empty Vial Labeled #2
+    [10689] = { b = 0, s = 0 }, -- Empty Vial Labeled #3
+    [10690] = { b = 0, s = 0 }, -- Empty Vial Labeled #4
+    [10691] = { b = 0, s = 0 }, -- Filled Vial Labeled #1
+    [10692] = { b = 0, s = 0 }, -- Filled Vial Labeled #2
+    [10693] = { b = 0, s = 0 }, -- Filled Vial Labeled #3
+    [10694] = { b = 0, s = 0 }, -- Filled Vial Labeled #4
+    [10695] = { b = 0, s = 0 }, -- Box of Empty Vials
     [10696] = { b = 209454, s = 41890 }, -- Enchanted Azsharite Felbane Sword
     [10697] = { b = 210221, s = 42044 }, -- Enchanted Azsharite Felbane Dagger
     [10698] = { b = 263735, s = 52747 }, -- Enchanted Azsharite Felbane Staff
+    [10699] = { b = 0, s = 0 }, -- Yeh'kinya's Bramble
     [10700] = { b = 24918, s = 4983 }, -- Encarmine Boots
     [10701] = { b = 37680, s = 7536 }, -- Boots of Zua'tec
     [10702] = { b = 26897, s = 5379 }, -- Enormous Ogre Boots
@@ -5087,15 +6483,22 @@ VanillaItemPrices = {
     [10709] = { b = 43814, s = 10953 }, -- Pyrestone Orb
     [10710] = { b = 24520, s = 6130 }, -- Dragonclaw Ring
     [10711] = { b = 33510, s = 8377 }, -- Dragon's Blood Necklace
+    [10712] = { b = 0, s = 0 }, -- Cuely's Elixir
     [10713] = { b = 2000, s = 500 }, -- Plans: Inlaid Mithril Cylinder
+    [10714] = { b = 0, s = 0 }, -- Crystallized Azsharite
+    [10715] = { b = 0, s = 0 }, -- Kim'Jael's Scope
     [10716] = { b = 3000, s = 750 }, -- Gnomish Shrink Ray
+    [10717] = { b = 0, s = 0 }, -- Kim'Jael's Compass
+    [10718] = { b = 0, s = 0 }, -- Kim'Jael's Wizzlegoober
     [10720] = { b = 3000, s = 750 }, -- Gnomish Net-o-Matic Projector
     [10721] = { b = 16588, s = 3317 }, -- Gnomish Harm Prevention Belt
+    [10722] = { b = 0, s = 0 }, -- Kim'Jael's Stuffed Chicken
     [10724] = { b = 23485, s = 4697 }, -- Gnomish Rocket Boots
     [10725] = { b = 6000, s = 1500 }, -- Gnomish Battle Chicken
     [10726] = { b = 27603, s = 5520 }, -- Gnomish Mind Control Cap
     [10727] = { b = 8000, s = 2000 }, -- Goblin Dragon Gun
     [10728] = { b = 1500, s = 375 }, -- Pattern: Black Swashbuckler's Shirt
+    [10738] = { b = 0, s = 0 }, -- Shipment to Galvan
     [10739] = { b = 21170, s = 5292 }, -- Ring of Fortitude
     [10740] = { b = 53464, s = 10692 }, -- Centurion Legplates
     [10741] = { b = 50318, s = 10063 }, -- Lordrec Helmet
@@ -5109,7 +6512,13 @@ VanillaItemPrices = {
     [10749] = { b = 52774, s = 10554 }, -- Avenguard Helm
     [10750] = { b = 176577, s = 35315 }, -- Lifeforce Dirk
     [10751] = { b = 53170, s = 10634 }, -- Gemburst Circlet
+    [10752] = { b = 0, s = 0 }, -- Emerald Encrusted Chest
+    [10753] = { b = 0, s = 0 }, -- Amulet of Grol
+    [10754] = { b = 0, s = 0 }, -- Amulet of Sevine
+    [10755] = { b = 0, s = 0 }, -- Amulet of Allistarj
+    [10757] = { b = 0, s = 0 }, -- Ward of the Defiler
     [10758] = { b = 100723, s = 20144 }, -- X'caliboar
+    [10759] = { b = 0, s = 0 }, -- Severed Horn of the Defiler
     [10760] = { b = 12141, s = 2428 }, -- Swine Fists
     [10761] = { b = 85966, s = 17193 }, -- Coldrage Dagger
     [10762] = { b = 34519, s = 6903 }, -- Robes of the Lich
@@ -5123,6 +6532,7 @@ VanillaItemPrices = {
     [10770] = { b = 31340, s = 7835 }, -- Mordresh's Lifeless Skull
     [10771] = { b = 14552, s = 2910 }, -- Deathmage Sash
     [10772] = { b = 60853, s = 12170 }, -- Glutton's Cleaver
+    [10773] = { b = 0, s = 0 }, -- Hakkari Urn
     [10774] = { b = 29787, s = 5957 }, -- Fleshhide Shoulders
     [10775] = { b = 31888, s = 6377 }, -- Carapace of Tuten'kash
     [10776] = { b = 23999, s = 4799 }, -- Silky Spider Cape
@@ -5138,6 +6548,12 @@ VanillaItemPrices = {
     [10786] = { b = 59889, s = 11977 }, -- Atal'ai Boots
     [10787] = { b = 31914, s = 6382 }, -- Atal'ai Gloves
     [10788] = { b = 26693, s = 5338 }, -- Atal'ai Girdle
+    [10789] = { b = 0, s = 0 }, -- Manual of Engineering Disciplines
+    [10790] = { b = 0, s = 0 }, -- Gnome Engineer Membership Card
+    [10791] = { b = 0, s = 0 }, -- Goblin Engineer Membership Card
+    [10792] = { b = 0, s = 0 }, -- Nixx's Pledge of Secrecy
+    [10793] = { b = 0, s = 0 }, -- Overspark's Pledge of Secrecy
+    [10794] = { b = 0, s = 0 }, -- Oglethorpe's Pledge of Secrecy
     [10795] = { b = 22170, s = 5542 }, -- Drakeclaw Band
     [10796] = { b = 35930, s = 8982 }, -- Drakestone
     [10797] = { b = 175347, s = 35069 }, -- Firebreather
@@ -5152,6 +6568,8 @@ VanillaItemPrices = {
     [10806] = { b = 75731, s = 15146 }, -- Vestments of the Atal'ai Prophet
     [10807] = { b = 76012, s = 15202 }, -- Kilt of the Atal'ai Prophet
     [10808] = { b = 38146, s = 7629 }, -- Gloves of the Atal'ai Prophet
+    [10818] = { b = 0, s = 0 }, -- Yeh'kinya's Scroll
+    [10819] = { b = 0, s = 0 }, -- Wildkin Feather
     [10820] = { b = 691, s = 138 }, -- Jackseed Belt
     [10821] = { b = 1040, s = 208 }, -- Sower's Cloak
     [10822] = { b = 10000, s = 2500 }, -- Dark Whelpling
@@ -5162,11 +6580,16 @@ VanillaItemPrices = {
     [10828] = { b = 202136, s = 40427 }, -- Dire Nail
     [10829] = { b = 42720, s = 10680 }, -- Dragon's Eye
     [10830] = { b = 3000, s = 750 }, -- M73 Frag Grenade
+    [10831] = { b = 0, s = 0 }, -- Fel Orb
+    [10832] = { b = 0, s = 0 }, -- Fel Tracker Owner's Manual
     [10833] = { b = 42986, s = 8597 }, -- Horns of Eranikus
+    [10834] = { b = 0, s = 0 }, -- Felhound Tracker Kit
     [10835] = { b = 123225, s = 24645 }, -- Crest of Supremacy
     [10836] = { b = 144946, s = 28989 }, -- Rod of Corrosion
     [10837] = { b = 194005, s = 38801 }, -- Tooth of Eranikus
     [10838] = { b = 173325, s = 34665 }, -- Might of Hakkar
+    [10839] = { b = 0, s = 0 }, -- Crystallized Note
+    [10840] = { b = 0, s = 0 }, -- Crystallized Note
     [10841] = { b = 340, s = 85 }, -- Goldthorn Tea
     [10842] = { b = 87976, s = 17595 }, -- Windscale Sarong
     [10843] = { b = 52977, s = 10595 }, -- Featherskin Cape
@@ -5180,41 +6603,105 @@ VanillaItemPrices = {
     [10920] = { b = 270, s = 67 }, -- Wound Poison II
     [10921] = { b = 500, s = 125 }, -- Wound Poison III
     [10922] = { b = 700, s = 175 }, -- Wound Poison IV
+    [10938] = { b = 800, s = 0 }, -- Lesser Magic Essence
+    [10939] = { b = 2400, s = 0 }, -- Greater Magic Essence
+    [10940] = { b = 800, s = 0 }, -- Strange Dust
+    [10958] = { b = 0, s = 0 }, -- Hilary's Necklace
     [10959] = { b = 35000, s = 8750 }, -- Demon Hide Sack
+    [10978] = { b = 4000, s = 0 }, -- Small Glimmering Shard
+    [10998] = { b = 3000, s = 0 }, -- Lesser Astral Essence
+    [10999] = { b = 0, s = 0 }, -- Ironfel
+    [11000] = { b = 0, s = 0 }, -- Shadowforge Key
     [11018] = { b = 585, s = 146 }, -- Un'Goro Soil
+    [11020] = { b = 10000, s = 0 }, -- Evergreen Pouch
     [11022] = { b = 1000, s = 250 }, -- Packet of Tharlendris Seeds
     [11023] = { b = 10000, s = 2500 }, -- Ancona Chicken
+    [11024] = { b = 0, s = 0 }, -- Evergreen Herb Casing
     [11026] = { b = 10000, s = 2500 }, -- Tree Frog Box
     [11027] = { b = 10000, s = 2500 }, -- Wood Frog Box
     [11038] = { b = 800, s = 200 }, -- Formula: Enchant 2H Weapon - Lesser Spirit
     [11039] = { b = 800, s = 200 }, -- Formula: Enchant Cloak - Minor Agility
     [11040] = { b = 4, s = 1 }, -- Morrowgrain
+    [11058] = { b = 0, s = 0 }, -- Sha'ni's Nose-Ring
+    [11078] = { b = 0, s = 0 }, -- Relic Coffer Key
+    [11079] = { b = 0, s = 0 }, -- Gor'tesh's Lopped Off Head
+    [11080] = { b = 0, s = 0 }, -- Gor'tesh's Lopped Off Head
     [11081] = { b = 800, s = 200 }, -- Formula: Enchant Shield - Lesser Protection
+    [11082] = { b = 9000, s = 0 }, -- Greater Astral Essence
+    [11083] = { b = 2400, s = 0 }, -- Soul Dust
+    [11084] = { b = 6000, s = 0 }, -- Large Glimmering Shard
     [11086] = { b = 137016, s = 27403 }, -- Jang'thraze the Protector
     [11098] = { b = 2000, s = 500 }, -- Formula: Enchant Cloak - Lesser Shadow Resistance
     [11101] = { b = 2500, s = 625 }, -- Formula: Enchant Bracer - Lesser Strength
+    [11102] = { b = 0, s = 0 }, -- Unhatched Sprite Darter Egg
+    [11103] = { b = 0, s = 0 }, -- Seed Voucher
+    [11104] = { b = 0, s = 0 }, -- Large Compass
+    [11105] = { b = 1, s = 0 }, -- Curled Map Parchment
+    [11106] = { b = 0, s = 0 }, -- Lion-headed Key
+    [11107] = { b = 0, s = 0 }, -- A Small Pack
+    [11108] = { b = 0, s = 0 }, -- Faded Photograph
     [11109] = { b = 25, s = 6 }, -- Special Chicken Feed
     [11110] = { b = 10, s = 2 }, -- Chicken Egg
+    [11112] = { b = 0, s = 0 }, -- Research Equipment
+    [11113] = { b = 0, s = 0 }, -- Crate of Foodstuffs
+    [11114] = { b = 0, s = 0 }, -- Dinosaur Bone
+    [11116] = { b = 0, s = 0 }, -- A Mangled Journal
     [11118] = { b = 43180, s = 10795 }, -- Archaedic Stone
+    [11119] = { b = 0, s = 0 }, -- Milly's Harvest
     [11120] = { b = 150720, s = 30144 }, -- Belgrom's Hammer
     [11121] = { b = 14705, s = 2941 }, -- Darkwater Talwar
     [11122] = { b = 28650, s = 7162 }, -- Carrot on a Stick
     [11123] = { b = 75186, s = 15037 }, -- Rainstrider Leggings
     [11124] = { b = 84900, s = 16980 }, -- Helm of Exile
+    [11125] = { b = 0, s = 0 }, -- Grape Manifest
+    [11126] = { b = 0, s = 0 }, -- Tablet of Kurniya
+    [11127] = { b = 0, s = 0 }, -- Scavenged Goods
     [11128] = { b = 2000, s = 500 }, -- Golden Rod
+    [11129] = { b = 0, s = 0 }, -- Essence of the Elements
     [11130] = { b = 2000, s = 500 }, -- Runed Golden Rod
+    [11131] = { b = 0, s = 0 }, -- Hive Wall Sample
+    [11132] = { b = 0, s = 0 }, -- Unused Scraping Vial
+    [11133] = { b = 0, s = 0 }, -- Linken's Training Sword
+    [11134] = { b = 10000, s = 0 }, -- Lesser Mystic Essence
+    [11135] = { b = 30000, s = 0 }, -- Greater Mystic Essence
+    [11136] = { b = 0, s = 0 }, -- Linken's Tempered Sword
+    [11137] = { b = 4000, s = 0 }, -- Vision Dust
+    [11138] = { b = 8000, s = 0 }, -- Small Glowing Shard
+    [11139] = { b = 12000, s = 0 }, -- Large Glowing Shard
+    [11140] = { b = 0, s = 0 }, -- Prison Cell Key
+    [11141] = { b = 2000, s = 0 }, -- Bait
+    [11142] = { b = 0, s = 0 }, -- Broken Samophlange
+    [11143] = { b = 0, s = 0 }, -- Nugget Slug
     [11144] = { b = 4000, s = 1000 }, -- Truesilver Rod
     [11145] = { b = 5000, s = 1250 }, -- Runed Truesilver Rod
+    [11146] = { b = 0, s = 0 }, -- Broken and Battered Samophlange
+    [11147] = { b = 0, s = 0 }, -- Samophlange Manual Cover
+    [11148] = { b = 0, s = 0 }, -- Samophlange Manual Page
+    [11149] = { b = 0, s = 0 }, -- Samophlange Manual
     [11150] = { b = 3000, s = 750 }, -- Formula: Enchant Gloves - Mining
     [11151] = { b = 3000, s = 750 }, -- Formula: Enchant Gloves - Herbalism
     [11152] = { b = 3000, s = 750 }, -- Formula: Enchant Gloves - Fishing
+    [11162] = { b = 0, s = 0 }, -- Linken's Superior Sword
     [11163] = { b = 3000, s = 750 }, -- Formula: Enchant Bracer - Lesser Deflection
     [11164] = { b = 3000, s = 750 }, -- Formula: Enchant Weapon - Lesser Beastslayer
     [11165] = { b = 3000, s = 750 }, -- Formula: Enchant Weapon - Lesser Elemental Slayer
     [11166] = { b = 4000, s = 1000 }, -- Formula: Enchant Gloves - Skinning
     [11167] = { b = 4000, s = 1000 }, -- Formula: Enchant Boots - Lesser Spirit
     [11168] = { b = 4000, s = 1000 }, -- Formula: Enchant Shield - Lesser Block
+    [11169] = { b = 0, s = 0 }, -- Book of Aquor
+    [11172] = { b = 0, s = 0 }, -- Silvery Claws
+    [11173] = { b = 0, s = 0 }, -- Irontree Heart
+    [11174] = { b = 20000, s = 0 }, -- Lesser Nether Essence
+    [11175] = { b = 60000, s = 0 }, -- Greater Nether Essence
+    [11176] = { b = 8000, s = 0 }, -- Dream Dust
+    [11177] = { b = 24000, s = 0 }, -- Small Radiant Shard
+    [11178] = { b = 36000, s = 0 }, -- Large Radiant Shard
+    [11179] = { b = 0, s = 0 }, -- Golden Flame
+    [11184] = { b = 0, s = 0 }, -- Blue Power Crystal
+    [11185] = { b = 0, s = 0 }, -- Green Power Crystal
+    [11186] = { b = 0, s = 0 }, -- Red Power Crystal
     [11187] = { b = 25, s = 5 }, -- Stemleaf Bracers
+    [11188] = { b = 0, s = 0 }, -- Yellow Power Crystal
     [11189] = { b = 52, s = 10 }, -- Woodland Robes
     [11190] = { b = 26, s = 5 }, -- Viny Gloves
     [11191] = { b = 227, s = 45 }, -- Farmer's Boots
@@ -5223,6 +6710,7 @@ VanillaItemPrices = {
     [11194] = { b = 102024, s = 20404 }, -- Prismscale Hauberk
     [11195] = { b = 68278, s = 13655 }, -- Warforged Chestplate
     [11196] = { b = 67500, s = 16875 }, -- Mindburst Medallion
+    [11197] = { b = 0, s = 0 }, -- Dark Keeper Key
     [11202] = { b = 4400, s = 1100 }, -- Formula: Enchant Shield - Stamina
     [11203] = { b = 4400, s = 1100 }, -- Formula: Enchant Gloves - Advanced Mining
     [11204] = { b = 4400, s = 1100 }, -- Formula: Enchant Bracer - Greater Spirit
@@ -5230,16 +6718,30 @@ VanillaItemPrices = {
     [11206] = { b = 5000, s = 1250 }, -- Formula: Enchant Cloak - Lesser Agility
     [11207] = { b = 12000, s = 3000 }, -- Formula: Enchant Weapon - Fiery Weapon
     [11208] = { b = 5400, s = 1350 }, -- Formula: Enchant Weapon - Demonslaying
+    [11222] = { b = 0, s = 0 }, -- Head of Krom'zar
     [11223] = { b = 5800, s = 1450 }, -- Formula: Enchant Bracer - Deflection
     [11224] = { b = 5800, s = 1450 }, -- Formula: Enchant Shield - Frost Resistance
     [11225] = { b = 6200, s = 1550 }, -- Formula: Enchant Bracer - Greater Stamina
     [11226] = { b = 6200, s = 1550 }, -- Formula: Enchant Gloves - Riding Skill
+    [11227] = { b = 0, s = 0 }, -- Piece of Krom'zar's Banner
     [11229] = { b = 8481, s = 1696 }, -- Brightscale Girdle
+    [11230] = { b = 0, s = 0 }, -- Encased Fiery Essence
+    [11231] = { b = 0, s = 0 }, -- Altered Black Dragonflight Molt
+    [11242] = { b = 0, s = 0 }, -- Evoroot
+    [11243] = { b = 0, s = 0 }, -- Videre Elixir
     [11262] = { b = 32570, s = 8142 }, -- Orb of Lorica
     [11263] = { b = 50517, s = 10103 }, -- Nether Force Wand
     [11265] = { b = 82424, s = 16484 }, -- Cragwood Maul
+    [11266] = { b = 0, s = 0 }, -- Fractured Elemental Shard
+    [11267] = { b = 0, s = 0 }, -- Elemental Shard Sample
+    [11268] = { b = 0, s = 0 }, -- Head of Argelmach
+    [11269] = { b = 0, s = 0 }, -- Intact Elemental Core
+    [11270] = { b = 0, s = 0 }, -- Nixx's Signed Pledge
+    [11282] = { b = 0, s = 0 }, -- Oglethorpe's Signed Pledge
+    [11283] = { b = 0, s = 0 }, -- Overspark's Signed Pledge
     [11284] = { b = 1000, s = 1 }, -- Accurate Slugs
     [11285] = { b = 1000, s = 2 }, -- Jagged Arrow
+    [11286] = { b = 0, s = 0 }, -- Thorium Shackles
     [11287] = { b = 2544, s = 508 }, -- Lesser Magic Wand
     [11288] = { b = 7675, s = 1535 }, -- Greater Magic Wand
     [11289] = { b = 17905, s = 3581 }, -- Lesser Mystic Wand
@@ -5252,12 +6754,24 @@ VanillaItemPrices = {
     [11306] = { b = 19467, s = 3893 }, -- Sturdy Recurve
     [11307] = { b = 67952, s = 13590 }, -- Massive Longbow
     [11308] = { b = 78828, s = 15765 }, -- Sylvan Shortbow
+    [11309] = { b = 0, s = 0 }, -- The Heart of the Mountain
     [11310] = { b = 32990, s = 6598 }, -- Flameseer Mantle
     [11311] = { b = 25553, s = 5110 }, -- Emberscale Cape
+    [11312] = { b = 0, s = 0 }, -- Lost Thunderbrew Recipe
+    [11313] = { b = 0, s = 0 }, -- Ribbly's Head
+    [11315] = { b = 0, s = 0 }, -- Bloodpetal Sprout
+    [11316] = { b = 0, s = 0 }, -- Bloodpetal
+    [11318] = { b = 0, s = 0 }, -- Atal'ai Haze
+    [11319] = { b = 0, s = 0 }, -- Unloaded Zapper
+    [11320] = { b = 0, s = 0 }, -- Bloodpetal Zapper
     [11324] = { b = 25000, s = 6250 }, -- Explorer's Knapsack
     [11325] = { b = 600, s = 150 }, -- Dark Iron Ale Mug
     [11362] = { b = 1000, s = 250 }, -- Medium Quiver
     [11363] = { b = 1000, s = 250 }, -- Medium Shot Pouch
+    [11364] = { b = 0, s = 0 }, -- Tabard of Stormwind
+    [11366] = { b = 0, s = 0 }, -- Helendis Riverhorn's Letter
+    [11367] = { b = 0, s = 0 }, -- Solomon's Plea to Bolvar
+    [11368] = { b = 0, s = 0 }, -- Bolvar's Decree
     [11370] = { b = 2000, s = 500 }, -- Dark Iron Ore
     [11371] = { b = 2400, s = 600 }, -- Dark Iron Bar
     [11382] = { b = 3000, s = 750 }, -- Blood of the Mountain
@@ -5276,12 +6790,15 @@ VanillaItemPrices = {
     [11402] = { b = 4820, s = 1205 }, -- Sleek Bat Pelt
     [11403] = { b = 6370, s = 1592 }, -- Large Bat Fang
     [11404] = { b = 8320, s = 2080 }, -- Evil Bat Eye
+    [11405] = { b = 0, s = 0 }, -- Giant Silver Vein
     [11406] = { b = 675, s = 168 }, -- Rotting Bear Carcass
     [11407] = { b = 435, s = 108 }, -- Torn Bear Pelt
     [11408] = { b = 3595, s = 898 }, -- Bear Jaw
     [11409] = { b = 2015, s = 503 }, -- Bear Flank
     [11410] = { b = 2315, s = 578 }, -- Savage Bear Claw
     [11411] = { b = 7420, s = 1484 }, -- Large Bear Bone
+    [11412] = { b = 0, s = 0 }, -- Nagmara's Vial
+    [11413] = { b = 0, s = 0 }, -- Nagmara's Filled Vial
     [11414] = { b = 7315, s = 1828 }, -- Grizzled Mane
     [11415] = { b = 4000, s = 200 }, -- Mixed Berries
     [11416] = { b = 1315, s = 328 }, -- Delicate Ribcage
@@ -5289,23 +6806,58 @@ VanillaItemPrices = {
     [11418] = { b = 2416, s = 604 }, -- Hollow Wing Bone
     [11419] = { b = 7600, s = 1900 }, -- Mysterious Unhatched Egg
     [11420] = { b = 6850, s = 1712 }, -- Elegant Writing Tool
+    [11422] = { b = 0, s = 0 }, -- Goblin Engineer's Renewal Gift
+    [11423] = { b = 0, s = 0 }, -- Gnome Engineer's Renewal Gift
     [11444] = { b = 4000, s = 200 }, -- Grim Guzzler Boar
+    [11445] = { b = 0, s = 0 }, -- Flute of the Ancients
+    [11446] = { b = 0, s = 0 }, -- A Crumpled Up Note
+    [11462] = { b = 0, s = 0 }, -- Discarded Knife
+    [11463] = { b = 0, s = 0 }, -- Undelivered Parcel
+    [11464] = { b = 0, s = 0 }, -- Marshal Windsor's Lost Information
+    [11465] = { b = 0, s = 0 }, -- Marshal Windsor's Lost Information
+    [11466] = { b = 0, s = 0 }, -- Raschal's Report
+    [11467] = { b = 0, s = 0 }, -- Blackrock Medallion
+    [11468] = { b = 0, s = 0 }, -- Dark Iron Fanny Pack
     [11469] = { b = 17815, s = 3563 }, -- Bloodband Bracers
+    [11470] = { b = 0, s = 0 }, -- Tablet Transcript
+    [11471] = { b = 0, s = 0 }, -- Fragile Sprite Darter Egg
+    [11472] = { b = 0, s = 0 }, -- Silvermane Stalker Flank
     [11474] = { b = 2000, s = 500 }, -- Sprite Darter Egg
     [11475] = { b = 38, s = 7 }, -- Wine-stained Cloak
+    [11476] = { b = 0, s = 0 }, -- U'cha's Pelt
+    [11477] = { b = 0, s = 0 }, -- White Ravasaur Claw
+    [11478] = { b = 0, s = 0 }, -- Un'Goro Gorilla Pelt
+    [11479] = { b = 0, s = 0 }, -- Un'Goro Stomper Pelt
+    [11480] = { b = 0, s = 0 }, -- Un'Goro Thunderer Pelt
+    [11482] = { b = 0, s = 0 }, -- Crystal Pylon User's Manual
     [11502] = { b = 32551, s = 6510 }, -- Loreskin Shoulders
+    [11503] = { b = 0, s = 0 }, -- Blood Amber
+    [11504] = { b = 0, s = 0 }, -- Piece of Threshadon Carcass
+    [11507] = { b = 0, s = 0 }, -- Spotted Hyena Pelt
     [11508] = { b = 5, s = 1 }, -- Gamemaster's Slippers
+    [11509] = { b = 0, s = 0 }, -- Ravasaur Pheromone Gland
+    [11510] = { b = 0, s = 0 }, -- Lar'korwi's Head
+    [11511] = { b = 0, s = 0 }, -- Cenarion Beacon
+    [11512] = { b = 0, s = 0 }, -- Patch of Tainted Skin
     [11513] = { b = 4, s = 1 }, -- Tainted Vitriol
     [11514] = { b = 4, s = 1 }, -- Fel Creep
     [11515] = { b = 4, s = 1 }, -- Corrupted Soul Shard
+    [11516] = { b = 0, s = 0 }, -- Cenarion Plant Salve
+    [11522] = { b = 0, s = 0 }, -- Silver Totem of Aquementas
     [11562] = { b = 4000, s = 1000 }, -- Crystal Restore
     [11563] = { b = 4000, s = 1000 }, -- Crystal Force
     [11564] = { b = 4000, s = 1000 }, -- Crystal Ward
     [11565] = { b = 4000, s = 1000 }, -- Crystal Yield
     [11566] = { b = 4000, s = 1000 }, -- Crystal Charge
     [11567] = { b = 4000, s = 1000 }, -- Crystal Spire
+    [11568] = { b = 0, s = 0 }, -- Torwa's Pouch
+    [11569] = { b = 0, s = 0 }, -- Preserved Threshadon Meat
+    [11570] = { b = 0, s = 0 }, -- Preserved Pheromone Mixture
+    [11582] = { b = 0, s = 0 }, -- Fel Salve
+    [11583] = { b = 0, s = 0 }, -- Cactus Apple
     [11584] = { b = 25, s = 1 }, -- Cactus Apple Surprise
     [11590] = { b = 1000, s = 250 }, -- Mechanical Repair Kit
+    [11602] = { b = 0, s = 0 }, -- Grim Guzzler Key
     [11603] = { b = 153283, s = 30656 }, -- Vilerend Slicer
     [11604] = { b = 97143, s = 19428 }, -- Dark Iron Plate
     [11605] = { b = 53880, s = 10776 }, -- Dark Iron Shoulders
@@ -5317,6 +6869,8 @@ VanillaItemPrices = {
     [11612] = { b = 12000, s = 3000 }, -- Plans: Dark Iron Plate
     [11614] = { b = 12000, s = 3000 }, -- Plans: Dark Iron Mail
     [11615] = { b = 12000, s = 3000 }, -- Plans: Dark Iron Shoulders
+    [11617] = { b = 0, s = 0 }, -- Eridan's Supplies
+    [11622] = { b = 0, s = 0 }, -- Lesser Arcanum of Rumination
     [11623] = { b = 49999, s = 9999 }, -- Spritecaster Cape
     [11624] = { b = 45399, s = 9079 }, -- Kentic Amice
     [11625] = { b = 41810, s = 10452 }, -- Enthralled Sphere
@@ -5330,25 +6884,45 @@ VanillaItemPrices = {
     [11633] = { b = 70380, s = 14076 }, -- Spiderfang Carapace
     [11634] = { b = 35319, s = 7063 }, -- Silkweb Gloves
     [11635] = { b = 177256, s = 35451 }, -- Hookfang Shanker
+    [11642] = { b = 0, s = 0 }, -- Lesser Arcanum of Constitution
+    [11643] = { b = 0, s = 0 }, -- Lesser Arcanum of Tenacity
+    [11644] = { b = 0, s = 0 }, -- Lesser Arcanum of Resilience
+    [11645] = { b = 0, s = 0 }, -- Lesser Arcanum of Voracity
+    [11646] = { b = 0, s = 0 }, -- Lesser Arcanum of Voracity
+    [11647] = { b = 0, s = 0 }, -- Lesser Arcanum of Voracity
+    [11648] = { b = 0, s = 0 }, -- Lesser Arcanum of Voracity
+    [11649] = { b = 0, s = 0 }, -- Lesser Arcanum of Voracity
     [11662] = { b = 37313, s = 7462 }, -- Ban'thok Sash
     [11665] = { b = 42661, s = 8532 }, -- Ogreseer Fists
+    [11668] = { b = 0, s = 0 }, -- Flute of Xavaric
     [11669] = { b = 68630, s = 17157 }, -- Naglering
+    [11674] = { b = 0, s = 0 }, -- Jadefire Felbind
     [11675] = { b = 72320, s = 14464 }, -- Shadefiend Boots
     [11677] = { b = 58276, s = 11655 }, -- Graverot Cape
     [11678] = { b = 77981, s = 15596 }, -- Carapace of Anub'shiah
     [11679] = { b = 58691, s = 11738 }, -- Rubicund Armguards
+    [11682] = { b = 0, s = 0 }, -- Eridan's Vial
     [11684] = { b = 315430, s = 63086 }, -- Ironfoe
     [11685] = { b = 69706, s = 13941 }, -- Splinthide Shoulders
     [11686] = { b = 46645, s = 9329 }, -- Girdle of Beastial Fury
     [11702] = { b = 183763, s = 36752 }, -- Grizzle's Skinner
     [11703] = { b = 36892, s = 7378 }, -- Stonewall Girdle
     [11722] = { b = 83052, s = 16610 }, -- Dregmetal Spaulders
+    [11723] = { b = 0, s = 0 }, -- Goodsteel's Balanced Flameberge
+    [11724] = { b = 0, s = 0 }, -- Overdue Package
+    [11725] = { b = 0, s = 0 }, -- Solid Crystal Leg Shaft
     [11726] = { b = 167666, s = 33533 }, -- Savage Gladiator Chain
+    [11727] = { b = 0, s = 0 }, -- Goodsteel Ledger
     [11728] = { b = 126682, s = 25336 }, -- Savage Gladiator Leggings
     [11729] = { b = 95365, s = 19073 }, -- Savage Gladiator Helm
     [11730] = { b = 63813, s = 12762 }, -- Savage Gladiator Grips
     [11731] = { b = 96501, s = 19300 }, -- Savage Gladiator Greaves
+    [11732] = { b = 0, s = 0 }, -- Libram of Rumination
+    [11733] = { b = 0, s = 0 }, -- Libram of Constitution
+    [11734] = { b = 0, s = 0 }, -- Libram of Tenacity
     [11735] = { b = 83349, s = 16669 }, -- Ragefury Eyepatch
+    [11736] = { b = 0, s = 0 }, -- Libram of Resilience
+    [11737] = { b = 0, s = 0 }, -- Libram of Voracity
     [11742] = { b = 35000, s = 8750 }, -- Wayfarer's Knapsack
     [11743] = { b = 153672, s = 30734 }, -- Rockfist
     [11744] = { b = 196213, s = 39242 }, -- Bloodfist
@@ -5358,6 +6932,10 @@ VanillaItemPrices = {
     [11748] = { b = 125416, s = 25083 }, -- Pyric Caduceus
     [11749] = { b = 100708, s = 20141 }, -- Searingscale Leggings
     [11750] = { b = 216172, s = 43234 }, -- Kindling Stave
+    [11751] = { b = 0, s = 0 }, -- Burning Essence
+    [11752] = { b = 0, s = 0 }, -- Black Blood of the Tormented
+    [11753] = { b = 0, s = 0 }, -- Eye of Kajal
+    [11754] = { b = 0, s = 0 }, -- Black Diamond
     [11755] = { b = 58510, s = 14627 }, -- Verek's Collar
     [11764] = { b = 51990, s = 10398 }, -- Cinderhide Armsplints
     [11765] = { b = 62625, s = 12525 }, -- Pyremail Wristguards
@@ -5372,6 +6950,7 @@ VanillaItemPrices = {
     [11787] = { b = 68664, s = 13732 }, -- Shalehusk Boots
     [11802] = { b = 89883, s = 17976 }, -- Lavacrest Leggings
     [11803] = { b = 250889, s = 50177 }, -- Force of Magma
+    [11804] = { b = 0, s = 0 }, -- Spraggle's Canteen
     [11805] = { b = 202196, s = 40439 }, -- Rubidium Hammer
     [11807] = { b = 45767, s = 9153 }, -- Sash of the Burning Heart
     [11808] = { b = 96461, s = 19292 }, -- Circle of Flame
@@ -5384,6 +6963,7 @@ VanillaItemPrices = {
     [11815] = { b = 40000, s = 10000 }, -- Hand of Justice
     [11816] = { b = 244414, s = 48882 }, -- Angerforge's Battle Axe
     [11817] = { b = 196273, s = 39254 }, -- Lord General's Sword
+    [11818] = { b = 0, s = 0 }, -- Grimesilt Outhouse Key
     [11819] = { b = 40000, s = 10000 }, -- Second Wind
     [11820] = { b = 133809, s = 26761 }, -- Royal Decorated Armor
     [11821] = { b = 111924, s = 22384 }, -- Warstrife Leggings
@@ -5394,11 +6974,20 @@ VanillaItemPrices = {
     [11826] = { b = 10000, s = 2500 }, -- Lil' Smoky
     [11827] = { b = 2700, s = 675 }, -- Schematic: Lil' Smoky
     [11828] = { b = 2700, s = 675 }, -- Schematic: Pet Bombling
+    [11829] = { b = 0, s = 0 }, -- Un'Goro Ash
+    [11830] = { b = 0, s = 0 }, -- Webbed Diemetradon Scale
+    [11831] = { b = 0, s = 0 }, -- Webbed Pterrordax Scale
     [11832] = { b = 40000, s = 10000 }, -- Burst of Knowledge
+    [11833] = { b = 0, s = 0 }, -- Gorishi Queen Lure
+    [11834] = { b = 0, s = 0 }, -- Super Sticky Tar
+    [11835] = { b = 0, s = 0 }, -- Gorishi Queen Brain
+    [11837] = { b = 0, s = 0 }, -- Gorishi Scent Gland
     [11839] = { b = 55958, s = 11191 }, -- Chief Architect's Monocle
     [11840] = { b = 28550, s = 7137 }, -- Master Builder's Shirt
     [11841] = { b = 75164, s = 15032 }, -- Senior Designer's Pantaloons
     [11842] = { b = 85252, s = 17050 }, -- Lead Surveyor's Mantle
+    [11843] = { b = 0, s = 0 }, -- Bank Voucher
+    [11844] = { b = 0, s = 0 }, -- Pestlezugg's Un'Goro Report
     [11845] = { b = 250, s = 62 }, -- Handmade Leather Bag
     [11846] = { b = 120, s = 30 }, -- Wizbang's Special Brew
     [11847] = { b = 38, s = 7 }, -- Battered Cloak
@@ -5432,8 +7021,10 @@ VanillaItemPrices = {
     [11875] = { b = 28881, s = 5776 }, -- Breezecloud Bracers
     [11876] = { b = 81437, s = 16287 }, -- Plainstalker Tunic
     [11882] = { b = 102603, s = 20520 }, -- Outrider Leggings
+    [11883] = { b = 0, s = 0 }, -- A Dingy Fanny Pack
     [11884] = { b = 9231, s = 1846 }, -- Moonlit Amice
     [11885] = { b = 2846, s = 711 }, -- Shadowforge Torch
+    [11886] = { b = 0, s = 0 }, -- Urgent Message
     [11887] = { b = 50, s = 12 }, -- Cenarion Circle Cache
     [11888] = { b = 24398, s = 4879 }, -- Quintis' Research Gloves
     [11889] = { b = 36728, s = 7345 }, -- Bark Iron Pauldrons
@@ -5446,7 +7037,9 @@ VanillaItemPrices = {
     [11909] = { b = 41337, s = 8267 }, -- Excavator's Utility Belt
     [11910] = { b = 61727, s = 12345 }, -- Bejeweled Legguards
     [11911] = { b = 61960, s = 12392 }, -- Treetop Leggings
+    [11912] = { b = 0, s = 0 }, -- Package of Empty Ooze Containers
     [11913] = { b = 70224, s = 14044 }, -- Clayridge Helm
+    [11914] = { b = 0, s = 0 }, -- Empty Cursed Ooze Jar
     [11915] = { b = 100623, s = 20124 }, -- Shizzle's Drizzle Blocker
     [11916] = { b = 59171, s = 11834 }, -- Shizzle's Muzzle
     [11917] = { b = 31674, s = 6334 }, -- Shizzle's Nozzle Wiper
@@ -5479,6 +7072,15 @@ VanillaItemPrices = {
     [11944] = { b = 35284, s = 8821 }, -- Dark Iron Baby Booties
     [11945] = { b = 26370, s = 6592 }, -- Dark Iron Ring
     [11946] = { b = 31650, s = 7912 }, -- Fire Opal Necklace
+    [11947] = { b = 0, s = 0 }, -- Filled Cursed Ooze Jar
+    [11948] = { b = 0, s = 0 }, -- Empty Tainted Ooze Jar
+    [11949] = { b = 0, s = 0 }, -- Filled Tainted Ooze Jar
+    [11950] = { b = 0, s = 0 }, -- Windblossom Berries
+    [11951] = { b = 0, s = 0 }, -- Whipper Root Tuber
+    [11952] = { b = 0, s = 0 }, -- Night Dragon's Breath
+    [11953] = { b = 0, s = 0 }, -- Empty Pure Sample Jar
+    [11954] = { b = 0, s = 0 }, -- Filled Pure Sample Jar
+    [11955] = { b = 0, s = 0 }, -- Bag of Empty Ooze Containers
     [11962] = { b = 39699, s = 7939 }, -- Manacle Cuffs
     [11963] = { b = 50128, s = 10025 }, -- Penance Spaulders
     [11964] = { b = 150783, s = 30156 }, -- Swiftstrike Cudgel
@@ -5550,6 +7152,7 @@ VanillaItemPrices = {
     [12030] = { b = 28574, s = 7143 }, -- Jet Chain
     [12031] = { b = 31578, s = 7894 }, -- Lodestone Necklace
     [12032] = { b = 21587, s = 5396 }, -- Onyx Choker
+    [12033] = { b = 0, s = 0 }, -- Thaurissan Family Jewels
     [12034] = { b = 20050, s = 5012 }, -- Marble Necklace
     [12035] = { b = 22053, s = 5513 }, -- Obsidian Pendant
     [12036] = { b = 23930, s = 5982 }, -- Granite Necklace
@@ -5576,6 +7179,7 @@ VanillaItemPrices = {
     [12057] = { b = 33500, s = 8375 }, -- Dragonscale Band
     [12058] = { b = 33505, s = 8376 }, -- Demonic Bone Ring
     [12059] = { b = 49510, s = 12377 }, -- Conqueror's Medallion
+    [12060] = { b = 0, s = 0 }, -- Shindrell's Note
     [12061] = { b = 201060, s = 40212 }, -- Blade of Reckoning
     [12062] = { b = 201827, s = 40365 }, -- Skilled Fighting Blade
     [12064] = { b = 4, s = 1 }, -- Gamemaster Hood
@@ -5593,12 +7197,16 @@ VanillaItemPrices = {
     [12113] = { b = 52219, s = 10443 }, -- Sunborne Cape
     [12114] = { b = 43671, s = 8734 }, -- Nightfall Gloves
     [12115] = { b = 35060, s = 7012 }, -- Stalwart Clutch
+    [12122] = { b = 0, s = 0 }, -- Kum'isha's Junk
+    [12144] = { b = 0, s = 0 }, -- Eggscilloscope
     [12162] = { b = 3000, s = 750 }, -- Plans: Hardened Iron Shortsword
     [12163] = { b = 4400, s = 1100 }, -- Plans: Moonsteel Broadsword
     [12164] = { b = 4400, s = 1100 }, -- Plans: Massive Iron Axe
     [12184] = { b = 350, s = 87 }, -- Raptor Flesh
     [12185] = { b = 64478, s = 12895 }, -- Bloodsail Admiral's Hat
     [12190] = { b = 1000, s = 250 }, -- Dreamless Sleep Potion
+    [12191] = { b = 0, s = 0 }, -- Silver Dawning's Lockbox
+    [12192] = { b = 0, s = 0 }, -- Mist Veil's Lockbox
     [12202] = { b = 350, s = 87 }, -- Tiger Meat
     [12203] = { b = 350, s = 87 }, -- Red Wolf Meat
     [12204] = { b = 450, s = 112 }, -- Heavy Kodo Meat
@@ -5615,6 +7223,8 @@ VanillaItemPrices = {
     [12216] = { b = 1200, s = 300 }, -- Spiced Chili Crab
     [12217] = { b = 1200, s = 300 }, -- Dragonbreath Chili
     [12218] = { b = 1200, s = 300 }, -- Monster Omelet
+    [12219] = { b = 0, s = 0 }, -- Unadorned Seal of Ascension
+    [12220] = { b = 0, s = 0 }, -- Intact Elemental Bracer
     [12223] = { b = 16, s = 4 }, -- Meaty Bat Wing
     [12224] = { b = 40, s = 10 }, -- Crispy Bat Wing
     [12225] = { b = 939, s = 187 }, -- Blump Family Fishing Pole
@@ -5622,12 +7232,19 @@ VanillaItemPrices = {
     [12227] = { b = 1600, s = 400 }, -- Recipe: Lean Wolf Steak
     [12228] = { b = 5000, s = 1250 }, -- Recipe: Roast Raptor
     [12229] = { b = 5000, s = 1250 }, -- Recipe: Hot Wolf Ribs
+    [12230] = { b = 0, s = 0 }, -- Felwood Slime Sample
     [12231] = { b = 3000, s = 750 }, -- Recipe: Jungle Stew
     [12232] = { b = 5000, s = 1250 }, -- Recipe: Carrion Surprise
     [12233] = { b = 3000, s = 750 }, -- Recipe: Mystery Stew
+    [12234] = { b = 0, s = 0 }, -- Corrupted Felwood Sample
+    [12235] = { b = 0, s = 0 }, -- Un'Goro Slime Sample
+    [12236] = { b = 0, s = 0 }, -- Pure Un'Goro Sample
+    [12237] = { b = 0, s = 0 }, -- Fine Crab Chunks
     [12238] = { b = 40, s = 2 }, -- Darkshore Grouper
     [12239] = { b = 7000, s = 1750 }, -- Recipe: Dragonbreath Chili
     [12240] = { b = 7000, s = 1750 }, -- Recipe: Heavy Kodo Stew
+    [12241] = { b = 0, s = 0 }, -- Collected Dragon Egg
+    [12242] = { b = 0, s = 0 }, -- Sea Creature Bones
     [12243] = { b = 229901, s = 45980 }, -- Smoldering Claw
     [12247] = { b = 28372, s = 5674 }, -- Broad Bladed Knife
     [12248] = { b = 32029, s = 6405 }, -- Daring Dirk
@@ -5643,24 +7260,75 @@ VanillaItemPrices = {
     [12259] = { b = 40363, s = 8072 }, -- Glinting Steel Dagger
     [12260] = { b = 51977, s = 10395 }, -- Searing Golden Blade
     [12261] = { b = 3800, s = 950 }, -- Plans: Searing Golden Blade
+    [12262] = { b = 0, s = 0 }, -- Empty Worg Pup Cage
+    [12263] = { b = 0, s = 0 }, -- Caged Worg Pup
     [12264] = { b = 6000, s = 1500 }, -- Worg Carrier
     [12282] = { b = 43, s = 8 }, -- Worn Battleaxe
+    [12283] = { b = 0, s = 0 }, -- Broodling Essence
+    [12284] = { b = 0, s = 0 }, -- Draco-Incarcinatrix 900
+    [12286] = { b = 0, s = 0 }, -- Eggscilloscope Prototype
+    [12287] = { b = 0, s = 0 }, -- Collectronic Module
+    [12288] = { b = 0, s = 0 }, -- Encased Corrupt Ooze
+    [12289] = { b = 0, s = 0 }, -- Sea Turtle Remains
+    [12291] = { b = 0, s = 0 }, -- Merged Ooze Sample
+    [12292] = { b = 0, s = 0 }, -- Strangely Marked Box
+    [12293] = { b = 0, s = 0 }, -- Fine Gold Thread
     [12295] = { b = 1413, s = 282 }, -- Leggings of the People's Militia
     [12296] = { b = 3612, s = 722 }, -- Spark of the People's Militia
     [12299] = { b = 82, s = 16 }, -- Netted Gloves
+    [12300] = { b = 0, s = 0 }, -- Orb of Draconic Energy
+    [12301] = { b = 0, s = 0 }, -- Bamboo Cage Key
+    [12302] = { b = 1000000, s = 0 }, -- Reins of the Frostsaber
+    [12303] = { b = 1000000, s = 0 }, -- Reins of the Nightsaber
+    [12323] = { b = 0, s = 0 }, -- Unforged Seal of Ascension
+    [12324] = { b = 0, s = 0 }, -- Forged Seal of Ascension
+    [12325] = { b = 100000, s = 0 }, -- Reins of the Primal Leopard
+    [12326] = { b = 100000, s = 0 }, -- Reins of the Tawny Sabercat
+    [12327] = { b = 100000, s = 0 }, -- Reins of the Golden Sabercat
+    [12330] = { b = 1000000, s = 0 }, -- Horn of the Red Wolf
+    [12334] = { b = 0, s = 0 }, -- Frostmaul Shards
+    [12335] = { b = 0, s = 0 }, -- Gemstone of Smolderthorn
+    [12336] = { b = 0, s = 0 }, -- Gemstone of Spirestone
+    [12337] = { b = 0, s = 0 }, -- Gemstone of Bloodaxe
+    [12339] = { b = 0, s = 0 }, -- Vaelan's Gift
+    [12341] = { b = 0, s = 0 }, -- Blackwood Fruit Sample
+    [12342] = { b = 0, s = 0 }, -- Blackwood Grain Sample
+    [12343] = { b = 0, s = 0 }, -- Blackwood Nut Sample
+    [12344] = { b = 0, s = 0 }, -- Seal of Ascension
+    [12345] = { b = 0, s = 0 }, -- Bijou's Belongings
+    [12346] = { b = 0, s = 0 }, -- Empty Cleansing Bowl
+    [12347] = { b = 0, s = 0 }, -- Filled Cleansing Bowl
+    [12349] = { b = 0, s = 0 }, -- Cliffspring River Sample
+    [12350] = { b = 0, s = 0 }, -- Empty Sampling Tube
+    [12351] = { b = 1000000, s = 0 }, -- Horn of the Arctic Wolf
+    [12352] = { b = 0, s = 0 }, -- Doomrigger's Clasp
+    [12353] = { b = 1000000, s = 0 }, -- White Stallion Bridle
+    [12354] = { b = 1000000, s = 0 }, -- Palomino Bridle
+    [12355] = { b = 0, s = 0 }, -- Talisman of Corruption
+    [12356] = { b = 0, s = 0 }, -- Highperch Wyvern Egg
+    [12358] = { b = 0, s = 0 }, -- Darkstone Tablet
     [12359] = { b = 2400, s = 600 }, -- Thorium Bar
     [12360] = { b = 20000, s = 5000 }, -- Arcanite Bar
     [12361] = { b = 28000, s = 7000 }, -- Blue Sapphire
     [12363] = { b = 8000, s = 2000 }, -- Arcane Crystal
     [12364] = { b = 40000, s = 10000 }, -- Huge Emerald
     [12365] = { b = 1000, s = 250 }, -- Dense Stone
+    [12366] = { b = 0, s = 0 }, -- Thick Yeti Fur
+    [12367] = { b = 0, s = 0 }, -- Pristine Yeti Horn
+    [12368] = { b = 0, s = 0 }, -- Dawn's Gambit
+    [12382] = { b = 0, s = 0 }, -- Key to the City
+    [12383] = { b = 0, s = 0 }, -- Moontouched Feather
+    [12384] = { b = 0, s = 0 }, -- Cache of Mau'ari
     [12400] = { b = 189166, s = 37833 }, -- The Judge's Gavel
+    [12402] = { b = 0, s = 0 }, -- Ancient Egg
     [12404] = { b = 300, s = 75 }, -- Dense Sharpening Stone
     [12405] = { b = 46199, s = 9239 }, -- Thorium Armor
     [12406] = { b = 23183, s = 4636 }, -- Thorium Belt
     [12408] = { b = 24991, s = 4998 }, -- Thorium Bracers
     [12409] = { b = 51682, s = 10336 }, -- Thorium Boots
     [12410] = { b = 51863, s = 10372 }, -- Thorium Helm
+    [12411] = { b = 0, s = 0 }, -- Third Mosh'aru Tablet
+    [12412] = { b = 0, s = 0 }, -- Fourth Mosh'aru Tablet
     [12414] = { b = 86882, s = 17376 }, -- Thorium Leggings
     [12415] = { b = 85018, s = 17003 }, -- Radiant Breastplate
     [12416] = { b = 37979, s = 7595 }, -- Radiant Belt
@@ -5675,6 +7343,17 @@ VanillaItemPrices = {
     [12427] = { b = 60530, s = 12106 }, -- Imperial Plate Helm
     [12428] = { b = 43233, s = 8646 }, -- Imperial Plate Shoulders
     [12429] = { b = 89615, s = 17923 }, -- Imperial Plate Leggings
+    [12430] = { b = 0, s = 0 }, -- Frostsaber E'ko
+    [12431] = { b = 0, s = 0 }, -- Winterfall E'ko
+    [12432] = { b = 0, s = 0 }, -- Shardtooth E'ko
+    [12433] = { b = 0, s = 0 }, -- Wildkin E'ko
+    [12434] = { b = 0, s = 0 }, -- Chillwind E'ko
+    [12435] = { b = 0, s = 0 }, -- Ice Thistle E'ko
+    [12436] = { b = 0, s = 0 }, -- Frostmaul E'ko
+    [12437] = { b = 0, s = 0 }, -- Ridgewell's Crate
+    [12438] = { b = 0, s = 0 }, -- Tinkee's Letter
+    [12444] = { b = 0, s = 0 }, -- Uncracked Chillwind Horn
+    [12445] = { b = 0, s = 0 }, -- Felnok's Package
     [12446] = { b = 95, s = 19 }, -- Anvilmar Musket
     [12447] = { b = 96, s = 19 }, -- Thistlewood Bow
     [12448] = { b = 96, s = 19 }, -- Light Hunting Rifle
@@ -5691,14 +7370,21 @@ VanillaItemPrices = {
     [12464] = { b = 42601, s = 8520 }, -- Bloodfire Talons
     [12465] = { b = 51309, s = 10261 }, -- Nightfall Drape
     [12466] = { b = 34327, s = 6865 }, -- Dawnspire Cord
+    [12467] = { b = 0, s = 0 }, -- Alien Egg
     [12470] = { b = 43922, s = 8784 }, -- Sandstalker Ankleguards
     [12471] = { b = 33638, s = 8409 }, -- Desertwalker Cane
+    [12472] = { b = 0, s = 0 }, -- Krakle's Thermometer
     [12522] = { b = 910, s = 182 }, -- Bingles' Flying Gloves
+    [12524] = { b = 0, s = 0 }, -- Blue-feathered Amulet
+    [12525] = { b = 0, s = 0 }, -- Jaron's Supplies
     [12527] = { b = 176662, s = 35332 }, -- Ribsplitter
     [12528] = { b = 189166, s = 37833 }, -- The Judge's Gavel
     [12529] = { b = 6000, s = 1500 }, -- Smolderweb Carrier
+    [12530] = { b = 0, s = 0 }, -- Spire Spider Egg
     [12531] = { b = 144416, s = 28883 }, -- Searing Needle
     [12532] = { b = 242507, s = 48501 }, -- Spire of the Stoneshaper
+    [12533] = { b = 0, s = 0 }, -- Roughshod Pike
+    [12534] = { b = 0, s = 0 }, -- Omokk's Head
     [12535] = { b = 174629, s = 34925 }, -- Doomforged Straightedge
     [12542] = { b = 61781, s = 12356 }, -- Funeral Pyre Vestment
     [12543] = { b = 28625, s = 7156 }, -- Songstone of Ironforge
@@ -5716,9 +7402,17 @@ VanillaItemPrices = {
     [12555] = { b = 57032, s = 11406 }, -- Battlechaser's Greaves
     [12556] = { b = 71585, s = 14317 }, -- High Priestess Boots
     [12557] = { b = 71841, s = 14368 }, -- Ebonsteel Spaulders
+    [12558] = { b = 0, s = 0 }, -- Blue-feathered Necklace
+    [12562] = { b = 0, s = 0 }, -- Important Blackrock Documents
+    [12563] = { b = 0, s = 0 }, -- Warlord Goretooth's Command
+    [12564] = { b = 0, s = 0 }, -- Assassination Note
+    [12565] = { b = 0, s = 0 }, -- Winna's Kitten Carrier
+    [12566] = { b = 0, s = 0 }, -- Hardened Flasket
+    [12567] = { b = 0, s = 0 }, -- Filled Flasket
     [12582] = { b = 255997, s = 51199 }, -- Keris of Zul'Serak
     [12583] = { b = 371731, s = 74346 }, -- Blackhand Doomsaw
     [12584] = { b = 248182, s = 49636 }, -- Grand Marshal's Longsword
+    [12586] = { b = 0, s = 0 }, -- Immature Venom Sac
     [12587] = { b = 105159, s = 21031 }, -- Eye of Rend
     [12588] = { b = 127233, s = 25446 }, -- Bonespike Shoulder
     [12589] = { b = 51257, s = 10251 }, -- Dustfeather Sash
@@ -5741,27 +7435,41 @@ VanillaItemPrices = {
     [12619] = { b = 120290, s = 24058 }, -- Enchanted Thorium Leggings
     [12620] = { b = 86225, s = 17245 }, -- Enchanted Thorium Helm
     [12621] = { b = 225425, s = 45085 }, -- Demonfork
+    [12622] = { b = 0, s = 0 }, -- Shardtooth Meat
+    [12623] = { b = 0, s = 0 }, -- Chillwind Meat
     [12624] = { b = 103212, s = 20642 }, -- Wildthorn Mail
     [12625] = { b = 114235, s = 22847 }, -- Dawnbringer Shoulders
     [12626] = { b = 45956, s = 9191 }, -- Funeral Cuffs
+    [12627] = { b = 0, s = 0 }, -- Temporal Displacer
     [12628] = { b = 83203, s = 16640 }, -- Demon Forged Breastplate
+    [12630] = { b = 0, s = 0 }, -- Head of Rend Blackhand
     [12631] = { b = 44598, s = 8919 }, -- Fiery Plate Gauntlets
     [12632] = { b = 70498, s = 14099 }, -- Storm Gauntlets
     [12633] = { b = 74299, s = 14859 }, -- Whitesoul Helm
     [12634] = { b = 76552, s = 15310 }, -- Chiselbrand Girdle
+    [12635] = { b = 0, s = 0 }, -- Simple Parchment
     [12636] = { b = 121428, s = 24285 }, -- Helm of the Great Chief
     [12637] = { b = 51582, s = 10316 }, -- Backusarian Gauntlets
+    [12638] = { b = 0, s = 0 }, -- Andorhal Watch
     [12639] = { b = 76359, s = 15271 }, -- Stronghold Gauntlets
     [12640] = { b = 109471, s = 21894 }, -- Lionheart Helm
     [12641] = { b = 219182, s = 43836 }, -- Invulnerable Mail
+    [12642] = { b = 0, s = 0 }, -- Cleansed Infernal Orb
     [12643] = { b = 300, s = 75 }, -- Dense Weightstone
     [12644] = { b = 800, s = 200 }, -- Dense Grinding Stone
     [12645] = { b = 2000, s = 500 }, -- Thorium Shield Spike
+    [12646] = { b = 0, s = 0 }, -- Infus Emerald
+    [12647] = { b = 0, s = 0 }, -- Felhas Ruby
+    [12648] = { b = 0, s = 0 }, -- Imprisoned Felhound Spirit
+    [12649] = { b = 0, s = 0 }, -- Imprisoned Infernal Spirit
+    [12650] = { b = 0, s = 0 }, -- Attuned Dampener
     [12651] = { b = 180279, s = 36055 }, -- Blackcrow
+    [12652] = { b = 0, s = 0 }, -- Bijou's Reconnaissance Report
     [12653] = { b = 181593, s = 36318 }, -- Riphook
     [12654] = { b = 250, s = 62 }, -- Doomshot
     [12655] = { b = 2000, s = 500 }, -- Enchanted Thorium Bar
     [12662] = { b = 2400, s = 600 }, -- Demonic Rune
+    [12663] = { b = 0, s = 0 }, -- Glyphed Oaken Branch
     [12682] = { b = 12000, s = 3000 }, -- Plans: Thorium Armor
     [12683] = { b = 12000, s = 3000 }, -- Plans: Thorium Belt
     [12684] = { b = 12000, s = 3000 }, -- Plans: Thorium Bracers
@@ -5787,8 +7495,11 @@ VanillaItemPrices = {
     [12705] = { b = 30000, s = 7500 }, -- Plans: Imperial Plate Chest
     [12706] = { b = 30000, s = 7500 }, -- Plans: Runic Plate Shoulders
     [12707] = { b = 30000, s = 7500 }, -- Plans: Runic Plate Boots
+    [12708] = { b = 0, s = 0 }, -- Crossroads' Supply Crates
     [12709] = { b = 289956, s = 57991 }, -- Finkle's Skinner
+    [12710] = { b = 0, s = 0 }, -- Glowing Hunk of the Beast's Flesh
     [12711] = { b = 40000, s = 10000 }, -- Plans: Whitesoul Helm
+    [12712] = { b = 0, s = 0 }, -- Warosh's Mojo
     [12713] = { b = 40000, s = 10000 }, -- Plans: Radiant Leggings
     [12714] = { b = 40000, s = 10000 }, -- Plans: Runic Plate Helm
     [12715] = { b = 40000, s = 10000 }, -- Plans: Imperial Plate Leggings
@@ -5797,23 +7508,47 @@ VanillaItemPrices = {
     [12718] = { b = 60000, s = 15000 }, -- Plans: Runic Breastplate
     [12719] = { b = 60000, s = 15000 }, -- Plans: Runic Plate Leggings
     [12720] = { b = 80000, s = 20000 }, -- Plans: Stronghold Gauntlets
+    [12721] = { b = 0, s = 0 }, -- Good Luck Half-Charm
+    [12722] = { b = 0, s = 0 }, -- Good Luck Other-Half-Charm
+    [12723] = { b = 0, s = 0 }, -- Good Luck Charm
+    [12724] = { b = 0, s = 0 }, -- Janice's Parcel
     [12725] = { b = 60000, s = 15000 }, -- Plans: Enchanted Thorium Helm
     [12726] = { b = 60000, s = 15000 }, -- Plans: Enchanted Thorium Leggings
     [12727] = { b = 60000, s = 15000 }, -- Plans: Enchanted Thorium Breastplate
     [12728] = { b = 80000, s = 20000 }, -- Plans: Invulnerable Mail
+    [12730] = { b = 0, s = 0 }, -- Warosh's Scroll
+    [12731] = { b = 0, s = 0 }, -- Pristine Hide of the Beast
+    [12732] = { b = 0, s = 0 }, -- Incendia Agave
+    [12733] = { b = 0, s = 0 }, -- Sacred Frostsaber Meat
+    [12734] = { b = 0, s = 0 }, -- Enchanted Scarlet Thread
+    [12735] = { b = 0, s = 0 }, -- Frayed Abomination Stitching
+    [12736] = { b = 0, s = 0 }, -- Frostwhisper's Embalming Fluid
+    [12737] = { b = 0, s = 0 }, -- Gloom Weed
+    [12738] = { b = 0, s = 0 }, -- Dalson Outhouse Key
+    [12739] = { b = 0, s = 0 }, -- Dalson Cabinet Key
+    [12740] = { b = 0, s = 0 }, -- Fifth Mosh'aru Tablet
+    [12741] = { b = 0, s = 0 }, -- Sixth Mosh'aru Tablet
     [12752] = { b = 114539, s = 22907 }, -- Cap of the Scarlet Savant
+    [12753] = { b = 0, s = 0 }, -- Skin of Shadow
     [12756] = { b = 175287, s = 35057 }, -- Leggings of Arcana
     [12757] = { b = 175964, s = 35192 }, -- Breastplate of Bloodthirst
+    [12765] = { b = 0, s = 0 }, -- Secret Note #1
+    [12766] = { b = 0, s = 0 }, -- Secret Note #2
+    [12768] = { b = 0, s = 0 }, -- Secret Note #3
+    [12770] = { b = 0, s = 0 }, -- Bijou's Information
+    [12771] = { b = 0, s = 0 }, -- Empty Firewater Flask
     [12772] = { b = 194358, s = 38871 }, -- Inlaid Thorium Hammer
     [12773] = { b = 165399, s = 33079 }, -- Ornate Thorium Handaxe
     [12774] = { b = 180220, s = 36044 }, -- Dawn's Edge
     [12775] = { b = 199746, s = 39949 }, -- Huge Thorium Battleaxe
     [12776] = { b = 240624, s = 48124 }, -- Enchanted Battlehammer
     [12777] = { b = 193242, s = 38648 }, -- Blazing Rapier
+    [12780] = { b = 0, s = 0 }, -- General Drakkisath's Command
     [12781] = { b = 213605, s = 42721 }, -- Serenity
     [12782] = { b = 284042, s = 56808 }, -- Corruption
     [12783] = { b = 291079, s = 58215 }, -- Heartseeker
     [12784] = { b = 365181, s = 73036 }, -- Arcanite Reaper
+    [12785] = { b = 0, s = 0 }, -- Incendia Powder
     [12790] = { b = 373098, s = 74619 }, -- Arcanite Champion
     [12791] = { b = 197059, s = 39411 }, -- Barman Shanker
     [12792] = { b = 196279, s = 39255 }, -- Volcanic Hammer
@@ -5826,17 +7561,26 @@ VanillaItemPrices = {
     [12800] = { b = 40000, s = 10000 }, -- Azerothian Diamond
     [12803] = { b = 2000, s = 500 }, -- Living Essence
     [12804] = { b = 8000, s = 2000 }, -- Powerful Mojo
+    [12806] = { b = 0, s = 0 }, -- Unforged Rune Covered Breastplate
+    [12807] = { b = 0, s = 0 }, -- Scourge Banner
     [12808] = { b = 4000, s = 1000 }, -- Essence of Undeath
     [12809] = { b = 40000, s = 10000 }, -- Guardian Stone
     [12810] = { b = 2000, s = 500 }, -- Enchanted Leather
     [12811] = { b = 80000, s = 20000 }, -- Righteous Orb
+    [12812] = { b = 0, s = 0 }, -- Unfired Plate Gauntlets
+    [12813] = { b = 0, s = 0 }, -- Flask of Mystery Goo
+    [12814] = { b = 0, s = 0 }, -- Flame in a Bottle
+    [12815] = { b = 0, s = 0 }, -- Beacon Torch
     [12819] = { b = 16000, s = 4000 }, -- Plans: Ornate Thorium Handaxe
+    [12820] = { b = 0, s = 0 }, -- Winterfall Firewater
     [12821] = { b = 16000, s = 4000 }, -- Plans: Dawn's Edge
+    [12822] = { b = 0, s = 0 }, -- Toxic Horror Droplet
     [12823] = { b = 20000, s = 5000 }, -- Plans: Huge Thorium Battleaxe
     [12824] = { b = 20000, s = 5000 }, -- Plans: Enchanted Battlehammer
     [12825] = { b = 20000, s = 5000 }, -- Plans: Blazing Rapier
     [12827] = { b = 20000, s = 5000 }, -- Plans: Serenity
     [12828] = { b = 22000, s = 5500 }, -- Plans: Volcanic Hammer
+    [12829] = { b = 0, s = 0 }, -- Winterfall Crate
     [12830] = { b = 22000, s = 5500 }, -- Plans: Corruption
     [12833] = { b = 80000, s = 20000 }, -- Plans: Hammer of the Titans
     [12834] = { b = 80000, s = 20000 }, -- Plans: Arcanite Champion
@@ -5845,21 +7589,58 @@ VanillaItemPrices = {
     [12837] = { b = 80000, s = 20000 }, -- Plans: Masterwork Stormhammer
     [12838] = { b = 80000, s = 20000 }, -- Plans: Arcanite Reaper
     [12839] = { b = 80000, s = 20000 }, -- Plans: Heartseeker
+    [12840] = { b = 0, s = 0 }, -- Minion's Scourgestone
+    [12841] = { b = 0, s = 0 }, -- Invader's Scourgestone
+    [12842] = { b = 0, s = 0 }, -- Crudely-written Log
+    [12843] = { b = 0, s = 0 }, -- Corruptor's Scourgestone
+    [12844] = { b = 0, s = 0 }, -- Argent Dawn Valor Token
+    [12845] = { b = 0, s = 0 }, -- Medallion of Faith
+    [12846] = { b = 0, s = 0 }, -- Argent Dawn Commission
+    [12847] = { b = 0, s = 0 }, -- Soul Stained Pike
+    [12848] = { b = 0, s = 0 }, -- Blood Stained Pike
+    [12849] = { b = 0, s = 0 }, -- Demon Kissed Sack
     [12871] = { b = 32195, s = 8048 }, -- Chromatic Carapace
+    [12884] = { b = 0, s = 0 }, -- Arnak's Hoof
+    [12885] = { b = 0, s = 0 }, -- Pamela's Doll
+    [12886] = { b = 0, s = 0 }, -- Pamela's Doll's Head
+    [12887] = { b = 0, s = 0 }, -- Pamela's Doll's Left Side
+    [12888] = { b = 0, s = 0 }, -- Pamela's Doll's Right Side
+    [12891] = { b = 0, s = 0 }, -- Jaron's Pick
+    [12894] = { b = 0, s = 0 }, -- Joseph's Wedding Ring
     [12895] = { b = 147308, s = 29461 }, -- Breastplate of the Chromatic Flight
+    [12896] = { b = 0, s = 0 }, -- First Relic Fragment
+    [12897] = { b = 0, s = 0 }, -- Second Relic Fragment
+    [12898] = { b = 0, s = 0 }, -- Third Relic Fragment
+    [12899] = { b = 0, s = 0 }, -- Fourth Relic Fragment
+    [12900] = { b = 0, s = 0 }, -- Annals of Darrowshire
     [12903] = { b = 227412, s = 45482 }, -- Legguards of the Chromatic Defier
     [12905] = { b = 81798, s = 16359 }, -- Wildfire Cape
+    [12906] = { b = 0, s = 0 }, -- Purified Moonwell Water
+    [12907] = { b = 0, s = 0 }, -- Corrupt Moonwell Water
+    [12922] = { b = 0, s = 0 }, -- Empty Canteen
+    [12923] = { b = 0, s = 0 }, -- Awbee's Scale
+    [12924] = { b = 0, s = 0 }, -- Ritual Candle
+    [12925] = { b = 0, s = 0 }, -- Arikara Serpent Skin
     [12926] = { b = 59630, s = 14907 }, -- Flaming Band
     [12927] = { b = 95745, s = 19149 }, -- Truestrike Shoulders
+    [12928] = { b = 0, s = 0 }, -- Umi's Mechanical Yeti
     [12929] = { b = 78585, s = 19646 }, -- Emberfury Talisman
     [12930] = { b = 40000, s = 10000 }, -- Briarwood Reed
     [12935] = { b = 115982, s = 23196 }, -- Warmaster Legguards
     [12936] = { b = 58203, s = 11640 }, -- Battleborn Armbraces
+    [12938] = { b = 0, s = 0 }, -- Blood of Heroes
     [12939] = { b = 301818, s = 60363 }, -- Dal'Rend's Tribal Guardian
     [12940] = { b = 274063, s = 54812 }, -- Dal'Rend's Sacred Charge
+    [12942] = { b = 0, s = 0 }, -- Panther Cage Key
     [12945] = { b = 212825, s = 42565 }, -- Legplates of the Chromatic Defier
+    [12946] = { b = 0, s = 0 }, -- Hypercapacitor Gizmo
+    [12947] = { b = 0, s = 0 }, -- Alex's Ring of Audacity
     [12952] = { b = 74307, s = 14861 }, -- Gyth's Skull
     [12953] = { b = 111874, s = 22374 }, -- Dragoneye Coif
+    [12954] = { b = 0, s = 0 }, -- Davil's Libram
+    [12955] = { b = 0, s = 0 }, -- Redpath's Shield
+    [12956] = { b = 0, s = 0 }, -- Skull of Horgus
+    [12957] = { b = 0, s = 0 }, -- Shattered Sword of Marduk
     [12958] = { b = 50000, s = 12500 }, -- Recipe: Transmute Arcanite
     [12960] = { b = 88761, s = 17752 }, -- Tribal War Feathers
     [12963] = { b = 138586, s = 27717 }, -- Blademaster Leggings
@@ -5869,6 +7650,7 @@ VanillaItemPrices = {
     [12967] = { b = 84420, s = 16884 }, -- Bloodmoon Cloak
     [12968] = { b = 84740, s = 16948 }, -- Frostweaver Cape
     [12969] = { b = 354420, s = 70884 }, -- Seeping Willow
+    [12973] = { b = 0, s = 0 }, -- Scarlet Cannonball
     [12974] = { b = 30525, s = 6105 }, -- The Black Knight
     [12975] = { b = 11026, s = 2205 }, -- Prospector Axe
     [12976] = { b = 8852, s = 1770 }, -- Ironpatch Blade
@@ -5970,6 +7752,7 @@ VanillaItemPrices = {
     [13083] = { b = 173470, s = 34694 }, -- Garrett Family Crest
     [13084] = { b = 26458, s = 6614 }, -- Kaleidoscope Chain
     [13085] = { b = 36548, s = 9137 }, -- Horizon Choker
+    [13086] = { b = 1000000, s = 0 }, -- Reins of the Winterspring Frostsaber
     [13087] = { b = 23584, s = 5896 }, -- River Pride Choker
     [13088] = { b = 29654, s = 7413 }, -- Gazlowe's Charm
     [13089] = { b = 32156, s = 8039 }, -- Skibi's Pendant
@@ -6020,6 +7803,7 @@ VanillaItemPrices = {
     [13137] = { b = 29374, s = 5874 }, -- Ironweaver
     [13138] = { b = 57661, s = 11532 }, -- The Silencer
     [13139] = { b = 105149, s = 21029 }, -- Guttbuster
+    [13140] = { b = 0, s = 0 }, -- Blood Red Key
     [13141] = { b = 48373, s = 12093 }, -- Tooth of Gnarr
     [13142] = { b = 58210, s = 11642 }, -- Brigam Girdle
     [13143] = { b = 85490, s = 21372 }, -- Mark of the Dragon Lord
@@ -6027,6 +7811,11 @@ VanillaItemPrices = {
     [13145] = { b = 13522, s = 2704 }, -- Enormous Ogre Belt
     [13146] = { b = 173521, s = 34704 }, -- Shell Launcher Shotgun
     [13148] = { b = 313145, s = 62629 }, -- Chillpike
+    [13155] = { b = 0, s = 0 }, -- Resonating Skull
+    [13156] = { b = 0, s = 0 }, -- Mystic Crystal
+    [13157] = { b = 0, s = 0 }, -- Fetid Skull
+    [13158] = { b = 0, s = 0 }, -- Words of the High Chief
+    [13159] = { b = 0, s = 0 }, -- Bone Dust
     [13161] = { b = 328749, s = 65749 }, -- Trindlehaven Staff
     [13162] = { b = 52793, s = 10558 }, -- Reiver Claws
     [13163] = { b = 347689, s = 69537 }, -- Relentless Scythe
@@ -6037,23 +7826,42 @@ VanillaItemPrices = {
     [13169] = { b = 119741, s = 23948 }, -- Tressermane Leggings
     [13170] = { b = 96151, s = 19230 }, -- Skyshroud Leggings
     [13171] = { b = 28000, s = 7000 }, -- Smokey's Lighter
+    [13172] = { b = 0, s = 0 }, -- Siabi's Premium Tobacco
     [13173] = { b = 47, s = 11 }, -- Flightblade Throwing Axe
+    [13174] = { b = 0, s = 0 }, -- Plagued Flesh Sample
     [13175] = { b = 153095, s = 30619 }, -- Voone's Twitchbow
+    [13176] = { b = 0, s = 0 }, -- Scourge Data
     [13177] = { b = 65585, s = 16396 }, -- Talisman of Evasion
     [13178] = { b = 55130, s = 13782 }, -- Rosewine Circle
     [13179] = { b = 74583, s = 14916 }, -- Brazecore Armguards
+    [13180] = { b = 0, s = 0 }, -- Stratholme Holy Water
     [13181] = { b = 43988, s = 8797 }, -- Demonskin Gloves
     [13182] = { b = 220713, s = 44142 }, -- Phase Blade
     [13183] = { b = 258857, s = 51771 }, -- Venomspitter
     [13184] = { b = 68191, s = 13638 }, -- Fallbrush Handgrips
     [13185] = { b = 82111, s = 16422 }, -- Sunderseer Mantle
+    [13186] = { b = 0, s = 0 }, -- Empty Felstone Field Bottle
+    [13187] = { b = 0, s = 0 }, -- Empty Dalson's Tears Bottle
+    [13188] = { b = 0, s = 0 }, -- Empty Writhing Haunt Bottle
+    [13189] = { b = 0, s = 0 }, -- Empty Gahrron's Withering Bottle
+    [13190] = { b = 0, s = 0 }, -- Filled Felstone Field Bottle
+    [13191] = { b = 0, s = 0 }, -- Filled Dalson's Tears Bottle
+    [13192] = { b = 0, s = 0 }, -- Filled Writhing Haunt Bottle
+    [13193] = { b = 0, s = 0 }, -- Filled Gahrron's Withering Bottle
+    [13194] = { b = 0, s = 0 }, -- Felstone Field Cauldron Key
+    [13195] = { b = 0, s = 0 }, -- Dalson's Tears Cauldron Key
+    [13196] = { b = 0, s = 0 }, -- Gahrron's Withering Cauldron Key
+    [13197] = { b = 0, s = 0 }, -- Writhing Haunt Cauldron Key
     [13198] = { b = 254256, s = 50851 }, -- Hurd Smasher
     [13199] = { b = 21994, s = 4398 }, -- Crushridge Bindings
+    [13202] = { b = 0, s = 0 }, -- Extended Annals of Darrowshire
     [13203] = { b = 77649, s = 15529 }, -- Armswake Cloak
     [13204] = { b = 259727, s = 51945 }, -- Bashguuder
     [13205] = { b = 175155, s = 35031 }, -- Rhombeard Protector
     [13206] = { b = 99402, s = 19880 }, -- Wolfshear Leggings
+    [13207] = { b = 0, s = 0 }, -- Shadow Lord Fel'dan's Head
     [13208] = { b = 62603, s = 12520 }, -- Bleak Howler Armguards
+    [13209] = { b = 0, s = 0 }, -- Seal of the Dawn
     [13210] = { b = 90122, s = 18024 }, -- Pads of the Dread Wolf
     [13211] = { b = 72374, s = 14474 }, -- Slashclaw Bracers
     [13212] = { b = 42683, s = 10670 }, -- Halycon's Spiked Collar
@@ -6067,6 +7875,8 @@ VanillaItemPrices = {
     [13246] = { b = 268114, s = 53622 }, -- Argent Avenger
     [13248] = { b = 148350, s = 29670 }, -- Burstshot Harquebus
     [13249] = { b = 338914, s = 67782 }, -- Argent Crusader
+    [13250] = { b = 0, s = 0 }, -- Head of Balnazzar
+    [13251] = { b = 0, s = 0 }, -- Head of Baron Rivendare
     [13252] = { b = 62170, s = 12434 }, -- Cloudrunner Girdle
     [13253] = { b = 49916, s = 9983 }, -- Hands of Power
     [13254] = { b = 129419, s = 25883 }, -- Astral Guard
@@ -6084,20 +7894,47 @@ VanillaItemPrices = {
     [13286] = { b = 220533, s = 44106 }, -- Rivenspike
     [13287] = { b = 2500, s = 625 }, -- Pattern: Raptor Hide Harness
     [13288] = { b = 2500, s = 625 }, -- Pattern: Raptor Hide Belt
+    [13289] = { b = 0, s = 0 }, -- Egan's Blaster
+    [13302] = { b = 0, s = 0 }, -- Market Row Postbox Key
+    [13303] = { b = 0, s = 0 }, -- Crusaders' Square Postbox Key
+    [13304] = { b = 0, s = 0 }, -- Festival Lane Postbox Key
+    [13305] = { b = 0, s = 0 }, -- Elders' Square Postbox Key
+    [13306] = { b = 0, s = 0 }, -- King's Square Postbox Key
+    [13307] = { b = 0, s = 0 }, -- Fras Siabi's Postbox Key
     [13308] = { b = 1800, s = 450 }, -- Schematic: Ice Deflector
     [13309] = { b = 1000, s = 250 }, -- Schematic: Lovingly Crafted Boomstick
     [13310] = { b = 2000, s = 500 }, -- Schematic: Accurate Scope
     [13311] = { b = 10000, s = 2500 }, -- Schematic: Mechanical Dragonling
+    [13313] = { b = 0, s = 0 }, -- Sacred Highborne Writings
     [13314] = { b = 151110, s = 30222 }, -- Alanna's Embrace
     [13315] = { b = 45587, s = 11396 }, -- Testament of Hope
+    [13317] = { b = 10000000, s = 0 }, -- Whistle of the Ivory Raptor
+    [13320] = { b = 5000, s = 0 }, -- Arcane Quickener
+    [13321] = { b = 100000, s = 0 }, -- Green Mechanostrider
+    [13322] = { b = 100000, s = 0 }, -- Unpainted Mechanostrider
+    [13326] = { b = 1000000, s = 0 }, -- White Mechanostrider Mod A
+    [13327] = { b = 1000000, s = 0 }, -- Icy Blue Mechanostrider Mod A
+    [13328] = { b = 1000000, s = 0 }, -- Black Ram
+    [13329] = { b = 1000000, s = 0 }, -- Frost Ram
+    [13331] = { b = 100000, s = 0 }, -- Red Skeletal Horse
+    [13332] = { b = 100000, s = 0 }, -- Blue Skeletal Horse
+    [13333] = { b = 100000, s = 0 }, -- Brown Skeletal Horse
+    [13334] = { b = 1000000, s = 0 }, -- Green Skeletal Warhorse
     [13335] = { b = 1000000, s = 250000 }, -- Deathcharger's Reins
     [13340] = { b = 82494, s = 16498 }, -- Cape of the Black Baron
     [13344] = { b = 86054, s = 17210 }, -- Dracorian Gauntlets
     [13345] = { b = 61830, s = 15457 }, -- Seal of Rivendare
     [13346] = { b = 115591, s = 23118 }, -- Robes of the Exalted
+    [13347] = { b = 0, s = 0 }, -- Crystal of Zin-Malor
     [13348] = { b = 363850, s = 72770 }, -- Demonshear
     [13349] = { b = 292145, s = 58429 }, -- Scepter of the Unholy
+    [13350] = { b = 0, s = 0 }, -- Insignia of the Black Guard
+    [13351] = { b = 0, s = 0 }, -- Crimson Hammersmith's Apron
+    [13352] = { b = 0, s = 0 }, -- Vosh'gajin's Snakestone
     [13353] = { b = 41810, s = 10452 }, -- Book of the Dead
+    [13354] = { b = 0, s = 0 }, -- Ectoplasmic Resonator
+    [13356] = { b = 0, s = 0 }, -- Somatic Intensifier
+    [13357] = { b = 0, s = 0 }, -- Osseous Agitator
     [13358] = { b = 105181, s = 21036 }, -- Wyrmtongue Shoulders
     [13359] = { b = 126683, s = 25336 }, -- Crown of Tyranny
     [13360] = { b = 282585, s = 56517 }, -- Gift of the Elven Magi
@@ -6107,8 +7944,10 @@ VanillaItemPrices = {
     [13364] = { b = 8000, s = 2000 }, -- Fras Siabi's Advertisement
     [13365] = { b = 8000, s = 2000 }, -- Town Meeting Notice
     [13366] = { b = 12000, s = 3000 }, -- Ingenious Toy
+    [13367] = { b = 0, s = 0 }, -- Wrapped Gift
     [13368] = { b = 277190, s = 55438 }, -- Bonescraper
     [13369] = { b = 87634, s = 17526 }, -- Fire Striders
+    [13370] = { b = 0, s = 0 }, -- Vitreous Focuser
     [13371] = { b = 26630, s = 6657 }, -- Father Flame
     [13372] = { b = 318846, s = 63769 }, -- Slavedriver's Cane
     [13373] = { b = 59387, s = 14846 }, -- Band of Flesh
@@ -6154,6 +7993,9 @@ VanillaItemPrices = {
     [13445] = { b = 2000, s = 500 }, -- Elixir of Superior Defense
     [13446] = { b = 4000, s = 1000 }, -- Major Healing Potion
     [13447] = { b = 5000, s = 1250 }, -- Elixir of the Sages
+    [13448] = { b = 0, s = 0 }, -- The Deed to Caer Darrow
+    [13450] = { b = 0, s = 0 }, -- The Deed to Southshore
+    [13451] = { b = 0, s = 0 }, -- The Deed to Tarren Mill
     [13452] = { b = 5000, s = 1250 }, -- Elixir of the Mongoose
     [13453] = { b = 5000, s = 1250 }, -- Elixir of Brute Force
     [13454] = { b = 3000, s = 750 }, -- Greater Arcane Elixir
@@ -6170,6 +8012,9 @@ VanillaItemPrices = {
     [13466] = { b = 1000, s = 250 }, -- Plaguebloom
     [13467] = { b = 1000, s = 250 }, -- Icecap
     [13468] = { b = 4000, s = 1000 }, -- Black Lotus
+    [13469] = { b = 0, s = 0 }, -- Head of Weldon Barov
+    [13470] = { b = 0, s = 0 }, -- Head of Alexi Barov
+    [13471] = { b = 0, s = 0 }, -- The Deed to Brill
     [13473] = { b = 28658, s = 7164 }, -- Felstone Good Luck Charm
     [13474] = { b = 123624, s = 24724 }, -- Farmer Dalson's Shotgun
     [13475] = { b = 32436, s = 8109 }, -- Dalson Family Wedding Ring
@@ -6179,6 +8024,10 @@ VanillaItemPrices = {
     [13479] = { b = 14000, s = 3500 }, -- Recipe: Elixir of the Sages
     [13480] = { b = 15000, s = 3750 }, -- Recipe: Major Healing Potion
     [13481] = { b = 15000, s = 3750 }, -- Recipe: Elixir of Brute Force
+    [13482] = { b = 15000, s = 0 }, -- Recipe: Transmute Air to Fire
+    [13483] = { b = 15000, s = 0 }, -- Recipe: Transmute Fire to Earth
+    [13484] = { b = 15000, s = 0 }, -- Recipe: Transmute Earth to Water
+    [13485] = { b = 15000, s = 0 }, -- Recipe: Transmute Water to Air
     [13486] = { b = 15000, s = 3750 }, -- Recipe: Transmute Undeath to Water
     [13487] = { b = 15000, s = 3750 }, -- Recipe: Transmute Water to Undeath
     [13488] = { b = 15000, s = 3750 }, -- Recipe: Transmute Life to Earth
@@ -6197,6 +8046,7 @@ VanillaItemPrices = {
     [13502] = { b = 59937, s = 11987 }, -- Handcrafted Mastersmith Girdle
     [13505] = { b = 456725, s = 91345 }, -- Runeblade of Baron Rivendare
     [13506] = { b = 20000, s = 5000 }, -- Flask of Petrification
+    [13507] = { b = 0, s = 0 }, -- Cliffwatcher Longhorn Report
     [13508] = { b = 19115, s = 4778 }, -- Eye of Arachnida
     [13509] = { b = 21573, s = 5393 }, -- Clutch of Foresight
     [13510] = { b = 20000, s = 5000 }, -- Flask of the Titans
@@ -6210,6 +8060,7 @@ VanillaItemPrices = {
     [13520] = { b = 40000, s = 10000 }, -- Recipe: Flask of Distilled Wisdom
     [13521] = { b = 40000, s = 10000 }, -- Recipe: Flask of Supreme Power
     [13522] = { b = 40000, s = 10000 }, -- Recipe: Flask of Chromatic Resistance
+    [13523] = { b = 0, s = 0 }, -- Blood of Innocents
     [13524] = { b = 49835, s = 12458 }, -- Skull of Burning Shadows
     [13525] = { b = 43492, s = 8698 }, -- Darkbind Fingers
     [13526] = { b = 54485, s = 10897 }, -- Flamescarred Girdle
@@ -6222,11 +8073,32 @@ VanillaItemPrices = {
     [13533] = { b = 64052, s = 12810 }, -- Acid-etched Pauldrons
     [13534] = { b = 188639, s = 37727 }, -- Banshee Finger
     [13535] = { b = 84146, s = 16829 }, -- Coldtouch Phantom Wraps
+    [13536] = { b = 0, s = 0 }, -- Horn of Awakening
     [13537] = { b = 49420, s = 9884 }, -- Chillhide Bracers
     [13538] = { b = 96115, s = 19223 }, -- Windshrieker Pauldrons
     [13539] = { b = 42677, s = 8535 }, -- Banshee's Touch
+    [13542] = { b = 0, s = 0 }, -- Demon Box
+    [13544] = { b = 0, s = 0 }, -- Spectral Essence
+    [13545] = { b = 0, s = 0 }, -- Shellfish
     [13546] = { b = 1250, s = 62 }, -- Bloodbelly Fish
+    [13562] = { b = 0, s = 0 }, -- Remains of Trey Lightforge
+    [13582] = { b = 0, s = 0 }, -- Zergling Leash
+    [13583] = { b = 0, s = 0 }, -- Panda Collar
+    [13584] = { b = 0, s = 0 }, -- Diablo Stone
+    [13585] = { b = 0, s = 0 }, -- Keepsake of Remembrance
+    [13602] = { b = 0, s = 0 }, -- Greater Spellstone
+    [13603] = { b = 0, s = 0 }, -- Major Spellstone
+    [13624] = { b = 0, s = 0 }, -- Soulbound Keepsake
+    [13626] = { b = 0, s = 0 }, -- Human Head of Ras Frostwhisper
+    [13699] = { b = 0, s = 0 }, -- Firestone
+    [13700] = { b = 0, s = 0 }, -- Greater Firestone
+    [13701] = { b = 0, s = 0 }, -- Major Firestone
+    [13702] = { b = 0, s = 0 }, -- Doom Weed
+    [13703] = { b = 0, s = 0 }, -- Kodo Bone
+    [13704] = { b = 0, s = 0 }, -- Skeleton Key
     [13724] = { b = 6000, s = 300 }, -- Enriched Manna Biscuit
+    [13725] = { b = 0, s = 0 }, -- Krastinov's Bag of Horrors
+    [13752] = { b = 0, s = 0 }, -- Soulbound Keepsake
     [13754] = { b = 120, s = 6 }, -- Raw Glossy Mightfish
     [13755] = { b = 140, s = 7 }, -- Winter Squid
     [13756] = { b = 180, s = 9 }, -- Raw Summer Bass
@@ -6234,8 +8106,10 @@ VanillaItemPrices = {
     [13758] = { b = 80, s = 4 }, -- Raw Redgill
     [13759] = { b = 200, s = 10 }, -- Raw Nightfin Snapper
     [13760] = { b = 200, s = 10 }, -- Raw Sunscale Salmon
+    [13761] = { b = 0, s = 0 }, -- Frozen Eggs
     [13810] = { b = 6000, s = 300 }, -- Blessed Sunfruit
     [13813] = { b = 6000, s = 300 }, -- Blessed Sunfruit Juice
+    [13815] = { b = 0, s = 0 }, -- Some Rune
     [13816] = { b = 52808, s = 10561 }, -- Fine Longsword
     [13817] = { b = 93984, s = 18796 }, -- Tapered Greatsword
     [13818] = { b = 67157, s = 13431 }, -- Jagged Axe
@@ -6246,7 +8120,10 @@ VanillaItemPrices = {
     [13823] = { b = 59622, s = 11924 }, -- Stout War Staff
     [13824] = { b = 45078, s = 9015 }, -- Recurve Long Bow
     [13825] = { b = 50841, s = 10168 }, -- Primed Musket
+    [13850] = { b = 0, s = 0 }, -- Rumbleshot's Ammo
     [13851] = { b = 1250, s = 312 }, -- Hot Wolf Ribs
+    [13852] = { b = 0, s = 0 }, -- The Grand Crusader's Command
+    [13853] = { b = 0, s = 0 }, -- Slab of Carrion Worm Meat
     [13856] = { b = 25564, s = 5112 }, -- Runecloth Belt
     [13857] = { b = 54393, s = 10878 }, -- Runecloth Tunic
     [13858] = { b = 54589, s = 10917 }, -- Runecloth Robe
@@ -6260,6 +8137,8 @@ VanillaItemPrices = {
     [13869] = { b = 48513, s = 9702 }, -- Frostweave Tunic
     [13870] = { b = 27358, s = 5471 }, -- Frostweave Gloves
     [13871] = { b = 67183, s = 13436 }, -- Frostweave Pants
+    [13872] = { b = 0, s = 0 }, -- Bundle of Wood
+    [13873] = { b = 0, s = 0 }, -- Viewing Room Key
     [13874] = { b = 4, s = 1 }, -- Heavy Crate
     [13875] = { b = 4, s = 1 }, -- Ironbound Locked Chest
     [13876] = { b = 100, s = 25 }, -- 40 Pound Grouper
@@ -6278,6 +8157,7 @@ VanillaItemPrices = {
     [13889] = { b = 1000, s = 5 }, -- Raw Whitescale Salmon
     [13890] = { b = 1400, s = 70 }, -- Plated Armorfish
     [13891] = { b = 400, s = 100 }, -- Bloated Salmon
+    [13892] = { b = 0, s = 0 }, -- Kodo Kombobulator
     [13893] = { b = 60, s = 15 }, -- Large Raw Mightfish
     [13895] = { b = 506622, s = 101324 }, -- Formal Dangui
     [13896] = { b = 55103, s = 11020 }, -- Dark Green Wedding Hanbok
@@ -6303,6 +8183,7 @@ VanillaItemPrices = {
     [13916] = { b = 600, s = 150 }, -- 92 Pound Mightfish
     [13917] = { b = 800, s = 200 }, -- 103 Pound Mightfish
     [13918] = { b = 4, s = 1 }, -- Reinforced Locked Chest
+    [13920] = { b = 0, s = 0 }, -- Healthy Dragon Scale
     [13926] = { b = 40000, s = 10000 }, -- Golden Pearl
     [13927] = { b = 32, s = 8 }, -- Cooked Glossy Mightfish
     [13928] = { b = 160, s = 8 }, -- Grilled Squid
@@ -6610,9 +8491,13 @@ VanillaItemPrices = {
     [14335] = { b = 75432, s = 15086 }, -- Eternal Spaulders
     [14336] = { b = 100686, s = 20137 }, -- Eternal Wraps
     [14337] = { b = 42731, s = 8546 }, -- Eternal Cord
+    [14338] = { b = 0, s = 0 }, -- Empty Water Tube
+    [14339] = { b = 0, s = 0 }, -- Moonwell Water Tube
     [14340] = { b = 108891, s = 21778 }, -- Freezing Lich Robes
     [14341] = { b = 5000, s = 1250 }, -- Rune Thread
     [14342] = { b = 16000, s = 4000 }, -- Mooncloth
+    [14343] = { b = 36000, s = 0 }, -- Small Brilliant Shard
+    [14344] = { b = 36000, s = 0 }, -- Large Brilliant Shard
     [14364] = { b = 1624, s = 324 }, -- Mystic's Slippers
     [14365] = { b = 1072, s = 214 }, -- Mystic's Cape
     [14366] = { b = 948, s = 189 }, -- Mystic's Bracelets
@@ -6630,6 +8515,9 @@ VanillaItemPrices = {
     [14378] = { b = 4987, s = 997 }, -- Sanguine Mantle
     [14379] = { b = 8075, s = 1615 }, -- Sanguine Trousers
     [14380] = { b = 7369, s = 1473 }, -- Sanguine Robe
+    [14381] = { b = 0, s = 0 }, -- Grimtotem Satchel
+    [14395] = { b = 0, s = 0 }, -- Spells of Shadow
+    [14396] = { b = 0, s = 0 }, -- Incantations from the Nether
     [14397] = { b = 8001, s = 1600 }, -- Resilient Mantle
     [14398] = { b = 11778, s = 2355 }, -- Resilient Tunic
     [14399] = { b = 7328, s = 1465 }, -- Resilient Boots
@@ -6748,6 +8636,7 @@ VanillaItemPrices = {
     [14513] = { b = 60000, s = 15000 }, -- Pattern: Robe of the Archmage
     [14514] = { b = 60000, s = 15000 }, -- Pattern: Robe of the Void
     [14522] = { b = 156591, s = 31318 }, -- Maelstrom Leggings
+    [14523] = { b = 0, s = 0 }, -- Demon Pick
     [14525] = { b = 52805, s = 10561 }, -- Boneclenched Gauntlets
     [14526] = { b = 20000, s = 5000 }, -- Pattern: Mooncloth
     [14528] = { b = 170909, s = 34181 }, -- Rattlecage Buckler
@@ -6758,9 +8647,14 @@ VanillaItemPrices = {
     [14537] = { b = 85008, s = 17001 }, -- Corpselight Greaves
     [14538] = { b = 85312, s = 17062 }, -- Deadwalker Mantle
     [14539] = { b = 107021, s = 21404 }, -- Bone Ring Helm
+    [14540] = { b = 0, s = 0 }, -- Taragaman the Hungerer's Heart
     [14541] = { b = 342133, s = 68426 }, -- Barovian Family Sword
+    [14542] = { b = 0, s = 0 }, -- Kravel's Crate
     [14543] = { b = 52394, s = 10478 }, -- Darkshade Gloves
+    [14544] = { b = 0, s = 0 }, -- Lieutenant's Insignia
     [14545] = { b = 131987, s = 26397 }, -- Ghostloom Leggings
+    [14546] = { b = 0, s = 0 }, -- Roon's Kodo Horn
+    [14547] = { b = 0, s = 0 }, -- Hand of Iruxos
     [14548] = { b = 123964, s = 24792 }, -- Royal Cap Spaulders
     [14549] = { b = 39038, s = 7807 }, -- Boots of Avoidance
     [14551] = { b = 53008, s = 10601 }, -- Edgemaster's Handguards
@@ -6817,19 +8711,24 @@ VanillaItemPrices = {
     [14606] = { b = 14775, s = 2955 }, -- Warden's Gloves
     [14607] = { b = 27906, s = 5581 }, -- Hawkeye's Buckler
     [14608] = { b = 15810, s = 3162 }, -- Dokebi Buckler
+    [14610] = { b = 0, s = 0 }, -- Araj's Scarab
     [14611] = { b = 162547, s = 32509 }, -- Bloodmail Hauberk
     [14612] = { b = 163111, s = 32622 }, -- Bloodmail Legguards
+    [14613] = { b = 0, s = 0 }, -- Taelan's Hammer
     [14614] = { b = 82135, s = 16427 }, -- Bloodmail Belt
     [14615] = { b = 74583, s = 14916 }, -- Bloodmail Gauntlets
     [14616] = { b = 112796, s = 22559 }, -- Bloodmail Boots
     [14617] = { b = 25000, s = 6250 }, -- Sawbones Shirt
+    [14619] = { b = 0, s = 0 }, -- Skeletal Fragments
     [14620] = { b = 50677, s = 10135 }, -- Deathbone Girdle
     [14621] = { b = 76306, s = 15261 }, -- Deathbone Sabatons
     [14622] = { b = 51064, s = 10212 }, -- Deathbone Gauntlets
     [14623] = { b = 102515, s = 20503 }, -- Deathbone Legguards
     [14624] = { b = 102891, s = 20578 }, -- Deathbone Chestplate
+    [14625] = { b = 0, s = 0 }, -- Symbol of Lost Honor
     [14626] = { b = 103664, s = 20732 }, -- Necropile Robe
     [14627] = { b = 800, s = 200 }, -- Pattern: Bright Yellow Shirt
+    [14628] = { b = 0, s = 0 }, -- Imbued Skeletal Fragments
     [14629] = { b = 53790, s = 10758 }, -- Necropile Cuffs
     [14630] = { b = 1000, s = 250 }, -- Pattern: Enchanter's Cowl
     [14631] = { b = 81258, s = 16251 }, -- Necropile Boots
@@ -6843,6 +8742,14 @@ VanillaItemPrices = {
     [14639] = { b = 1500, s = 375 }, -- Schematic: Minor Recombobulator
     [14640] = { b = 63340, s = 12668 }, -- Cadaverous Gloves
     [14641] = { b = 95373, s = 19074 }, -- Cadaverous Walkers
+    [14644] = { b = 0, s = 0 }, -- Skeleton Key Mold
+    [14645] = { b = 0, s = 0 }, -- Unfinished Skeleton Key
+    [14646] = { b = 0, s = 0 }, -- Northshire Gift Voucher
+    [14647] = { b = 0, s = 0 }, -- Coldridge Valley Gift Voucher
+    [14648] = { b = 0, s = 0 }, -- Shadowglen Gift Voucher
+    [14649] = { b = 0, s = 0 }, -- Valley of Trials Gift Voucher
+    [14650] = { b = 0, s = 0 }, -- Camp Narache Gift Voucher
+    [14651] = { b = 0, s = 0 }, -- Deathknell Gift Voucher
     [14652] = { b = 21079, s = 4215 }, -- Scorpashi Sash
     [14653] = { b = 34271, s = 6854 }, -- Scorpashi Slippers
     [14654] = { b = 19655, s = 3931 }, -- Scorpashi Wristbands
@@ -6870,6 +8777,7 @@ VanillaItemPrices = {
     [14676] = { b = 69205, s = 13841 }, -- Pridelord Halo
     [14677] = { b = 92621, s = 18524 }, -- Pridelord Pants
     [14678] = { b = 65780, s = 13156 }, -- Pridelord Pauldrons
+    [14679] = { b = 0, s = 0 }, -- Of Love and Family
     [14680] = { b = 125507, s = 25101 }, -- Indomitable Vest
     [14681] = { b = 85696, s = 17139 }, -- Indomitable Boots
     [14682] = { b = 49534, s = 9906 }, -- Indomitable Armguards
@@ -7007,6 +8915,8 @@ VanillaItemPrices = {
     [14867] = { b = 89014, s = 17802 }, -- Warleader's Leggings
     [14868] = { b = 65547, s = 13109 }, -- Warleader's Shoulders
     [14869] = { b = 37886, s = 7577 }, -- Warleader's Bracers
+    [14872] = { b = 0, s = 0 }, -- Tirion's Gift
+    [14894] = { b = 0, s = 0 }, -- Lily Root
     [14895] = { b = 24524, s = 4904 }, -- Saltstone Surcoat
     [14896] = { b = 17091, s = 3418 }, -- Saltstone Sabatons
     [14897] = { b = 11434, s = 2286 }, -- Saltstone Gauntlets
@@ -7096,6 +9006,7 @@ VanillaItemPrices = {
     [14981] = { b = 68824, s = 13764 }, -- Exalted Epaulets
     [14982] = { b = 170595, s = 34119 }, -- Exalted Shield
     [14983] = { b = 39927, s = 7985 }, -- Exalted Armsplints
+    [15002] = { b = 0, s = 0 }, -- Nimboya's Pike
     [15003] = { b = 100, s = 20 }, -- Primal Belt
     [15004] = { b = 212, s = 42 }, -- Primal Boots
     [15005] = { b = 141, s = 28 }, -- Primal Bands
@@ -7113,6 +9024,9 @@ VanillaItemPrices = {
     [15017] = { b = 3059, s = 611 }, -- Lupine Leggings
     [15018] = { b = 3531, s = 706 }, -- Lupine Vest
     [15019] = { b = 1833, s = 366 }, -- Lupine Mantle
+    [15042] = { b = 0, s = 0 }, -- Empty Termite Jar
+    [15043] = { b = 0, s = 0 }, -- Plagueland Termites
+    [15044] = { b = 0, s = 0 }, -- Barrel of Plagueland Termites
     [15045] = { b = 99692, s = 19938 }, -- Green Dragonscale Breastplate
     [15046] = { b = 112411, s = 22482 }, -- Green Dragonscale Leggings
     [15047] = { b = 149181, s = 29836 }, -- Red Dragonscale Breastplate
@@ -7164,6 +9078,8 @@ VanillaItemPrices = {
     [15094] = { b = 70777, s = 14155 }, -- Runic Leather Headband
     [15095] = { b = 104426, s = 20885 }, -- Runic Leather Pants
     [15096] = { b = 86664, s = 17332 }, -- Runic Leather Shoulders
+    [15102] = { b = 0, s = 0 }, -- Un'Goro Tested Sample
+    [15103] = { b = 0, s = 0 }, -- Corrupt Tested Sample
     [15104] = { b = 15940, s = 3188 }, -- Wingborne Boots
     [15105] = { b = 71989, s = 14397 }, -- Staff of Noh'Orahil
     [15106] = { b = 72237, s = 14447 }, -- Staff of Dar'Orahil
@@ -7266,6 +9182,8 @@ VanillaItemPrices = {
     [15205] = { b = 5317, s = 1063 }, -- Owlsight Rifle
     [15206] = { b = 3430, s = 857 }, -- Jadefinger Baton
     [15207] = { b = 4342, s = 868 }, -- Steelcap Shield
+    [15208] = { b = 0, s = 0 }, -- Cenarion Moondust
+    [15209] = { b = 0, s = 0 }, -- Relic Bundle
     [15210] = { b = 4128, s = 825 }, -- Raider Shortsword
     [15211] = { b = 9584, s = 1916 }, -- Militant Shortsword
     [15212] = { b = 17252, s = 3450 }, -- Fighter Broadsword
@@ -7333,6 +9251,7 @@ VanillaItemPrices = {
     [15274] = { b = 158334, s = 31666 }, -- Diviner Long Staff
     [15275] = { b = 178574, s = 35714 }, -- Thaumaturgist Staff
     [15276] = { b = 226315, s = 45263 }, -- Magus Long Staff
+    [15277] = { b = 100000, s = 0 }, -- Gray Kodo
     [15278] = { b = 251429, s = 50285 }, -- Solstice Staff
     [15279] = { b = 91339, s = 18267 }, -- Ivory Wand
     [15280] = { b = 103018, s = 20603 }, -- Wizard's Hand
@@ -7345,7 +9264,10 @@ VanillaItemPrices = {
     [15287] = { b = 62583, s = 12516 }, -- Crusader Bow
     [15288] = { b = 168715, s = 33743 }, -- Blasthorn Bow
     [15289] = { b = 205809, s = 41161 }, -- Archstrike Bow
+    [15290] = { b = 100000, s = 0 }, -- Brown Kodo
     [15291] = { b = 97958, s = 19591 }, -- Harpy Needler
+    [15292] = { b = 10000000, s = 0 }, -- Green Kodo
+    [15293] = { b = 10000000, s = 0 }, -- Teal Kodo
     [15294] = { b = 100679, s = 20135 }, -- Siege Bow
     [15295] = { b = 113560, s = 22712 }, -- Quillfire Bow
     [15296] = { b = 173287, s = 34657 }, -- Hawkeye Bow
@@ -7366,12 +9288,14 @@ VanillaItemPrices = {
     [15311] = { b = 4913, s = 982 }, -- Feral Harness
     [15312] = { b = 3728, s = 745 }, -- Feral Leggings
     [15313] = { b = 2572, s = 514 }, -- Feral Shoulder Pads
+    [15314] = { b = 0, s = 0 }, -- Bundle of Relics
     [15322] = { b = 38726, s = 7745 }, -- Smoothbore Gun
     [15323] = { b = 88956, s = 17791 }, -- Percussion Shotgun
     [15324] = { b = 127828, s = 25565 }, -- Burnside Rifle
     [15325] = { b = 158924, s = 31784 }, -- Sharpshooter Harquebus
     [15326] = { b = 800, s = 1 }, -- Gleaming Throwing Axe
     [15327] = { b = 800, s = 1 }, -- Wicked Throwing Dagger
+    [15328] = { b = 0, s = 0 }, -- Joseph's Key
     [15329] = { b = 3114, s = 622 }, -- Wrangler's Belt
     [15330] = { b = 5298, s = 1059 }, -- Wrangler's Boots
     [15331] = { b = 2776, s = 555 }, -- Wrangler's Wristbands
@@ -7489,11 +9413,14 @@ VanillaItemPrices = {
     [15443] = { b = 5598, s = 1119 }, -- Kris of Orgrimmar
     [15444] = { b = 7023, s = 1404 }, -- Staff of Orgrimmar
     [15445] = { b = 5637, s = 1127 }, -- Hammer of Orgrimmar
+    [15447] = { b = 0, s = 0 }, -- Living Rot
+    [15448] = { b = 0, s = 0 }, -- Coagulated Rot
     [15449] = { b = 2127, s = 425 }, -- Ghastly Trousers
     [15450] = { b = 2669, s = 533 }, -- Dredgemire Leggings
     [15451] = { b = 3216, s = 643 }, -- Gargoyle Leggings
     [15452] = { b = 1075, s = 215 }, -- Featherbead Bracers
     [15453] = { b = 1349, s = 269 }, -- Savannah Bracers
+    [15454] = { b = 0, s = 0 }, -- Mortar and Pestle
     [15455] = { b = 17705, s = 3541 }, -- Dustfall Robes
     [15456] = { b = 22211, s = 4442 }, -- Lightstep Leggings
     [15457] = { b = 5671, s = 1134 }, -- Desert Shoulders
@@ -7732,6 +9659,7 @@ VanillaItemPrices = {
     [15693] = { b = 72665, s = 14533 }, -- Grand Shoulders
     [15694] = { b = 66322, s = 13264 }, -- Merciless Greaves
     [15695] = { b = 28856, s = 5771 }, -- Studded Ring Shield
+    [15696] = { b = 0, s = 0 }, -- Ruined Tome
     [15697] = { b = 14129, s = 2825 }, -- Kodo Rustler Boots
     [15698] = { b = 21368, s = 4273 }, -- Wrangling Spaulders
     [15699] = { b = 100, s = 25 }, -- Small Brown-wrapped Package
@@ -7743,6 +9671,8 @@ VanillaItemPrices = {
     [15707] = { b = 36078, s = 7215 }, -- Brantwood Sash
     [15708] = { b = 44825, s = 8965 }, -- Blight Leather Gloves
     [15709] = { b = 36352, s = 7270 }, -- Gearforge Girdle
+    [15710] = { b = 0, s = 0 }, -- Cenarion Lunardust
+    [15722] = { b = 0, s = 0 }, -- Spraggle's Canteen
     [15723] = { b = 11300, s = 2825 }, -- Tea with Sugar
     [15724] = { b = 12000, s = 3000 }, -- Pattern: Heavy Scorpid Bracers
     [15725] = { b = 12000, s = 3000 }, -- Pattern: Wicked Leather Gauntlets
@@ -7756,6 +9686,7 @@ VanillaItemPrices = {
     [15733] = { b = 14000, s = 3500 }, -- Pattern: Green Dragonscale Leggings
     [15734] = { b = 14000, s = 3500 }, -- Pattern: Living Shoulders
     [15735] = { b = 14000, s = 3500 }, -- Pattern: Ironfeather Shoulders
+    [15736] = { b = 0, s = 0 }, -- Smokey's Special Compound
     [15737] = { b = 16000, s = 4000 }, -- Pattern: Chimeric Boots
     [15738] = { b = 16000, s = 4000 }, -- Pattern: Heavy Scorpid Gauntlets
     [15739] = { b = 16000, s = 4000 }, -- Pattern: Runic Leather Bracers
@@ -7769,6 +9700,7 @@ VanillaItemPrices = {
     [15747] = { b = 20000, s = 5000 }, -- Pattern: Frostsaber Leggings
     [15748] = { b = 20000, s = 5000 }, -- Pattern: Heavy Scorpid Leggings
     [15749] = { b = 20000, s = 5000 }, -- Pattern: Volcanic Breastplate
+    [15750] = { b = 0, s = 0 }, -- Sceptre of Light
     [15751] = { b = 20000, s = 5000 }, -- Pattern: Blue Dragonscale Breastplate
     [15752] = { b = 20000, s = 5000 }, -- Pattern: Living Leggings
     [15753] = { b = 20000, s = 5000 }, -- Pattern: Stormshroud Armor
@@ -7784,6 +9716,8 @@ VanillaItemPrices = {
     [15763] = { b = 25000, s = 6250 }, -- Pattern: Blue Dragonscale Shoulders
     [15764] = { b = 25000, s = 6250 }, -- Pattern: Stormshroud Shoulders
     [15765] = { b = 30000, s = 7500 }, -- Pattern: Runic Leather Pants
+    [15766] = { b = 0, s = 0 }, -- Gem of the Serpent
+    [15767] = { b = 0, s = 0 }, -- Hameya's Key
     [15768] = { b = 30000, s = 7500 }, -- Pattern: Wicked Leather Belt
     [15770] = { b = 30000, s = 7500 }, -- Pattern: Black Dragonscale Shoulders
     [15771] = { b = 30000, s = 7500 }, -- Pattern: Living Breastplate
@@ -7799,9 +9733,12 @@ VanillaItemPrices = {
     [15782] = { b = 215714, s = 43142 }, -- Beaststalker Blade
     [15783] = { b = 216460, s = 43292 }, -- Beasthunter Dagger
     [15784] = { b = 57705, s = 11541 }, -- Crystal Breeze Mantle
+    [15785] = { b = 0, s = 0 }, -- Zaeldarr's Head
     [15786] = { b = 94134, s = 18826 }, -- Fernpulse Jerkin
     [15787] = { b = 112961, s = 22592 }, -- Willow Band Hauberk
+    [15788] = { b = 0, s = 0 }, -- Everlook Report
     [15789] = { b = 47873, s = 9574 }, -- Deep River Cloak
+    [15790] = { b = 0, s = 0 }, -- Studies in Spirit Speaking
     [15791] = { b = 35860, s = 7172 }, -- Turquoise Sash
     [15792] = { b = 70770, s = 14154 }, -- Plow Wood Spaulders
     [15793] = { b = 200, s = 50 }, -- A Chewed Bone
@@ -7814,6 +9751,7 @@ VanillaItemPrices = {
     [15800] = { b = 180413, s = 36082 }, -- Intrepid Shortsword
     [15801] = { b = 179303, s = 35860 }, -- Valiant Shortsword
     [15802] = { b = 58243, s = 11648 }, -- Mooncloth Boots
+    [15803] = { b = 0, s = 0 }, -- Book of the Ancients
     [15804] = { b = 47873, s = 9574 }, -- Cerise Drape
     [15805] = { b = 58650, s = 14662 }, -- Penelope's Rose
     [15806] = { b = 256366, s = 51273 }, -- Mirah's Song
@@ -7830,8 +9768,19 @@ VanillaItemPrices = {
     [15823] = { b = 45958, s = 9191 }, -- Bricksteel Gauntlets
     [15824] = { b = 75307, s = 15061 }, -- Astoria Robes
     [15825] = { b = 96512, s = 19302 }, -- Traphook Jerkin
+    [15826] = { b = 0, s = 0 }, -- Curative Animal Salve
     [15827] = { b = 112961, s = 22592 }, -- Jadescale Breastplate
+    [15842] = { b = 0, s = 0 }, -- Empty Dreadmist Peak Sampler
+    [15843] = { b = 0, s = 0 }, -- Filled Dreadmist Peak Sampler
+    [15844] = { b = 0, s = 0 }, -- Empty Cliffspring Falls Sampler
+    [15845] = { b = 0, s = 0 }, -- Filled Cliffspring Falls Sampler
     [15846] = { b = 30000, s = 7500 }, -- Salt Shaker
+    [15847] = { b = 0, s = 0 }, -- Quel'Thalas Registry
+    [15848] = { b = 0, s = 0 }, -- Crate of Ghost Magnets
+    [15849] = { b = 0, s = 0 }, -- Ghost-o-plasm
+    [15850] = { b = 0, s = 0 }, -- Patch of Duskwing's Fur
+    [15851] = { b = 0, s = 0 }, -- Lunar Fungus
+    [15852] = { b = 0, s = 0 }, -- Kodo Horn
     [15853] = { b = 257091, s = 51418 }, -- Windreaper
     [15854] = { b = 322514, s = 64502 }, -- Dancing Sliver
     [15855] = { b = 31555, s = 7888 }, -- Ring of Protection
@@ -7847,11 +9796,25 @@ VanillaItemPrices = {
     [15865] = { b = 32811, s = 6562 }, -- Anchorhold Buckler
     [15866] = { b = 2250, s = 562 }, -- Veildust Medicine Bag
     [15867] = { b = 29857, s = 7464 }, -- Prismcharm
+    [15868] = { b = 0, s = 0 }, -- The Grand Crusader's Command
     [15869] = { b = 200, s = 50 }, -- Silver Skeleton Key
     [15870] = { b = 1200, s = 300 }, -- Golden Skeleton Key
     [15871] = { b = 2500, s = 625 }, -- Truesilver Skeleton Key
     [15872] = { b = 2500, s = 625 }, -- Arcanite Skeleton Key
     [15873] = { b = 32578, s = 8144 }, -- Ragged John's Neverending Cup
+    [15874] = { b = 0, s = 0 }, -- Soft-shelled Clam
+    [15875] = { b = 0, s = 0 }, -- Rotten Apple
+    [15876] = { b = 0, s = 0 }, -- Nathanos' Chest
+    [15877] = { b = 0, s = 0 }, -- Shrine Bauble
+    [15878] = { b = 0, s = 0 }, -- Rackmore's Silver Key
+    [15879] = { b = 0, s = 0 }, -- Overlord Ror's Claw
+    [15880] = { b = 0, s = 0 }, -- Head of Ramstein the Gorger
+    [15881] = { b = 0, s = 0 }, -- Rackmore's Golden Key
+    [15882] = { b = 0, s = 0 }, -- Half Pendant of Aquatic Endurance
+    [15883] = { b = 0, s = 0 }, -- Half Pendant of Aquatic Agility
+    [15884] = { b = 0, s = 0 }, -- Augustus' Receipt Book
+    [15885] = { b = 0, s = 0 }, -- Pendant of the Sea Lion
+    [15886] = { b = 0, s = 0 }, -- Timolain's Phylactery
     [15887] = { b = 147908, s = 29581 }, -- Heroic Guard
     [15890] = { b = 129157, s = 25831 }, -- Vanguard Shield
     [15891] = { b = 10074, s = 2014 }, -- Hulking Shield
@@ -7865,9 +9828,22 @@ VanillaItemPrices = {
     [15905] = { b = 2130, s = 426 }, -- Right-Handed Brass Knuckles
     [15906] = { b = 2138, s = 427 }, -- Left-Handed Brass Knuckles
     [15907] = { b = 8237, s = 1647 }, -- Left-Handed Claw
+    [15908] = { b = 0, s = 0 }, -- Taming Rod
     [15909] = { b = 22107, s = 4421 }, -- Left-Handed Blades
+    [15911] = { b = 0, s = 0 }, -- Taming Rod
     [15912] = { b = 4594, s = 1148 }, -- Buccaneer's Orb
+    [15913] = { b = 0, s = 0 }, -- Taming Rod
+    [15914] = { b = 0, s = 0 }, -- Taming Rod
+    [15915] = { b = 0, s = 0 }, -- Taming Rod
+    [15916] = { b = 0, s = 0 }, -- Taming Rod
+    [15917] = { b = 0, s = 0 }, -- Taming Rod
     [15918] = { b = 19392, s = 4848 }, -- Conjurer's Sphere
+    [15919] = { b = 0, s = 0 }, -- Taming Rod
+    [15920] = { b = 0, s = 0 }, -- Taming Rod
+    [15921] = { b = 0, s = 0 }, -- Taming Rod
+    [15922] = { b = 0, s = 0 }, -- Taming Rod
+    [15923] = { b = 0, s = 0 }, -- Taming Rod
+    [15924] = { b = 0, s = 0 }, -- Soft-shelled Clam Meat
     [15925] = { b = 1758, s = 439 }, -- Journeyman's Stave
     [15926] = { b = 3210, s = 802 }, -- Spellbinder Orb
     [15927] = { b = 7458, s = 1864 }, -- Bright Sphere
@@ -7927,8 +9903,12 @@ VanillaItemPrices = {
     [15995] = { b = 98697, s = 19739 }, -- Thorium Rifle
     [15996] = { b = 10000, s = 2500 }, -- Lifelike Mechanical Toad
     [15997] = { b = 4000, s = 10 }, -- Thorium Shells
+    [15998] = { b = 0, s = 0 }, -- Lewis' Note
     [15999] = { b = 45014, s = 9002 }, -- Spellpower Goggles Xtreme Plus
     [16000] = { b = 15000, s = 3750 }, -- Thorium Tube
+    [16001] = { b = 0, s = 0 }, -- SI:7 Insignia (Fredo)
+    [16002] = { b = 0, s = 0 }, -- SI:7 Insignia (Turyen)
+    [16003] = { b = 0, s = 0 }, -- SI:7 Insignia (Rutger)
     [16004] = { b = 145762, s = 29152 }, -- Dark Iron Rifle
     [16005] = { b = 5000, s = 1250 }, -- Dark Iron Bomb
     [16006] = { b = 40000, s = 10000 }, -- Delicate Arcanite Converter
@@ -7966,6 +9946,8 @@ VanillaItemPrices = {
     [16111] = { b = 12000, s = 3000 }, -- Recipe: Spiced Chili Crab
     [16112] = { b = 2200, s = 550 }, -- Manual: Heavy Silk Bandage
     [16113] = { b = 5000, s = 1250 }, -- Manual: Mageweave Bandage
+    [16114] = { b = 0, s = 0 }, -- Foreman's Blackjack
+    [16115] = { b = 0, s = 0 }, -- Osric's Crate
     [16165] = { b = 20701, s = 4140 }, -- Test Arcane Res Legs Mail
     [16166] = { b = 25, s = 1 }, -- Bean Soup
     [16167] = { b = 125, s = 6 }, -- Versicolor Treat
@@ -7973,8 +9955,18 @@ VanillaItemPrices = {
     [16169] = { b = 1000, s = 62 }, -- Wild Ricecake
     [16170] = { b = 500, s = 25 }, -- Steamed Mandu
     [16171] = { b = 4000, s = 200 }, -- Shinsollo
+    [16189] = { b = 0, s = 0 }, -- Maggran's Reserve Letter
+    [16190] = { b = 0, s = 0 }, -- Bloodfury Ripper's Remains
+    [16192] = { b = 0, s = 0 }, -- Besseleth's Fang
+    [16202] = { b = 40000, s = 0 }, -- Lesser Eternal Essence
+    [16203] = { b = 120000, s = 0 }, -- Greater Eternal Essence
+    [16204] = { b = 12000, s = 0 }, -- Illusion Dust
+    [16205] = { b = 0, s = 0 }, -- Gaea Seed
     [16206] = { b = 4000, s = 1000 }, -- Arcanite Rod
     [16207] = { b = 5000, s = 1250 }, -- Runed Arcanite Rod
+    [16208] = { b = 0, s = 0 }, -- Enchanted Gaea Seeds
+    [16209] = { b = 0, s = 0 }, -- Podrig's Order
+    [16210] = { b = 0, s = 0 }, -- Gordon's Crate
     [16214] = { b = 12000, s = 3000 }, -- Formula: Enchant Bracer - Greater Intellect
     [16215] = { b = 12000, s = 3000 }, -- Formula: Enchant Boots - Greater Stamina
     [16216] = { b = 12000, s = 3000 }, -- Formula: Enchant Cloak - Greater Resistance
@@ -8000,7 +9992,22 @@ VanillaItemPrices = {
     [16253] = { b = 30000, s = 7500 }, -- Formula: Enchant Chest - Greater Stats
     [16254] = { b = 30000, s = 7500 }, -- Formula: Enchant Weapon - Lifestealing
     [16255] = { b = 30000, s = 7500 }, -- Formula: Enchant 2H Weapon - Major Spirit
+    [16262] = { b = 0, s = 0 }, -- Nessa's Collection
+    [16263] = { b = 0, s = 0 }, -- Laird's Response
+    [16282] = { b = 0, s = 0 }, -- Bundle of Hides
+    [16283] = { b = 0, s = 0 }, -- Ahanu's Leather Goods
     [16302] = { b = 100, s = 25 }, -- Grimoire of Firebolt (Rank 2)
+    [16303] = { b = 0, s = 0 }, -- Ursangous's Paw
+    [16304] = { b = 0, s = 0 }, -- Shadumbra's Head
+    [16305] = { b = 0, s = 0 }, -- Sharptalon's Claw
+    [16306] = { b = 0, s = 0 }, -- Zargh's Meats
+    [16307] = { b = 0, s = 0 }, -- Gryshka's Letter
+    [16309] = { b = 0, s = 0 }, -- Drakefire Amulet
+    [16310] = { b = 0, s = 0 }, -- Brock's List
+    [16311] = { b = 0, s = 0 }, -- Honorary Picks
+    [16312] = { b = 0, s = 0 }, -- Incendrites
+    [16313] = { b = 0, s = 0 }, -- Felix's Chest
+    [16314] = { b = 0, s = 0 }, -- Felix's Bucket of Bolts
     [16316] = { b = 1500, s = 375 }, -- Grimoire of Firebolt (Rank 3)
     [16317] = { b = 5000, s = 1250 }, -- Grimoire of Firebolt (Rank 4)
     [16318] = { b = 10000, s = 2500 }, -- Grimoire of Firebolt (Rank 5)
@@ -8017,6 +10024,8 @@ VanillaItemPrices = {
     [16329] = { b = 12000, s = 3000 }, -- Grimoire of Fire Shield (Rank 4)
     [16330] = { b = 20000, s = 5000 }, -- Grimoire of Fire Shield (Rank 5)
     [16331] = { b = 600, s = 150 }, -- Grimoire of Phase Shift
+    [16332] = { b = 0, s = 0 }, -- Thazz'ril's Pick
+    [16333] = { b = 0, s = 0 }, -- Samuel's Remains
     [16335] = { b = 40000, s = 10000 }, -- Senior Sergeant's Insignia
     [16341] = { b = 21425, s = 4285 }, -- Sergeant's Cloak
     [16342] = { b = 44154, s = 8830 }, -- Sergeant's Cape
@@ -8073,6 +10082,7 @@ VanillaItemPrices = {
     [16403] = { b = 41118, s = 8223 }, -- Knight-Lieutenant's Chain Gauntlets
     [16405] = { b = 41433, s = 8286 }, -- Knight-Lieutenant's Plate Boots
     [16406] = { b = 27728, s = 5545 }, -- Knight-Lieutenant's Plate Gauntlets
+    [16408] = { b = 0, s = 0 }, -- Befouled Water Globe
     [16409] = { b = 42068, s = 8413 }, -- Knight-Lieutenant's Lamellar Sabatons
     [16410] = { b = 28152, s = 5630 }, -- Knight-Lieutenant's Lamellar Gauntlets
     [16413] = { b = 58463, s = 11692 }, -- Knight-Captain's Silk Raiment
@@ -8210,7 +10220,10 @@ VanillaItemPrices = {
     [16578] = { b = 145586, s = 29117 }, -- Warlord's Mail Helm
     [16579] = { b = 168313, s = 33662 }, -- General's Mail Leggings
     [16580] = { b = 147331, s = 29466 }, -- Warlord's Mail Spaulders
+    [16581] = { b = 0, s = 0 }, -- Resonite Crystal
     [16583] = { b = 10000, s = 2500 }, -- Demonic Figurine
+    [16602] = { b = 0, s = 0 }, -- Troll Charm
+    [16603] = { b = 0, s = 0 }, -- Enchanted Resonite Crystal
     [16604] = { b = 86, s = 17 }, -- Moon Robes of Elune
     [16605] = { b = 87, s = 17 }, -- Friar's Robes of the Light
     [16606] = { b = 87, s = 17 }, -- Juju Hex Robes
@@ -8218,6 +10231,9 @@ VanillaItemPrices = {
     [16608] = { b = 969, s = 193 }, -- Aquarius Belt
     [16622] = { b = 136535, s = 27307 }, -- Thornflinger
     [16623] = { b = 31135, s = 7783 }, -- Opaline Medallion
+    [16642] = { b = 0, s = 0 }, -- Shredder Operating Manual - Chapter 1
+    [16643] = { b = 0, s = 0 }, -- Shredder Operating Manual - Chapter 2
+    [16644] = { b = 0, s = 0 }, -- Shredder Operating Manual - Chapter 3
     [16645] = { b = 250, s = 62 }, -- Shredder Operating Manual - Page 1
     [16646] = { b = 250, s = 62 }, -- Shredder Operating Manual - Page 2
     [16647] = { b = 250, s = 62 }, -- Shredder Operating Manual - Page 3
@@ -8234,6 +10250,9 @@ VanillaItemPrices = {
     [16659] = { b = 4282, s = 856 }, -- Deftkin Belt
     [16660] = { b = 11004, s = 2200 }, -- Driftmire Shield
     [16661] = { b = 4828, s = 965 }, -- Soft Willow Cape
+    [16662] = { b = 0, s = 0 }, -- Fragment of the Dragon's Eye
+    [16663] = { b = 0, s = 0 }, -- Blood of the Black Dragon Champion
+    [16665] = { b = 0, s = 0 }, -- Tome of Tranquilizing Shot
     [16666] = { b = 179813, s = 35962 }, -- Vest of Elements
     [16667] = { b = 128894, s = 25778 }, -- Coif of Elements
     [16668] = { b = 152707, s = 30541 }, -- Kilt of Elements
@@ -8310,14 +10329,30 @@ VanillaItemPrices = {
     [16739] = { b = 36502, s = 7300 }, -- Rugwood Mantle
     [16740] = { b = 4712, s = 942 }, -- Shredder Operating Gloves
     [16741] = { b = 5890, s = 1178 }, -- Oilrag Handwraps
+    [16742] = { b = 0, s = 0 }, -- Warsong Saw Blades
+    [16743] = { b = 0, s = 0 }, -- Logging Rope
+    [16744] = { b = 0, s = 0 }, -- Warsong Oil
+    [16745] = { b = 0, s = 0 }, -- Warsong Axe Shipment
+    [16746] = { b = 0, s = 0 }, -- Warsong Report
     [16747] = { b = 110, s = 27 }, -- Broken Lock
     [16748] = { b = 60, s = 15 }, -- Padded Lining
+    [16762] = { b = 0, s = 0 }, -- Fathom Core
+    [16763] = { b = 0, s = 0 }, -- Warsong Runner Update
+    [16764] = { b = 0, s = 0 }, -- Warsong Scout Update
+    [16765] = { b = 0, s = 0 }, -- Warsong Outrider Update
     [16766] = { b = 2000, s = 100 }, -- Undermine Clam Chowder
     [16767] = { b = 3000, s = 750 }, -- Recipe: Undermine Clam Chowder
     [16768] = { b = 150000, s = 37500 }, -- Furbolg Medicine Pouch
     [16769] = { b = 133081, s = 26616 }, -- Furbolg Medicine Totem
+    [16782] = { b = 0, s = 0 }, -- Strange Water Globe
+    [16783] = { b = 0, s = 0 }, -- Bundle of Reports
+    [16784] = { b = 0, s = 0 }, -- Sapphire of Aku'Mai
+    [16785] = { b = 0, s = 0 }, -- Rexxar's Testament
+    [16786] = { b = 0, s = 0 }, -- Black Dragonspawn Eye
+    [16787] = { b = 0, s = 0 }, -- Amulet of Draconic Subversion
     [16788] = { b = 25476, s = 5095 }, -- Captain Rackmore's Wheel
     [16789] = { b = 29962, s = 5992 }, -- Captain Rackmore's Tiller
+    [16790] = { b = 0, s = 0 }, -- Damp Note
     [16791] = { b = 9561, s = 1912 }, -- Silkstream Cuffs
     [16793] = { b = 21765, s = 4353 }, -- Arcmetal Shoulders
     [16794] = { b = 13525, s = 2705 }, -- Gripsteel Wristguards
@@ -8395,13 +10430,26 @@ VanillaItemPrices = {
     [16866] = { b = 135851, s = 27170 }, -- Helm of Might
     [16867] = { b = 181792, s = 36358 }, -- Legplates of Might
     [16868] = { b = 136824, s = 27364 }, -- Pauldrons of Might
+    [16869] = { b = 0, s = 0 }, -- The Skull of Scryer
+    [16870] = { b = 0, s = 0 }, -- The Skull of Somnus
+    [16871] = { b = 0, s = 0 }, -- The Skull of Chronalis
+    [16872] = { b = 0, s = 0 }, -- The Skull of Axtroz
     [16873] = { b = 11271, s = 2254 }, -- Braidfur Gloves
+    [16882] = { b = 0, s = 0 }, -- Battered Junkbox
+    [16883] = { b = 0, s = 0 }, -- Worn Junkbox
+    [16884] = { b = 0, s = 0 }, -- Sturdy Junkbox
+    [16885] = { b = 0, s = 0 }, -- Heavy Junkbox
     [16886] = { b = 27462, s = 5492 }, -- Outlaw Sabre
     [16887] = { b = 7954, s = 1988 }, -- Witch's Finger
+    [16888] = { b = 0, s = 0 }, -- Dull Drakefire Amulet
     [16889] = { b = 15467, s = 3093 }, -- Polished Walking Staff
     [16890] = { b = 12416, s = 2483 }, -- Slatemetal Cutlass
     [16891] = { b = 8485, s = 1697 }, -- Claystone Shortsword
+    [16892] = { b = 0, s = 0 }, -- Lesser Soulstone
+    [16893] = { b = 0, s = 0 }, -- Soulstone
     [16894] = { b = 9967, s = 1993 }, -- Clear Crystal Rod
+    [16895] = { b = 0, s = 0 }, -- Greater Soulstone
+    [16896] = { b = 0, s = 0 }, -- Major Soulstone
     [16897] = { b = 356759, s = 71351 }, -- Stormrage Chestguard
     [16898] = { b = 268546, s = 53709 }, -- Stormrage Boots
     [16899] = { b = 179700, s = 35940 }, -- Stormrage Handguards
@@ -8472,8 +10520,16 @@ VanillaItemPrices = {
     [16964] = { b = 150203, s = 30040 }, -- Gauntlets of Wrath
     [16965] = { b = 226108, s = 45221 }, -- Sabatons of Wrath
     [16966] = { b = 302519, s = 60503 }, -- Breastplate of Wrath
+    [16967] = { b = 0, s = 0 }, -- Feralas Ahi
+    [16968] = { b = 0, s = 0 }, -- Sar'theris Striker
+    [16969] = { b = 0, s = 0 }, -- Savage Coast Blue Sailfin
+    [16970] = { b = 0, s = 0 }, -- Misty Reed Mahi Mahi
     [16971] = { b = 1200, s = 300 }, -- Clamlette Surprise
+    [16972] = { b = 0, s = 0 }, -- Karang's Banner
+    [16973] = { b = 0, s = 0 }, -- Vial of Dire Water
+    [16974] = { b = 0, s = 0 }, -- Empty Water Vial
     [16975] = { b = 4067, s = 813 }, -- Warsong Sash
+    [16976] = { b = 0, s = 0 }, -- Murgut's Totem
     [16977] = { b = 7242, s = 1448 }, -- Warsong Boots
     [16978] = { b = 5794, s = 1158 }, -- Warsong Gauntlets
     [16979] = { b = 74510, s = 14902 }, -- Flarecore Gloves
@@ -8488,6 +10544,7 @@ VanillaItemPrices = {
     [16988] = { b = 157303, s = 31460 }, -- Fiery Chain Shoulders
     [16989] = { b = 93050, s = 18610 }, -- Fiery Chain Girdle
     [16990] = { b = 4990, s = 998 }, -- Spritekin Cloak
+    [16991] = { b = 0, s = 0 }, -- Triage Bandage
     [16992] = { b = 154370, s = 30874 }, -- Smokey's Explosive Launcher
     [16993] = { b = 154945, s = 30989 }, -- Smokey's Fireshooter
     [16994] = { b = 49420, s = 9884 }, -- Duskwing Gloves
@@ -8503,6 +10560,8 @@ VanillaItemPrices = {
     [17005] = { b = 8161, s = 1632 }, -- Boorguard Tunic
     [17006] = { b = 9831, s = 1966 }, -- Cobalt Legguards
     [17007] = { b = 57238, s = 11447 }, -- Stonerender Gauntlets
+    [17008] = { b = 0, s = 0 }, -- Small Scroll
+    [17009] = { b = 0, s = 0 }, -- Ambassador Malcin's Head
     [17010] = { b = 8000, s = 2000 }, -- Fiery Core
     [17011] = { b = 8000, s = 2000 }, -- Lava Core
     [17012] = { b = 4000, s = 1000 }, -- Core Leather
@@ -8580,7 +10639,13 @@ VanillaItemPrices = {
     [17111] = { b = 138595, s = 34648 }, -- Blazefury Medallion
     [17112] = { b = 452792, s = 90558 }, -- Empyrean Demolisher
     [17113] = { b = 596390, s = 119278 }, -- Amberseal Keeper
+    [17114] = { b = 0, s = 0 }, -- Araj's Phylactery Shard
+    [17117] = { b = 0, s = 0 }, -- Rat Catcher's Flute
+    [17118] = { b = 0, s = 0 }, -- Carton of Mystery Meat
     [17119] = { b = 125, s = 6 }, -- Deeprun Rat Kabob
+    [17124] = { b = 0, s = 0 }, -- Syndicate Emblem
+    [17125] = { b = 0, s = 0 }, -- Seal of Ravenholdt
+    [17126] = { b = 0, s = 0 }, -- Elegant Letter
     [17182] = { b = 1663117, s = 332623 }, -- Sulfuras, Hand of Ragnaros
     [17183] = { b = 34, s = 6 }, -- Dented Buckler
     [17184] = { b = 36, s = 6 }, -- Small Shield
@@ -8590,25 +10655,58 @@ VanillaItemPrices = {
     [17188] = { b = 2265, s = 453 }, -- Ringed Buckler
     [17189] = { b = 12043, s = 2408 }, -- Metal Buckler
     [17190] = { b = 34609, s = 6921 }, -- Ornate Buckler
+    [17191] = { b = 0, s = 0 }, -- Scepter of Celebras
     [17192] = { b = 4399, s = 879 }, -- Reinforced Targe
     [17193] = { b = 611555, s = 122311 }, -- Sulfuron Hammer
+    [17194] = { b = 10, s = 0 }, -- Holiday Spices
+    [17195] = { b = 10, s = 0 }, -- Fake Mistletoe
     [17196] = { b = 50, s = 12 }, -- Holiday Spirits
     [17197] = { b = 40, s = 10 }, -- Gingerbread Cookie
     [17198] = { b = 36, s = 9 }, -- Egg Nog
     [17200] = { b = 25, s = 6 }, -- Recipe: Gingerbread Cookie
     [17201] = { b = 240, s = 60 }, -- Recipe: Egg Nog
+    [17202] = { b = 10, s = 0 }, -- Snowball
     [17203] = { b = 400000, s = 100000 }, -- Sulfuron Ingot
     [17204] = { b = 800000, s = 200000 }, -- Eye of Sulfuras
     [17222] = { b = 1200, s = 300 }, -- Spider Sausage
     [17223] = { b = 485373, s = 97074 }, -- Thunderstrike
+    [17224] = { b = 0, s = 0 }, -- Scrying Scope
+    [17242] = { b = 0, s = 0 }, -- Key to Salem's Chest
+    [17262] = { b = 0, s = 0 }, -- James' Key
+    [17302] = { b = 0, s = 0 }, -- Blue Ribboned Holiday Gift
     [17303] = { b = 10, s = 2 }, -- Blue Ribboned Wrapping Paper
     [17304] = { b = 10, s = 2 }, -- Green Ribboned Wrapping Paper
+    [17305] = { b = 0, s = 0 }, -- Green Ribboned Holiday Gift
+    [17306] = { b = 0, s = 0 }, -- Stormpike Soldier's Blood
     [17307] = { b = 10, s = 2 }, -- Purple Ribboned Wrapping Paper
+    [17308] = { b = 0, s = 0 }, -- Purple Ribboned Holiday Gift
+    [17309] = { b = 0, s = 0 }, -- Discordant Bracers
+    [17310] = { b = 0, s = 0 }, -- Aspect of Neptulon
+    [17322] = { b = 0, s = 0 }, -- Eye of the Emberseer
+    [17323] = { b = 0, s = 0 }, -- Mulverick's Beacon
+    [17324] = { b = 0, s = 0 }, -- Guse's Beacon
+    [17325] = { b = 0, s = 0 }, -- Jeztor's Beacon
+    [17326] = { b = 0, s = 0 }, -- Stormpike Soldier's Flesh
+    [17327] = { b = 0, s = 0 }, -- Stormpike Lieutenant's Flesh
+    [17328] = { b = 0, s = 0 }, -- Stormpike Commander's Flesh
+    [17329] = { b = 0, s = 0 }, -- Hand of Lucifron
+    [17330] = { b = 0, s = 0 }, -- Hand of Sulfuron
+    [17331] = { b = 0, s = 0 }, -- Hand of Gehennas
+    [17332] = { b = 0, s = 0 }, -- Hand of Shazzrah
+    [17333] = { b = 0, s = 0 }, -- Aqual Quintessence
     [17344] = { b = 25, s = 1 }, -- Candy Cane
+    [17345] = { b = 0, s = 0 }, -- Silithid Goo
+    [17346] = { b = 0, s = 0 }, -- Encrusted Silithid Object
     [17348] = { b = 1000, s = 250 }, -- Major Healing Draught
     [17349] = { b = 500, s = 125 }, -- Superior Healing Draught
     [17351] = { b = 1000, s = 250 }, -- Major Mana Draught
     [17352] = { b = 500, s = 125 }, -- Superior Mana Draught
+    [17353] = { b = 0, s = 0 }, -- Stormpike Assault Orders
+    [17355] = { b = 0, s = 0 }, -- Rabine's Letter
+    [17362] = { b = 0, s = 0 }, -- Ryson's Beacon
+    [17363] = { b = 0, s = 0 }, -- Ryson's Beacon
+    [17364] = { b = 0, s = 0 }, -- Scrying Scope
+    [17384] = { b = 0, s = 0 }, -- Zinfizzlex's Portable Shredder Unit
     [17402] = { b = 2000, s = 500 }, -- Greatfather's Winter Ale
     [17403] = { b = 150, s = 37 }, -- Steamwheedle Fizzy Spirits
     [17404] = { b = 125, s = 6 }, -- Blended Bean Brew
@@ -8616,9 +10714,19 @@ VanillaItemPrices = {
     [17406] = { b = 125, s = 6 }, -- Holiday Cheesewheel
     [17407] = { b = 1000, s = 50 }, -- Graccu's Homemade Meat Pie
     [17408] = { b = 2000, s = 100 }, -- Spicy Beefstick
+    [17410] = { b = 0, s = 0 }, -- Zinfizzlex's Portable Shredder Unit
+    [17411] = { b = 0, s = 0 }, -- Steamsaw
     [17413] = { b = 31000, s = 7750 }, -- Codex: Prayer of Fortitude
     [17414] = { b = 59000, s = 14750 }, -- Codex: Prayer of Fortitude II
     [17422] = { b = 10, s = 2 }, -- Armor Scraps
+    [17423] = { b = 0, s = 0 }, -- Storm Crystal
+    [17442] = { b = 0, s = 0 }, -- Frostwolf Assault Orders
+    [17502] = { b = 0, s = 0 }, -- Frostwolf Soldier's Medal
+    [17503] = { b = 0, s = 0 }, -- Frostwolf Lieutenant's Medal
+    [17504] = { b = 0, s = 0 }, -- Frostwolf Commander's Medal
+    [17505] = { b = 0, s = 0 }, -- Ichman's Beacon
+    [17506] = { b = 0, s = 0 }, -- Vipore's Beacon
+    [17507] = { b = 0, s = 0 }, -- Slidore's Beacon
     [17508] = { b = 36350, s = 7270 }, -- Forcestone Buckler
     [17522] = { b = 8, s = 2 }, -- Irondeep Supplies
     [17523] = { b = 53790, s = 10758 }, -- Smokey's Drape
@@ -8671,14 +10779,27 @@ VanillaItemPrices = {
     [17623] = { b = 102553, s = 20510 }, -- Warlord's Satin Cowl
     [17624] = { b = 137223, s = 27444 }, -- Warlord's Satin Robes
     [17625] = { b = 118947, s = 23789 }, -- General's Satin Leggings
+    [17626] = { b = 0, s = 0 }, -- Frostwolf Muzzle
+    [17642] = { b = 0, s = 0 }, -- Alterac Ram Hide
+    [17643] = { b = 0, s = 0 }, -- Frostwolf Hide
+    [17662] = { b = 0, s = 0 }, -- Stolen Treats
     [17682] = { b = 35000, s = 8750 }, -- Book: Gift of the Wild
     [17683] = { b = 59000, s = 14750 }, -- Book: Gift of the Wild II
+    [17684] = { b = 0, s = 0 }, -- Theradric Crystal Carving
+    [17685] = { b = 0, s = 0 }, -- Smokywood Pastures Sampler
     [17686] = { b = 49686, s = 9937 }, -- Master Hunter's Bow
     [17687] = { b = 49686, s = 9937 }, -- Master Hunter's Rifle
     [17688] = { b = 15776, s = 3155 }, -- Jungle Boots
+    [17689] = { b = 0, s = 0 }, -- Stormpike Training Collar
+    [17690] = { b = 0, s = 0 }, -- Frostwolf Insignia Rank 1
+    [17691] = { b = 0, s = 0 }, -- Stormpike Insignia Rank 1
     [17692] = { b = 3525, s = 881 }, -- Horn Ring
+    [17693] = { b = 0, s = 0 }, -- Coated Cerulean Vial
     [17694] = { b = 3525, s = 881 }, -- Band of the Fist
     [17695] = { b = 4654, s = 930 }, -- Chestnut Mantle
+    [17696] = { b = 0, s = 0 }, -- Filled Cerulean Vial
+    [17702] = { b = 0, s = 0 }, -- Celebrian Rod
+    [17703] = { b = 0, s = 0 }, -- Celebrian Diamond
     [17704] = { b = 45890, s = 9178 }, -- Edge of Winter
     [17705] = { b = 164272, s = 32854 }, -- Thrash Blade
     [17706] = { b = 3800, s = 950 }, -- Plans: Edge of Winter
@@ -8687,6 +10808,7 @@ VanillaItemPrices = {
     [17709] = { b = 2000, s = 500 }, -- Recipe: Elixir of Frost Power
     [17710] = { b = 177417, s = 35483 }, -- Charstone Dirk
     [17711] = { b = 71223, s = 14244 }, -- Elemental Rockridge Leggings
+    [17712] = { b = 0, s = 0 }, -- Winter Veil Disguise Kit
     [17713] = { b = 58565, s = 14641 }, -- Blackstone Ring
     [17714] = { b = 51128, s = 10225 }, -- Bracers of the Stone Princess
     [17715] = { b = 51128, s = 10225 }, -- Eye of Theradras
@@ -8700,11 +10822,14 @@ VanillaItemPrices = {
     [17723] = { b = 3000, s = 750 }, -- Green Holiday Shirt
     [17724] = { b = 1500, s = 375 }, -- Pattern: Green Holiday Shirt
     [17725] = { b = 3000, s = 750 }, -- Formula: Enchant Weapon - Winter's Might
+    [17726] = { b = 0, s = 0 }, -- Smokywood Pastures Special Gift
+    [17727] = { b = 0, s = 0 }, -- Smokywood Pastures Gift Pack
     [17728] = { b = 62291, s = 12458 }, -- Albino Crocscale Boots
     [17730] = { b = 214759, s = 42951 }, -- Gatorbite Axe
     [17732] = { b = 51916, s = 10383 }, -- Rotgrip Mantle
     [17733] = { b = 173678, s = 34735 }, -- Fist of Stone
     [17734] = { b = 52285, s = 10457 }, -- Helm of the Mountain
+    [17735] = { b = 0, s = 0 }, -- The Feast of Winter Veil
     [17736] = { b = 48234, s = 9646 }, -- Rockgrip Gauntlets
     [17737] = { b = 40655, s = 10163 }, -- Cloud Stone
     [17738] = { b = 166758, s = 33351 }, -- Claw of Celebras
@@ -8725,7 +10850,16 @@ VanillaItemPrices = {
     [17753] = { b = 130233, s = 26046 }, -- Verdant Keeper's Aim
     [17754] = { b = 86971, s = 17394 }, -- Infernal Trickster Leggings
     [17755] = { b = 29093, s = 5818 }, -- Satyrmane Sash
+    [17756] = { b = 0, s = 0 }, -- Shadowshard Fragment
+    [17757] = { b = 0, s = 0 }, -- Amulet of Spirits
+    [17758] = { b = 0, s = 0 }, -- Amulet of Union
     [17759] = { b = 41230, s = 10307 }, -- Mark of Resolution
+    [17760] = { b = 0, s = 0 }, -- Seed of Life
+    [17761] = { b = 0, s = 0 }, -- Gem of the First Khan
+    [17762] = { b = 0, s = 0 }, -- Gem of the Second Kahn
+    [17763] = { b = 0, s = 0 }, -- Gem of the Third Kahn
+    [17764] = { b = 0, s = 0 }, -- Gem of the Fourth Kahn
+    [17765] = { b = 0, s = 0 }, -- Gem of the Fifth Kahn
     [17766] = { b = 224317, s = 44863 }, -- Princess Theradras' Scepter
     [17767] = { b = 68052, s = 13610 }, -- Bloomsprout Headpiece
     [17768] = { b = 31565, s = 7891 }, -- Woodseed Hoop
@@ -8740,7 +10874,22 @@ VanillaItemPrices = {
     [17778] = { b = 22532, s = 4506 }, -- Sagebrush Girdle
     [17779] = { b = 27736, s = 5547 }, -- Hulkstone Pauldrons
     [17780] = { b = 233983, s = 46796 }, -- Blade of Eternal Darkness
+    [17781] = { b = 0, s = 0 }, -- The Pariah's Instructions
     [17782] = { b = 134500, s = 33625 }, -- Talisman of Binding Shard
+    [17822] = { b = 0, s = 0 }, -- Frostwolf Maps
+    [17823] = { b = 0, s = 0 }, -- Stormpike Battle Plans
+    [17849] = { b = 0, s = 0 }, -- Stormpike Banner
+    [17850] = { b = 0, s = 0 }, -- Frostwolf Banner
+    [17900] = { b = 0, s = 0 }, -- Stormpike Insignia Rank 2
+    [17901] = { b = 0, s = 0 }, -- Stormpike Insignia Rank 3
+    [17902] = { b = 0, s = 0 }, -- Stormpike Insignia Rank 4
+    [17903] = { b = 0, s = 0 }, -- Stormpike Insignia Rank 5
+    [17904] = { b = 0, s = 0 }, -- Stormpike Insignia Rank 6
+    [17905] = { b = 0, s = 0 }, -- Frostwolf Insignia Rank 2
+    [17906] = { b = 0, s = 0 }, -- Frostwolf Insignia Rank 3
+    [17907] = { b = 0, s = 0 }, -- Frostwolf Insignia Rank 4
+    [17908] = { b = 0, s = 0 }, -- Frostwolf Insignia Rank 5
+    [17909] = { b = 0, s = 0 }, -- Frostwolf Insignia Rank 6
     [17922] = { b = 576, s = 115 }, -- Lionfur Armor
     [17943] = { b = 160783, s = 32156 }, -- Fist of Stone
     [17962] = { b = 19050, s = 4762 }, -- Blue Sack of Gems
@@ -8767,6 +10916,18 @@ VanillaItemPrices = {
     [18102] = { b = 85794, s = 17158 }, -- Dragonrider Boots
     [18103] = { b = 61010, s = 15252 }, -- Band of Rumination
     [18104] = { b = 86425, s = 17285 }, -- Feralsurge Girdle
+    [18142] = { b = 0, s = 0 }, -- Severed Night Elf Head
+    [18143] = { b = 0, s = 0 }, -- Tuft of Gnome Hair
+    [18144] = { b = 0, s = 0 }, -- Human Bone Chip
+    [18145] = { b = 0, s = 0 }, -- Tauren Hoof
+    [18146] = { b = 0, s = 0 }, -- Darkspear Troll Mojo
+    [18147] = { b = 0, s = 0 }, -- Forsaken Heart
+    [18148] = { b = 0, s = 0 }, -- Skull of Korrak
+    [18149] = { b = 0, s = 0 }, -- Rune of Recall
+    [18150] = { b = 0, s = 0 }, -- Rune of Recall
+    [18151] = { b = 0, s = 0 }, -- Filled Amethyst Phial
+    [18152] = { b = 0, s = 0 }, -- Amethyst Phial
+    [18154] = { b = 0, s = 0 }, -- Blizzard Stationery
     [18160] = { b = 200, s = 50 }, -- Recipe: Thistle Tea
     [18168] = { b = 282082, s = 56416 }, -- Force Reactive Disk
     [18169] = { b = 100000, s = 25000 }, -- Flame Mantle of the Dawn
@@ -8779,6 +10940,8 @@ VanillaItemPrices = {
     [18203] = { b = 454525, s = 90905 }, -- Eskhandar's Right Claw
     [18204] = { b = 136851, s = 27370 }, -- Eskhandar's Pelt
     [18205] = { b = 133150, s = 33287 }, -- Eskhandar's Collar
+    [18206] = { b = 0, s = 0 }, -- Dwarf Spine
+    [18207] = { b = 0, s = 0 }, -- Orc Tooth
     [18208] = { b = 145737, s = 29147 }, -- Drape of Benediction
     [18222] = { b = 12280, s = 3070 }, -- Thorny Vine
     [18223] = { b = 24568, s = 6142 }, -- Serrated Petal
@@ -8797,6 +10960,17 @@ VanillaItemPrices = {
     [18237] = { b = 6490, s = 1622 }, -- Mastiff Jawbone
     [18238] = { b = 16608, s = 3321 }, -- Shadowskin Gloves
     [18239] = { b = 3500, s = 875 }, -- Pattern: Shadowskin Gloves
+    [18240] = { b = 0, s = 0 }, -- Ogre Tannin
+    [18241] = { b = 100000, s = 0 }, -- Black War Steed Bridle
+    [18242] = { b = 100000, s = 0 }, -- Reins of the Black War Tiger
+    [18243] = { b = 100000, s = 0 }, -- Black Battlestrider
+    [18244] = { b = 100000, s = 0 }, -- Black War Ram
+    [18245] = { b = 100000, s = 0 }, -- Horn of the Black War Wolf
+    [18246] = { b = 100000, s = 0 }, -- Whistle of the Black War Raptor
+    [18247] = { b = 100000, s = 0 }, -- Black War Kodo
+    [18248] = { b = 100000, s = 0 }, -- Red Skeletal Warhorse
+    [18249] = { b = 0, s = 0 }, -- Crescent Key
+    [18250] = { b = 0, s = 0 }, -- Gordok Shackle Key
     [18251] = { b = 20000, s = 5000 }, -- Core Armor Kit
     [18252] = { b = 200000, s = 50000 }, -- Pattern: Core Armor Kit
     [18253] = { b = 60, s = 15 }, -- Major Rejuvenation Potion
@@ -8804,13 +10978,17 @@ VanillaItemPrices = {
     [18255] = { b = 60, s = 15 }, -- Runn Tum Tuber
     [18256] = { b = 30000, s = 1500 }, -- Imbued Vial
     [18257] = { b = 200000, s = 50000 }, -- Recipe: Major Rejuvenation Potion
+    [18258] = { b = 0, s = 0 }, -- Gordok Ogre Suit
     [18259] = { b = 30000, s = 7500 }, -- Formula: Enchant Weapon - Spell Power
     [18260] = { b = 30000, s = 7500 }, -- Formula: Enchant Weapon - Healing Power
+    [18261] = { b = 0, s = 0 }, -- Book of Incantations
     [18262] = { b = 5000, s = 1250 }, -- Elemental Sharpening Stone
     [18263] = { b = 84557, s = 16911 }, -- Flarecore Wraps
     [18264] = { b = 100000, s = 25000 }, -- Plans: Elemental Sharpening Stone
     [18265] = { b = 120000, s = 30000 }, -- Pattern: Flarecore Wraps
+    [18266] = { b = 0, s = 0 }, -- Gordok Courtyard Key
     [18267] = { b = 20000, s = 5000 }, -- Recipe: Runn Tum Tuber Surprise
+    [18268] = { b = 0, s = 0 }, -- Gordok Inner Door Key
     [18269] = { b = 1500, s = 375 }, -- Gordok Green Grog
     [18282] = { b = 331739, s = 66347 }, -- Core Marksman Rifle
     [18283] = { b = 100000, s = 25000 }, -- Biznicks 247x128 Accurascope
@@ -8826,7 +11004,9 @@ VanillaItemPrices = {
     [18294] = { b = 1000, s = 250 }, -- Elixir of Greater Water Breathing
     [18295] = { b = 57913, s = 11582 }, -- Phasing Boots
     [18296] = { b = 61610, s = 12322 }, -- Marksman Bands
+    [18297] = { b = 0, s = 0 }, -- Thornling Seed
     [18298] = { b = 103427, s = 20685 }, -- Unbridled Leggings
+    [18299] = { b = 0, s = 0 }, -- Hydrospawn Essence
     [18300] = { b = 4000, s = 200 }, -- Hyjal Nectar
     [18301] = { b = 146815, s = 29363 }, -- Lethtendris's Wand
     [18302] = { b = 30122, s = 7530 }, -- Band of Vigor
@@ -8852,6 +11032,14 @@ VanillaItemPrices = {
     [18326] = { b = 45184, s = 9036 }, -- Razor Gauntlets
     [18327] = { b = 46880, s = 9376 }, -- Whipvine Cord
     [18328] = { b = 70583, s = 14116 }, -- Shadewood Cloak
+    [18329] = { b = 0, s = 0 }, -- Arcanum of Rapidity
+    [18330] = { b = 0, s = 0 }, -- Arcanum of Focus
+    [18331] = { b = 0, s = 0 }, -- Arcanum of Protection
+    [18332] = { b = 0, s = 0 }, -- Libram of Rapidity
+    [18333] = { b = 0, s = 0 }, -- Libram of Focus
+    [18334] = { b = 0, s = 0 }, -- Libram of Protection
+    [18335] = { b = 0, s = 0 }, -- Pristine Black Diamond
+    [18336] = { b = 0, s = 0 }, -- Gauntlet of Gordok Might
     [18337] = { b = 40516, s = 8103 }, -- Orphic Bracers
     [18338] = { b = 182979, s = 36595 }, -- Wand of Arcane Potency
     [18339] = { b = 56853, s = 11370 }, -- Eidolon Cloak
@@ -8868,6 +11056,16 @@ VanillaItemPrices = {
     [18352] = { b = 140363, s = 28072 }, -- Petrified Bark Shield
     [18353] = { b = 275154, s = 55030 }, -- Stoneflower Staff
     [18354] = { b = 69864, s = 17466 }, -- Pimgib's Collar
+    [18356] = { b = 0, s = 0 }, -- Garona: A Study on Stealth and Treachery
+    [18357] = { b = 0, s = 0 }, -- Codex of Defense
+    [18358] = { b = 0, s = 0 }, -- The Arcanist's Cookbook
+    [18359] = { b = 0, s = 0 }, -- The Light and How to Swing It
+    [18360] = { b = 0, s = 0 }, -- Harnessing Shadows
+    [18361] = { b = 0, s = 0 }, -- The Greatest Race of Hunters
+    [18362] = { b = 0, s = 0 }, -- Holy Bologna: What the Light Won't Tell You
+    [18363] = { b = 0, s = 0 }, -- Frost Shock and You
+    [18364] = { b = 0, s = 0 }, -- The Emerald Dream
+    [18365] = { b = 0, s = 0 }, -- A Thoroughly Read Copy of \"Nat Pagle's Extreme' Anglin.\"
     [18366] = { b = 49025, s = 9805 }, -- Gordok's Handguards
     [18367] = { b = 73814, s = 14762 }, -- Gordok's Gauntlets
     [18368] = { b = 61742, s = 12348 }, -- Gordok's Gloves
@@ -8903,6 +11101,7 @@ VanillaItemPrices = {
     [18398] = { b = 108413, s = 27103 }, -- Tidal Loop
     [18399] = { b = 108413, s = 27103 }, -- Ocean's Breeze
     [18400] = { b = 59412, s = 14853 }, -- Ring of Living Stone
+    [18401] = { b = 0, s = 0 }, -- Foror's Compendium of Dragon Slaying
     [18402] = { b = 74651, s = 18662 }, -- Glowing Crystal Ring
     [18403] = { b = 196240, s = 49060 }, -- Dragonslayer's Signet
     [18404] = { b = 26856, s = 6714 }, -- Onyxia Tooth Pendant
@@ -8913,6 +11112,7 @@ VanillaItemPrices = {
     [18409] = { b = 56096, s = 11219 }, -- Mooncloth Gloves
     [18410] = { b = 227582, s = 45516 }, -- Sprinter's Sword
     [18411] = { b = 68520, s = 13704 }, -- Spry Boots
+    [18412] = { b = 0, s = 0 }, -- Core Fragment
     [18413] = { b = 85353, s = 17070 }, -- Cloak of Warding
     [18414] = { b = 120000, s = 30000 }, -- Pattern: Belt of the Archmage
     [18415] = { b = 40000, s = 10000 }, -- Pattern: Felcloth Gloves
@@ -8921,8 +11121,11 @@ VanillaItemPrices = {
     [18418] = { b = 40000, s = 10000 }, -- Pattern: Cloak of Warding
     [18420] = { b = 356184, s = 71236 }, -- Bonecrusher
     [18421] = { b = 128705, s = 25741 }, -- Backwood Helm
+    [18422] = { b = 0, s = 0 }, -- Head of Onyxia
+    [18423] = { b = 0, s = 0 }, -- Head of Onyxia
     [18424] = { b = 102979, s = 20595 }, -- Sedge Boots
     [18425] = { b = 22150, s = 5537 }, -- Kreeg's Mug
+    [18426] = { b = 0, s = 0 }, -- Lethtendris's Web
     [18427] = { b = 6611, s = 1322 }, -- Sergeant's Cloak
     [18428] = { b = 30000, s = 7500 }, -- Senior Sergeant's Insignia
     [18429] = { b = 29447, s = 5889 }, -- First Sergeant's Plate Bracers
@@ -8956,6 +11159,15 @@ VanillaItemPrices = {
     [18462] = { b = 206595, s = 41319 }, -- Jagged Bone Fist
     [18463] = { b = 207361, s = 41472 }, -- Ogre Pocket Knife
     [18464] = { b = 116541, s = 29135 }, -- Gordok Nose Ring
+    [18465] = { b = 0, s = 0 }, -- Royal Seal of Eldre'Thalas
+    [18466] = { b = 0, s = 0 }, -- Royal Seal of Eldre'Thalas
+    [18467] = { b = 0, s = 0 }, -- Royal Seal of Eldre'Thalas
+    [18468] = { b = 0, s = 0 }, -- Royal Seal of Eldre'Thalas
+    [18469] = { b = 0, s = 0 }, -- Royal Seal of Eldre'Thalas
+    [18470] = { b = 0, s = 0 }, -- Royal Seal of Eldre'Thalas
+    [18471] = { b = 0, s = 0 }, -- Royal Seal of Eldre'Thalas
+    [18472] = { b = 0, s = 0 }, -- Royal Seal of Eldre'Thalas
+    [18473] = { b = 0, s = 0 }, -- Royal Seal of Eldre'Thalas
     [18475] = { b = 39536, s = 7907 }, -- Oddly Magical Belt
     [18476] = { b = 75747, s = 15149 }, -- Mud Stained Boots
     [18477] = { b = 98841, s = 19768 }, -- Shaggy Leggings
@@ -8969,8 +11181,11 @@ VanillaItemPrices = {
     [18485] = { b = 172849, s = 34569 }, -- Observer's Shield
     [18486] = { b = 108417, s = 21683 }, -- Mooncloth Robe
     [18487] = { b = 40000, s = 10000 }, -- Pattern: Mooncloth Robe
+    [18488] = { b = 0, s = 0 }, -- Heated Ancient Blade
+    [18489] = { b = 0, s = 0 }, -- Unfired Ancient Blade
     [18490] = { b = 93277, s = 18655 }, -- Insightful Hood
     [18491] = { b = 203475, s = 40695 }, -- Lorespinner
+    [18492] = { b = 0, s = 0 }, -- Treated Ancient Blade
     [18493] = { b = 71165, s = 14233 }, -- Bulky Iron Spaulders
     [18494] = { b = 107223, s = 21444 }, -- Denwatcher's Shoulders
     [18495] = { b = 83851, s = 16770 }, -- Redoubt Cloak
@@ -8979,6 +11194,7 @@ VanillaItemPrices = {
     [18498] = { b = 237219, s = 47443 }, -- Hedgecutter
     [18499] = { b = 172945, s = 34589 }, -- Barrier Shield
     [18500] = { b = 125360, s = 31340 }, -- Tarnished Elven Ring
+    [18501] = { b = 0, s = 0 }, -- Felvine Shard
     [18502] = { b = 350636, s = 70127 }, -- Monstrous Glaive
     [18503] = { b = 112609, s = 22521 }, -- Kromcrush's Chestplate
     [18504] = { b = 70634, s = 14126 }, -- Girdle of Insight
@@ -8990,6 +11206,7 @@ VanillaItemPrices = {
     [18510] = { b = 104449, s = 20889 }, -- Hide of the Wild
     [18511] = { b = 104855, s = 20971 }, -- Shifting Cloak
     [18512] = { b = 16000, s = 4000 }, -- Larval Acid
+    [18513] = { b = 0, s = 0 }, -- A Dull and Flat Elven Blade
     [18514] = { b = 60000, s = 15000 }, -- Pattern: Girdle of Insight
     [18515] = { b = 60000, s = 15000 }, -- Pattern: Mongoose Boots
     [18516] = { b = 60000, s = 15000 }, -- Pattern: Swift Flight Bracers
@@ -9015,6 +11232,8 @@ VanillaItemPrices = {
     [18536] = { b = 154658, s = 38664 }, -- Milli's Lexicon
     [18537] = { b = 264540, s = 66135 }, -- Counterattack Lodestone
     [18538] = { b = 483741, s = 96748 }, -- Treant's Bane
+    [18539] = { b = 0, s = 0 }, -- Reliquary of Purity
+    [18540] = { b = 0, s = 0 }, -- Sealed Reliquary of Purity
     [18541] = { b = 165144, s = 33028 }, -- Puissant Cape
     [18542] = { b = 626393, s = 125278 }, -- Typhoon
     [18543] = { b = 254912, s = 63728 }, -- Ring of Entropy
@@ -9023,6 +11242,10 @@ VanillaItemPrices = {
     [18546] = { b = 240179, s = 48035 }, -- Infernal Headcage
     [18547] = { b = 118096, s = 23619 }, -- Unmelting Ice Girdle
     [18562] = { b = 400000, s = 100000 }, -- Elementium Ore
+    [18563] = { b = 0, s = 0 }, -- Bindings of the Windseeker
+    [18564] = { b = 0, s = 0 }, -- Bindings of the Windseeker
+    [18565] = { b = 0, s = 0 }, -- Vessel of Rebirth
+    [18566] = { b = 0, s = 0 }, -- Essence of the Firelord
     [18567] = { b = 150000, s = 37500 }, -- Elemental Flux
     [18582] = { b = 6122369, s = 1224473 }, -- The Twin Blades of Azzinoth
     [18583] = { b = 5559741, s = 1111948 }, -- Warglaive of Azzinoth (Right)
@@ -9031,14 +11254,32 @@ VanillaItemPrices = {
     [18586] = { b = 59413, s = 14853 }, -- Lonetree's Circle
     [18587] = { b = 8000, s = 2000 }, -- Goblin Jumper Cables XL
     [18588] = { b = 800, s = 200 }, -- Ez-Thro Dynamite II
+    [18590] = { b = 0, s = 0 }, -- Raging Beast's Blood
+    [18591] = { b = 0, s = 0 }, -- Case of Blood
     [18592] = { b = 80000, s = 20000 }, -- Plans: Sulfuron Hammer
     [18594] = { b = 12000, s = 3000 }, -- Powerful Seaforium Charge
+    [18597] = { b = 0, s = 0 }, -- Orcish Orphan Whistle
+    [18598] = { b = 0, s = 0 }, -- Human Orphan Whistle
     [18600] = { b = 48000, s = 12000 }, -- Tome of Arcane Brilliance
+    [18601] = { b = 0, s = 0 }, -- Glowing Crystal Prison
+    [18602] = { b = 0, s = 0 }, -- Tome of Sacrifice
+    [18603] = { b = 0, s = 0 }, -- Satyr Blood
+    [18604] = { b = 0, s = 0 }, -- Tears of the Hederine
+    [18605] = { b = 0, s = 0 }, -- Imprisoned Doomguard
     [18606] = { b = 50000, s = 12500 }, -- Alliance Battle Standard
     [18607] = { b = 50000, s = 12500 }, -- Horde Battle Standard
+    [18608] = { b = 0, s = 0 }, -- Benediction
+    [18609] = { b = 0, s = 0 }, -- Anathema
     [18610] = { b = 181, s = 36 }, -- Keen Machete
     [18611] = { b = 139, s = 27 }, -- Gnarlpine Leggings
     [18612] = { b = 171, s = 34 }, -- Bloody Chain Boots
+    [18622] = { b = 0, s = 0 }, -- Flawless Fel Essence (Jaedenar)
+    [18623] = { b = 0, s = 0 }, -- Flawless Fel Essence (Dark Portal)
+    [18624] = { b = 0, s = 0 }, -- Flawless Fel Essence (Azshara)
+    [18625] = { b = 0, s = 0 }, -- Kroshius' Infernal Core
+    [18626] = { b = 0, s = 0 }, -- Fel Fire
+    [18628] = { b = 0, s = 0 }, -- Thorium Brotherhood Contract
+    [18629] = { b = 500000, s = 0 }, -- Black Lodestone
     [18631] = { b = 12000, s = 3000 }, -- Truesilver Transformer
     [18632] = { b = 1000, s = 50 }, -- Moonbrook Riot Taffy
     [18633] = { b = 125, s = 6 }, -- Styleen's Sour Suckerpop
@@ -9048,8 +11289,12 @@ VanillaItemPrices = {
     [18637] = { b = 2400, s = 600 }, -- Major Recombobulator
     [18638] = { b = 50000, s = 12500 }, -- Hyper-Radiant Flame Reflector
     [18639] = { b = 50000, s = 12500 }, -- Ultra-Flash Shadow Reflector
+    [18640] = { b = 0, s = 0 }, -- Happy Fun Rock
     [18641] = { b = 2000, s = 500 }, -- Dense Dynamite
+    [18642] = { b = 0, s = 0 }, -- Jaina's Autograph
+    [18643] = { b = 0, s = 0 }, -- Cairne's Hoofprint
     [18645] = { b = 6000, s = 1500 }, -- Alarm-O-Bot
+    [18646] = { b = 0, s = 0 }, -- The Eye of Divinity
     [18647] = { b = 1800, s = 450 }, -- Schematic: Red Firework
     [18648] = { b = 1800, s = 450 }, -- Schematic: Green Firework
     [18649] = { b = 1800, s = 450 }, -- Schematic: Blue Firework
@@ -9062,10 +11307,14 @@ VanillaItemPrices = {
     [18656] = { b = 16000, s = 4000 }, -- Schematic: Powerful Seaforium Charge
     [18657] = { b = 20000, s = 5000 }, -- Schematic: Hyper-Radiant Flame Reflector
     [18658] = { b = 24000, s = 6000 }, -- Schematic: Ultra-Flash Shadow Reflector
+    [18659] = { b = 0, s = 0 }, -- Splinter of Nordrassil
     [18660] = { b = 30000, s = 7500 }, -- World Enlarger
     [18661] = { b = 12000, s = 3000 }, -- Schematic: World Enlarger
     [18662] = { b = 20, s = 5 }, -- Heavy Leather Ball
+    [18663] = { b = 1500000, s = 0 }, -- J'eevee's Jar
     [18664] = { b = 100, s = 25 }, -- A Treatise on Military Ranks
+    [18665] = { b = 0, s = 0 }, -- The Eye of Shadow
+    [18670] = { b = 500000, s = 0 }, -- Xorothian Glyphs
     [18671] = { b = 225923, s = 45184 }, -- Baron Charr's Sceptre
     [18672] = { b = 71420, s = 17855 }, -- Elemental Ember
     [18673] = { b = 144591, s = 28918 }, -- Avalanchion's Stony Hide
@@ -9081,6 +11330,8 @@ VanillaItemPrices = {
     [18683] = { b = 255504, s = 51100 }, -- Hammer of the Vesper
     [18684] = { b = 144564, s = 36141 }, -- Dimly Opalescent Ring
     [18686] = { b = 122638, s = 24527 }, -- Bone Golem Shoulders
+    [18687] = { b = 1500000, s = 0 }, -- Xorothian Stardust
+    [18688] = { b = 0, s = 0 }, -- Imp in a Jar
     [18689] = { b = 82301, s = 16460 }, -- Phantasmal Cloak
     [18690] = { b = 110130, s = 22026 }, -- Wraithplate Leggings
     [18691] = { b = 125601, s = 31400 }, -- Dark Advisor's Pendant
@@ -9095,18 +11346,28 @@ VanillaItemPrices = {
     [18700] = { b = 54552, s = 10910 }, -- Malefic Bracers
     [18701] = { b = 145640, s = 36410 }, -- Innervating Band
     [18702] = { b = 48478, s = 9695 }, -- Belt of the Ordained
+    [18703] = { b = 0, s = 0 }, -- Ancient Petrified Leaf
+    [18704] = { b = 0, s = 0 }, -- Mature Blue Dragon Sinew
+    [18705] = { b = 0, s = 0 }, -- Mature Black Dragon Sinew
     [18706] = { b = 40124, s = 10031 }, -- Arena Master
+    [18707] = { b = 0, s = 0 }, -- Ancient Rune Etched Stave
+    [18708] = { b = 0, s = 0 }, -- Petrified Bark
     [18709] = { b = 28794, s = 5758 }, -- Arena Wristguards
     [18710] = { b = 36122, s = 7224 }, -- Arena Bracers
     [18711] = { b = 43502, s = 8700 }, -- Arena Bands
     [18712] = { b = 29105, s = 5821 }, -- Arena Vambraces
+    [18713] = { b = 0, s = 0 }, -- Rhok'delar, Longbow of the Ancient Keepers
+    [18714] = { b = 0, s = 0 }, -- Ancient Sinew Wrapped Lamina
+    [18715] = { b = 0, s = 0 }, -- Lok'delar, Stave of the Ancient Keepers
     [18716] = { b = 93277, s = 18655 }, -- Ash Covered Boots
     [18717] = { b = 344091, s = 68818 }, -- Hammer of the Grand Crusader
     [18718] = { b = 82901, s = 16580 }, -- Grand Crusader's Helm
+    [18719] = { b = 0, s = 0 }, -- The Traitor's Heart
     [18720] = { b = 83532, s = 16706 }, -- Shroud of the Nathrezim
     [18721] = { b = 74724, s = 14944 }, -- Barrage Girdle
     [18722] = { b = 53442, s = 10688 }, -- Death Grips
     [18723] = { b = 167814, s = 41953 }, -- Animated Chain Necklace
+    [18724] = { b = 0, s = 0 }, -- Enchanted Black Dragon Sinew
     [18725] = { b = 299636, s = 59927 }, -- Peacemaker
     [18726] = { b = 56480, s = 11296 }, -- Magistrate's Cuffs
     [18727] = { b = 72438, s = 14487 }, -- Crimson Felt Hat
@@ -9126,6 +11387,10 @@ VanillaItemPrices = {
     [18743] = { b = 71379, s = 14275 }, -- Gracious Cape
     [18744] = { b = 56859, s = 11371 }, -- Plaguebat Fur Gloves
     [18745] = { b = 86140, s = 17228 }, -- Sacred Cloth Leggings
+    [18746] = { b = 0, s = 0 }, -- Divination Scryer
+    [18749] = { b = 0, s = 0 }, -- Charger's Lost Soul
+    [18752] = { b = 0, s = 0 }, -- Exorcism Censer
+    [18753] = { b = 0, s = 0 }, -- Arcanite Barding
     [18754] = { b = 52306, s = 10461 }, -- Fel Hardened Bracers
     [18755] = { b = 215646, s = 43129 }, -- Xorothian Firestick
     [18756] = { b = 167101, s = 33420 }, -- Dreadguard's Protector
@@ -9135,8 +11400,43 @@ VanillaItemPrices = {
     [18760] = { b = 123465, s = 30866 }, -- Necromantic Band
     [18761] = { b = 205055, s = 41011 }, -- Oblivion's Touch
     [18762] = { b = 110526, s = 27631 }, -- Shard of the Green Flame
+    [18766] = { b = 1000000, s = 0 }, -- Reins of the Swift Frostsaber
+    [18767] = { b = 1000000, s = 0 }, -- Reins of the Swift Mistsaber
+    [18768] = { b = 1000000, s = 0 }, -- Reins of the Swift Dawnsaber
+    [18769] = { b = 0, s = 0 }, -- Enchanted Thorium Platemail
+    [18770] = { b = 0, s = 0 }, -- Enchanted Thorium Platemail
+    [18771] = { b = 0, s = 0 }, -- Enchanted Thorium Platemail
+    [18772] = { b = 1000000, s = 0 }, -- Swift Green Mechanostrider
+    [18773] = { b = 1000000, s = 0 }, -- Swift White Mechanostrider
+    [18774] = { b = 1000000, s = 0 }, -- Swift Yellow Mechanostrider
+    [18775] = { b = 0, s = 0 }, -- Manna-Enriched Horse Feed
+    [18776] = { b = 1000000, s = 0 }, -- Swift Palomino
+    [18777] = { b = 1000000, s = 0 }, -- Swift Brown Steed
+    [18778] = { b = 1000000, s = 0 }, -- Swift White Steed
+    [18779] = { b = 0, s = 0 }, -- Bottom Half of Advanced Armorsmithing: Volume I
+    [18780] = { b = 0, s = 0 }, -- Top Half of Advanced Armorsmithing: Volume I
+    [18781] = { b = 0, s = 0 }, -- Bottom Half of Advanced Armorsmithing: Volume II
+    [18782] = { b = 0, s = 0 }, -- Top Half of Advanced Armorsmithing: Volume II
+    [18783] = { b = 0, s = 0 }, -- Bottom Half of Advanced Armorsmithing: Volume III
+    [18784] = { b = 0, s = 0 }, -- Top Half of Advanced Armorsmithing: Volume III
+    [18785] = { b = 1000000, s = 0 }, -- Swift White Ram
+    [18786] = { b = 1000000, s = 0 }, -- Swift Brown Ram
+    [18787] = { b = 1000000, s = 0 }, -- Swift Gray Ram
+    [18788] = { b = 1000000, s = 0 }, -- Swift Blue Raptor
+    [18789] = { b = 1000000, s = 0 }, -- Swift Olive Raptor
+    [18790] = { b = 1000000, s = 0 }, -- Swift Orange Raptor
+    [18791] = { b = 1000000, s = 0 }, -- Purple Skeletal Warhorse
+    [18792] = { b = 0, s = 0 }, -- Blessed Arcanite Barding
+    [18793] = { b = 1000000, s = 0 }, -- Great White Kodo
+    [18794] = { b = 1000000, s = 0 }, -- Great Brown Kodo
+    [18795] = { b = 1000000, s = 0 }, -- Great Gray Kodo
+    [18796] = { b = 1000000, s = 0 }, -- Horn of the Swift Brown Wolf
+    [18797] = { b = 1000000, s = 0 }, -- Horn of the Swift Timber Wolf
+    [18798] = { b = 1000000, s = 0 }, -- Horn of the Swift Gray Wolf
+    [18799] = { b = 0, s = 0 }, -- Charger's Redeemed Soul
     [18802] = { b = 60000, s = 5000 }, -- Shadowy Potion
     [18803] = { b = 677972, s = 135594 }, -- Finkle's Lava Dredger
+    [18804] = { b = 0, s = 0 }, -- Lord Grayson's Satchel
     [18805] = { b = 546375, s = 109275 }, -- Core Hound Tooth
     [18806] = { b = 168806, s = 33761 }, -- Core Forged Greaves
     [18807] = { b = 128980, s = 25796 }, -- Helm of Latent Power
@@ -9150,6 +11450,8 @@ VanillaItemPrices = {
     [18815] = { b = 256380, s = 64095 }, -- Essence of the Pure Flame
     [18816] = { b = 743570, s = 148714 }, -- Perdition's Blade
     [18817] = { b = 319878, s = 63975 }, -- Crown of Destruction
+    [18818] = { b = 0, s = 0 }, -- Mor'zul's Instructions
+    [18819] = { b = 0, s = 0 }, -- Rohan's Exorcism Censer
     [18820] = { b = 265161, s = 66290 }, -- Talisman of Ephemeral Power
     [18821] = { b = 256120, s = 64030 }, -- Quick Strike Ring
     [18822] = { b = 628843, s = 125768 }, -- Obsidian Edged Blade
@@ -9210,23 +11512,68 @@ VanillaItemPrices = {
     [18877] = { b = 301699, s = 60339 }, -- High Warlord's Greatsword
     [18878] = { b = 428226, s = 85645 }, -- Sorcerous Dagger
     [18879] = { b = 213456, s = 53364 }, -- Heavy Dark Iron Ring
+    [18880] = { b = 0, s = 0 }, -- Darkreaver's Head
+    [18902] = { b = 1000000, s = 0 }, -- Reins of the Swift Stormsaber
+    [18904] = { b = 0, s = 0 }, -- Zorbin's Ultra-Shrinker
+    [18922] = { b = 0, s = 0 }, -- Secret Plans: Fiery Flux
+    [18943] = { b = 0, s = 0 }, -- Dark Iron Pillow
     [18944] = { b = 0, s = 123 }, -- Incendosaur Scale
     [18945] = { b = 0, s = 100 }, -- Dark Iron Residue
+    [18946] = { b = 0, s = 0 }, -- Head of Overseer Maltorius
+    [18947] = { b = 0, s = 0 }, -- Rage Scar Yeti Hide
     [18948] = { b = 7945, s = 1589 }, -- Barbaric Bracers
     [18949] = { b = 2000, s = 500 }, -- Pattern: Barbaric Bracers
+    [18950] = { b = 0, s = 0 }, -- Chambermaid Pillaclencher's Pillow
+    [18951] = { b = 0, s = 0 }, -- Evonice's Landin' Pilla
+    [18952] = { b = 0, s = 0 }, -- Simone's Head
+    [18953] = { b = 0, s = 0 }, -- Klinfran's Head
+    [18954] = { b = 0, s = 0 }, -- Solenor's Head
+    [18955] = { b = 0, s = 0 }, -- Artorius's Head
+    [18956] = { b = 0, s = 0 }, -- Miniaturization Residue
     [18957] = { b = 1250, s = 250 }, -- Brushwood Blade
+    [18958] = { b = 0, s = 0 }, -- Water Elemental Core
+    [18959] = { b = 0, s = 0 }, -- Smithing Tuyere
+    [18960] = { b = 0, s = 0 }, -- Lookout's Spyglass
+    [18961] = { b = 0, s = 0 }, -- Zukk'ash Carapace
+    [18962] = { b = 0, s = 0 }, -- Stinglasher's Glands
+    [18969] = { b = 0, s = 0 }, -- Pristine Yeti Hide
     [18970] = { b = 224050, s = 56012 }, -- Ring of Critical Testing 2
+    [18972] = { b = 0, s = 0 }, -- Perfect Yeti Hide
     [18984] = { b = 20000, s = 5000 }, -- Dimensional Ripper - Everlook
     [18986] = { b = 20000, s = 5000 }, -- Ultrasafe Transporter: Gadgetzan
+    [18987] = { b = 0, s = 0 }, -- Blackhand's Command
+    [19002] = { b = 0, s = 0 }, -- Head of Nefarian
+    [19003] = { b = 0, s = 0 }, -- Head of Nefarian
+    [19004] = { b = 0, s = 0 }, -- Minor Healthstone
+    [19005] = { b = 0, s = 0 }, -- Minor Healthstone
+    [19006] = { b = 0, s = 0 }, -- Lesser Healthstone
+    [19007] = { b = 0, s = 0 }, -- Lesser Healthstone
+    [19008] = { b = 0, s = 0 }, -- Healthstone
+    [19009] = { b = 0, s = 0 }, -- Healthstone
+    [19010] = { b = 0, s = 0 }, -- Greater Healthstone
+    [19011] = { b = 0, s = 0 }, -- Greater Healthstone
+    [19012] = { b = 0, s = 0 }, -- Major Healthstone
+    [19013] = { b = 0, s = 0 }, -- Major Healthstone
+    [19016] = { b = 0, s = 0 }, -- Vessel of Rebirth
+    [19017] = { b = 0, s = 0 }, -- Essence of the Firelord
+    [19018] = { b = 0, s = 0 }, -- Dormant Wind Kissed Blade
     [19019] = { b = 615704, s = 123140 }, -- Thunderfury, Blessed Blade of the Windseeker
+    [19020] = { b = 0, s = 0 }, -- Camp Mojache Zukk'ash Report
     [19022] = { b = 142900, s = 28580 }, -- Nat Pagle's Extreme Angler FC-5000
+    [19023] = { b = 0, s = 0 }, -- Katoom's Best Lure
     [19024] = { b = 40124, s = 10031 }, -- Arena Grand Master
+    [19025] = { b = 0, s = 0 }, -- Skylord Plume
     [19026] = { b = 1000, s = 250 }, -- Snake Burst Firework
     [19027] = { b = 5000, s = 1250 }, -- Schematic: Snake Burst Firework
     [19028] = { b = 5393, s = 1078 }, -- Elegant Dress
+    [19029] = { b = 100000, s = 0 }, -- Horn of the Frostwolf Howler
+    [19030] = { b = 100000, s = 0 }, -- Stormpike Battle Charger
     [19031] = { b = 10000, s = 2500 }, -- Frostwolf Battle Tabard
     [19032] = { b = 10000, s = 2500 }, -- Stormpike Battle Tabard
+    [19033] = { b = 0, s = 0 }, -- Slagtree's Lost Tools
+    [19034] = { b = 0, s = 0 }, -- Lard's Lunch
     [19035] = { b = 1000, s = 250 }, -- Lard's Special Picnic Basket
+    [19036] = { b = 0, s = 0 }, -- Final Message to the Wildhammer
     [19037] = { b = 29389, s = 5877 }, -- Emerald Peak Spaulders
     [19038] = { b = 44581, s = 11145 }, -- Ring of Subtlety
     [19039] = { b = 37019, s = 7403 }, -- Zorbin's Water Resistant Hat
@@ -9243,6 +11590,8 @@ VanillaItemPrices = {
     [19050] = { b = 93794, s = 18758 }, -- Mantle of the Timbermaw
     [19051] = { b = 46827, s = 9365 }, -- Girdle of the Dawn
     [19052] = { b = 88105, s = 17621 }, -- Dawn Treaders
+    [19054] = { b = 0, s = 0 }, -- Red Dragon Orb
+    [19055] = { b = 0, s = 0 }, -- Green Dragon Orb
     [19056] = { b = 64705, s = 12941 }, -- Argent Boots
     [19057] = { b = 58031, s = 11606 }, -- Gloves of the Dawn
     [19058] = { b = 109227, s = 21845 }, -- Golden Mantle of the Dawn
@@ -9250,9 +11599,13 @@ VanillaItemPrices = {
     [19060] = { b = 2000, s = 100 }, -- Warsong Gulch Enriched Ration
     [19061] = { b = 1500, s = 75 }, -- Warsong Gulch Iron Ration
     [19062] = { b = 1000, s = 50 }, -- Warsong Gulch Field Ration
+    [19064] = { b = 0, s = 0 }, -- Shackle Key
     [19066] = { b = 2000, s = 100 }, -- Warsong Gulch Runecloth Bandage
     [19067] = { b = 1500, s = 75 }, -- Warsong Gulch Mageweave Bandage
     [19068] = { b = 1000, s = 50 }, -- Warsong Gulch Silk Bandage
+    [19069] = { b = 0, s = 0 }, -- Huntsman Malkhor's Skull
+    [19070] = { b = 0, s = 0 }, -- Huntsman Malkhor's Bones
+    [19071] = { b = 0, s = 0 }, -- Vessel of Tainted Blood
     [19083] = { b = 75224, s = 15044 }, -- Frostwolf Legionnaire's Cloak
     [19084] = { b = 75500, s = 15100 }, -- Stormpike Soldier's Cloak
     [19085] = { b = 75776, s = 15155 }, -- Frostwolf Advisor's Cloak
@@ -9318,9 +11671,16 @@ VanillaItemPrices = {
     [19147] = { b = 365815, s = 91453 }, -- Ring of Spell Power
     [19148] = { b = 126998, s = 25399 }, -- Dark Iron Helm
     [19149] = { b = 106243, s = 21248 }, -- Lava Belt
+    [19150] = { b = 0, s = 0 }, -- Sentinel Basic Care Package
+    [19151] = { b = 0, s = 0 }, -- Sentinel Standard Care Package
+    [19152] = { b = 0, s = 0 }, -- Sentinel Advanced Care Package
+    [19153] = { b = 0, s = 0 }, -- Outrider Advanced Care Package
+    [19154] = { b = 0, s = 0 }, -- Outrider Basic Care Package
+    [19155] = { b = 0, s = 0 }, -- Outrider Standard Care Package
     [19156] = { b = 174557, s = 34911 }, -- Flarecore Robe
     [19157] = { b = 159715, s = 31943 }, -- Chromatic Gauntlets
     [19159] = { b = 84564, s = 21141 }, -- Woven Ivy Necklace
+    [19160] = { b = 0, s = 0 }, -- Contest Winner's Tabard
     [19162] = { b = 139159, s = 27831 }, -- Corehound Belt
     [19163] = { b = 139659, s = 27931 }, -- Molten Belt
     [19164] = { b = 112127, s = 22425 }, -- Dark Iron Gauntlets
@@ -9331,6 +11691,7 @@ VanillaItemPrices = {
     [19169] = { b = 645562, s = 129112 }, -- Nightfall
     [19170] = { b = 518448, s = 103689 }, -- Ebon Hand
     [19182] = { b = 100, s = 25 }, -- Darkmoon Faire Prize Ticket
+    [19183] = { b = 0, s = 0 }, -- Hourglass Sand
     [19202] = { b = 22000, s = 5500 }, -- Plans: Heavy Timbermaw Belt
     [19203] = { b = 22000, s = 5500 }, -- Plans: Girdle of the Dawn
     [19204] = { b = 40000, s = 10000 }, -- Plans: Heavy Timbermaw Boots
@@ -9342,6 +11703,7 @@ VanillaItemPrices = {
     [19210] = { b = 120000, s = 30000 }, -- Plans: Ebon Hand
     [19211] = { b = 120000, s = 30000 }, -- Plans: Blackguard
     [19212] = { b = 120000, s = 30000 }, -- Plans: Nightfall
+    [19213] = { b = 0, s = 0 }, -- Silverwing Talisman of Merit
     [19215] = { b = 22000, s = 5500 }, -- Pattern: Wisdom of the Timbermaw
     [19216] = { b = 22000, s = 5500 }, -- Pattern: Argent Boots
     [19217] = { b = 40000, s = 10000 }, -- Pattern: Argent Shoulders
@@ -9355,6 +11717,7 @@ VanillaItemPrices = {
     [19225] = { b = 4000, s = 200 }, -- Deep Fried Candybar
     [19227] = { b = 50000, s = 12500 }, -- Ace of Beasts
     [19228] = { b = 400000, s = 100000 }, -- Beasts Deck
+    [19229] = { b = 0, s = 0 }, -- Sayge's Fortune #1
     [19230] = { b = 50000, s = 12500 }, -- Two of Beasts
     [19231] = { b = 50000, s = 12500 }, -- Three of Beasts
     [19232] = { b = 50000, s = 12500 }, -- Four of Beasts
@@ -9362,6 +11725,26 @@ VanillaItemPrices = {
     [19234] = { b = 50000, s = 12500 }, -- Six of Beasts
     [19235] = { b = 50000, s = 12500 }, -- Seven of Beasts
     [19236] = { b = 50000, s = 12500 }, -- Eight of Beasts
+    [19237] = { b = 0, s = 0 }, -- Sayge's Fortune #19
+    [19238] = { b = 0, s = 0 }, -- Sayge's Fortune #3
+    [19239] = { b = 0, s = 0 }, -- Sayge's Fortune #4
+    [19240] = { b = 0, s = 0 }, -- Sayge's Fortune #5
+    [19241] = { b = 0, s = 0 }, -- Sayge's Fortune #6
+    [19242] = { b = 0, s = 0 }, -- Sayge's Fortune #7
+    [19243] = { b = 0, s = 0 }, -- Sayge's Fortune #8
+    [19244] = { b = 0, s = 0 }, -- Sayge's Fortune #9
+    [19245] = { b = 0, s = 0 }, -- Sayge's Fortune #10
+    [19246] = { b = 0, s = 0 }, -- Sayge's Fortune #11
+    [19247] = { b = 0, s = 0 }, -- Sayge's Fortune #12
+    [19248] = { b = 0, s = 0 }, -- Sayge's Fortune #13
+    [19249] = { b = 0, s = 0 }, -- Sayge's Fortune #14
+    [19250] = { b = 0, s = 0 }, -- Sayge's Fortune #15
+    [19251] = { b = 0, s = 0 }, -- Sayge's Fortune #16
+    [19252] = { b = 0, s = 0 }, -- Sayge's Fortune #18
+    [19253] = { b = 0, s = 0 }, -- Sayge's Fortune #17
+    [19254] = { b = 0, s = 0 }, -- Sayge's Fortune #21
+    [19255] = { b = 0, s = 0 }, -- Sayge's Fortune #22
+    [19256] = { b = 0, s = 0 }, -- Sayge's Fortune #2
     [19257] = { b = 400000, s = 100000 }, -- Warlords Deck
     [19258] = { b = 50000, s = 12500 }, -- Ace of Warlords
     [19259] = { b = 50000, s = 12500 }, -- Two of Warlords
@@ -9371,6 +11754,7 @@ VanillaItemPrices = {
     [19263] = { b = 50000, s = 12500 }, -- Six of Warlords
     [19264] = { b = 50000, s = 12500 }, -- Seven of Warlords
     [19265] = { b = 50000, s = 12500 }, -- Eight of Warlords
+    [19266] = { b = 0, s = 0 }, -- Sayge's Fortune #20
     [19267] = { b = 400000, s = 100000 }, -- Elementals Deck
     [19268] = { b = 50000, s = 12500 }, -- Ace of Elementals
     [19269] = { b = 50000, s = 12500 }, -- Two of Elementals
@@ -9421,6 +11805,7 @@ VanillaItemPrices = {
     [19319] = { b = 350000, s = 87500 }, -- Harpy Hide Quiver
     [19320] = { b = 350000, s = 87500 }, -- Gnoll Skin Bandolier
     [19321] = { b = 795297, s = 159059 }, -- The Immovable Object
+    [19322] = { b = 0, s = 0 }, -- Warsong Mark of Honor
     [19323] = { b = 1564900, s = 312980 }, -- The Unstoppable Force
     [19324] = { b = 1256618, s = 251323 }, -- The Lobotomizer
     [19325] = { b = 755555, s = 188888 }, -- Don Julio's Band
@@ -9436,6 +11821,7 @@ VanillaItemPrices = {
     [19335] = { b = 644128, s = 128825 }, -- Spineshatter
     [19336] = { b = 288156, s = 72039 }, -- Arcane Infused Gem
     [19337] = { b = 288156, s = 72039 }, -- The Black Book
+    [19338] = { b = 0, s = 0 }, -- Free Ticket Voucher
     [19339] = { b = 288156, s = 72039 }, -- Mind Quickening Gem
     [19340] = { b = 288156, s = 72039 }, -- Rune of Metamorphosis
     [19341] = { b = 288156, s = 72039 }, -- Lifegiving Gem
@@ -9503,6 +11889,10 @@ VanillaItemPrices = {
     [19405] = { b = 351387, s = 70277 }, -- Malfurion's Blessed Bulwark
     [19406] = { b = 364641, s = 91160 }, -- Drake Fang Talisman
     [19407] = { b = 141561, s = 28312 }, -- Ebony Flame Gloves
+    [19422] = { b = 0, s = 0 }, -- Darkmoon Faire Fortune
+    [19423] = { b = 0, s = 0 }, -- Sayge's Fortune #23
+    [19424] = { b = 0, s = 0 }, -- Sayge's Fortune #24
+    [19425] = { b = 0, s = 0 }, -- Mysterious Lockbox
     [19426] = { b = 100000, s = 25000 }, -- Orb of the Darkmoon
     [19430] = { b = 214596, s = 42919 }, -- Shroud of Pure Thought
     [19431] = { b = 412471, s = 103117 }, -- Styleen's Impeding Scarab
@@ -9517,12 +11907,21 @@ VanillaItemPrices = {
     [19440] = { b = 2000, s = 500 }, -- Powerful Anti-Venom
     [19441] = { b = 6000, s = 1500 }, -- Huge Venom Sac
     [19442] = { b = 100000, s = 25000 }, -- Formula: Powerful Anti-Venom
+    [19443] = { b = 0, s = 0 }, -- Sayge's Fortune #25
     [19444] = { b = 30000, s = 7500 }, -- Formula: Enchant Weapon - Strength
     [19445] = { b = 30000, s = 7500 }, -- Formula: Enchant Weapon - Agility
     [19446] = { b = 30000, s = 7500 }, -- Formula: Enchant Bracer - Mana Regeneration
     [19447] = { b = 60000, s = 15000 }, -- Formula: Enchant Bracer - Healing
     [19448] = { b = 80000, s = 20000 }, -- Formula: Enchant Weapon - Mighty Spirit
     [19449] = { b = 100000, s = 25000 }, -- Formula: Enchant Weapon - Mighty Intellect
+    [19450] = { b = 0, s = 0 }, -- A Jubling's Tiny Home
+    [19451] = { b = 0, s = 0 }, -- Sayge's Fortune #26
+    [19452] = { b = 0, s = 0 }, -- Sayge's Fortune #27
+    [19453] = { b = 0, s = 0 }, -- Sayge's Fortune #28
+    [19454] = { b = 0, s = 0 }, -- Sayge's Fortune #29
+    [19462] = { b = 0, s = 0 }, -- Unhatched Jubling Egg
+    [19483] = { b = 0, s = 0 }, -- Peeling the Onion
+    [19484] = { b = 0, s = 0 }, -- The Frostwolf Artichoke
     [19491] = { b = 100000, s = 25000 }, -- Amulet of the Darkmoon
     [19505] = { b = 50000, s = 12500 }, -- Warsong Battle Tabard
     [19506] = { b = 50000, s = 12500 }, -- Silverwing Battle Tabard
@@ -9593,18 +11992,54 @@ VanillaItemPrices = {
     [19571] = { b = 209282, s = 41856 }, -- Lorekeeper's Staff
     [19572] = { b = 103864, s = 20772 }, -- Lorekeeper's Staff
     [19573] = { b = 44870, s = 8974 }, -- Lorekeeper's Staff
+    [19574] = { b = 0, s = 0 }, -- Strength of Mugamba
+    [19575] = { b = 0, s = 0 }, -- Strength of Mugamba
+    [19576] = { b = 0, s = 0 }, -- Strength of Mugamba
+    [19577] = { b = 0, s = 0 }, -- Rage of Mugamba
     [19578] = { b = 88497, s = 17699 }, -- Berserker Bracers
+    [19579] = { b = 0, s = 0 }, -- Heathen's Brand
     [19580] = { b = 48175, s = 9635 }, -- Berserker Bracers
     [19581] = { b = 24727, s = 4945 }, -- Berserker Bracers
     [19582] = { b = 121103, s = 24220 }, -- Windtalker's Wristguards
     [19583] = { b = 72262, s = 14452 }, -- Windtalker's Wristguards
     [19584] = { b = 37090, s = 7418 }, -- Windtalker's Wristguards
+    [19585] = { b = 0, s = 0 }, -- Heathen's Brand
+    [19586] = { b = 0, s = 0 }, -- Heathen's Brand
     [19587] = { b = 100919, s = 20183 }, -- Forest Stalker's Bracers
+    [19588] = { b = 0, s = 0 }, -- Hero's Brand
     [19589] = { b = 60218, s = 12043 }, -- Forest Stalker's Bracers
     [19590] = { b = 30909, s = 6181 }, -- Forest Stalker's Bracers
+    [19591] = { b = 0, s = 0 }, -- The Eye of Zuldazar
+    [19592] = { b = 0, s = 0 }, -- The Eye of Zuldazar
+    [19593] = { b = 0, s = 0 }, -- The Eye of Zuldazar
+    [19594] = { b = 0, s = 0 }, -- The All-Seeing Eye of Zuldazar
     [19595] = { b = 87549, s = 17509 }, -- Dryad's Wrist Bindings
     [19596] = { b = 52427, s = 10485 }, -- Dryad's Wrist Bindings
     [19597] = { b = 27006, s = 5401 }, -- Dryad's Wrist Bindings
+    [19598] = { b = 0, s = 0 }, -- Pebble of Kajaro
+    [19599] = { b = 0, s = 0 }, -- Pebble of Kajaro
+    [19600] = { b = 0, s = 0 }, -- Pebble of Kajaro
+    [19601] = { b = 0, s = 0 }, -- Jewel of Kajaro
+    [19602] = { b = 0, s = 0 }, -- Kezan's Taint
+    [19603] = { b = 0, s = 0 }, -- Kezan's Taint
+    [19604] = { b = 0, s = 0 }, -- Kezan's Taint
+    [19605] = { b = 0, s = 0 }, -- Kezan's Unstoppable Taint
+    [19606] = { b = 0, s = 0 }, -- Vision of Voodress
+    [19607] = { b = 0, s = 0 }, -- Vision of Voodress
+    [19608] = { b = 0, s = 0 }, -- Vision of Voodress
+    [19609] = { b = 0, s = 0 }, -- Unmarred Vision of Voodress
+    [19610] = { b = 0, s = 0 }, -- Enchanted South Seas Kelp
+    [19611] = { b = 0, s = 0 }, -- Enchanted South Seas Kelp
+    [19612] = { b = 0, s = 0 }, -- Enchanted South Seas Kelp
+    [19613] = { b = 0, s = 0 }, -- Pristine Enchanted South Seas Kelp
+    [19614] = { b = 0, s = 0 }, -- Zandalarian Shadow Talisman
+    [19615] = { b = 0, s = 0 }, -- Zandalarian Shadow Talisman
+    [19616] = { b = 0, s = 0 }, -- Zandalarian Shadow Talisman
+    [19617] = { b = 0, s = 0 }, -- Zandalarian Shadow Mastery Talisman
+    [19618] = { b = 0, s = 0 }, -- Maelstrom's Tendril
+    [19619] = { b = 0, s = 0 }, -- Maelstrom's Tendril
+    [19620] = { b = 0, s = 0 }, -- Maelstrom's Tendril
+    [19621] = { b = 0, s = 0 }, -- Maelstrom's Wrath
     [19682] = { b = 125179, s = 25035 }, -- Bloodvine Vest
     [19683] = { b = 125649, s = 25129 }, -- Bloodvine Leggings
     [19684] = { b = 94579, s = 18915 }, -- Bloodvine Boots
@@ -9619,6 +12054,36 @@ VanillaItemPrices = {
     [19693] = { b = 120963, s = 24192 }, -- Darksoul Breastplate
     [19694] = { b = 121433, s = 24286 }, -- Darksoul Leggings
     [19695] = { b = 91427, s = 18285 }, -- Darksoul Shoulders
+    [19696] = { b = 0, s = 0 }, -- Harvest Bread
+    [19697] = { b = 0, s = 0 }, -- Bounty of the Harvest
+    [19698] = { b = 0, s = 0 }, -- Zulian Coin
+    [19699] = { b = 0, s = 0 }, -- Razzashi Coin
+    [19700] = { b = 0, s = 0 }, -- Hakkari Coin
+    [19701] = { b = 0, s = 0 }, -- Gurubashi Coin
+    [19702] = { b = 0, s = 0 }, -- Vilebranch Coin
+    [19703] = { b = 0, s = 0 }, -- Witherbark Coin
+    [19704] = { b = 0, s = 0 }, -- Sandfury Coin
+    [19705] = { b = 0, s = 0 }, -- Skullsplitter Coin
+    [19706] = { b = 0, s = 0 }, -- Bloodscalp Coin
+    [19707] = { b = 0, s = 0 }, -- Red Hakkari Bijou
+    [19708] = { b = 0, s = 0 }, -- Blue Hakkari Bijou
+    [19709] = { b = 0, s = 0 }, -- Yellow Hakkari Bijou
+    [19710] = { b = 0, s = 0 }, -- Orange Hakkari Bijou
+    [19711] = { b = 0, s = 0 }, -- Green Hakkari Bijou
+    [19712] = { b = 0, s = 0 }, -- Purple Hakkari Bijou
+    [19713] = { b = 0, s = 0 }, -- Bronze Hakkari Bijou
+    [19714] = { b = 0, s = 0 }, -- Silver Hakkari Bijou
+    [19715] = { b = 0, s = 0 }, -- Gold Hakkari Bijou
+    [19716] = { b = 0, s = 0 }, -- Primal Hakkari Bindings
+    [19717] = { b = 0, s = 0 }, -- Primal Hakkari Armsplint
+    [19718] = { b = 0, s = 0 }, -- Primal Hakkari Stanchion
+    [19719] = { b = 0, s = 0 }, -- Primal Hakkari Girdle
+    [19720] = { b = 0, s = 0 }, -- Primal Hakkari Sash
+    [19721] = { b = 0, s = 0 }, -- Primal Hakkari Shawl
+    [19722] = { b = 0, s = 0 }, -- Primal Hakkari Tabard
+    [19723] = { b = 0, s = 0 }, -- Primal Hakkari Kossack
+    [19724] = { b = 0, s = 0 }, -- Primal Hakkari Aegis
+    [19725] = { b = 0, s = 0 }, -- Arathi Resource Crate
     [19726] = { b = 2000, s = 500 }, -- Bloodvine
     [19727] = { b = 60000, s = 15000 }, -- Blood Scythe
     [19760] = { b = 125826, s = 25165 }, -- Overlord's Embrace
@@ -9633,19 +12098,72 @@ VanillaItemPrices = {
     [19772] = { b = 50000, s = 12500 }, -- Pattern: Blood Tiger Breastplate
     [19773] = { b = 50000, s = 12500 }, -- Pattern: Blood Tiger Shoulders
     [19774] = { b = 20000, s = 5000 }, -- Souldarite
+    [19775] = { b = 0, s = 0 }, -- Sealed Azure Bag
     [19776] = { b = 50000, s = 12500 }, -- Plans: Bloodsoul Breastplate
     [19777] = { b = 50000, s = 12500 }, -- Plans: Bloodsoul Shoulders
     [19778] = { b = 50000, s = 12500 }, -- Plans: Bloodsoul Gauntlets
     [19779] = { b = 50000, s = 12500 }, -- Plans: Darksoul Breastplate
     [19780] = { b = 50000, s = 12500 }, -- Plans: Darksoul Leggings
     [19781] = { b = 50000, s = 12500 }, -- Plans: Darksoul Shoulders
+    [19782] = { b = 0, s = 0 }, -- Presence of Might
+    [19783] = { b = 0, s = 0 }, -- Syncretist's Sigil
+    [19784] = { b = 0, s = 0 }, -- Death's Embrace
+    [19785] = { b = 0, s = 0 }, -- Falcon's Call
+    [19786] = { b = 0, s = 0 }, -- Vodouisant's Vigilant Embrace
+    [19787] = { b = 0, s = 0 }, -- Presence of Sight
+    [19788] = { b = 0, s = 0 }, -- Hoodoo Hex
+    [19789] = { b = 0, s = 0 }, -- Prophetic Aura
+    [19790] = { b = 0, s = 0 }, -- Animist's Caress
+    [19802] = { b = 0, s = 0 }, -- Heart of Hakkar
+    [19803] = { b = 0, s = 0 }, -- Brownell's Blue Striped Racer
+    [19805] = { b = 0, s = 0 }, -- Keefer's Angelfish
+    [19806] = { b = 0, s = 0 }, -- Dezian Queenfish
+    [19807] = { b = 0, s = 0 }, -- Speckled Tastyfish
     [19808] = { b = 77783, s = 15556 }, -- Rockhide Strongfish
+    [19812] = { b = 0, s = 0 }, -- Rune of the Dawn
+    [19813] = { b = 0, s = 0 }, -- Punctured Voodoo Doll
+    [19814] = { b = 0, s = 0 }, -- Punctured Voodoo Doll
+    [19815] = { b = 0, s = 0 }, -- Punctured Voodoo Doll
+    [19816] = { b = 0, s = 0 }, -- Punctured Voodoo Doll
+    [19817] = { b = 0, s = 0 }, -- Punctured Voodoo Doll
+    [19818] = { b = 0, s = 0 }, -- Punctured Voodoo Doll
+    [19819] = { b = 0, s = 0 }, -- Punctured Voodoo Doll
+    [19820] = { b = 0, s = 0 }, -- Punctured Voodoo Doll
+    [19821] = { b = 0, s = 0 }, -- Punctured Voodoo Doll
+    [19822] = { b = 0, s = 0 }, -- Zandalar Vindicator's Breastplate
+    [19823] = { b = 0, s = 0 }, -- Zandalar Vindicator's Belt
+    [19824] = { b = 0, s = 0 }, -- Zandalar Vindicator's Armguards
+    [19825] = { b = 0, s = 0 }, -- Zandalar Freethinker's Breastplate
+    [19826] = { b = 0, s = 0 }, -- Zandalar Freethinker's Belt
+    [19827] = { b = 0, s = 0 }, -- Zandalar Freethinker's Armguards
+    [19828] = { b = 0, s = 0 }, -- Zandalar Augur's Hauberk
+    [19829] = { b = 0, s = 0 }, -- Zandalar Augur's Belt
+    [19830] = { b = 0, s = 0 }, -- Zandalar Augur's Bracers
+    [19831] = { b = 0, s = 0 }, -- Zandalar Predator's Mantle
+    [19832] = { b = 0, s = 0 }, -- Zandalar Predator's Belt
+    [19833] = { b = 0, s = 0 }, -- Zandalar Predator's Bracers
+    [19834] = { b = 0, s = 0 }, -- Zandalar Madcap's Tunic
+    [19835] = { b = 0, s = 0 }, -- Zandalar Madcap's Mantle
+    [19836] = { b = 0, s = 0 }, -- Zandalar Madcap's Bracers
+    [19838] = { b = 0, s = 0 }, -- Zandalar Haruspex's Tunic
+    [19839] = { b = 0, s = 0 }, -- Zandalar Haruspex's Belt
+    [19840] = { b = 0, s = 0 }, -- Zandalar Haruspex's Bracers
+    [19841] = { b = 0, s = 0 }, -- Zandalar Confessor's Mantle
+    [19842] = { b = 0, s = 0 }, -- Zandalar Confessor's Bindings
+    [19843] = { b = 0, s = 0 }, -- Zandalar Confessor's Wraps
+    [19845] = { b = 0, s = 0 }, -- Zandalar Illusionist's Mantle
+    [19846] = { b = 0, s = 0 }, -- Zandalar Illusionist's Wraps
+    [19848] = { b = 0, s = 0 }, -- Zandalar Demoniac's Wraps
+    [19849] = { b = 0, s = 0 }, -- Zandalar Demoniac's Mantle
+    [19850] = { b = 0, s = 0 }, -- Uther's Tribute
+    [19851] = { b = 0, s = 0 }, -- Grom's Tribute
     [19852] = { b = 490433, s = 98086 }, -- Ancient Hakkari Manslayer
     [19853] = { b = 369185, s = 73837 }, -- Gurubashi Dwarf Destroyer
     [19854] = { b = 617513, s = 123502 }, -- Zin'rokh, Destroyer of Worlds
     [19855] = { b = 198329, s = 39665 }, -- Bloodsoaked Legplates
     [19856] = { b = 194513, s = 48628 }, -- The Eye of Hakkar
     [19857] = { b = 149834, s = 29966 }, -- Cloak of Consumption
+    [19858] = { b = 0, s = 0 }, -- Zandalar Honor Token
     [19859] = { b = 503025, s = 100605 }, -- Fang of the Faceless
     [19861] = { b = 379951, s = 75990 }, -- Touch of Chaos
     [19862] = { b = 325385, s = 65077 }, -- Aegis of the Blood God
@@ -9657,6 +12175,7 @@ VanillaItemPrices = {
     [19869] = { b = 105259, s = 21051 }, -- Blooddrenched Grips
     [19870] = { b = 126784, s = 25356 }, -- Hakkari Loa Cloak
     [19871] = { b = 201151, s = 50287 }, -- Talisman of Protection
+    [19872] = { b = 0, s = 0 }, -- Swift Razzashi Raptor
     [19873] = { b = 194642, s = 48660 }, -- Overlord's Crimson Band
     [19874] = { b = 560047, s = 112009 }, -- Halberd of Smiting
     [19875] = { b = 193698, s = 38739 }, -- Bloodstained Coif
@@ -9664,6 +12183,10 @@ VanillaItemPrices = {
     [19877] = { b = 216772, s = 43354 }, -- Animist's Leggings
     [19878] = { b = 130535, s = 26107 }, -- Bloodsoaked Pauldrons
     [19879] = { b = 644009, s = 128801 }, -- Alex's Test Beatdown Staff
+    [19880] = { b = 0, s = 0 }, -- Gurubashi Head Collection
+    [19881] = { b = 0, s = 0 }, -- Channeler's Head
+    [19882] = { b = 0, s = 0 }, -- The Hexxer's Head
+    [19883] = { b = 0, s = 0 }, -- Sacred Cord
     [19884] = { b = 539549, s = 107909 }, -- Jin'do's Judgement
     [19885] = { b = 176815, s = 44203 }, -- Jin'do's Evil Eye
     [19886] = { b = 124895, s = 24979 }, -- The Hexxer's Cover
@@ -9682,6 +12205,7 @@ VanillaItemPrices = {
     [19899] = { b = 140045, s = 28009 }, -- Ritualistic Legguards
     [19900] = { b = 439341, s = 87868 }, -- Zulian Stone Axe
     [19901] = { b = 352833, s = 70566 }, -- Zulian Slicer
+    [19902] = { b = 0, s = 0 }, -- Swift Zulian Tiger
     [19903] = { b = 409477, s = 81895 }, -- Fang of Venoxis
     [19904] = { b = 246625, s = 49325 }, -- Runed Bloodstained Hauberk
     [19905] = { b = 181012, s = 45253 }, -- Zanzil's Band
@@ -9690,6 +12214,7 @@ VanillaItemPrices = {
     [19908] = { b = 312948, s = 62589 }, -- Sceptre of Smiting
     [19909] = { b = 523538, s = 104707 }, -- Will of Arlokk
     [19910] = { b = 420354, s = 84070 }, -- Arlokk's Grasp
+    [19911] = { b = 0, s = 0 }, -- Whipweed Heart
     [19912] = { b = 174192, s = 43548 }, -- Overlord's Onyx Band
     [19913] = { b = 110711, s = 22142 }, -- Bloodsoaked Greaves
     [19914] = { b = 35000, s = 8750 }, -- Panther Hide Sack
@@ -9705,12 +12230,17 @@ VanillaItemPrices = {
     [19928] = { b = 135840, s = 27168 }, -- Animist's Spaulders
     [19929] = { b = 84173, s = 16834 }, -- Bloodtinged Gloves
     [19930] = { b = 295411, s = 73852 }, -- Mar'li's Eye
+    [19931] = { b = 0, s = 0 }, -- Gurubashi Mojo Madness
     [19933] = { b = 8320, s = 2080 }, -- Glowing Scorpid Blood
     [19934] = { b = 5600, s = 1400 }, -- Large Scorpid Claw
     [19935] = { b = 3320, s = 830 }, -- Empty Venom Sac
     [19936] = { b = 3320, s = 830 }, -- Dried Scorpid Carapace
     [19937] = { b = 3120, s = 780 }, -- Small Scorpid Claw
     [19938] = { b = 2320, s = 580 }, -- Heavy Scorpid Leg
+    [19939] = { b = 0, s = 0 }, -- Gri'lek's Blood
+    [19940] = { b = 0, s = 0 }, -- Renataki's Tooth
+    [19941] = { b = 0, s = 0 }, -- Wushoolay's Mane
+    [19942] = { b = 0, s = 0 }, -- Hazza'rah's Dream Thread
     [19943] = { b = 8000, s = 2000 }, -- Massive Mojo
     [19944] = { b = 513645, s = 102729 }, -- Nat Pagle's Fish Terminator
     [19945] = { b = 154680, s = 30936 }, -- Foror's Eyepatch
@@ -9719,6 +12249,16 @@ VanillaItemPrices = {
     [19948] = { b = 445213, s = 111303 }, -- Zandalarian Hero Badge
     [19949] = { b = 445213, s = 111303 }, -- Zandalarian Hero Medallion
     [19950] = { b = 445213, s = 111303 }, -- Zandalarian Hero Charm
+    [19951] = { b = 0, s = 0 }, -- Gri'lek's Charm of Might
+    [19952] = { b = 0, s = 0 }, -- Gri'lek's Charm of Valor
+    [19953] = { b = 0, s = 0 }, -- Renataki's Charm of Beasts
+    [19954] = { b = 0, s = 0 }, -- Renataki's Charm of Trickery
+    [19955] = { b = 0, s = 0 }, -- Wushoolay's Charm of Nature
+    [19956] = { b = 0, s = 0 }, -- Wushoolay's Charm of Spirits
+    [19957] = { b = 0, s = 0 }, -- Hazza'rah's Charm of Destruction
+    [19958] = { b = 0, s = 0 }, -- Hazza'rah's Charm of Healing
+    [19959] = { b = 0, s = 0 }, -- Hazza'rah's Charm of Magic
+    [19960] = { b = 0, s = 0 }, -- Crystalized Honey
     [19961] = { b = 352686, s = 70537 }, -- Gri'lek's Grinder
     [19962] = { b = 442557, s = 88511 }, -- Gri'lek's Carver
     [19963] = { b = 456382, s = 91276 }, -- Pitchfork of Madness
@@ -9730,45 +12270,75 @@ VanillaItemPrices = {
     [19970] = { b = 10878, s = 2175 }, -- Arcanite Fishing Pole
     [19971] = { b = 8000, s = 2000 }, -- High Test Eternium Fishing Line
     [19972] = { b = 16983, s = 3396 }, -- Lucky Fishing Hat
+    [19973] = { b = 0, s = 0 }, -- Nat's Measuring Tape
     [19974] = { b = 10000, s = 2500 }, -- Mudskunk Lure
+    [19975] = { b = 0, s = 0 }, -- Zulian Mudskunk
+    [19978] = { b = 0, s = 0 }, -- Fishing Tournament!
     [19979] = { b = 100000, s = 25000 }, -- Hook of the Master Angler
     [19982] = { b = 47222, s = 9444 }, -- Duskbat Drape
     [19984] = { b = 59469, s = 11893 }, -- Ebon Mask
+    [19990] = { b = 0, s = 0 }, -- Blessed Prayer Beads
+    [19991] = { b = 0, s = 0 }, -- Devilsaur Eye
+    [19992] = { b = 0, s = 0 }, -- Devilsaur Tooth
     [19993] = { b = 283916, s = 56783 }, -- Hoodoo Hunting Bow
+    [19994] = { b = 0, s = 0 }, -- Harvest Fruit
+    [19995] = { b = 0, s = 0 }, -- Harvest Boar
+    [19996] = { b = 0, s = 0 }, -- Harvest Fish
+    [19997] = { b = 0, s = 0 }, -- Harvest Nectar
     [19998] = { b = 116058, s = 23211 }, -- Bloodvine Lens
     [19999] = { b = 93198, s = 18639 }, -- Bloodvine Goggles
     [20000] = { b = 120000, s = 30000 }, -- Schematic: Bloodvine Goggles
     [20001] = { b = 50000, s = 12500 }, -- Schematic: Bloodvine Lens
     [20002] = { b = 4000, s = 1000 }, -- Greater Dreamless Sleep Potion
     [20004] = { b = 4000, s = 1000 }, -- Major Troll's Blood Potion
+    [20006] = { b = 0, s = 0 }, -- Circle of Hope
     [20007] = { b = 4000, s = 1000 }, -- Mageblood Potion
     [20008] = { b = 2400, s = 600 }, -- Living Action Potion
+    [20009] = { b = 0, s = 0 }, -- For the Light!
+    [20010] = { b = 0, s = 0 }, -- The Horde's Hellscream
     [20011] = { b = 50000, s = 12500 }, -- Recipe: Mageblood Potion
     [20012] = { b = 50000, s = 12500 }, -- Recipe: Greater Dreamless Sleep
     [20013] = { b = 50000, s = 12500 }, -- Recipe: Living Action Potion
     [20014] = { b = 50000, s = 12500 }, -- Recipe: Major Troll's Blood Potion
     [20015] = { b = 6632, s = 1658 }, -- Elder Raptor Feathers
     [20016] = { b = 14540, s = 3635 }, -- Trophy Raptor Skull
+    [20017] = { b = 0, s = 0 }, -- Perfect Courser Antler
+    [20018] = { b = 0, s = 0 }, -- Angerclaw Grizzly Hide
+    [20019] = { b = 0, s = 0 }, -- Tooth of Morphaz
+    [20021] = { b = 0, s = 0 }, -- Gold Pirate Earring
+    [20022] = { b = 0, s = 0 }, -- Azure Key
+    [20023] = { b = 0, s = 0 }, -- Encoded Fragment
+    [20025] = { b = 0, s = 0 }, -- Blood of Morphaz
+    [20027] = { b = 0, s = 0 }, -- Healthy Courser Gland
+    [20028] = { b = 0, s = 0 }, -- Glittering Dust
+    [20029] = { b = 0, s = 0 }, -- Enchanted Coral
     [20030] = { b = 6321, s = 1580 }, -- Pet Rock
+    [20031] = { b = 0, s = 0 }, -- Essence Mango
     [20032] = { b = 161285, s = 32257 }, -- Flowing Ritual Robes
+    [20033] = { b = 0, s = 0 }, -- Zandalar Demoniac's Robe
+    [20034] = { b = 0, s = 0 }, -- Zandalar Illusionist's Robe
     [20035] = { b = 153257, s = 30651 }, -- Glacial Spike
     [20036] = { b = 11002, s = 2750 }, -- Fire Ruby
+    [20037] = { b = 0, s = 0 }, -- Arcane Crystal Pendant
     [20038] = { b = 324862, s = 64972 }, -- Mandokir's Sting
     [20039] = { b = 158548, s = 31709 }, -- Dark Iron Boots
     [20040] = { b = 80000, s = 20000 }, -- Plans: Dark Iron Boots
     [20041] = { b = 56764, s = 11352 }, -- Highlander's Plate Girdle
     [20042] = { b = 56972, s = 11394 }, -- Highlander's Lamellar Girdle
     [20043] = { b = 88066, s = 17613 }, -- Highlander's Chain Girdle
+    [20044] = { b = 0, s = 0 }, -- Highlander's Mail Girdle
     [20045] = { b = 73921, s = 14784 }, -- Highlander's Leather Girdle
     [20046] = { b = 74180, s = 14836 }, -- Highlander's Lizardhide Girdle
     [20047] = { b = 59557, s = 11911 }, -- Highlander's Cloth Girdle
     [20048] = { b = 89656, s = 17931 }, -- Highlander's Plate Greaves
     [20049] = { b = 89975, s = 17995 }, -- Highlander's Lamellar Greaves
     [20050] = { b = 136031, s = 27206 }, -- Highlander's Chain Greaves
+    [20051] = { b = 0, s = 0 }, -- Highlander's Mail Greaves
     [20052] = { b = 102849, s = 20569 }, -- Highlander's Leather Boots
     [20053] = { b = 103238, s = 20647 }, -- Highlander's Lizardhide Boots
     [20054] = { b = 82910, s = 16582 }, -- Highlander's Cloth Boots
     [20055] = { b = 184337, s = 36867 }, -- Highlander's Chain Pauldrons
+    [20056] = { b = 0, s = 0 }, -- Highlander's Mail Pauldrons
     [20057] = { b = 123274, s = 24654 }, -- Highlander's Plate Spaulders
     [20058] = { b = 123744, s = 24748 }, -- Highlander's Lamellar Spaulders
     [20059] = { b = 159473, s = 31894 }, -- Highlander's Leather Shoulders
@@ -9788,9 +12358,17 @@ VanillaItemPrices = {
     [20073] = { b = 121395, s = 24279 }, -- Cloak of the Honor Guard
     [20074] = { b = 1200, s = 300 }, -- Heavy Crocolisk Stew
     [20075] = { b = 2000, s = 500 }, -- Recipe: Heavy Crocolisk Stew
+    [20076] = { b = 0, s = 0 }, -- Zandalar Signet of Mojo
+    [20077] = { b = 0, s = 0 }, -- Zandalar Signet of Might
+    [20078] = { b = 0, s = 0 }, -- Zandalar Signet of Serenity
+    [20079] = { b = 0, s = 0 }, -- Spirit of Zanza
+    [20080] = { b = 0, s = 0 }, -- Sheen of Zanza
+    [20081] = { b = 0, s = 0 }, -- Swiftness of Zanza
     [20082] = { b = 121145, s = 24229 }, -- Woestave
     [20083] = { b = 202624, s = 40524 }, -- Hunting Spear
+    [20085] = { b = 0, s = 0 }, -- Arcane Shard
     [20086] = { b = 1200, s = 1 }, -- Dusksteel Throwing Knife
+    [20087] = { b = 0, s = 0 }, -- Wavethrasher Scales
     [20088] = { b = 52478, s = 10495 }, -- Highlander's Chain Girdle
     [20089] = { b = 26040, s = 5208 }, -- Highlander's Chain Girdle
     [20090] = { b = 9373, s = 1874 }, -- Highlander's Chain Girdle
@@ -9827,6 +12405,7 @@ VanillaItemPrices = {
     [20127] = { b = 48558, s = 9711 }, -- Highlander's Plate Greaves
     [20128] = { b = 24102, s = 4820 }, -- Highlander's Plate Greaves
     [20129] = { b = 15688, s = 3137 }, -- Highlander's Plate Greaves
+    [20130] = { b = 0, s = 0 }, -- Diamond Flask
     [20131] = { b = 50000, s = 12500 }, -- Battle Tabard of the Defilers
     [20132] = { b = 50000, s = 12500 }, -- Arathor Battle Tabard
     [20134] = { b = 162201, s = 32440 }, -- Skyfury Helm
@@ -9857,6 +12436,9 @@ VanillaItemPrices = {
     [20174] = { b = 42652, s = 8530 }, -- Defiler's Lizardhide Girdle
     [20175] = { b = 161219, s = 32243 }, -- Defiler's Lizardhide Shoulders
     [20176] = { b = 129445, s = 25889 }, -- Defiler's Epaulets
+    [20177] = { b = 0, s = 0 }, -- Defiler's Lamellar Girdle
+    [20181] = { b = 0, s = 0 }, -- Defiler's Lamellar Greaves
+    [20184] = { b = 0, s = 0 }, -- Defiler's Lamellar Spaulders
     [20186] = { b = 103227, s = 20645 }, -- Defiler's Leather Boots
     [20187] = { b = 29999, s = 5999 }, -- Defiler's Leather Boots
     [20188] = { b = 13318, s = 2663 }, -- Defiler's Leather Boots
@@ -9898,15 +12480,22 @@ VanillaItemPrices = {
     [20225] = { b = 2000, s = 100 }, -- Highlander's Enriched Ration
     [20226] = { b = 1000, s = 50 }, -- Highlander's Field Ration
     [20227] = { b = 1500, s = 75 }, -- Highlander's Iron Ration
+    [20228] = { b = 0, s = 0 }, -- Defiler's Advanced Care Package
+    [20229] = { b = 0, s = 0 }, -- Defiler's Basic Care Package
+    [20230] = { b = 0, s = 0 }, -- Defiler's Standard Care Package
+    [20231] = { b = 0, s = 0 }, -- Arathor Advanced Care Package
     [20232] = { b = 1500, s = 75 }, -- Defiler's Mageweave Bandage
+    [20233] = { b = 0, s = 0 }, -- Arathor Basic Care Package
     [20234] = { b = 2000, s = 100 }, -- Defiler's Runecloth Bandage
     [20235] = { b = 1000, s = 50 }, -- Defiler's Silk Bandage
+    [20236] = { b = 0, s = 0 }, -- Arathor Standard Care Package
     [20237] = { b = 1500, s = 75 }, -- Highlander's Mageweave Bandage
     [20243] = { b = 2000, s = 100 }, -- Highlander's Runecloth Bandage
     [20244] = { b = 1000, s = 50 }, -- Highlander's Silk Bandage
     [20253] = { b = 16000, s = 4000 }, -- Pattern: Warbear Harness
     [20254] = { b = 20000, s = 5000 }, -- Pattern: Warbear Woolies
     [20255] = { b = 62129, s = 12425 }, -- Whisperwalk Boots
+    [20256] = { b = 0, s = 0 }, -- Warsong Gulch Ribbon of Sacrifice
     [20257] = { b = 154200, s = 30840 }, -- Seafury Gauntlets
     [20258] = { b = 378012, s = 75602 }, -- Zulian Ceremonial Staff
     [20259] = { b = 75896, s = 15179 }, -- Shadow Panther Hide Gloves
@@ -9919,16 +12508,55 @@ VanillaItemPrices = {
     [20266] = { b = 144352, s = 28870 }, -- Peacekeeper Leggings
     [20295] = { b = 155418, s = 31083 }, -- Blue Dragonscale Leggings
     [20296] = { b = 62954, s = 12590 }, -- Green Dragonscale Gauntlets
+    [20310] = { b = 0, s = 0 }, -- Flayed Demon Skin
     [20369] = { b = 49879, s = 9975 }, -- Azurite Fists
+    [20371] = { b = 0, s = 0 }, -- Blue Murloc Egg
+    [20373] = { b = 0, s = 0 }, -- Stonelash Scorpid Stinger
+    [20374] = { b = 0, s = 0 }, -- Stonelash Pincer Stinger
+    [20375] = { b = 0, s = 0 }, -- Stonelash Flayer Stinger
+    [20376] = { b = 0, s = 0 }, -- Sand Skitterer Fang
+    [20377] = { b = 0, s = 0 }, -- Rock Stalker Fang
+    [20378] = { b = 0, s = 0 }, -- Twilight Tablet Fragment
+    [20379] = { b = 0, s = 0 }, -- Noggle's Satchel
     [20380] = { b = 289792, s = 57958 }, -- Dreamscale Breastplate
     [20381] = { b = 20000, s = 5000 }, -- Dreamscale
     [20382] = { b = 60000, s = 15000 }, -- Pattern: Dreamscale Breastplate
+    [20383] = { b = 0, s = 0 }, -- Head of the Broodlord Lashlayer
+    [20384] = { b = 0, s = 0 }, -- Silithid Carapace Fragment
+    [20385] = { b = 0, s = 0 }, -- Deathclasp's Pincer
+    [20387] = { b = 1000, s = 0 }, -- Forsaken Stink Bomb Cluster
+    [20388] = { b = 0, s = 0 }, -- Lollipop
+    [20389] = { b = 0, s = 0 }, -- Candy Corn
+    [20390] = { b = 0, s = 0 }, -- Candy Bar
     [20391] = { b = 5, s = 1 }, -- Flimsy Male Gnome Mask
     [20392] = { b = 5, s = 1 }, -- Flimsy Female Gnome Mask
+    [20393] = { b = 0, s = 0 }, -- Treat Bag
+    [20394] = { b = 0, s = 0 }, -- Twilight Lexicon - Chapter 1
+    [20395] = { b = 0, s = 0 }, -- Twilight Lexicon - Chapter 2
+    [20396] = { b = 0, s = 0 }, -- Twilight Lexicon - Chapter 3
+    [20397] = { b = 0, s = 0 }, -- Hallowed Wand - Pirate
+    [20398] = { b = 0, s = 0 }, -- Hallowed Wand - Ninja
+    [20399] = { b = 0, s = 0 }, -- Hallowed Wand - Leper Gnome
     [20400] = { b = 80000, s = 20000 }, -- Pumpkin Bag
+    [20401] = { b = 0, s = 0 }, -- Restored Twilight Tablet
+    [20402] = { b = 0, s = 0 }, -- Agent of Nozdormu
+    [20403] = { b = 0, s = 0 }, -- Proxy of Nozdormu
+    [20404] = { b = 0, s = 0 }, -- Encrypted Twilight Text
+    [20405] = { b = 0, s = 0 }, -- Decoded Tablet Transcription
     [20406] = { b = 9645, s = 1929 }, -- Twilight Cultist Mantle
     [20407] = { b = 12905, s = 2581 }, -- Twilight Cultist Robe
     [20408] = { b = 9713, s = 1942 }, -- Twilight Cultist Cowl
+    [20409] = { b = 0, s = 0 }, -- Hallowed Wand - Ghost
+    [20410] = { b = 0, s = 0 }, -- Hallowed Wand - Bat
+    [20411] = { b = 0, s = 0 }, -- Hallowed Wand - Skeleton
+    [20413] = { b = 0, s = 0 }, -- Hallowed Wand - Random
+    [20414] = { b = 0, s = 0 }, -- Hallowed Wand - Wisp
+    [20415] = { b = 0, s = 0 }, -- The War of the Shifting Sands
+    [20416] = { b = 0, s = 0 }, -- Crest of Beckoning: Fire
+    [20418] = { b = 0, s = 0 }, -- Crest of Beckoning: Thunder
+    [20419] = { b = 0, s = 0 }, -- Crest of Beckoning: Stone
+    [20420] = { b = 0, s = 0 }, -- Crest of Beckoning: Water
+    [20422] = { b = 0, s = 0 }, -- Twilight Cultist Medallion of Station
     [20424] = { b = 700, s = 175 }, -- Sandworm Meat
     [20425] = { b = 15211, s = 3042 }, -- Advisor's Gnarled Staff
     [20426] = { b = 20000, s = 5000 }, -- Advisor's Ring
@@ -9937,7 +12565,11 @@ VanillaItemPrices = {
     [20429] = { b = 20000, s = 5000 }, -- Legionnaire's Band
     [20430] = { b = 12169, s = 2433 }, -- Legionnaire's Sword
     [20431] = { b = 20000, s = 5000 }, -- Lorekeeper's Ring
+    [20432] = { b = 0, s = 0 }, -- Signet of Beckoning: Fire
+    [20433] = { b = 0, s = 0 }, -- Signet of Beckoning: Thunder
     [20434] = { b = 15211, s = 3042 }, -- Lorekeeper's Staff
+    [20435] = { b = 0, s = 0 }, -- Signet of Beckoning: Stone
+    [20436] = { b = 0, s = 0 }, -- Signet of Beckoning: Water
     [20437] = { b = 9126, s = 1825 }, -- Outrider's Bow
     [20438] = { b = 9126, s = 1825 }, -- Outrunner's Bow
     [20439] = { b = 20000, s = 5000 }, -- Protector's Band
@@ -9946,19 +12578,53 @@ VanillaItemPrices = {
     [20442] = { b = 20000, s = 5000 }, -- Scout's Medallion
     [20443] = { b = 13050, s = 2610 }, -- Sentinel's Blade
     [20444] = { b = 20000, s = 5000 }, -- Sentinel's Medallion
+    [20447] = { b = 0, s = 0 }, -- Scepter of Beckoning: Fire
+    [20448] = { b = 0, s = 0 }, -- Scepter of Beckoning: Thunder
+    [20449] = { b = 0, s = 0 }, -- Scepter of Beckoning: Stone
+    [20450] = { b = 0, s = 0 }, -- Scepter of Beckoning: Water
+    [20451] = { b = 0, s = 0 }, -- Twilight Cultist Ring of Lordship
     [20452] = { b = 5000, s = 250 }, -- Smoked Desert Dumplings
+    [20453] = { b = 0, s = 0 }, -- Geologist's Transcription Kit
+    [20454] = { b = 0, s = 0 }, -- Hive'Zora Rubbing
+    [20455] = { b = 0, s = 0 }, -- Hive'Ashi Rubbing
+    [20456] = { b = 0, s = 0 }, -- Hive'Regal Rubbing
+    [20457] = { b = 0, s = 0 }, -- Hive'Ashi Silithid Brain
+    [20458] = { b = 0, s = 0 }, -- Hive'Zora Silithid Brain
+    [20459] = { b = 0, s = 0 }, -- Hive'Regal Silithid Brain
+    [20461] = { b = 0, s = 0 }, -- Brann Bronzebeard's Lost Letter
+    [20463] = { b = 0, s = 0 }, -- Glyphed Crystal Prism
+    [20464] = { b = 0, s = 0 }, -- Glyphs of Calling
+    [20465] = { b = 0, s = 0 }, -- Crystal Unlocking Mechanism
+    [20466] = { b = 0, s = 0 }, -- Vyral's Signet Ring
+    [20467] = { b = 0, s = 0 }, -- Torn Recipe Page
     [20469] = { b = 50, s = 12 }, -- Decoded True Believer Clippings
+    [20470] = { b = 0, s = 0 }, -- Solanian's Scrying Orb
+    [20471] = { b = 0, s = 0 }, -- Scroll of Scourge Magic
+    [20472] = { b = 0, s = 0 }, -- Solanian's Journal
+    [20474] = { b = 0, s = 0 }, -- Sunstrider Book Satchel
     [20476] = { b = 82005, s = 16401 }, -- Sandstalker Bracers
     [20477] = { b = 84490, s = 16898 }, -- Sandstalker Gauntlets
     [20478] = { b = 169588, s = 33917 }, -- Sandstalker Breastplate
     [20479] = { b = 170181, s = 34036 }, -- Spitfire Breastplate
     [20480] = { b = 85394, s = 17078 }, -- Spitfire Gauntlets
     [20481] = { b = 85699, s = 17139 }, -- Spitfire Bracers
+    [20482] = { b = 0, s = 0 }, -- Arcane Sliver
+    [20483] = { b = 0, s = 0 }, -- Tainted Arcane Sliver
     [20487] = { b = 830469, s = 166093 }, -- Lok'delar, Stave of the Ancient Keepers DEP
+    [20488] = { b = 0, s = 0 }, -- Rhok'delar, Longbow of the Ancient Keepers DEP
+    [20490] = { b = 0, s = 0 }, -- Ironforge Mint
+    [20491] = { b = 0, s = 0 }, -- Undercity Mint
+    [20492] = { b = 0, s = 0 }, -- Stormwind Nougat
+    [20493] = { b = 0, s = 0 }, -- Orgrimmar Nougat
+    [20494] = { b = 0, s = 0 }, -- Gnomeregan Gumdrop
+    [20495] = { b = 0, s = 0 }, -- Darkspear Gumdrop
+    [20496] = { b = 0, s = 0 }, -- Darnassus Marzipan
+    [20497] = { b = 0, s = 0 }, -- Thunder Bluff Marzipan
     [20498] = { b = 4000, s = 1000 }, -- Silithid Chitin
     [20499] = { b = 2000, s = 500 }, -- Broken Silithid Chitin
     [20500] = { b = 8000, s = 2000 }, -- Light Silithid Carapace
     [20501] = { b = 8000, s = 2000 }, -- Heavy Silithid Carapace
+    [20503] = { b = 0, s = 0 }, -- Enamored Water Spirit
     [20504] = { b = 189365, s = 37873 }, -- Lightforged Blade
     [20505] = { b = 61830, s = 15457 }, -- Chivalrous Signet
     [20506] = { b = 40000, s = 10000 }, -- Pattern: Spitfire Bracers
@@ -9967,8 +12633,14 @@ VanillaItemPrices = {
     [20509] = { b = 40000, s = 10000 }, -- Pattern: Sandstalker Bracers
     [20510] = { b = 40000, s = 10000 }, -- Pattern: Sandstalker Gauntlets
     [20511] = { b = 40000, s = 10000 }, -- Pattern: Sandstalker Breastplate
+    [20512] = { b = 0, s = 0 }, -- Sanctified Orb
+    [20513] = { b = 0, s = 0 }, -- Abyssal Crest
+    [20514] = { b = 0, s = 0 }, -- Abyssal Signet
+    [20515] = { b = 0, s = 0 }, -- Abyssal Scepter
+    [20516] = { b = 0, s = 0 }, -- Bobbing Apple
     [20517] = { b = 48987, s = 9797 }, -- Razorsteel Shoulders
     [20518] = { b = 2000, s = 500 }, -- Scroll: Create Crest of Beckoning
+    [20519] = { b = 0, s = 0 }, -- Southsea Pirate Hat
     [20520] = { b = 8000, s = 2000 }, -- Dark Rune
     [20521] = { b = 49688, s = 9937 }, -- Fury Visor
     [20526] = { b = 2000, s = 500 }, -- Scroll: Create Crest of Beckoning
@@ -9978,6 +12650,7 @@ VanillaItemPrices = {
     [20531] = { b = 3000, s = 750 }, -- Scroll: Create Signet of Beckoning
     [20532] = { b = 3000, s = 750 }, -- Scroll: Create Signet of Beckoning
     [20533] = { b = 3000, s = 750 }, -- Scroll: Create Signet of Beckoning
+    [20534] = { b = 0, s = 0 }, -- Abyss Shard
     [20535] = { b = 3000, s = 750 }, -- Scroll: Create Signet of Beckoning
     [20536] = { b = 203359, s = 40671 }, -- Soul Harvester
     [20537] = { b = 88680, s = 17736 }, -- Runed Stygian Boots
@@ -10001,6 +12674,9 @@ VanillaItemPrices = {
     [20555] = { b = 60000, s = 15000 }, -- Plans: Darkrune Helm
     [20556] = { b = 203339, s = 40667 }, -- Wildstaff
     [20557] = { b = 3500, s = 175 }, -- Hallow's End Pumpkin Treat
+    [20558] = { b = 0, s = 0 }, -- Warsong Gulch Mark of Honor
+    [20559] = { b = 0, s = 0 }, -- Arathi Basin Mark of Honor
+    [20560] = { b = 0, s = 0 }, -- Alterac Valley Mark of Honor
     [20561] = { b = 5, s = 1 }, -- Flimsy Male Dwarf Mask
     [20562] = { b = 5, s = 1 }, -- Flimsy Female Dwarf Mask
     [20563] = { b = 5, s = 1 }, -- Flimsy Female Nightelf Mask
@@ -10028,11 +12704,22 @@ VanillaItemPrices = {
     [20601] = { b = 50, s = 12 }, -- Sack of Spoils
     [20602] = { b = 50, s = 12 }, -- Chest of Spoils
     [20603] = { b = 50, s = 12 }, -- Bag of Spoils
+    [20604] = { b = 500, s = 0 }, -- Stink Bomb Cleaner
+    [20605] = { b = 0, s = 0 }, -- Rotten Eggs
+    [20606] = { b = 0, s = 0 }, -- Amber Voodoo Feather
+    [20607] = { b = 0, s = 0 }, -- Blue Voodoo Feather
+    [20608] = { b = 0, s = 0 }, -- Green Voodoo Feather
+    [20610] = { b = 0, s = 0 }, -- Bloodshot Spider Eye
+    [20611] = { b = 0, s = 0 }, -- Thick Black Claw
+    [20612] = { b = 0, s = 0 }, -- Inert Scourgestone
+    [20613] = { b = 0, s = 0 }, -- Rotting Wood
+    [20614] = { b = 0, s = 0 }, -- Bloodvenom Essence
     [20615] = { b = 148216, s = 29643 }, -- Dragonspur Wraps
     [20616] = { b = 108193, s = 21638 }, -- Dragonbone Wristguards
     [20617] = { b = 340381, s = 68076 }, -- Ancient Corroded Leggings
     [20618] = { b = 113889, s = 22777 }, -- Gloves of Delusional Power
     [20619] = { b = 171494, s = 34298 }, -- Acid Inscribed Greaves
+    [20620] = { b = 0, s = 0 }, -- Holy Mightstone
     [20621] = { b = 247978, s = 49595 }, -- Boots of the Endless Moor
     [20622] = { b = 456415, s = 114103 }, -- Dragonheart Necklace
     [20623] = { b = 223569, s = 44713 }, -- Circlet of Restless Dreams
@@ -10056,6 +12743,7 @@ VanillaItemPrices = {
     [20641] = { b = 24149, s = 4829 }, -- Southsea Mojo Boots
     [20642] = { b = 37696, s = 7539 }, -- Antiquated Nobleman's Tunic
     [20643] = { b = 35471, s = 7094 }, -- Undercity Reservist's Cap
+    [20644] = { b = 0, s = 0 }, -- Nightmare Engulfed Object
     [20645] = { b = 87141, s = 21785 }, -- Nature's Whisper
     [20646] = { b = 149818, s = 29963 }, -- Sandstrider's Mark
     [20647] = { b = 200487, s = 40097 }, -- Black Crystal Dagger
@@ -10133,6 +12821,7 @@ VanillaItemPrices = {
     [20722] = { b = 227069, s = 45413 }, -- Crystal Slugthrower
     [20723] = { b = 234671, s = 46934 }, -- Brann's Trusty Pick
     [20724] = { b = 294368, s = 58873 }, -- Corrupted Blackwood Staff
+    [20725] = { b = 60000, s = 0 }, -- Nexus Crystal
     [20726] = { b = 100000, s = 25000 }, -- Formula: Enchant Gloves - Threat
     [20727] = { b = 100000, s = 25000 }, -- Formula: Enchant Gloves - Shadow Power
     [20728] = { b = 100000, s = 25000 }, -- Formula: Enchant Gloves - Frost Power
@@ -10144,6 +12833,8 @@ VanillaItemPrices = {
     [20734] = { b = 100000, s = 25000 }, -- Formula: Enchant Cloak - Stealth
     [20735] = { b = 100000, s = 25000 }, -- Formula: Enchant Cloak - Subtlety
     [20736] = { b = 100000, s = 25000 }, -- Formula: Enchant Cloak - Dodge
+    [20741] = { b = 0, s = 0 }, -- Deadwood Ritual Totem
+    [20742] = { b = 0, s = 0 }, -- Winterfall Ritual Totem
     [20744] = { b = 2000, s = 500 }, -- Minor Wizard Oil
     [20745] = { b = 4000, s = 1000 }, -- Minor Mana Oil
     [20746] = { b = 4000, s = 1000 }, -- Lesser Wizard Oil
@@ -10160,22 +12851,100 @@ VanillaItemPrices = {
     [20758] = { b = 500, s = 125 }, -- Formula: Minor Wizard Oil
     [20761] = { b = 120000, s = 30000 }, -- Recipe: Transmute Elemental Fire
     [20763] = { b = 1250, s = 312 }, -- Broken Weapon
+    [20766] = { b = 0, s = 0 }, -- Slimy Bag
+    [20767] = { b = 0, s = 0 }, -- Scum Covered Bag
+    [20768] = { b = 0, s = 0 }, -- Oozing Bag
     [20769] = { b = 10000, s = 2500 }, -- Disgusting Oozeling
     [20770] = { b = 1800, s = 450 }, -- Bubbling Green Ichor
+    [20800] = { b = 0, s = 0 }, -- Cenarion Logistics Badge
+    [20801] = { b = 0, s = 0 }, -- Cenarion Tactical Badge
+    [20802] = { b = 0, s = 0 }, -- Cenarion Combat Badge
+    [20803] = { b = 0, s = 0 }, -- Twilight Battle Orders
     [20805] = { b = 50, s = 12 }, -- Followup Logistics Assignment
+    [20806] = { b = 0, s = 0 }, -- Logistics Task Briefing X
+    [20807] = { b = 0, s = 0 }, -- Logistics Task Briefing I
     [20808] = { b = 50, s = 12 }, -- Combat Assignment
     [20809] = { b = 50, s = 12 }, -- Tactical Assignment
+    [20810] = { b = 0, s = 0 }, -- Signed Field Duty Papers
     [20844] = { b = 600, s = 150 }, -- Deadly Poison V
+    [20858] = { b = 0, s = 0 }, -- Stone Scarab
+    [20859] = { b = 0, s = 0 }, -- Gold Scarab
+    [20860] = { b = 0, s = 0 }, -- Silver Scarab
+    [20861] = { b = 0, s = 0 }, -- Bronze Scarab
+    [20862] = { b = 0, s = 0 }, -- Crystal Scarab
+    [20863] = { b = 0, s = 0 }, -- Clay Scarab
+    [20864] = { b = 0, s = 0 }, -- Bone Scarab
+    [20865] = { b = 0, s = 0 }, -- Ivory Scarab
+    [20866] = { b = 0, s = 0 }, -- Azure Idol
+    [20867] = { b = 0, s = 0 }, -- Onyx Idol
+    [20868] = { b = 0, s = 0 }, -- Lambent Idol
+    [20869] = { b = 0, s = 0 }, -- Amber Idol
+    [20870] = { b = 0, s = 0 }, -- Jasper Idol
+    [20871] = { b = 0, s = 0 }, -- Obsidian Idol
+    [20872] = { b = 0, s = 0 }, -- Vermillion Idol
+    [20873] = { b = 0, s = 0 }, -- Alabaster Idol
+    [20874] = { b = 0, s = 0 }, -- Idol of the Sun
+    [20875] = { b = 0, s = 0 }, -- Idol of Night
+    [20876] = { b = 0, s = 0 }, -- Idol of Death
+    [20877] = { b = 0, s = 0 }, -- Idol of the Sage
+    [20878] = { b = 0, s = 0 }, -- Idol of Rebirth
+    [20879] = { b = 0, s = 0 }, -- Idol of Life
+    [20881] = { b = 0, s = 0 }, -- Idol of Strife
+    [20882] = { b = 0, s = 0 }, -- Idol of War
+    [20884] = { b = 0, s = 0 }, -- Qiraji Magisterial Ring
+    [20885] = { b = 0, s = 0 }, -- Qiraji Martial Drape
+    [20886] = { b = 0, s = 0 }, -- Qiraji Spiked Hilt
+    [20888] = { b = 0, s = 0 }, -- Qiraji Ceremonial Ring
+    [20889] = { b = 0, s = 0 }, -- Qiraji Regal Drape
+    [20890] = { b = 0, s = 0 }, -- Qiraji Ornate Hilt
+    [20926] = { b = 0, s = 0 }, -- Vek'nilash's Circlet
+    [20927] = { b = 0, s = 0 }, -- Ouro's Intact Hide
+    [20928] = { b = 0, s = 0 }, -- Qiraji Bindings of Command
+    [20929] = { b = 0, s = 0 }, -- Carapace of the Old God
+    [20930] = { b = 0, s = 0 }, -- Vek'lor's Diadem
+    [20931] = { b = 0, s = 0 }, -- Skin of the Great Sandworm
+    [20932] = { b = 0, s = 0 }, -- Qiraji Bindings of Dominance
+    [20933] = { b = 0, s = 0 }, -- Husk of the Old God
+    [20939] = { b = 0, s = 0 }, -- Logistics Task Briefing II
+    [20940] = { b = 0, s = 0 }, -- Logistics Task Briefing III
+    [20941] = { b = 0, s = 0 }, -- Combat Task Briefing XII
+    [20942] = { b = 0, s = 0 }, -- Combat Task Briefing III
+    [20943] = { b = 0, s = 0 }, -- Tactical Task Briefing X
+    [20944] = { b = 0, s = 0 }, -- Tactical Task Briefing IX
+    [20945] = { b = 0, s = 0 }, -- Tactical Task Briefing II
+    [20947] = { b = 0, s = 0 }, -- Tactical Task Briefing IV
+    [20948] = { b = 0, s = 0 }, -- Tactical Task Briefing V
+    [20949] = { b = 0, s = 0 }, -- Magical Ledger
+    [20951] = { b = 0, s = 0 }, -- Narain's Scrying Goggles
     [21023] = { b = 5000, s = 250 }, -- Dirge's Kickin' Chimaerok Chops
+    [21024] = { b = 0, s = 0 }, -- Chimaerok Tenderloin
     [21025] = { b = 5000, s = 1250 }, -- Recipe: Dirge's Kickin' Chimaerok Chops
+    [21027] = { b = 0, s = 0 }, -- Lakmaeran's Carcass
+    [21028] = { b = 0, s = 0 }, -- 500 Pound Chicken
+    [21029] = { b = 0, s = 0 }, -- Ransom Letter
     [21030] = { b = 2000, s = 100 }, -- Darnassus Kimchi Pie
     [21031] = { b = 4000, s = 200 }, -- Cabbage Kimchi
+    [21032] = { b = 0, s = 0 }, -- Meridith's Love Letter
     [21033] = { b = 4000, s = 200 }, -- Radish Kimchi
+    [21037] = { b = 0, s = 0 }, -- Crude Map
     [21039] = { b = 5, s = 1 }, -- Narain's Turban
     [21040] = { b = 7, s = 1 }, -- Narain's Robe
+    [21041] = { b = 0, s = 0 }, -- Bag of Gold
+    [21042] = { b = 0, s = 0 }, -- Narain's Special Kit
     [21071] = { b = 100, s = 25 }, -- Raw Sagefish
     [21072] = { b = 160, s = 40 }, -- Smoked Sagefish
     [21099] = { b = 500, s = 125 }, -- Recipe: Smoked Sagefish
+    [21100] = { b = 0, s = 0 }, -- Coin of Ancestry
+    [21103] = { b = 0, s = 0 }, -- Draconic for Dummies
+    [21104] = { b = 0, s = 0 }, -- Draconic for Dummies
+    [21105] = { b = 0, s = 0 }, -- Draconic for Dummies
+    [21106] = { b = 0, s = 0 }, -- Draconic for Dummies
+    [21107] = { b = 0, s = 0 }, -- Draconic for Dummies
+    [21108] = { b = 0, s = 0 }, -- Draconic for Dummies
+    [21109] = { b = 0, s = 0 }, -- Draconic for Dummies
+    [21110] = { b = 0, s = 0 }, -- Draconic for Dummies
+    [21111] = { b = 0, s = 0 }, -- Draconic For Dummies: Volume II
+    [21112] = { b = 0, s = 0 }, -- Magical Book Binding
     [21113] = { b = 10, s = 2 }, -- Watertight Trunk
     [21114] = { b = 200, s = 50 }, -- Rumsey Rum Dark
     [21115] = { b = 28230, s = 7057 }, -- Defiler's Talisman
@@ -10186,18 +12955,43 @@ VanillaItemPrices = {
     [21120] = { b = 7230, s = 1807 }, -- Defiler's Talisman
     [21126] = { b = 1034835, s = 206967 }, -- Death's Sting
     [21128] = { b = 840206, s = 168041 }, -- Staff of the Qiraji Prophets
+    [21130] = { b = 0, s = 0 }, -- Diary of Weavil
     [21131] = { b = 50, s = 12 }, -- Followup Combat Assignment
     [21132] = { b = 50, s = 12 }, -- Logistics Assignment
     [21133] = { b = 50, s = 12 }, -- Followup Tactical Assignment
     [21134] = { b = 1332847, s = 266569 }, -- Dark Edge of Insanity
+    [21136] = { b = 0, s = 0 }, -- Arcanite Buoy
+    [21137] = { b = 0, s = 0 }, -- Blue Scepter Shard
+    [21138] = { b = 0, s = 0 }, -- Red Scepter Shard
+    [21139] = { b = 0, s = 0 }, -- Green Scepter Shard
+    [21140] = { b = 0, s = 0 }, -- Auction Stationery
+    [21142] = { b = 0, s = 0 }, -- From the Desk of Lord Victor Nefarius
+    [21143] = { b = 0, s = 0 }, -- Unsigned Field Duty Papers
+    [21144] = { b = 0, s = 0 }, -- Demon Summoning Torch
+    [21145] = { b = 0, s = 0 }, -- Essence of Xandivious
+    [21146] = { b = 0, s = 0 }, -- Fragment of the Nightmare's Corruption
+    [21147] = { b = 0, s = 0 }, -- Fragment of the Nightmare's Corruption
+    [21148] = { b = 0, s = 0 }, -- Fragment of the Nightmare's Corruption
+    [21149] = { b = 0, s = 0 }, -- Fragment of the Nightmare's Corruption
     [21150] = { b = 10, s = 2 }, -- Iron Bound Trunk
     [21151] = { b = 200, s = 50 }, -- Rumsey Rum Black Label
     [21153] = { b = 500, s = 125 }, -- Raw Greater Sagefish
     [21154] = { b = 7, s = 1 }, -- Festival Dress
+    [21155] = { b = 0, s = 0 }, -- Timbermaw Offering of Peace
     [21156] = { b = 50, s = 12 }, -- Scarab Bag
     [21157] = { b = 7, s = 1 }, -- Festive Green Dress
+    [21158] = { b = 0, s = 0 }, -- Hive'Zora Scout Report
+    [21160] = { b = 0, s = 0 }, -- Hive'Regal Scout Report
+    [21161] = { b = 0, s = 0 }, -- Hive'Ashi Scout Report
     [21162] = { b = 100, s = 25 }, -- Bloated Oily Blackmouth
     [21164] = { b = 400, s = 100 }, -- Bloated Rockscale Cod
+    [21165] = { b = 0, s = 0 }, -- Tactical Task Briefing VI
+    [21166] = { b = 0, s = 0 }, -- Tactical Task Briefing VII
+    [21167] = { b = 0, s = 0 }, -- Tactical Task Briefing VIII
+    [21171] = { b = 0, s = 0 }, -- Filled Festive Mug
+    [21174] = { b = 0, s = 0 }, -- Empty Festive Mug
+    [21175] = { b = 0, s = 0 }, -- The Scepter of the Shifting Sands
+    [21176] = { b = 10000000, s = 0 }, -- Black Qiraji Resonating Crystal
     [21177] = { b = 3000, s = 37 }, -- Symbol of Kings
     [21178] = { b = 71155, s = 14231 }, -- Gloves of Earthen Power
     [21179] = { b = 42837, s = 10709 }, -- Band of Earthen Wrath
@@ -10212,9 +13006,33 @@ VanillaItemPrices = {
     [21188] = { b = 556103, s = 111220 }, -- Fist of Cenarius
     [21189] = { b = 755555, s = 188888 }, -- Might of Cenarius
     [21190] = { b = 755555, s = 188888 }, -- Wrath of Cenarius
+    [21191] = { b = 0, s = 0 }, -- Carefully Wrapped Present
+    [21196] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21197] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21198] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21199] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21200] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21201] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21202] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21203] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21204] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21205] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21206] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21207] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21208] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21209] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21210] = { b = 0, s = 0 }, -- Signet Ring of the Bronze Dragonflight
+    [21211] = { b = 0, s = 0 }, -- Pouch of Reindeer Dust
+    [21212] = { b = 0, s = 0 }, -- Fresh Holly
+    [21213] = { b = 0, s = 0 }, -- Preserved Holly
     [21214] = { b = 400000, s = 100000 }, -- Tome of Frostbolt XI
+    [21215] = { b = 0, s = 0 }, -- Graccu's Mince Meat Fruitcake
+    [21216] = { b = 0, s = 0 }, -- Smokywood Pastures Extra-Special Gift
     [21217] = { b = 500, s = 125 }, -- Sagefish Delight
+    [21218] = { b = 0, s = 0 }, -- Blue Qiraji Resonating Crystal
     [21219] = { b = 5000, s = 1250 }, -- Recipe: Sagefish Delight
+    [21220] = { b = 0, s = 0 }, -- Head of Ossirian the Unscarred
+    [21221] = { b = 0, s = 0 }, -- Eye of C'Thun
     [21222] = { b = 7000, s = 1750 }, -- Armored Chitin
     [21223] = { b = 6000, s = 1500 }, -- Black Stone
     [21224] = { b = 12000, s = 3000 }, -- Ancient Armor Fragment
@@ -10222,12 +13040,40 @@ VanillaItemPrices = {
     [21226] = { b = 16000, s = 4000 }, -- Runic Stone
     [21227] = { b = 30000, s = 7500 }, -- Ancient Hero's Skull
     [21228] = { b = 10, s = 2 }, -- Mithril Bound Trunk
+    [21229] = { b = 0, s = 0 }, -- Qiraji Lord's Insignia
+    [21230] = { b = 0, s = 0 }, -- Ancient Qiraji Artifact
+    [21232] = { b = 0, s = 0 }, -- Imperial Qiraji Armaments
+    [21235] = { b = 0, s = 0 }, -- Winter Veil Roast
+    [21237] = { b = 0, s = 0 }, -- Imperial Qiraji Regalia
+    [21241] = { b = 0, s = 0 }, -- Winter Veil Eggnog
     [21242] = { b = 820121, s = 164024 }, -- Blessed Qiraji War Axe
     [21243] = { b = 400, s = 100 }, -- Bloated Mightfish
     [21244] = { b = 826238, s = 165247 }, -- Blessed Qiraji Pugio
+    [21245] = { b = 0, s = 0 }, -- Tactical Task Briefing I
+    [21248] = { b = 0, s = 0 }, -- Combat Task Briefing IV
+    [21249] = { b = 0, s = 0 }, -- Combat Task Briefing V
+    [21250] = { b = 0, s = 0 }, -- Combat Task Briefing VI
+    [21251] = { b = 0, s = 0 }, -- Combat Task Briefing VII
+    [21252] = { b = 0, s = 0 }, -- Combat Task Briefing VIII
+    [21253] = { b = 0, s = 0 }, -- Combat Task Briefing IX
+    [21254] = { b = 0, s = 0 }, -- Winter Veil Cookie
+    [21255] = { b = 0, s = 0 }, -- Combat Task Briefing X
+    [21256] = { b = 0, s = 0 }, -- Combat Task Briefing XI
+    [21257] = { b = 0, s = 0 }, -- Logistics Task Briefing IV
+    [21258] = { b = 0, s = 0 }, -- Logistics Task Briefing IV
+    [21259] = { b = 0, s = 0 }, -- Logistics Task Briefing V
+    [21260] = { b = 0, s = 0 }, -- Logistics Task Briefing VI
+    [21261] = { b = 0, s = 0 }, -- Logistics Task Briefing VI
+    [21262] = { b = 0, s = 0 }, -- Logistics Task Briefing VIII
+    [21263] = { b = 0, s = 0 }, -- Logistics Task Briefing VII
+    [21264] = { b = 0, s = 0 }, -- Logistics Task Briefing VII
+    [21265] = { b = 0, s = 0 }, -- Logistics Task Briefing IX
     [21266] = { b = 50, s = 12 }, -- Logistics Assignment
+    [21267] = { b = 0, s = 0 }, -- Toasting Goblet
     [21268] = { b = 860679, s = 172135 }, -- Blessed Qiraji War Hammer
     [21269] = { b = 552819, s = 110563 }, -- Blessed Qiraji Bulwark
+    [21270] = { b = 0, s = 0 }, -- Gently Shaken Gift
+    [21271] = { b = 0, s = 0 }, -- Gently Shaken Gift
     [21272] = { b = 654748, s = 130949 }, -- Blessed Qiraji Musket
     [21273] = { b = 1095018, s = 219003 }, -- Blessed Qiraji Acolyte Staff
     [21275] = { b = 997918, s = 199583 }, -- Blessed Qiraji Augur Staff
@@ -10254,20 +13100,33 @@ VanillaItemPrices = {
     [21298] = { b = 400000, s = 100000 }, -- Manual of Battle Shout VII
     [21299] = { b = 400000, s = 100000 }, -- Manual of Revenge VI
     [21300] = { b = 400000, s = 100000 }, -- Handbook of Backstab IX
+    [21301] = { b = 0, s = 0 }, -- Green Helper Box
     [21302] = { b = 400000, s = 100000 }, -- Handbook of Deadly Poison V
     [21303] = { b = 400000, s = 100000 }, -- Handbook of Feint V
     [21304] = { b = 400000, s = 100000 }, -- Guide: Multi-Shot V
+    [21305] = { b = 0, s = 0 }, -- Red Helper Box
     [21306] = { b = 400000, s = 100000 }, -- Guide: Serpent Sting IX
     [21307] = { b = 400000, s = 100000 }, -- Guide: Aspect of the Hawk VII
+    [21308] = { b = 0, s = 0 }, -- Jingling Bell
+    [21309] = { b = 0, s = 0 }, -- Snowman Kit
+    [21310] = { b = 0, s = 0 }, -- Gaily Wrapped Present
     [21311] = { b = 42365, s = 8473 }, -- Earth Warder's Vest
     [21312] = { b = 31887, s = 6377 }, -- Belt of the Den Watcher
+    [21314] = { b = 0, s = 0 }, -- Metzen's Letters and Notes
+    [21315] = { b = 0, s = 0 }, -- Smokywood Satchel
     [21316] = { b = 62037, s = 12407 }, -- Leggings of the Ursa
     [21317] = { b = 58378, s = 11675 }, -- Helm of the Pathfinder
     [21318] = { b = 37221, s = 7444 }, -- Earth Warder's Gloves
     [21319] = { b = 46696, s = 9339 }, -- Gloves of the Pathfinder
     [21320] = { b = 112489, s = 22497 }, -- Vest of the Den Watcher
+    [21321] = { b = 0, s = 0 }, -- Red Qiraji Resonating Crystal
     [21322] = { b = 75541, s = 15108 }, -- Ursa's Embrace
+    [21323] = { b = 0, s = 0 }, -- Green Qiraji Resonating Crystal
+    [21324] = { b = 0, s = 0 }, -- Yellow Qiraji Resonating Crystal
+    [21325] = { b = 0, s = 0 }, -- Mechanical Greench
     [21326] = { b = 35965, s = 8991 }, -- Defender of the Timbermaw
+    [21327] = { b = 0, s = 0 }, -- Ticking Present
+    [21328] = { b = 0, s = 0 }, -- Wand of Holiday Cheer
     [21329] = { b = 265185, s = 53037 }, -- Conqueror's Crown
     [21330] = { b = 229939, s = 45987 }, -- Conqueror's Spaulders
     [21331] = { b = 501319, s = 100263 }, -- Conqueror's Breastplate
@@ -10301,6 +13160,7 @@ VanillaItemPrices = {
     [21360] = { b = 345409, s = 69081 }, -- Deathdealer's Helm
     [21361] = { b = 307415, s = 61483 }, -- Deathdealer's Spaulders
     [21362] = { b = 476204, s = 95240 }, -- Deathdealer's Leggings
+    [21363] = { b = 0, s = 0 }, -- Festive Gift
     [21364] = { b = 674813, s = 134962 }, -- Deathdealer's Vest
     [21365] = { b = 375840, s = 75168 }, -- Striker's Footguards
     [21366] = { b = 434695, s = 86939 }, -- Striker's Diadem
@@ -10314,13 +13174,49 @@ VanillaItemPrices = {
     [21375] = { b = 542399, s = 108479 }, -- Stormcaller's Leggings
     [21376] = { b = 354305, s = 70861 }, -- Stormcaller's Pauldrons
     [21377] = { b = 800, s = 200 }, -- Deadwood Headdress Feather
+    [21378] = { b = 0, s = 0 }, -- Logistics Task Briefing I
+    [21379] = { b = 0, s = 0 }, -- Logistics Task Briefing II
+    [21380] = { b = 0, s = 0 }, -- Logistics Task Briefing III
+    [21381] = { b = 0, s = 0 }, -- Logistics Task Briefing IX
+    [21382] = { b = 0, s = 0 }, -- Logistics Task Briefing V
     [21383] = { b = 800, s = 200 }, -- Winterfall Spirit Beads
+    [21384] = { b = 0, s = 0 }, -- Logistics Task Briefing VIII
+    [21385] = { b = 0, s = 0 }, -- Logistics Task Briefing X
     [21386] = { b = 50, s = 12 }, -- Followup Logistics Assignment
     [21387] = { b = 290767, s = 58153 }, -- Avenger's Crown
     [21388] = { b = 228095, s = 45619 }, -- Avenger's Greaves
     [21389] = { b = 497315, s = 99463 }, -- Avenger's Breastplate
     [21390] = { b = 354763, s = 70952 }, -- Avenger's Legguards
     [21391] = { b = 230729, s = 46145 }, -- Avenger's Pauldrons
+    [21392] = { b = 0, s = 0 }, -- Sickle of Unyielding Strength
+    [21393] = { b = 0, s = 0 }, -- Signet of Unyielding Strength
+    [21394] = { b = 0, s = 0 }, -- Drape of Unyielding Strength
+    [21395] = { b = 0, s = 0 }, -- Blade of Eternal Justice
+    [21396] = { b = 0, s = 0 }, -- Ring of Eternal Justice
+    [21397] = { b = 0, s = 0 }, -- Cape of Eternal Justice
+    [21398] = { b = 0, s = 0 }, -- Hammer of the Gathering Storm
+    [21399] = { b = 0, s = 0 }, -- Ring of the Gathering Storm
+    [21400] = { b = 0, s = 0 }, -- Cloak of the Gathering Storm
+    [21401] = { b = 0, s = 0 }, -- Scythe of the Unseen Path
+    [21402] = { b = 0, s = 0 }, -- Signet of the Unseen Path
+    [21403] = { b = 0, s = 0 }, -- Cloak of the Unseen Path
+    [21404] = { b = 0, s = 0 }, -- Dagger of Veiled Shadows
+    [21405] = { b = 0, s = 0 }, -- Band of Veiled Shadows
+    [21406] = { b = 0, s = 0 }, -- Cloak of Veiled Shadows
+    [21407] = { b = 0, s = 0 }, -- Mace of Unending Life
+    [21408] = { b = 0, s = 0 }, -- Band of Unending Life
+    [21409] = { b = 0, s = 0 }, -- Cloak of Unending Life
+    [21410] = { b = 0, s = 0 }, -- Gavel of Infinite Wisdom
+    [21411] = { b = 0, s = 0 }, -- Ring of Infinite Wisdom
+    [21412] = { b = 0, s = 0 }, -- Shroud of Infinite Wisdom
+    [21413] = { b = 0, s = 0 }, -- Blade of Vaulted Secrets
+    [21414] = { b = 0, s = 0 }, -- Band of Vaulted Secrets
+    [21415] = { b = 0, s = 0 }, -- Drape of Vaulted Secrets
+    [21416] = { b = 0, s = 0 }, -- Kris of Unspoken Names
+    [21417] = { b = 0, s = 0 }, -- Ring of Unspoken Names
+    [21418] = { b = 0, s = 0 }, -- Shroud of Unspoken Names
+    [21436] = { b = 0, s = 0 }, -- Alliance Commendation Signet
+    [21438] = { b = 0, s = 0 }, -- Horde Commendation Signet
     [21452] = { b = 739573, s = 147914 }, -- Staff of the Ruins
     [21453] = { b = 178158, s = 35631 }, -- Mantle of the Horusath
     [21454] = { b = 269394, s = 53878 }, -- Runic Stone Shoulders
@@ -10376,7 +13272,16 @@ VanillaItemPrices = {
     [21505] = { b = 446512, s = 111628 }, -- Choker of the Shifting Sands
     [21506] = { b = 446512, s = 111628 }, -- Pendant of the Shifting Sands
     [21507] = { b = 446512, s = 111628 }, -- Amulet of the Shifting Sands
+    [21508] = { b = 0, s = 0 }, -- Mark of Cenarius
+    [21509] = { b = 0, s = 0 }, -- Ahn'Qiraj War Effort Supplies
+    [21510] = { b = 0, s = 0 }, -- Ahn'Qiraj War Effort Supplies
+    [21511] = { b = 0, s = 0 }, -- Ahn'Qiraj War Effort Supplies
+    [21512] = { b = 0, s = 0 }, -- Ahn'Qiraj War Effort Supplies
+    [21513] = { b = 0, s = 0 }, -- Ahn'Qiraj War Effort Supplies
+    [21514] = { b = 0, s = 0 }, -- Logistics Task Briefing XI
+    [21515] = { b = 0, s = 0 }, -- Mark of Remulos
     [21517] = { b = 214679, s = 42935 }, -- Gnomish Turban of Psychic Might
+    [21519] = { b = 1, s = 0 }, -- Mistletoe
     [21520] = { b = 759340, s = 151868 }, -- Ravencrest's Legacy
     [21521] = { b = 689558, s = 137911 }, -- Runesword of the Red
     [21522] = { b = 711347, s = 142269 }, -- Shadowsong's Sorrow
@@ -10385,16 +13290,24 @@ VanillaItemPrices = {
     [21525] = { b = 9, s = 1 }, -- Green Winter Hat
     [21526] = { b = 3312341, s = 828085 }, -- Band of Icy Depths
     [21527] = { b = 304360, s = 60872 }, -- Darkwater Robes
+    [21528] = { b = 0, s = 0 }, -- Colossal Bag of Loot
     [21529] = { b = 363154, s = 90788 }, -- Amulet of Shadow Shielding
     [21530] = { b = 461556, s = 92311 }, -- Onyx Embedded Leggings
     [21531] = { b = 412121, s = 103030 }, -- Drake Tooth Necklace
     [21532] = { b = 290581, s = 58116 }, -- Drudge Boots
+    [21533] = { b = 0, s = 0 }, -- Colossus of Zora's Husk
+    [21534] = { b = 0, s = 0 }, -- Colossus of Ashi's Husk
+    [21535] = { b = 0, s = 0 }, -- Colossus of Regal's Husk
+    [21536] = { b = 0, s = 0 }, -- Elune Stone
+    [21537] = { b = 0, s = 0 }, -- Festival Dumplings
     [21538] = { b = 7, s = 1 }, -- Festive Pink Dress
     [21539] = { b = 7, s = 1 }, -- Festive Purple Dress
+    [21540] = { b = 0, s = 0 }, -- Elune's Lantern
     [21541] = { b = 7, s = 1 }, -- Festive Black Pant Suit
     [21542] = { b = 7, s = 1 }, -- Festival Suit
     [21543] = { b = 7, s = 1 }, -- Festive Teal Pant Suit
     [21544] = { b = 7, s = 1 }, -- Festive Blue Pant Suit
+    [21545] = { b = 0, s = 0 }, -- Smokywood Supplies
     [21546] = { b = 140, s = 35 }, -- Elixir of Greater Firepower
     [21547] = { b = 10000, s = 2500 }, -- Recipe: Elixir of Greater Firepower
     [21548] = { b = 60000, s = 15000 }, -- Pattern: Stormshroud Gloves
@@ -10409,6 +13322,8 @@ VanillaItemPrices = {
     [21566] = { b = 20000, s = 5000 }, -- Rune of Perfection
     [21567] = { b = 40000, s = 10000 }, -- Rune of Duty
     [21568] = { b = 20000, s = 5000 }, -- Rune of Duty
+    [21569] = { b = 0, s = 0 }, -- Firework Launcher
+    [21570] = { b = 0, s = 0 }, -- Cluster Launcher
     [21571] = { b = 100, s = 25 }, -- Blue Rocket Cluster
     [21574] = { b = 100, s = 25 }, -- Green Rocket Cluster
     [21576] = { b = 100, s = 25 }, -- Red Rocket Cluster
@@ -10455,6 +13370,7 @@ VanillaItemPrices = {
     [21627] = { b = 234152, s = 46830 }, -- Cloak of Untold Secrets
     [21635] = { b = 933643, s = 186728 }, -- Barb of the Sand Reaver
     [21639] = { b = 227426, s = 45485 }, -- Pauldrons of the Unrelenting
+    [21640] = { b = 0, s = 0 }, -- Lunar Festival Fireworks Pack
     [21645] = { b = 290581, s = 58116 }, -- Hive Tunneler's Boots
     [21647] = { b = 345481, s = 86370 }, -- Fetish of the Sand Reaver
     [21648] = { b = 223784, s = 44756 }, -- Recomposed Boots
@@ -10509,6 +13425,7 @@ VanillaItemPrices = {
     [21708] = { b = 149526, s = 29905 }, -- Beetle Scaled Wristguards
     [21709] = { b = 454568, s = 113642 }, -- Ring of the Fallen God
     [21710] = { b = 375872, s = 75174 }, -- Cloak of the Fallen God
+    [21711] = { b = 0, s = 0 }, -- Lunar Festival Invitation
     [21712] = { b = 460801, s = 115200 }, -- Amulet of the Fallen God
     [21713] = { b = 1000, s = 250 }, -- Elune's Candle
     [21714] = { b = 200, s = 50 }, -- Large Blue Rocket Cluster
@@ -10532,7 +13449,19 @@ VanillaItemPrices = {
     [21735] = { b = 16000, s = 4000 }, -- Schematic: Large Red Rocket Cluster
     [21737] = { b = 16000, s = 4000 }, -- Schematic: Cluster Launcher
     [21738] = { b = 3500, s = 875 }, -- Schematic: Firework Launcher
+    [21740] = { b = 0, s = 0 }, -- Small Rocket Recipes
+    [21741] = { b = 0, s = 0 }, -- Cluster Rocket Recipes
+    [21742] = { b = 0, s = 0 }, -- Large Rocket Recipes
+    [21743] = { b = 0, s = 0 }, -- Large Cluster Rocket Recipes
+    [21744] = { b = 0, s = 0 }, -- Lucky Rocket Cluster
+    [21745] = { b = 0, s = 0 }, -- Elder's Moonstone
+    [21746] = { b = 0, s = 0 }, -- Lucky Red Envelope
     [21747] = { b = 300, s = 75 }, -- Festival Firecracker
+    [21749] = { b = 0, s = 0 }, -- Combat Task Briefing I
+    [21750] = { b = 0, s = 0 }, -- Combat Task Briefing II
+    [21751] = { b = 0, s = 0 }, -- Tactical Task Briefing III
+    [21761] = { b = 0, s = 0 }, -- Scarab Coffer Key
+    [21762] = { b = 0, s = 0 }, -- Greater Scarab Coffer Key
     [21800] = { b = 262613, s = 52522 }, -- Silithid Husked Launcher
     [21801] = { b = 263632, s = 52726 }, -- Antenna of Invigoration
     [21802] = { b = 352869, s = 70573 }, -- The Lost Kris of Zedd
@@ -10542,8 +13471,21 @@ VanillaItemPrices = {
     [21806] = { b = 518430, s = 103686 }, -- Gavel of Qiraji Authority
     [21809] = { b = 194623, s = 48655 }, -- Fury of the Forgotten Swarm
     [21810] = { b = 126299, s = 25259 }, -- Treads of the Wandering Nomad
+    [21812] = { b = 0, s = 0 }, -- Box of Chocolates
+    [21813] = { b = 0, s = 0 }, -- Bag of Candies
     [21814] = { b = 257851, s = 51570 }, -- Breastplate of Annihilation
+    [21815] = { b = 10, s = 0 }, -- Love Token
+    [21816] = { b = 0, s = 0 }, -- Heart Candy
+    [21817] = { b = 0, s = 0 }, -- Heart Candy
+    [21818] = { b = 0, s = 0 }, -- Heart Candy
+    [21819] = { b = 0, s = 0 }, -- Heart Candy
+    [21820] = { b = 0, s = 0 }, -- Heart Candy
+    [21821] = { b = 0, s = 0 }, -- Heart Candy
+    [21822] = { b = 0, s = 0 }, -- Heart Candy
+    [21823] = { b = 0, s = 0 }, -- Heart Candy
     [21829] = { b = 100, s = 25 }, -- Perfume Bottle
+    [21830] = { b = 0, s = 0 }, -- Empty Wrapper
+    [21831] = { b = 0, s = 0 }, -- Wrappered Gift
     [21833] = { b = 100, s = 25 }, -- Cologne Bottle
     [21836] = { b = 387414, s = 96853 }, -- Ritssyn's Ring of Chaos
     [21837] = { b = 590879, s = 118175 }, -- Anubisath Warhammer
@@ -10553,7 +13495,30 @@ VanillaItemPrices = {
     [21888] = { b = 114375, s = 22875 }, -- Gloves of the Immortal
     [21889] = { b = 139534, s = 27906 }, -- Gloves of the Redeemed Prophecy
     [21891] = { b = 397512, s = 99378 }, -- Shard of the Fallen Star
+    [21920] = { b = 0, s = 0 }, -- Creased Letter
+    [21921] = { b = 0, s = 0 }, -- Carefully Penned Note
+    [21925] = { b = 0, s = 0 }, -- Immaculate Letter
+    [21926] = { b = 0, s = 0 }, -- Slightly Creased Note
+    [21928] = { b = 0, s = 0 }, -- Winterspring Blood Sample
+    [21935] = { b = 0, s = 0 }, -- Stable Ectoplasm
+    [21936] = { b = 0, s = 0 }, -- Frozen Ectoplasm
+    [21937] = { b = 0, s = 0 }, -- Scorched Ectoplasm
+    [21938] = { b = 0, s = 0 }, -- Magma Core
     [21939] = { b = 400000, s = 100000 }, -- Fel Elemental Rod
+    [21946] = { b = 0, s = 0 }, -- Ectoplasmic Distiller
+    [21960] = { b = 0, s = 0 }, -- Handmade Woodcraft
+    [21975] = { b = 0, s = 0 }, -- Pledge of Adoration: Stormwind
+    [21979] = { b = 0, s = 0 }, -- Gift of Adoration: Darnassus
+    [21980] = { b = 0, s = 0 }, -- Gift of Adoration: Ironforge
+    [21981] = { b = 0, s = 0 }, -- Gift of Adoration: Stormwind
+    [21982] = { b = 0, s = 0 }, -- Ogre Warbeads
+    [21983] = { b = 0, s = 0 }, -- Incomplete Banner of Provocation
+    [21984] = { b = 0, s = 0 }, -- Left Piece of Lord Valthalak's Amulet
+    [21985] = { b = 0, s = 0 }, -- Sealed Blood Container
+    [21986] = { b = 0, s = 0 }, -- Banner of Provocation
+    [21987] = { b = 0, s = 0 }, -- Incendicite of Incendius
+    [21988] = { b = 0, s = 0 }, -- Ember of Emberseer
+    [21989] = { b = 0, s = 0 }, -- Cinder of Cynders
     [21994] = { b = 62380, s = 12476 }, -- Belt of Heroism
     [21995] = { b = 98121, s = 19624 }, -- Boots of Heroism
     [21996] = { b = 62843, s = 12568 }, -- Bracers of Heroism
@@ -10577,6 +13542,17 @@ VanillaItemPrices = {
     [22015] = { b = 74709, s = 14941 }, -- Beastmaster's Gloves
     [22016] = { b = 142012, s = 28402 }, -- Beastmaster's Mantle
     [22017] = { b = 198677, s = 39735 }, -- Beastmaster's Pants
+    [22046] = { b = 0, s = 0 }, -- Right Piece of Lord Valthalak's Amulet
+    [22047] = { b = 0, s = 0 }, -- Top Piece of Lord Valthalak's Amulet
+    [22048] = { b = 0, s = 0 }, -- Lord Valthalak's Amulet
+    [22049] = { b = 0, s = 0 }, -- Brazier of Beckoning
+    [22050] = { b = 0, s = 0 }, -- Brazier of Beckoning
+    [22051] = { b = 0, s = 0 }, -- Brazier of Beckoning
+    [22052] = { b = 0, s = 0 }, -- Brazier of Beckoning
+    [22056] = { b = 0, s = 0 }, -- Brazier of Beckoning
+    [22057] = { b = 0, s = 0 }, -- Brazier of Invocation
+    [22058] = { b = 0, s = 0 }, -- Valentine's Day Stationery
+    [22059] = { b = 0, s = 0 }, -- Valentine's Day Card
     [22060] = { b = 205076, s = 41015 }, -- Beastmaster's Tunic
     [22061] = { b = 155045, s = 31009 }, -- Beastmaster's Boots
     [22062] = { b = 65903, s = 13180 }, -- Sorcerer's Belt
@@ -10611,6 +13587,7 @@ VanillaItemPrices = {
     [22091] = { b = 99225, s = 19845 }, -- Soulforge Helm
     [22092] = { b = 133464, s = 26692 }, -- Soulforge Legplates
     [22093] = { b = 95684, s = 19136 }, -- Soulforge Spaulders
+    [22094] = { b = 0, s = 0 }, -- Bloodkelp
     [22095] = { b = 96379, s = 19275 }, -- Bindings of The Five Thunders
     [22096] = { b = 152257, s = 30451 }, -- Boots of The Five Thunders
     [22097] = { b = 152135, s = 30427 }, -- Coif of The Five Thunders
@@ -10627,33 +13604,97 @@ VanillaItemPrices = {
     [22111] = { b = 166197, s = 33239 }, -- Feralheart Kilt
     [22112] = { b = 119153, s = 23830 }, -- Feralheart Spaulders
     [22113] = { b = 166569, s = 33313 }, -- Feralheart Vest
+    [22115] = { b = 0, s = 0 }, -- Extra-Dimensional Ghost Revealer
+    [22117] = { b = 0, s = 0 }, -- Pledge of Loyalty: Stormwind
+    [22119] = { b = 0, s = 0 }, -- Pledge of Loyalty: Ironforge
+    [22120] = { b = 0, s = 0 }, -- Pledge of Loyalty: Darnassus
+    [22121] = { b = 0, s = 0 }, -- Pledge of Loyalty: Undercity
+    [22122] = { b = 0, s = 0 }, -- Pledge of Loyalty: Thunder Bluff
+    [22123] = { b = 0, s = 0 }, -- Pledge of Loyalty: Orgrimmar
+    [22131] = { b = 0, s = 0 }, -- Stormwind Gift Collection
+    [22132] = { b = 0, s = 0 }, -- Ironforge Gift Collection
+    [22133] = { b = 0, s = 0 }, -- Darnassus Gift Collection
+    [22134] = { b = 0, s = 0 }, -- Undercity Gift Collection
+    [22135] = { b = 0, s = 0 }, -- Thunder Bluff Gift Collection
+    [22136] = { b = 0, s = 0 }, -- Orgrimmar Gift Collection
     [22137] = { b = 50, s = 12 }, -- Ysida's Satchel
+    [22138] = { b = 0, s = 0 }, -- Blackrock Bracer
+    [22139] = { b = 0, s = 0 }, -- Ysida's Locket
+    [22140] = { b = 0, s = 0 }, -- Sentinel's Card
+    [22141] = { b = 0, s = 0 }, -- Ironforge Guard's Card
+    [22142] = { b = 0, s = 0 }, -- Grunt's Card
+    [22143] = { b = 0, s = 0 }, -- Stormwind Guard's Card
+    [22144] = { b = 0, s = 0 }, -- Bluffwatcher's Card
+    [22145] = { b = 0, s = 0 }, -- Guardian's Moldy Card
     [22149] = { b = 41135, s = 10283 }, -- Beads of Ogre Mojo
     [22150] = { b = 41135, s = 10283 }, -- Beads of Ogre Might
+    [22154] = { b = 0, s = 0 }, -- Pledge of Adoration: Ironforge
+    [22155] = { b = 0, s = 0 }, -- Pledge of Adoration: Darnassus
+    [22156] = { b = 0, s = 0 }, -- Pledge of Adoration: Orgrimmar
+    [22157] = { b = 0, s = 0 }, -- Pledge of Adoration: Undercity
+    [22158] = { b = 0, s = 0 }, -- Pledge of Adoration: Thunder Bluff
+    [22159] = { b = 0, s = 0 }, -- Pledge of Friendship: Darnassus
+    [22160] = { b = 0, s = 0 }, -- Pledge of Friendship: Ironforge
+    [22161] = { b = 0, s = 0 }, -- Pledge of Friendship: Orgrimmar
+    [22162] = { b = 0, s = 0 }, -- Pledge of Friendship: Thunder Bluff
+    [22163] = { b = 0, s = 0 }, -- Pledge of Friendship: Undercity
+    [22164] = { b = 0, s = 0 }, -- Gift of Adoration: Orgrimmar
+    [22165] = { b = 0, s = 0 }, -- Gift of Adoration: Thunder Bluff
+    [22166] = { b = 0, s = 0 }, -- Gift of Adoration: Undercity
+    [22167] = { b = 0, s = 0 }, -- Gift of Friendship: Darnassus
+    [22168] = { b = 0, s = 0 }, -- Gift of Friendship: Ironforge
+    [22169] = { b = 0, s = 0 }, -- Gift of Friendship: Orgrimmar
+    [22170] = { b = 0, s = 0 }, -- Gift of Friendship: Stormwind
+    [22171] = { b = 0, s = 0 }, -- Gift of Friendship: Thunder Bluff
+    [22172] = { b = 0, s = 0 }, -- Gift of Friendship: Undercity
+    [22173] = { b = 0, s = 0 }, -- Dwarven Homebrew
+    [22174] = { b = 0, s = 0 }, -- Romantic Poem
+    [22175] = { b = 0, s = 0 }, -- Freshly Baked Pie
+    [22176] = { b = 0, s = 0 }, -- Homemade Bread
+    [22177] = { b = 0, s = 0 }, -- Freshly Picked Flowers
+    [22178] = { b = 0, s = 0 }, -- Pledge of Friendship: Stormwind
     [22191] = { b = 365643, s = 73128 }, -- Obsidian Mail Tunic
+    [22192] = { b = 0, s = 0 }, -- Bloodkelp Elixir of Dodging
+    [22193] = { b = 0, s = 0 }, -- Bloodkelp Elixir of Resistance
     [22194] = { b = 167607, s = 33521 }, -- Black Grasp of the Destroyer
     [22195] = { b = 114426, s = 22885 }, -- Light Obsidian Belt
     [22196] = { b = 248121, s = 49624 }, -- Thick Obsidian Breastplate
     [22197] = { b = 71411, s = 14282 }, -- Heavy Obsidian Belt
     [22198] = { b = 337200, s = 67440 }, -- Jagged Obsidian Shield
+    [22200] = { b = 0, s = 0 }, -- Silver Shafted Arrow
+    [22201] = { b = 0, s = 0 }, -- Reliquary of Purity
     [22202] = { b = 10000, s = 2500 }, -- Small Obsidian Shard
     [22203] = { b = 20000, s = 5000 }, -- Large Obsidian Shard
     [22204] = { b = 62015, s = 12403 }, -- Wristguards of Renown
     [22205] = { b = 42610, s = 8522 }, -- Black Steel Bindings
+    [22206] = { b = 0, s = 0 }, -- Bouquet of Red Roses
     [22207] = { b = 71165, s = 14233 }, -- Sash of the Grand Hunt
     [22208] = { b = 285396, s = 57079 }, -- Lavastone Hammer
     [22209] = { b = 50000, s = 12500 }, -- Plans: Heavy Obsidian Belt
     [22212] = { b = 86556, s = 17311 }, -- Golem Fitted Pauldrons
     [22214] = { b = 50000, s = 12500 }, -- Plans: Light Obsidian Belt
+    [22216] = { b = 0, s = 0 }, -- Venoxis's Venom Sac
+    [22217] = { b = 0, s = 0 }, -- Kurinnaxx's Venom Sac
+    [22218] = { b = 0, s = 0 }, -- Handful of Rose Petals
     [22219] = { b = 50000, s = 12500 }, -- Plans: Jagged Obsidian Shield
     [22220] = { b = 50000, s = 12500 }, -- Plans: Black Grasp of the Destroyer
     [22221] = { b = 80000, s = 20000 }, -- Plans: Obsidian Mail Tunic
     [22222] = { b = 80000, s = 20000 }, -- Plans: Thick Obsidian Breastplate
     [22223] = { b = 56458, s = 11291 }, -- Foreman's Head Protector
+    [22224] = { b = 0, s = 0 }, -- Jeering Spectre's Essence
     [22225] = { b = 74687, s = 14937 }, -- Dragonskin Cowl
+    [22226] = { b = 0, s = 0 }, -- Druidical Remains
+    [22227] = { b = 0, s = 0 }, -- Starbreeze Village Relic
+    [22228] = { b = 0, s = 0 }, -- Brilliant Sword of Zealotry
+    [22229] = { b = 0, s = 0 }, -- Soul Ashes of the Banished
     [22231] = { b = 82221, s = 16444 }, -- Kayser's Boots of Precision
     [22232] = { b = 74669, s = 14933 }, -- Marksman's Girdle
     [22234] = { b = 48568, s = 9713 }, -- Mantle of Lost Hope
+    [22235] = { b = 0, s = 0 }, -- Truesilver Shafted Arrow
+    [22236] = { b = 0, s = 0 }, -- Buttermilk Delight
+    [22237] = { b = 0, s = 0 }, -- Dark Desire
+    [22238] = { b = 0, s = 0 }, -- Very Berry Cream
+    [22239] = { b = 0, s = 0 }, -- Sweet Surprise
     [22240] = { b = 74861, s = 14972 }, -- Greaves of Withering Despair
     [22241] = { b = 78697, s = 15739 }, -- Dark Warder's Pauldrons
     [22242] = { b = 57448, s = 11489 }, -- Verek's Leash
@@ -10672,6 +13713,13 @@ VanillaItemPrices = {
     [22255] = { b = 131210, s = 32802 }, -- Magma Forged Band
     [22256] = { b = 41184, s = 8236 }, -- Mana Shaping Handwraps
     [22257] = { b = 144510, s = 36127 }, -- Bloodclot Band
+    [22259] = { b = 0, s = 0 }, -- Unbestowed Friendship Bracelet
+    [22260] = { b = 0, s = 0 }, -- Friendship Bracelet
+    [22261] = { b = 0, s = 0 }, -- Love Fool
+    [22262] = { b = 0, s = 0 }, -- Alliance Gift Collection
+    [22263] = { b = 0, s = 0 }, -- Horde Gift Collection
+    [22264] = { b = 0, s = 0 }, -- Carefully Written Letter
+    [22265] = { b = 0, s = 0 }, -- Lovingly Composed Letter
     [22266] = { b = 219394, s = 43878 }, -- Flarethorn
     [22267] = { b = 89353, s = 17870 }, -- Spellweaver's Turban
     [22268] = { b = 265161, s = 66290 }, -- Draconic Infused Emblem
@@ -10688,6 +13736,24 @@ VanillaItemPrices = {
     [22280] = { b = 7, s = 1 }, -- Lovely Purple Dress
     [22281] = { b = 7, s = 1 }, -- Blue Dinner Suit
     [22282] = { b = 7, s = 1 }, -- Purple Dinner Suit
+    [22283] = { b = 0, s = 0 }, -- Sack of Homemade Bread
+    [22284] = { b = 0, s = 0 }, -- Bundle of Cards
+    [22285] = { b = 0, s = 0 }, -- Stormwind Pledge Collection
+    [22286] = { b = 0, s = 0 }, -- Ironforge Pledge Collection
+    [22287] = { b = 0, s = 0 }, -- Parcel of Cards
+    [22288] = { b = 0, s = 0 }, -- Case of Homebrew
+    [22289] = { b = 0, s = 0 }, -- Stack of Cards
+    [22290] = { b = 0, s = 0 }, -- Darnassus Pledge Collection
+    [22291] = { b = 0, s = 0 }, -- Box of Woodcrafts
+    [22292] = { b = 0, s = 0 }, -- Box of Fresh Pies
+    [22293] = { b = 0, s = 0 }, -- Package of Cards
+    [22294] = { b = 0, s = 0 }, -- Orgrimmar Pledge Collection
+    [22295] = { b = 0, s = 0 }, -- Satchel of Cards
+    [22296] = { b = 0, s = 0 }, -- Basket of Flowers
+    [22297] = { b = 0, s = 0 }, -- Thunder Bluff Pledge Collection
+    [22298] = { b = 0, s = 0 }, -- Book of Romantic Poems
+    [22299] = { b = 0, s = 0 }, -- Sheaf of Cards
+    [22300] = { b = 0, s = 0 }, -- Undercity Pledge Collection
     [22301] = { b = 116570, s = 23314 }, -- Ironweave Robe
     [22302] = { b = 87747, s = 17549 }, -- Ironweave Cowl
     [22303] = { b = 111830, s = 22366 }, -- Ironweave Pants
@@ -10723,17 +13789,49 @@ VanillaItemPrices = {
     [22335] = { b = 356256, s = 71251 }, -- Lord Valthalak's Staff of Command
     [22336] = { b = 175751, s = 35150 }, -- Draconian Aegis of the Legion
     [22337] = { b = 82383, s = 16476 }, -- Shroud of Domination
+    [22338] = { b = 0, s = 0 }, -- Volcanic Ash
     [22339] = { b = 61130, s = 15282 }, -- Rune Band of Wizardry
     [22340] = { b = 421315, s = 65328 }, -- Pendant of Celerity
     [22342] = { b = 109844, s = 21968 }, -- Leggings of Torment
     [22343] = { b = 82383, s = 16476 }, -- Handguards of Savagery
+    [22344] = { b = 0, s = 0 }, -- Brazier of Invocation: User's Manual
     [22345] = { b = 78402, s = 15680 }, -- Totem of Rebirth
     [22347] = { b = 228640, s = 45728 }, -- Fahrad's Reloading Repeater
     [22348] = { b = 382535, s = 76507 }, -- Doomulus Prime
+    [22349] = { b = 0, s = 0 }, -- Desecrated Breastplate
+    [22350] = { b = 0, s = 0 }, -- Desecrated Tunic
+    [22351] = { b = 0, s = 0 }, -- Desecrated Robe
+    [22352] = { b = 0, s = 0 }, -- Desecrated Legplates
+    [22353] = { b = 0, s = 0 }, -- Desecrated Helmet
+    [22354] = { b = 0, s = 0 }, -- Desecrated Pauldrons
+    [22355] = { b = 0, s = 0 }, -- Desecrated Bracers
+    [22356] = { b = 0, s = 0 }, -- Desecrated Waistguard
+    [22357] = { b = 0, s = 0 }, -- Desecrated Gauntlets
+    [22358] = { b = 0, s = 0 }, -- Desecrated Sabatons
+    [22359] = { b = 0, s = 0 }, -- Desecrated Legguards
+    [22360] = { b = 0, s = 0 }, -- Desecrated Headpiece
+    [22361] = { b = 0, s = 0 }, -- Desecrated Spaulders
+    [22362] = { b = 0, s = 0 }, -- Desecrated Wristguards
+    [22363] = { b = 0, s = 0 }, -- Desecrated Girdle
+    [22364] = { b = 0, s = 0 }, -- Desecrated Handguards
+    [22365] = { b = 0, s = 0 }, -- Desecrated Boots
+    [22366] = { b = 0, s = 0 }, -- Desecrated Leggings
+    [22367] = { b = 0, s = 0 }, -- Desecrated Circlet
+    [22368] = { b = 0, s = 0 }, -- Desecrated Shoulderpads
+    [22369] = { b = 0, s = 0 }, -- Desecrated Bindings
+    [22370] = { b = 0, s = 0 }, -- Desecrated Belt
+    [22371] = { b = 0, s = 0 }, -- Desecrated Gloves
+    [22372] = { b = 0, s = 0 }, -- Desecrated Sandals
+    [22373] = { b = 0, s = 0 }, -- Wartorn Leather Scrap
+    [22374] = { b = 0, s = 0 }, -- Wartorn Chain Scrap
+    [22375] = { b = 0, s = 0 }, -- Wartorn Plate Scrap
+    [22376] = { b = 0, s = 0 }, -- Wartorn Cloth Scrap
     [22377] = { b = 324883, s = 64976 }, -- The Thunderwood Poker
     [22378] = { b = 326057, s = 65211 }, -- Ravenholdt Slicer
     [22379] = { b = 327232, s = 65446 }, -- Shivsprocket's Shiv
     [22380] = { b = 328375, s = 65675 }, -- Simone's Cultivating Hammer
+    [22381] = { b = 0, s = 0 }, -- Silithus Venom Sample
+    [22382] = { b = 0, s = 0 }, -- Sealed Venom Container
     [22383] = { b = 421458, s = 84291 }, -- Sageblade
     [22384] = { b = 402771, s = 80554 }, -- Persuader
     [22385] = { b = 126384, s = 25276 }, -- Titanic Leggings
@@ -10777,7 +13875,10 @@ VanillaItemPrices = {
     [22429] = { b = 351504, s = 70300 }, -- Redemption Spaulders
     [22430] = { b = 352812, s = 70562 }, -- Redemption Boots
     [22431] = { b = 260279, s = 52055 }, -- Redemption Girdle
+    [22432] = { b = 0, s = 0 }, -- Devilsaur Barb
     [22433] = { b = 61130, s = 15282 }, -- Don Mauricio's Band of Domination
+    [22434] = { b = 0, s = 0 }, -- Bloodcap
+    [22435] = { b = 0, s = 0 }, -- Gorishi Sting
     [22436] = { b = 966558, s = 193311 }, -- Cryptstalker Tunic
     [22437] = { b = 797997, s = 159599 }, -- Cryptstalker Legguards
     [22438] = { b = 557607, s = 111521 }, -- Cryptstalker Headpiece
@@ -10786,6 +13887,7 @@ VanillaItemPrices = {
     [22441] = { b = 376028, s = 75205 }, -- Cryptstalker Handguards
     [22442] = { b = 377471, s = 75494 }, -- Cryptstalker Girdle
     [22443] = { b = 378914, s = 75782 }, -- Cryptstalker Wristguards
+    [22444] = { b = 0, s = 0 }, -- Putrid Vine
     [22458] = { b = 189464, s = 37892 }, -- Moonshadow Stave
     [22464] = { b = 924464, s = 184892 }, -- Earthshatter Tunic
     [22465] = { b = 763444, s = 152688 }, -- Earthshatter Legguards
@@ -10804,6 +13906,7 @@ VanillaItemPrices = {
     [22481] = { b = 313292, s = 62658 }, -- Bonescythe Gauntlets
     [22482] = { b = 314462, s = 62892 }, -- Bonescythe Waistguard
     [22483] = { b = 315664, s = 63132 }, -- Bonescythe Bracers
+    [22484] = { b = 0, s = 0 }, -- Necrotic Rune
     [22488] = { b = 802858, s = 160571 }, -- Dreamwalker Tunic
     [22489] = { b = 662918, s = 132583 }, -- Dreamwalker Legguards
     [22490] = { b = 498943, s = 99788 }, -- Dreamwalker Headpiece
@@ -10837,10 +13940,48 @@ VanillaItemPrices = {
     [22518] = { b = 254585, s = 50917 }, -- Belt of Faith
     [22519] = { b = 255547, s = 51109 }, -- Bindings of Faith
     [22520] = { b = 1, s = 1 }, -- The Phylactery of Kel'Thuzad
+    [22523] = { b = 0, s = 0 }, -- Insignia of the Dawn
+    [22524] = { b = 0, s = 0 }, -- Insignia of the Crusade
+    [22525] = { b = 0, s = 0 }, -- Crypt Fiend Parts
+    [22526] = { b = 0, s = 0 }, -- Bone Fragments
+    [22527] = { b = 0, s = 0 }, -- Core of Elements
+    [22528] = { b = 0, s = 0 }, -- Dark Iron Scraps
+    [22529] = { b = 0, s = 0 }, -- Savage Frond
+    [22568] = { b = 0, s = 0 }, -- Sealed Craftsman's Writ
     [22589] = { b = 2818401, s = 562016 }, -- Atiesh, Greatstaff of the Guardian
+    [22593] = { b = 0, s = 0 }, -- Writ of Safe Passage
+    [22595] = { b = 0, s = 0 }, -- Call to Arms Announcement
+    [22600] = { b = 0, s = 0 }, -- Craftsman's Writ - Dense Weightstone
+    [22601] = { b = 0, s = 0 }, -- Craftsman's Writ - Imperial Plate Chest
+    [22602] = { b = 0, s = 0 }, -- Craftsman's Writ - Volcanic Hammer
+    [22603] = { b = 0, s = 0 }, -- Craftsman's Writ - Huge Thorium Battleaxe
+    [22604] = { b = 0, s = 0 }, -- Craftsman's Writ - Radiant Circlet
+    [22605] = { b = 0, s = 0 }, -- Craftsman's Writ - Wicked Leather Headband
+    [22606] = { b = 0, s = 0 }, -- Craftsman's Writ - Rugged Armor Kit
+    [22607] = { b = 0, s = 0 }, -- Craftsman's Writ - Wicked Leather Belt
+    [22608] = { b = 0, s = 0 }, -- Craftsman's Writ - Runic Leather Pants
+    [22609] = { b = 0, s = 0 }, -- Craftsman's Writ - Brightcloth Pants
+    [22610] = { b = 0, s = 0 }, -- Craftsman's Writ - Runecloth Boots
+    [22611] = { b = 0, s = 0 }, -- Craftsman's Writ - Runecloth Bag
+    [22612] = { b = 0, s = 0 }, -- Craftsman's Writ - Runecloth Robe
+    [22613] = { b = 0, s = 0 }, -- Craftsman's Writ - Goblin Sapper Charge
+    [22614] = { b = 0, s = 0 }, -- Craftsman's Writ - Thorium Grenade
+    [22615] = { b = 0, s = 0 }, -- Craftsman's Writ - Gnomish Battle Chicken
+    [22616] = { b = 0, s = 0 }, -- Craftsman's Writ - Thorium Tube
+    [22617] = { b = 0, s = 0 }, -- Craftsman's Writ - Major Mana Potion
+    [22618] = { b = 0, s = 0 }, -- Craftsman's Writ - Major Healing Potion
+    [22620] = { b = 0, s = 0 }, -- Craftsman's Writ - Greater Arcane Protection Potion
+    [22621] = { b = 0, s = 0 }, -- Craftsman's Writ - Flask of Petrification
+    [22622] = { b = 0, s = 0 }, -- Craftsman's Writ - Stonescale Eel
+    [22623] = { b = 0, s = 0 }, -- Craftsman's Writ - Plated Armorfish
+    [22624] = { b = 0, s = 0 }, -- Craftsman's Writ - Lightning Eel
     [22630] = { b = 2819221, s = 563844 }, -- Atiesh, Greatstaff of the Guardian
     [22631] = { b = 2631380, s = 526276 }, -- Atiesh, Greatstaff of the Guardian
     [22632] = { b = 2641323, s = 528264 }, -- Atiesh, Greatstaff of the Guardian
+    [22635] = { b = 0, s = 0 }, -- Savage Guard
+    [22636] = { b = 0, s = 0 }, -- Ice Guard
+    [22637] = { b = 0, s = 0 }, -- Primal Hakkari Idol
+    [22638] = { b = 0, s = 0 }, -- Shadow Guard
     [22648] = { b = 50, s = 12 }, -- Hive'Ashi Dossier
     [22649] = { b = 50, s = 12 }, -- Hive'Regal Dossier
     [22650] = { b = 50, s = 12 }, -- Hive'Zora Dossier
@@ -10882,6 +14023,7 @@ VanillaItemPrices = {
     [22701] = { b = 458411, s = 91682 }, -- Polar Leggings
     [22702] = { b = 552047, s = 110409 }, -- Icy Scale Leggings
     [22707] = { b = 394641, s = 98660 }, -- Ramaladni's Icy Grasp
+    [22708] = { b = 0, s = 0 }, -- Fate of Ramaladni
     [22711] = { b = 110810, s = 22162 }, -- Cloak of the Hakkari Worshipers
     [22712] = { b = 111207, s = 22241 }, -- Might of the Tribe
     [22713] = { b = 372051, s = 74410 }, -- Zulian Scepter of Rites
@@ -10889,13 +14031,21 @@ VanillaItemPrices = {
     [22715] = { b = 112420, s = 22484 }, -- Gloves of the Tormented
     [22716] = { b = 70096, s = 14019 }, -- Belt of Untapped Power
     [22718] = { b = 142054, s = 28410 }, -- Blooddrenched Mask
+    [22719] = { b = 0, s = 0 }, -- Omarion's Handbook
     [22720] = { b = 114448, s = 22889 }, -- Zulian Headdress
     [22721] = { b = 256120, s = 64030 }, -- Band of Servitude
     [22722] = { b = 256120, s = 64030 }, -- Seal of the Gurubashi Berserker
+    [22723] = { b = 0, s = 0 }, -- A Letter from the Keeper of the Rolls
     [22725] = { b = 155162, s = 38790 }, -- Band of Cenarius
+    [22726] = { b = 0, s = 0 }, -- Splinter of Atiesh
+    [22727] = { b = 0, s = 0 }, -- Frame of Atiesh
     [22730] = { b = 247981, s = 49596 }, -- Eyestalk Waist Cord
     [22731] = { b = 371972, s = 74394 }, -- Cloak of the Devoured
     [22732] = { b = 345774, s = 86443 }, -- Mark of C'Thun
+    [22733] = { b = 0, s = 0 }, -- Staff Head of Atiesh
+    [22734] = { b = 0, s = 0 }, -- Base of Atiesh
+    [22736] = { b = 0, s = 0 }, -- Andonisus, Reaper of Souls
+    [22737] = { b = 0, s = 0 }, -- Atiesh, Greatstaff of the Guardian
     [22739] = { b = 59000, s = 14750 }, -- Tome of Polymorph: Turtle
     [22740] = { b = 219678, s = 43935 }, -- Outrider's Leather Pants
     [22741] = { b = 220461, s = 44092 }, -- Outrider's Lizardhide Pants
@@ -10910,6 +14060,7 @@ VanillaItemPrices = {
     [22750] = { b = 211869, s = 42373 }, -- Sentinel's Lizardhide Pants
     [22752] = { b = 170748, s = 34149 }, -- Sentinel's Silk Leggings
     [22753] = { b = 171358, s = 34271 }, -- Sentinel's Lamellar Legguards
+    [22754] = { b = 0, s = 0 }, -- Eternal Quintessence
     [22756] = { b = 165824, s = 33164 }, -- Sylvan Vest
     [22757] = { b = 124806, s = 24961 }, -- Sylvan Crown
     [22758] = { b = 125255, s = 25051 }, -- Sylvan Shoulders
@@ -10949,6 +14100,7 @@ VanillaItemPrices = {
     [22819] = { b = 971128, s = 194225 }, -- Shield of Condemnation
     [22820] = { b = 736417, s = 147283 }, -- Wand of Fates
     [22821] = { b = 1146691, s = 229338 }, -- Doomfinger
+    [22822] = { b = 0, s = 0 }, -- iCoke Prize Voucher
     [22843] = { b = 75422, s = 15084 }, -- Blood Guard's Chain Greaves
     [22852] = { b = 59605, s = 11921 }, -- Blood Guard's Dragonhide Treads
     [22855] = { b = 47684, s = 9536 }, -- Blood Guard's Dreadweave Walkers
@@ -10983,7 +14135,11 @@ VanillaItemPrices = {
     [22887] = { b = 111979, s = 22395 }, -- Legionnaire's Mail Legguards
     [22890] = { b = 40000, s = 10000 }, -- Tome of Frost Ward V
     [22891] = { b = 40000, s = 10000 }, -- Grimoire of Shadow Ward IV
+    [22892] = { b = 0, s = 0 }, -- Dim Necrotic Stone
+    [22895] = { b = 0, s = 0 }, -- Conjured Cinnamon Roll
     [22897] = { b = 40000, s = 10000 }, -- Tome of Conjure Food VII
+    [22930] = { b = 0, s = 0 }, -- A Bloodstained Envelope
+    [22932] = { b = 0, s = 0 }, -- A Torn Letter
     [22935] = { b = 353421, s = 88355 }, -- Touch of Frost
     [22936] = { b = 204017, s = 40803 }, -- Wristguards of Vengeance
     [22937] = { b = 290604, s = 72651 }, -- Gem of Nerubis
@@ -10993,12 +14149,24 @@ VanillaItemPrices = {
     [22941] = { b = 389522, s = 77904 }, -- Polar Shoulder Pads
     [22942] = { b = 945573, s = 189114 }, -- The Widow's Embrace
     [22943] = { b = 411111, s = 102777 }, -- Malice Stone Pendant
+    [22944] = { b = 0, s = 0 }, -- A Crumpled Missive
+    [22945] = { b = 0, s = 0 }, -- A Careworn Note
+    [22946] = { b = 0, s = 0 }, -- A Ragged Page
     [22947] = { b = 353421, s = 88355 }, -- Pendant of Forgotten Names
+    [22948] = { b = 0, s = 0 }, -- A Smudged Document
+    [22949] = { b = 0, s = 0 }, -- Cracked Necrotic Crystal
+    [22950] = { b = 0, s = 0 }, -- Faint Necrotic Crystal
     [22954] = { b = 364641, s = 91160 }, -- Kiss of the Spider
     [22960] = { b = 310456, s = 62091 }, -- Cloak of Suturing
     [22961] = { b = 454568, s = 113642 }, -- Band of Reanimation
     [22967] = { b = 479632, s = 95926 }, -- Icy Scale Spaulders
     [22968] = { b = 296950, s = 59390 }, -- Glacial Mantle
+    [22970] = { b = 0, s = 0 }, -- A Bloodstained Envelope
+    [22972] = { b = 0, s = 0 }, -- A Careworn Note
+    [22973] = { b = 0, s = 0 }, -- A Crumpled Missive
+    [22974] = { b = 0, s = 0 }, -- A Ragged Page
+    [22975] = { b = 0, s = 0 }, -- A Smudged Document
+    [22977] = { b = 0, s = 0 }, -- A Torn Letter
     [22981] = { b = 515451, s = 128862 }, -- Gluth's Missing Collar
     [22983] = { b = 313787, s = 62757 }, -- Rime Covered Mantle
     [22988] = { b = 989733, s = 197946 }, -- The End of Dreams
@@ -11006,17 +14174,28 @@ VanillaItemPrices = {
     [22999] = { b = 10000, s = 2500 }, -- Tabard of the Argent Dawn
     [23000] = { b = 456281, s = 91256 }, -- Plated Abomination Ribcage
     [23001] = { b = 364641, s = 91160 }, -- Eye of Diminution
+    [23002] = { b = 0, s = 0 }, -- Turtle Box
     [23004] = { b = 292397, s = 58479 }, -- Idol of Longevity
     [23005] = { b = 293497, s = 58699 }, -- Totem of Flowing Water
     [23006] = { b = 294628, s = 58925 }, -- Libram of Light
+    [23007] = { b = 0, s = 0 }, -- Piglet's Collar
+    [23008] = { b = 0, s = 0 }, -- Sealed Research Report
     [23009] = { b = 744973, s = 148994 }, -- Wand of the Whispering Dead
+    [23010] = { b = 0, s = 0 }, -- Sealed Research Report
+    [23011] = { b = 0, s = 0 }, -- Sealed Research Report
+    [23012] = { b = 0, s = 0 }, -- Sealed Research Report
+    [23013] = { b = 0, s = 0 }, -- Sealed Research Report
     [23014] = { b = 917949, s = 183589 }, -- Iblis, Blade of the Fallen Seraph
+    [23015] = { b = 0, s = 0 }, -- Rat Cage
+    [23016] = { b = 0, s = 0 }, -- Sealed Research Report
     [23017] = { b = 315070, s = 63014 }, -- Veil of Eclipse
     [23018] = { b = 241024, s = 60256 }, -- Signet of the Fallen Defender
     [23019] = { b = 317331, s = 63466 }, -- Icebane Helmet
     [23020] = { b = 398039, s = 79607 }, -- Polar Helmet
     [23021] = { b = 213041, s = 42608 }, -- The Soul Harvester's Bindings
+    [23022] = { b = 0, s = 0 }, -- Curmudgeon's Payoff
     [23023] = { b = 86443, s = 345774 }, -- Sadist's Collar
+    [23024] = { b = 0, s = 0 }, -- Prepared Field Duty Papers
     [23025] = { b = 60256, s = 241024 }, -- Seal of the Damned
     [23027] = { b = 91160, s = 364641 }, -- Warmth of Forgiveness
     [23028] = { b = 394641, s = 98660 }, -- Hailstone Band
@@ -11044,6 +14223,7 @@ VanillaItemPrices = {
     [23051] = { b = 1265810, s = 763810 }, -- Glaive of the Defender
     [23053] = { b = 86443, s = 345774 }, -- Stormrage's Talisman of Seething
     [23054] = { b = 1391991, s = 278398 }, -- Gressil, Dawn of Ruin
+    [23055] = { b = 0, s = 0 }, -- Word of Thawing
     [23056] = { b = 1402092, s = 280418 }, -- Hammer of the Twisting Nether
     [23057] = { b = 102777, s = 411111 }, -- Gem of Trapped Innocents
     [23059] = { b = 241024, s = 60256 }, -- Ring of the Dreadnaught
@@ -11064,6 +14244,7 @@ VanillaItemPrices = {
     [23078] = { b = 59563, s = 11912 }, -- Gauntlets of Undead Slaying
     [23081] = { b = 69948, s = 13989 }, -- Handwraps of Undead Slaying
     [23082] = { b = 84257, s = 16851 }, -- Handguards of Undead Slaying
+    [23083] = { b = 0, s = 0 }, -- Captured Flame
     [23084] = { b = 56592, s = 11318 }, -- Gloves of Undead Cleansing
     [23085] = { b = 113610, s = 22722 }, -- Robe of Undead Cleansing
     [23087] = { b = 114462, s = 22892 }, -- Breastplate of Undead Slaying
@@ -11093,13 +14274,25 @@ VanillaItemPrices = {
     [23173] = { b = 6215, s = 1243 }, -- Abomination Skin Leggings
     [23177] = { b = 52683, s = 10536 }, -- Lady Falther'ess' Finger
     [23178] = { b = 20447, s = 4089 }, -- Mantle of Lady Falther'ess
+    [23179] = { b = 0, s = 0 }, -- Flame of Orgrimmar
+    [23180] = { b = 0, s = 0 }, -- Flame of Thunder Bluff
+    [23181] = { b = 0, s = 0 }, -- Flame of the Undercity
+    [23182] = { b = 0, s = 0 }, -- Flame of Stormwind
+    [23183] = { b = 0, s = 0 }, -- Flame of Ironforge
+    [23184] = { b = 0, s = 0 }, -- Flame of Darnassus
     [23192] = { b = 28575, s = 7143 }, -- Tabard of the Scarlet Crusade
+    [23194] = { b = 0, s = 0 }, -- Lesser Mark of the Dawn
+    [23195] = { b = 0, s = 0 }, -- Mark of the Dawn
+    [23196] = { b = 0, s = 0 }, -- Greater Mark of the Dawn
     [23197] = { b = 78453, s = 15690 }, -- Idol of the Moon
     [23198] = { b = 90827, s = 18165 }, -- Idol of Brutality
     [23199] = { b = 94293, s = 18858 }, -- Totem of the Storm
     [23200] = { b = 94646, s = 18929 }, -- Totem of Sustaining
     [23201] = { b = 94989, s = 18997 }, -- Libram of Divinity
     [23203] = { b = 95693, s = 19138 }, -- Libram of Fervor
+    [23206] = { b = 0, s = 0 }, -- Mark of the Champion
+    [23207] = { b = 0, s = 0 }, -- Mark of the Champion
+    [23211] = { b = 0, s = 0 }, -- Toasted Smorc
     [23219] = { b = 222368, s = 44473 }, -- Girdle of the Mentor
     [23220] = { b = 446354, s = 89270 }, -- Crystal Webbed Robe
     [23221] = { b = 1015910, s = 203182 }, -- Misplaced Servo Arm
@@ -11109,6 +14302,9 @@ VanillaItemPrices = {
     [23242] = { b = 267143, s = 1335716 }, -- Claw of the Frost Wyrm
     [23243] = { b = 65791, s = 13158 }, -- Champion's Plate Shoulders
     [23244] = { b = 66027, s = 13205 }, -- Champion's Plate Helm
+    [23246] = { b = 0, s = 0 }, -- Fiery Festival Brew
+    [23247] = { b = 0, s = 0 }, -- Burning Blossom
+    [23250] = { b = 0, s = 0 }, -- Prismatic Shell
     [23251] = { b = 91920, s = 18384 }, -- Champion's Chain Helm
     [23252] = { b = 92684, s = 18536 }, -- Champion's Chain Shoulders
     [23253] = { b = 77190, s = 15438 }, -- Champion's Dragonhide Headguard
@@ -11174,6 +14370,10 @@ VanillaItemPrices = {
     [23320] = { b = 400000, s = 100000 }, -- Tablet of Flame Shock VI
     [23323] = { b = 5, s = 1 }, -- Crown of the Fire Festival
     [23324] = { b = 5, s = 1 }, -- Mantle of the Fire Festival
+    [23326] = { b = 0, s = 0 }, -- Midsummer Sausage
+    [23327] = { b = 0, s = 0 }, -- Fire-toasted Bun
+    [23379] = { b = 0, s = 0 }, -- Cinder Bracers
+    [23435] = { b = 0, s = 0 }, -- Elderberry Pie
     [23451] = { b = 228358, s = 45671 }, -- Grand Marshal's Mageblade
     [23452] = { b = 301810, s = 75452 }, -- Grand Marshal's Tome of Power
     [23453] = { b = 301810, s = 75452 }, -- Grand Marshal's Tome of Restoration
@@ -11194,6 +14394,8 @@ VanillaItemPrices = {
     [23558] = { b = 7230, s = 1807 }, -- The Burrower's Shell
     [23570] = { b = 7230, s = 1807 }, -- Jom Gabbar
     [23577] = { b = 1346265, s = 269253 }, -- The Hungering Cold
+    [23578] = { b = 0, s = 0 }, -- Diet McWeaksauce
+    [23579] = { b = 0, s = 0 }, -- The McWeaksauce Classic
     [23663] = { b = 321323, s = 64264 }, -- Girdle of Elemental Fury
     [23664] = { b = 484128, s = 96825 }, -- Pauldrons of Elemental Fury
     [23665] = { b = 642647, s = 128529 }, -- Leggings of Elemental Fury
@@ -11208,13 +14410,501 @@ VanillaItemPrices = {
     [24281] = { b = 1210, s = 302 }, -- Carved Ivory Bone
     [24282] = { b = 18250, s = 4562 }, -- Rogue's Diary
     [24283] = { b = 152345, s = 38086 }, -- An Antique Gun
+    [21038] = { b = 10, s = 0 }, -- Hardpacked Snowball
+    [4991] = { b = 0, s = 0 }, -- Monster - Sword2H, Broadsword
+    [1908] = { b = 0, s = 0 }, -- Monster - Staff, Crooked
+    [2179] = { b = 0, s = 0 }, -- Monster - Sword, Scimitar Badass
+    [5258] = { b = 0, s = 0 }, -- Monster - Bow, Black
+    [2559] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Warlock Staff
+    [5300] = { b = 0, s = 0 }, -- Monster - Mace2H, Wood Handle Large Spiked Head
+    [1983] = { b = 0, s = 0 }, -- Monster - Sword2H, Basic
+    [1910] = { b = 0, s = 0 }, -- Monster - Item, Pick
+    [3346] = { b = 0, s = 0 }, -- Monster - Item, Shovel
+    [11542] = { b = 0, s = 0 }, -- Monster - Staff, Red Feathered
+    [5288] = { b = 0, s = 0 }, -- Monster - Axe, 2H Rev. Bearded Single Bladed
+    [9659] = { b = 0, s = 0 }, -- Monster - Mace, Tauren Spiked
+    [5303] = { b = 0, s = 0 }, -- Monster - Staff, Wooden Handle Rounded Head
+    [5293] = { b = 0, s = 0 }, -- Monster - Mace2H, Wood Handle Spiked Head
+    [10617] = { b = 0, s = 0 }, -- Monster - Dagger, Curved Bone Bloody
+    [10612] = { b = 0, s = 0 }, -- Monster - Axe, Horde Badass 02
+    [5262] = { b = 0, s = 0 }, -- Monster - Bow, Dark Brown
+    [2180] = { b = 0, s = 0 }, -- Monster - Sword, Short Ornate
+    [1984] = { b = 0, s = 0 }, -- Monster - Shield, Kite Metal
+    [5281] = { b = 0, s = 0 }, -- Monster - Dagger, Broad/Flat Blade
+    [5291] = { b = 0, s = 0 }, -- Monster - Mace, Jeweled Club
+    [5278] = { b = 0, s = 0 }, -- Monster - Dagger, Bowie Knife
+    [2552] = { b = 0, s = 0 }, -- Monster - Gun
+    [13222] = { b = 0, s = 0 }, -- Monster - Sword, Flaming Crimson Battlemage Longsword
+    [13221] = { b = 0, s = 0 }, -- Monster - Item, Staff Glowing Jeweled B01 Red Offhand
+    [12934] = { b = 0, s = 0 }, -- Monster - Mace, Maul B03 Red
+    [12933] = { b = 0, s = 0 }, -- Monster - Shield, Scarlet Crusade B03
+    [2182] = { b = 0, s = 0 }, -- Monster - Mace, Ornate Metal Hammer
+    [13219] = { b = 0, s = 0 }, -- Monster - Item, Holy Symbol Offhand
+    [3494] = { b = 0, s = 0 }, -- Monster - Claw
+    [11506] = { b = 0, s = 0 }, -- Monster - Claw Offhand
+    [2177] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Mage Staff
+    [5284] = { b = 0, s = 0 }, -- Monster - Dagger, Jeweled Hilt
+    [12403] = { b = 0, s = 0 }, -- Monster - Polearm, Black
+    [12868] = { b = 0, s = 0 }, -- Monster - Item, Book - B02 Blue Glowing
+    [6618] = { b = 0, s = 0 }, -- Monster - Orb
+    [3361] = { b = 0, s = 0 }, -- Monster - Mace, Spiked Heavy
+    [12932] = { b = 0, s = 0 }, -- Monster - Shield, Scarlet Crusade A02
+    [13312] = { b = 0, s = 0 }, -- Monster - Mace, Hammer Gold Orange
+    [3432] = { b = 0, s = 0 }, -- Monster - Glaive - 1 Blade Basic
+    [12882] = { b = 0, s = 0 }, -- Monster - Sword2H, Horde Curved Silver
+    [12950] = { b = 0, s = 0 }, -- Monster - Mace2H, Warhammer Ebony
+    [11763] = { b = 0, s = 0 }, -- Monster - Axe, Hatchet Red
+    [12523] = { b = 0, s = 0 }, -- Monster - Gun, Silver Musket
+    [12742] = { b = 0, s = 0 }, -- Monster - Item, Book - Brown
+    [12949] = { b = 0, s = 0 }, -- Monster - Sword2H, Red White Broad
+    [1906] = { b = 0, s = 0 }, -- Monster - Torch
+    [12855] = { b = 0, s = 0 }, -- Monster - Item, Bag - Green Offhand
+    [12751] = { b = 0, s = 0 }, -- Monster - Item, Book - Blue
+    [5259] = { b = 0, s = 0 }, -- Monster - Flaming Arrows
+    [1907] = { b = 0, s = 0 }, -- Monster - Staff, Basic
+    [1905] = { b = 0, s = 0 }, -- Monster - Axe, Metal Basic
+    [2714] = { b = 0, s = 0 }, -- Monster - Item, Lantern - Square
+    [12298] = { b = 0, s = 0 }, -- Monster - Dagger, Dark Pronged
+    [10616] = { b = 0, s = 0 }, -- Monster - Dagger, Curvey Silver
+    [12861] = { b = 0, s = 0 }, -- Monster - Item, Book - Black Skull Glowing Offhand
+    [12959] = { b = 0, s = 0 }, -- Monster - Staff, Demon Skull Staff
+    [21465] = { b = 0, s = 0 }, -- Monster - Axe, Insano
+    [21794] = { b = 0, s = 0 }, -- Monster - Sword2H, Ahn'Qiraj
+    [21796] = { b = 0, s = 0 }, -- Monster - Item, Ahn'Qiraj Held Scepter
+    [12746] = { b = 0, s = 0 }, -- Monster - Item, Orb - Lava
+    [18122] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Jeweled Staff - Blue High Blue Glow
+    [13723] = { b = 0, s = 0 }, -- Monster - Staff, Wood w/ Spiral Head White Low Purple Glow
+    [13698] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Warlock Staff Black Glow Low
+    [5746] = { b = 0, s = 0 }, -- Monster - Trident, Copper
+    [10614] = { b = 0, s = 0 }, -- Monster - Sword, Horde Sword Black
+    [15910] = { b = 0, s = 0 }, -- Monster - Trident, Dark Ornate
+    [2176] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Priest Staff
+    [3433] = { b = 0, s = 0 }, -- Monster - Spear, Badass
+    [5870] = { b = 0, s = 0 }, -- Monster - Throwing Spear
+    [13632] = { b = 0, s = 0 }, -- Monster - Spear, Badass Blue
+    [12063] = { b = 0, s = 0 }, -- Monster - Trident, Wicked
+    [1899] = { b = 0, s = 0 }, -- Monster - Sword, Long Basic
+    [12980] = { b = 0, s = 0 }, -- Monster - Shield, Wall Metal Silver
+    [1903] = { b = 0, s = 0 }, -- Monster - Mace, Basic Metal Hammer
+    [3351] = { b = 0, s = 0 }, -- Monster - Item, Rolling Pin
+    [3362] = { b = 0, s = 0 }, -- Monster - Item, Broom
+    [13605] = { b = 0, s = 0 }, -- Monster - Item, Bucket - Metal Dirty Offhand
+    [12748] = { b = 0, s = 0 }, -- Monster - Item, Scepter - Gold
+    [12863] = { b = 0, s = 0 }, -- Monster - Item, Book - Black Simple Offhand
+    [13631] = { b = 0, s = 0 }, -- Monster - Spear, Badass Red
+    [10619] = { b = 0, s = 0 }, -- Monster - Dagger, Badass Red
+    [1897] = { b = 0, s = 0 }, -- Monster - Sword, Scimitar Basic
+    [11424] = { b = 0, s = 0 }, -- Monster - Staff, Wooden Handle Spiral Head
+    [12993] = { b = 0, s = 0 }, -- Monster - Sword, Green Gold Scimitar
+    [14118] = { b = 0, s = 0 }, -- Monster - Bow, C02/B02 Black
+    [13061] = { b = 0, s = 0 }, -- Monster - Staff, Green Crystal Sphere
+    [18293] = { b = 0, s = 0 }, -- Monster - Glaive - 2 Blade B03 Green
+    [10611] = { b = 0, s = 0 }, -- Monster - Axe, Horde Badass 01
+    [2052] = { b = 0, s = 0 }, -- Monster - Shield, Small Metal Damaged
+    [2704] = { b = 0, s = 0 }, -- Monster - Item, Tankard Dirty
+    [2183] = { b = 0, s = 0 }, -- Monster - Axe, Metal Badass
+    [17383] = { b = 0, s = 0 }, -- Monster - Axe, 2H Horde Black War Axe
+    [5286] = { b = 0, s = 0 }, -- Monster - Axe, One-Handed Double Axe
+    [1985] = { b = 0, s = 0 }, -- Monster - Shield, Large Wooden
+    [14527] = { b = 0, s = 0 }, -- Monster - Mace2H, Horde Hammer A03 Dark
+    [5287] = { b = 0, s = 0 }, -- Monster - Axe, 2H Large Double Bladed
+    [6224] = { b = 0, s = 0 }, -- Monster - Sword2H, Black Metal Hilt
+    [13316] = { b = 0, s = 0 }, -- Monster - Sword2H, Claymore Silver Yellow Glow
+    [14618] = { b = 0, s = 0 }, -- Monster - Staff, Jeweled Red Staff Low Red Flame
+    [14837] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Jeweled Staff - Purple Low Purple Glow
+    [13705] = { b = 0, s = 0 }, -- Monster - Staff, Yellow Jeweled with Low Purple Glow
+    [18123] = { b = 0, s = 0 }, -- Monster - Staff, Feathered Silver Glow
+    [12285] = { b = 0, s = 0 }, -- Monster - Axe, 2H Rev. Bearded Single Bladed - Red
+    [13150] = { b = 0, s = 0 }, -- Monster - Sword2H, Claymore Blue
+    [13050] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Jeweled Staff - Red
+    [11383] = { b = 0, s = 0 }, -- Monster - Mace, Green Scepter
+    [5597] = { b = 0, s = 0 }, -- Monster - Glaive - 2 Blade Red
+    [2717] = { b = 0, s = 0 }, -- Monster - Item, Bottle - Black
+    [3757] = { b = 0, s = 0 }, -- Monster - Item, Bottle - Green Offhand
+    [12889] = { b = 0, s = 0 }, -- Monster - Sword2H, Horde Curved Black
+    [19404] = { b = 0, s = 0 }, -- Monster - Mace, The Hand of Nefarius
+    [6680] = { b = 0, s = 0 }, -- Monster - Spear, Sharp Thin
+    [5304] = { b = 0, s = 0 }, -- Monster - Staff, Large Metal Shaft
+    [5277] = { b = 0, s = 0 }, -- Monster - Staff, Metal /w Spike Crystal
+    [12297] = { b = 0, s = 0 }, -- Monster - Sword, Horde Jagged Brown
+    [12304] = { b = 0, s = 0 }, -- Monster - Sword, Horde Broad Pointed
+    [12788] = { b = 0, s = 0 }, -- Monster - Mace, Horde Bone Spike Hammer
+    [10825] = { b = 0, s = 0 }, -- Monster - Sword, Red Long
+    [12331] = { b = 0, s = 0 }, -- Monster - Sword2H, Horde Massive Green
+    [12755] = { b = 0, s = 0 }, -- Monster - Sword2H, Blackblade of Shahram
+    [12338] = { b = 0, s = 0 }, -- Monster - Polearm, Rend Blackhand
+    [2023] = { b = 0, s = 0 }, -- Monster - Spear, Rusty
+    [13147] = { b = 0, s = 0 }, -- Monster - Bow, White
+    [6227] = { b = 0, s = 0 }, -- Monster - Item, Fish - Green
+    [5276] = { b = 0, s = 0 }, -- Monster - Staff, 3 Piece Taped Staff
+    [1896] = { b = 0, s = 0 }, -- Monster - Sword, Short Basic
+    [1909] = { b = 0, s = 0 }, -- Monster - Axe, Large Basic
+    [1900] = { b = 0, s = 0 }, -- Monster - Thieves Blade
+    [2551] = { b = 0, s = 0 }, -- Monster - Crossbow
+    [2184] = { b = 0, s = 0 }, -- Monster - Dagger Basic
+    [1895] = { b = 0, s = 0 }, -- Monster - Sword, Short Rusty
+    [2051] = { b = 0, s = 0 }, -- Monster - Shield, Small Wooden Damaged
+    [5285] = { b = 0, s = 0 }, -- Monster - Dagger, Curvey Blue Hilt
+    [1904] = { b = 0, s = 0 }, -- Monster - Axe, Stone Basic
+    [2711] = { b = 0, s = 0 }, -- Monster - Dagger Badass
+    [3326] = { b = 0, s = 0 }, -- Monster - Mace2H, Basic Stone Hammer
+    [2197] = { b = 0, s = 0 }, -- Monster - Item, Bread
+    [3350] = { b = 0, s = 0 }, -- Monster - Item, Bone
+    [3367] = { b = 0, s = 0 }, -- Monster - Item, Pitchfork
+    [2557] = { b = 0, s = 0 }, -- Monster - Mace2H, Ornate Metal Hammer
+    [2827] = { b = 0, s = 0 }, -- Monster - Cleaver
+    [1957] = { b = 0, s = 0 }, -- Monster - Shield, Small Wooden
+    [12937] = { b = 0, s = 0 }, -- Monster - Staff, Basic Red
+    [1117] = { b = 0, s = 0 }, -- Monster - Item, Fishing Pole
+    [5260] = { b = 0, s = 0 }, -- Monster - Bow, Brown
+    [2196] = { b = 0, s = 0 }, -- Monster - Item, Mutton
+    [1901] = { b = 0, s = 0 }, -- Monster - Mace, Basic Stone Hammer
+    [2809] = { b = 0, s = 0 }, -- Monster - Mace, Spiked Basic
+    [2053] = { b = 0, s = 0 }, -- Monster - Shield, Buckler Metal Damaged
+    [1911] = { b = 0, s = 0 }, -- Monster - Tool, Wrench Small
+    [5745] = { b = 0, s = 0 }, -- Monster - Trident, Wood Handle
+    [10685] = { b = 0, s = 0 }, -- Monster - Mace2H, Kazon's Maul
+    [5289] = { b = 0, s = 0 }, -- Monster - Axe, 2H Single Bladed /w Pick
+    [3774] = { b = 0, s = 0 }, -- Monster - Dynamite, Unlit
+    [2081] = { b = 0, s = 0 }, -- Monster - Torch, Offhand
+    [2200] = { b = 0, s = 0 }, -- Monster - Item, Potion Green
+    [2550] = { b = 0, s = 0 }, -- Monster - Bow, Brown
+    [1961] = { b = 0, s = 0 }, -- Monster - Shield, Buckler Wooden
+    [12890] = { b = 0, s = 0 }, -- Monster - Sword, Militia Long Sword
+    [11087] = { b = 0, s = 0 }, -- Monster - Sword2H, Ragglesnout X'Caliboar
+    [12850] = { b = 0, s = 0 }, -- Monster - Item, Bag - Black
+    [2201] = { b = 0, s = 0 }, -- Monster - Item, Vial Black
+    [2703] = { b = 0, s = 0 }, -- Monster - Item, Tankard Wooden
+    [2202] = { b = 0, s = 0 }, -- Monster - Item, Mutton with Bite
+    [2705] = { b = 0, s = 0 }, -- Monster - Item, Tankard Metal
+    [2198] = { b = 0, s = 0 }, -- Monster - Item, Potion Blue
+    [5305] = { b = 0, s = 0 }, -- Monster - Sword, Broadsword Silver Hilt
+    [23583] = { b = 0, s = 0 }, -- Monster - Sir Zeliek
+    [22724] = { b = 0, s = 0 }, -- Monster - Mace1H, Korth'azz
+    [22738] = { b = 0, s = 0 }, -- Monster - Sword, 1H Uber Demon Blade
+    [23582] = { b = 0, s = 0 }, -- Monster - Lady Blameux
+    [22709] = { b = 0, s = 0 }, -- Monster - Sword2H, Corrupted Ashbringer
+    [14873] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Jeweled Staff - Blue
+    [13750] = { b = 0, s = 0 }, -- Monster - Staff, Jeweled Blue Staff
+    [13708] = { b = 0, s = 0 }, -- Monster - Sword2H, Horde Massive Blue
+    [11322] = { b = 0, s = 0 }, -- Monster - Sword2H, Horde Broad
+    [5261] = { b = 0, s = 0 }, -- Monster - Bow, Gray
+    [2147] = { b = 0, s = 0 }, -- Monster - Sword, Falchion
+    [13160] = { b = 0, s = 0 }, -- Monster - Sword2H, Claymore Silver
+    [22199] = { b = 0, s = 0 }, -- Monster - Axe, 2H Arcanite Reaper
+    [13623] = { b = 0, s = 0 }, -- Monster - Sword2H, Horde Skull Blue Flame
+    [23356] = { b = 0, s = 0 }, -- Monster - Shield, Skullflame
+    [2181] = { b = 0, s = 0 }, -- Monster - Sword2H, Baron Rivendare
+    [21553] = { b = 0, s = 0 }, -- Monster - Sword2H, Alliance PvP
+    [2199] = { b = 0, s = 0 }, -- Monster - Item, Vial Purple
+    [14642] = { b = 0, s = 0 }, -- Monster - Gun, Tauren Feathers Silver
+    [12745] = { b = 0, s = 0 }, -- Monster - Item, Bag - Brown Offhand
+    [5301] = { b = 0, s = 0 }, -- Monster - Mace2H, Huge Wooden Maul
+    [2813] = { b = 0, s = 0 }, -- Monster - Mace, Standard Basic
+    [5280] = { b = 0, s = 0 }, -- Monster - Dagger, Gold Blade
+    [2178] = { b = 0, s = 0 }, -- Monster - Sword, Long Ornate
+    [2695] = { b = 0, s = 0 }, -- Monster - Mace, Board with Nail Club
+    [4993] = { b = 0, s = 0 }, -- Monster - Item, Skull
+    [11019] = { b = 0, s = 0 }, -- Monster - Sword, Horde Jagged Bloody
+    [4994] = { b = 0, s = 0 }, -- Monster - Item, Gizmo
+    [3697] = { b = 0, s = 0 }, -- Monster - Item, Potion Blue Offhand
+    [3699] = { b = 0, s = 0 }, -- Monster - Item, Potion Red
+    [11343] = { b = 0, s = 0 }, -- Monster - Staff, Jeweled Red Staff
+    [5532] = { b = 0, s = 0 }, -- Monster - Hot Iron Poker
+    [2810] = { b = 0, s = 0 }, -- Monster - Mace, Standard Serpent
+    [2707] = { b = 0, s = 0 }, -- Monster - Item, Flower - Yellow
+    [2718] = { b = 0, s = 0 }, -- Monster - Item, Glass - Clear
+    [19485] = { b = 0, s = 0 }, -- Monster - Item, Fish - Blue Offhand
+    [6233] = { b = 0, s = 0 }, -- Monster - Item, Flowers - Bouquet Wildflowers
+    [2884] = { b = 0, s = 0 }, -- Monster - Dynamite, Lit
+    [12786] = { b = 0, s = 0 }, -- Monster - Mace, Horde Skull Club
+    [12454] = { b = 0, s = 0 }, -- Monster - Shield, Horde B01 Brown
+    [12750] = { b = 0, s = 0 }, -- Monster - Item, Book - Black Skull Glowing
+    [12322] = { b = 0, s = 0 }, -- Monster - Staff, Green Feathered
+    [13722] = { b = 0, s = 0 }, -- Monster - Staff, Demon Skull Staff Low Purple Flame
+    [13104] = { b = 0, s = 0 }, -- Monster - Axe, Hatchet C03 Red
+    [11342] = { b = 0, s = 0 }, -- Monster - Axe, 2H Pendulum of Doom
+    [12883] = { b = 0, s = 0 }, -- Monster - Mace, Thaurissan Silver
+    [13721] = { b = 0, s = 0 }, -- Monster - Staff, Wooden Handle Spiral Head White
+    [19053] = { b = 0, s = 0 }, -- Monster - Item, Orb - A01 Blue
+    [13611] = { b = 0, s = 0 }, -- Monster - Hot Iron Poker Offhand
+    [12862] = { b = 0, s = 0 }, -- Monster - Item, Book - Black Simple
+    [22596] = { b = 0, s = 0 }, -- Monster - Sword2H, Horde A02
+    [13406] = { b = 0, s = 0 }, -- Monster - Item, Mutton Offhand
+    [10613] = { b = 0, s = 0 }, -- Monster - Sword, Katana
+    [10756] = { b = 0, s = 0 }, -- Monster - Mace2H, Smite's Mighty Hammer
+    [2558] = { b = 0, s = 0 }, -- Monster - Mace, Good Wooden Hammer
+    [20417] = { b = 0, s = 0 }, -- Monster - Glaive - 2 Blade Silver (offhand)
+    [14882] = { b = 0, s = 0 }, -- Monster - Glaive - 2 Blade Silver
+    [24418] = { b = 0, s = 0 }, -- Monster - Dagger Badass Naxx
+    [12893] = { b = 0, s = 0 }, -- Monster - Shield, Black Skull
+    [18983] = { b = 0, s = 0 }, -- Monster - Sword, Longsword Exotic Black - Low Red Flame
+    [12902] = { b = 0, s = 0 }, -- Monster - Sword2H, Luminous Evil Blade
+    [11586] = { b = 0, s = 0 }, -- Monster - Shield, Engineer B01
+    [5491] = { b = 0, s = 0 }, -- Monster - Mace2H, Large Metal
+    [3698] = { b = 0, s = 0 }, -- Monster - Item, Potion Green Offhand
+    [12332] = { b = 0, s = 0 }, -- Monster - Dagger, Green Pronged
+    [6232] = { b = 0, s = 0 }, -- Monster - Item, Flowers - Bouquet Roses
+    [13339] = { b = 0, s = 0 }, -- Monster - Staff, Feathered Silver
+    [20468] = { b = 0, s = 0 }, -- Monster - Item, Orb - A01 Green
+    [23328] = { b = 0, s = 0 }, -- Monster - Sword2H, Instructor Razuvious
+    [11587] = { b = 0, s = 0 }, -- Monster - Shield, Engineer C01
+    [22341] = { b = 0, s = 0 }, -- Monster - Mace, Horde A04 Pale - Bone Wrench
+    [14105] = { b = 0, s = 0 }, -- Monster - Bow, C01/B02 White
+    [5598] = { b = 0, s = 0 }, -- Monster - Glaive - 3 Blade
+    [12629] = { b = 0, s = 0 }, -- Monster - Axe, Horde Hatchet 01
+    [13720] = { b = 0, s = 0 }, -- Monster - Staff, Feathered Invert - Glow Black High
+    [14823] = { b = 0, s = 0 }, -- Monster - Mace2H, Horde Red Spiked Badass
+    [13706] = { b = 0, s = 0 }, -- Monster - Axe, 2H Horde Black Tombstone
+    [13610] = { b = 0, s = 0 }, -- Monster - Item, Lantern - Square Offhand
+    [12860] = { b = 0, s = 0 }, -- Monster - Item, Book - Blue Offhand
+    [3368] = { b = 0, s = 0 }, -- Monster - Item, Harpoon
+    [2716] = { b = 0, s = 0 }, -- Monster - Item, Bottle - Green
+    [12452] = { b = 0, s = 0 }, -- Monster - Shield, Horde A02 Steel
+    [12329] = { b = 0, s = 0 }, -- Monster - Staff, Crooked Green
+    [1902] = { b = 0, s = 0 }, -- Monster - Mace, Basic Wooden Hammer
+    [13854] = { b = 0, s = 0 }, -- Monster - Item, Tankard Dirty Offhand
+    [3695] = { b = 0, s = 0 }, -- Monster - Item, Vial Purple Offhand
+    [10898] = { b = 0, s = 0 }, -- Monster - Sword, Horde Sword Centurion
+    [14533] = { b = 0, s = 0 }, -- Monster - Mace, Hammer Blue Mighty
+    [13925] = { b = 0, s = 0 }, -- Monster - Mace2H, Maul B02 Silver
+    [12901] = { b = 0, s = 0 }, -- Monster - Mace2H, Golden Stone Hammer
+    [14706] = { b = 0, s = 0 }, -- Monster - Staff, 3 Piece Taped Staff Purple
+    [14836] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Jeweled Staff - Purple
+    [14534] = { b = 0, s = 0 }, -- Monster - Axe, Metal Blue Badass
+    [13627] = { b = 0, s = 0 }, -- Monster - Sword, Horde Jagged Blue
+    [12995] = { b = 0, s = 0 }, -- Monster - Shield, Horde A02 Steel
+    [18167] = { b = 0, s = 0 }, -- Monster - Sword, Machete C01
+    [18166] = { b = 0, s = 0 }, -- Monster - Shield, Royal Dreadguard
+    [6254] = { b = 0, s = 0 }, -- Monster - Shield, Ironforge
+    [13319] = { b = 0, s = 0 }, -- Monster - Shield, Horde B03
+    [15460] = { b = 0, s = 0 }, -- Monster - Gun, Shotgun
+    [12951] = { b = 0, s = 0 }, -- Monster - Axe, 2H War - Red
+    [13924] = { b = 0, s = 0 }, -- Monster - Gun, Tauren Scope Blade Feathered Silver Deluxe
+    [18062] = { b = 0, s = 0 }, -- Monster - Mace2H, Horde Hammer A03/C01Black
+    [13753] = { b = 0, s = 0 }, -- Monster - Staff, Jeweled Green Staff
+    [12328] = { b = 0, s = 0 }, -- Monster - Staff, 3 Piece Taped Staff Green
+    [13292] = { b = 0, s = 0 }, -- Monster - Wand, Horde Demon Skull
+    [13293] = { b = 0, s = 0 }, -- Monster - Wand, Horde Dark Skull
+    [23369] = { b = 0, s = 0 }, -- Monster - Dagger, Claw of Chromaggus
+    [12981] = { b = 0, s = 0 }, -- Monster - Shield, Wall Metal Gold
+    [18419] = { b = 0, s = 0 }, -- Monster - Axe, 2H Horde Red War Axe
+    [18596] = { b = 0, s = 0 }, -- Monster - Axe, Horde B01 Green
+    [18644] = { b = 0, s = 0 }, -- Monster - Staff, Ornate Jeweled Staff - Red Low Red Flame
+    [14643] = { b = 0, s = 0 }, -- Monster - Axe, 2H Battle A03 Red
+    [13609] = { b = 0, s = 0 }, -- Monster - Item, Lantern - Round Offhand
+    [19916] = { b = 0, s = 0 }, -- Monster - Mace, Standard Serpent Green
+    [19917] = { b = 0, s = 0 }, -- Monster - Wand, Horde A01 Green
+    [21551] = { b = 0, s = 0 }, -- Monster - Dagger, Alliance PvP
+    [21573] = { b = 0, s = 0 }, -- Monster - Sword, 1H Alliance PvP
+    [11323] = { b = 0, s = 0 }, -- Monster - Sword2H, Horde Jagged
+    [12856] = { b = 0, s = 0 }, -- Monster - Item, Bag - Red
+    [13628] = { b = 0, s = 0 }, -- Monster - Shield, Horde B04
+    [10591] = { b = 0, s = 0 }, -- Monster - Mace, Stormhammer
+    [21564] = { b = 0, s = 0 }, -- Monster - Gun, Kaldorei PVP Alliance
+    [21572] = { b = 0, s = 0 }, -- Monster - Shield, Alliance PVP
+    [21554] = { b = 0, s = 0 }, -- Monster - Gun, PvP Horde
+    [21555] = { b = 0, s = 0 }, -- Monster - Mace2H, Alliance PvP
+    [20412] = { b = 0, s = 0 }, -- Monster - Polearm, PVPAlliance_A01
+    [13337] = { b = 0, s = 0 }, -- Monster - Staff, Feathered Gold
+    [14879] = { b = 0, s = 0 }, -- Monster - Polearm, Blademaster
+    [14870] = { b = 0, s = 0 }, -- Monster - Axe, 2H Horde Massive Spiked
+    [21549] = { b = 0, s = 0 }, -- Monster - Shield, Shieldguard
+    [17283] = { b = 0, s = 0 }, -- Monster - Dagger, Exotic B01 Red
+    [12294] = { b = 0, s = 0 }, -- Monster - Axe, 2H Horde Green War Axe
+    [12944] = { b = 0, s = 0 }, -- Monster - Sword, Golden Long
+    [12787] = { b = 0, s = 0 }, -- Monster - Mace, Horde Bone Claw Hammer
+    [12290] = { b = 0, s = 0 }, -- Monster - Axe, Horde Badass Copper 01
+    [23743] = { b = 0, s = 0 }, -- Monster - Sword 1H - Widow's Remorse
+    [13069] = { b = 0, s = 0 }, -- Monster - Staff, D01 Flaming Red
+    [22210] = { b = 0, s = 0 }, -- Monster - Knuckle, B01 Red
+    [22211] = { b = 0, s = 0 }, -- Monster - Knuckle, B01 Red Offhand
+    [22215] = { b = 0, s = 0 }, -- Monster - Dagger, Bonescraper
+    [22213] = { b = 0, s = 0 }, -- Monster - Mace, Hand of Edward the Odd
+    [12456] = { b = 0, s = 0 }, -- Monster - Shield, Horde B02 Brown
+    [14824] = { b = 0, s = 0 }, -- Monster - Mace2H, Horde Black Spiked Badass
+    [11369] = { b = 0, s = 0 }, -- Monster - Mace, Thaurissan Hammer
+    [13622] = { b = 0, s = 0 }, -- Monster - Staff, D01 Circling Black Skull
+    [13718] = { b = 0, s = 0 }, -- Monster - Sword, Horde Jagged Red
+    [13707] = { b = 0, s = 0 }, -- Monster - Sword, Horde Sword B04 Black
+    [21286] = { b = 0, s = 0 }, -- Monster - Axe, 2H Large Double Bladed, Gold
+    [21192] = { b = 0, s = 0 }, -- Monster - Axe, 2H UBER Blackwing
+    [12869] = { b = 0, s = 0 }, -- Monster - Item, Book - B02 Blue Glowing Offhand
+    [21129] = { b = 0, s = 0 }, -- Monster - Axe, Doctor Weavil
+    [17942] = { b = 0, s = 0 }, -- Monster - Mace2H, War Maul
+    [6228] = { b = 0, s = 0 }, -- Monster - Item, Fish - Orange
+    [12754] = { b = 0, s = 0 }, -- Monster - Axe, 2H War Green - Mulgore Protector
+    [21122] = { b = 0, s = 0 }, -- Monster - Dagger, Korean A01 Black
+    [12870] = { b = 0, s = 0 }, -- Monster - Item, Potion Red Offhand
+    [13709] = { b = 0, s = 0 }, -- Monster - Staff Green Sphere Glowing
+    [14475] = { b = 0, s = 0 }, -- Monster - Axe, 2H War A03 White
+    [21123] = { b = 0, s = 0 }, -- Monster - Item, Flower - White
+    [13078] = { b = 0, s = 0 }, -- Monster - Staff, Pointed Red Crystal
+    [21121] = { b = 0, s = 0 }, -- Monster - Item, Flower - Purple
+    [14881] = { b = 0, s = 0 }, -- Monster - Glaive - 3 Blade Black
+    [20738] = { b = 0, s = 0 }, -- Monster - Mace, Scepter of the Shifting Sands
+    [12851] = { b = 0, s = 0 }, -- Monster - Item, Bag - Black Offhand
+    [12857] = { b = 0, s = 0 }, -- Monster - Item, Bag - Red Offhand
+    [13336] = { b = 0, s = 0 }, -- Monster - Staff, Feathered Black
+    [20718] = { b = 0, s = 0 }, -- Monster - Staff, Jeweled Yellow Staff w/Low Purple Glow
+    [20719] = { b = 0, s = 0 }, -- Monster - Staff, Jeweled D01/B02 Yellow w/Low Red Flame
+    [11041] = { b = 0, s = 0 }, -- Monster - Shield, Kite Metal Gold
+    [12453] = { b = 0, s = 0 }, -- Monster - Shield, Horde A03 Triangle
+    [14874] = { b = 0, s = 0 }, -- Monster - Axe, Horde C02 Black
+    [17282] = { b = 0, s = 0 }, -- Monster - Dagger, Exotic B01 Green
+    [13861] = { b = 0, s = 0 }, -- Monster - Item, Tankard Gold
+    [19988] = { b = 0, s = 0 }, -- Monster - Mace2H, Horde C01 Steel (Green)
+    [19980] = { b = 0, s = 0 }, -- Monster - Dagger, Ornate Spikey Base Red
+    [12747] = { b = 0, s = 0 }, -- Monster - Item, Orb - Lava Offhand
+    [13607] = { b = 0, s = 0 }, -- Monster - Item, Bucket - Metal
+    [19763] = { b = 0, s = 0 }, -- Monster - Shield, Round A01/Buckler Damaged A02Black
+    [19762] = { b = 0, s = 0 }, -- Monster - Axe, Horde C04 Purple
+    [12854] = { b = 0, s = 0 }, -- Monster - Item, Bag - Green
+    [12858] = { b = 0, s = 0 }, -- Monster - Item, Bag - White
+    [19623] = { b = 0, s = 0 }, -- Monster - Mace2H, Horde B01/B01 Orange
+    [11314] = { b = 0, s = 0 }, -- Monster - Claw Insect
+    [18002] = { b = 0, s = 0 }, -- Monster - Axe, 2H Horde Massive Spiked Blue
+    [14586] = { b = 0, s = 0 }, -- Monster - Mace2H, Fist of Omokk
+    [17463] = { b = 0, s = 0 }, -- Monster - Axe, 2H Horde Blue War Axe
+    [12801] = { b = 0, s = 0 }, -- Monster - Item, Bucket - Wood
+    [12867] = { b = 0, s = 0 }, -- Monster - Item, Book - B02 Black Glowing Offhand
+    [19214] = { b = 0, s = 0 }, -- Monster - Staff, Wooden Handle Spiral Head Dark
+    [6229] = { b = 0, s = 0 }, -- Monster - Item, Fish - Purple
+    [3694] = { b = 0, s = 0 }, -- Monster - Item, Vial Black Offhand
+    [6234] = { b = 0, s = 0 }, -- Monster - Item, Flower - Long Blue
+    [21580] = { b = 0, s = 0 }, -- Monster - Axe, 2H Horde PvP
+    [19014] = { b = 0, s = 0 }, -- Monster - Item, 2H Horde Wood Axe
+    [18985] = { b = 0, s = 0 }, -- Monster - Sword, Long Silver - Green Pommel - High Black Glow
+    [12859] = { b = 0, s = 0 }, -- Monster - Item, Bag - White Offhand
+    [13859] = { b = 0, s = 0 }, -- Monster - Item, Tankard Wooden Offhand
+    [13606] = { b = 0, s = 0 }, -- Monster - Item, Bucket - Metal Offhand
+    [13894] = { b = 0, s = 0 }, -- Monster - Mace, Standard B01 White
+    [10618] = { b = 0, s = 0 }, -- Monster - Dagger, Tanto Blade
+    [17462] = { b = 0, s = 0 }, -- Monster - Axe, Horde B02 Silver
+    [14877] = { b = 0, s = 0 }, -- Monster - Axe, Horde Spiked A04
+    [17382] = { b = 0, s = 0 }, -- Monster - Glaive - 2 Blade Purple
+    [12991] = { b = 0, s = 0 }, -- Monster - Dagger, Curvey Green Blade
+    [14893] = { b = 0, s = 0 }, -- Monster - Axe, Horde C01 Gold
+    [11589] = { b = 0, s = 0 }, -- Monster - Shield, Orange Skull
+    [13625] = { b = 0, s = 0 }, -- Monster - Axe, Horde B03 Copper
+    [11021] = { b = 0, s = 0 }, -- Monster - Big Sniper Gun
+    [12593] = { b = 0, s = 0 }, -- Monster - Sword, Horde Sword Bronze
+    [13630] = { b = 0, s = 0 }, -- Monster - Shield, Horde C03
+    [11042] = { b = 0, s = 0 }, -- Monster - Sword, Horde Jagged w/ Bolts
+    [13165] = { b = 0, s = 0 }, -- Monster - Sword, Long Silver - Green Pommel
+    [11317] = { b = 0, s = 0 }, -- Monster - Axe, 2H War C01 Blue Limited
+    [17482] = { b = 0, s = 0 }, -- Monster - Shield, B01 WoodCopperCap
+    [11762] = { b = 0, s = 0 }, -- Monster - Axe, Hatchet Gold
+    [14535] = { b = 0, s = 0 }, -- Monster - Spear, Cool Blue
+    [12591] = { b = 0, s = 0 }, -- Monster - Staff, Holy Staff
+    [12744] = { b = 0, s = 0 }, -- Monster - Item, Bag - Brown
+    [13290] = { b = 0, s = 0 }, -- Monster - Wand, Horde Purple Orb
+    [10878] = { b = 0, s = 0 }, -- Monster - Sword, Horde Jagged Green
+    [16582] = { b = 0, s = 0 }, -- Monster - Wand, Horde Green Feathered
+    [13612] = { b = 0, s = 0 }, -- Monster - Item, Glass - Purple Wine
+    [3364] = { b = 0, s = 0 }, -- Monster - Sword, Rapier
+    [17123] = { b = 0, s = 0 }, -- Monster - Sword, Horde Troll
+    [14875] = { b = 0, s = 0 }, -- Monster - Axe, Horde Double Blade A02
+    [14880] = { b = 0, s = 0 }, -- Monster - Axe, Wide Blade Silver
+    [14082] = { b = 0, s = 0 }, -- Monster - Mace2H, Tirion Fordring
+    [13629] = { b = 0, s = 0 }, -- Monster - Shield, Horde C02
+    [12421] = { b = 0, s = 0 }, -- Monster - Staff, White Jeweled
+    [13719] = { b = 0, s = 0 }, -- Monster - Sword, Horde Jagged Red w/ Low Yellow Glow
+    [14532] = { b = 0, s = 0 }, -- Monster - Mace2H, Warhammer Jade
+    [13751] = { b = 0, s = 0 }, -- Monster - Staff, Jeweled Yellow Staff
+    [12941] = { b = 0, s = 0 }, -- Monster - Wand, Jeweled - B02 Red
+    [12852] = { b = 0, s = 0 }, -- Monster - Item, Bag - Gray
+    [11321] = { b = 0, s = 0 }, -- Monster - Sword2H, Horde Massive Red
+    [12749] = { b = 0, s = 0 }, -- Monster - Item, Scepter - Gold Offhand
+    [13341] = { b = 0, s = 0 }, -- Monster - Item, Vial Yellow Offhand
+    [12892] = { b = 0, s = 0 }, -- Monster - Sword1H, Dark Short Sword
+    [6434] = { b = 0, s = 0 }, -- Monster - Shield, Stromgarde
+    [10615] = { b = 0, s = 0 }, -- Monster - Sword, Horde Sword Red
+    [13220] = { b = 0, s = 0 }, -- Monster - Item, Holy Symbol
+    [10568] = { b = 0, s = 0 }, -- Monster - Mace2H, Pacifier
+    [12866] = { b = 0, s = 0 }, -- Monster - Item, Book - B02 Black Glowing
+    [12142] = { b = 0, s = 0 }, -- Monster - Sword, Thick/Fat Blade
+    [13407] = { b = 0, s = 0 }, -- Monster - Item, Mutton with Bite Offhand
+    [13604] = { b = 0, s = 0 }, -- Monster - Item, Bucket - Wood Offhand
+    [6322] = { b = 0, s = 0 }, -- Monster - Staff, Arugal
+    [14575] = { b = 0, s = 0 }, -- Monster - Mace, Bashguud's Hammer
+    [7612] = { b = 0, s = 0 }, -- Monster - Axe, 2H Special NPC (Herod)
+    [11025] = { b = 0, s = 0 }, -- Monster - Sword, Katana 2H
+    [11365] = { b = 0, s = 0 }, -- Monster - Staff, Badass Red Staff
+    [12461] = { b = 0, s = 0 }, -- Monster - Axe, 2H Horde Brown Tombstone
+    [6334] = { b = 0, s = 0 }, -- Monster - Mace, Green
+    [11588] = { b = 0, s = 0 }, -- Monster - Staff, Jeweled D01 Green
+    [11591] = { b = 0, s = 0 }, -- Monster - Sword2H, Battlefield Destroyer
+    [5600] = { b = 0, s = 0 }, -- Monster - Claw - Bear
+    [12865] = { b = 0, s = 0 }, -- Monster - Item, Book - B01 Black Glowing Offhand
+    [6231] = { b = 0, s = 0 }, -- Monster - Wand, Jeweled - Green
+    [3696] = { b = 0, s = 0 }, -- Monster - Item, Vial Yellow
+    [14707] = { b = 0, s = 0 }, -- Monster - Staff, 3 Piece Taped Staff Blue
+    [14845] = { b = 0, s = 0 }, -- Monster - Staff, Wooden Handle Rounded Head Low Yellow Glow
+    [9701] = { b = 0, s = 0 }, -- Monster - Item, Sparkler Red
+    [9700] = { b = 0, s = 0 }, -- Monster - Item, Sparkler Blue
+    [9702] = { b = 0, s = 0 }, -- Monster - Item, Sparkler White
+    [3366] = { b = 0, s = 0 }, -- Monster - Sword2H, Katana
+    [12502] = { b = 0, s = 0 }, -- Monster - Glaive - Demonhunter Black Offhand
+    [12482] = { b = 0, s = 0 }, -- Monster - Glaive - Demonhunter Black
+    [2708] = { b = 0, s = 0 }, -- Monster - Item, Bouquet - White & Purple
+    [2709] = { b = 0, s = 0 }, -- Monster - Item, Flower - Rose
+    [6236] = { b = 0, s = 0 }, -- Monster - Item, Flower - Rose (White)
+    [13922] = { b = 0, s = 0 }, -- Monster - Shield, B01 WoodSteelCap
+    [5747] = { b = 0, s = 0 }, -- Monster - Trident, Ornate
+    [11585] = { b = 0, s = 0 }, -- Monster - Shield, Engineer A01
+    [12743] = { b = 0, s = 0 }, -- Monster - Item, Book - Brown Offhand
+    [12943] = { b = 0, s = 0 }, -- Monster - Staff, 3 Piece Taped Staff Red
+    [5292] = { b = 0, s = 0 }, -- Monster - Mace2H, Basic Wooden Hammer
+    [5502] = { b = 0, s = 0 }, -- Monster - Sword2H, Broadsword (1H, Special)
+    [6225] = { b = 0, s = 0 }, -- Monster - Item, Fish - Blue
+    [12864] = { b = 0, s = 0 }, -- Monster - Item, Book - B01 Black Glowing
+    [5599] = { b = 0, s = 0 }, -- Monster - Glaive - 4 Blade
+    [13504] = { b = 0, s = 0 }, -- Monster - Sword, Doomguard
+    [6230] = { b = 0, s = 0 }, -- Monster - Wand, Basic
+    [5495] = { b = 0, s = 0 }, -- Monster - Mace2H, Large Metal (1H, Special)
+    [14820] = { b = 0, s = 0 }, -- Monster - Mace2H, Horde Skull Maul
+    [12183] = { b = 0, s = 0 }, -- Monster - Mace, Thrall's Hammer
+    [6237] = { b = 0, s = 0 }, -- Monster - Item, Flowers - Bouquet Roses (Black)
+    [25818] = { b = 0, s = 0 }, -- Monster - Shield, Legion
+    [7706] = { b = 0, s = 0 }, -- Monster - Mace2H, Special NPC (Mograine)
+    [11264] = { b = 0, s = 0 }, -- Monster - Mace, Baron Silverlaine
+    [12348] = { b = 0, s = 0 }, -- Monster - Axe, Horde Badass Copper 01 (Special1H)
+    [13855] = { b = 0, s = 0 }, -- Monster - Item, Tankard Metal Offhand
+    [14084] = { b = 0, s = 0 }, -- Monster - Mace2H, Cairne Totem
+    [13814] = { b = 0, s = 0 }, -- Monster - Shield, Stromgarde B03
+    [12182] = { b = 0, s = 0 }, -- Monster - Staff of Jordan
+    [6235] = { b = 0, s = 0 }, -- Monster - Item, Flower - Rose (Black)
+    [2710] = { b = 0, s = 0 }, -- Monster - Item, Bouquet - Roses
+    [14092] = { b = 0, s = 0 }, -- Monster - Staff, Holy Staff Archbishop Benedictus
+    [2706] = { b = 0, s = 0 }, -- Monster - Item, Flower - Red
+    [3756] = { b = 0, s = 0 }, -- Monster - Item, Bottle - Black Offhand
+    [143] = { b = 0, s = 0 }, -- Monster - Shield, Stormwind Guard
+    [19924] = { b = 0, s = 0 }, -- Monster - Dagger, Fang Hook Curve Dark
+    [14085] = { b = 0, s = 0 }, -- Monster - Glaive Vol'jin
+    [7826] = { b = 0, s = 0 }, -- Monster - Staff, Special NPC (Whitemane)
+    [19981] = { b = 0, s = 0 }, -- Monster - Sword2H, Claymore B01/Broadsword A03 Black Sharpened
+    [5856] = { b = 0, s = 0 }, -- Monster - Throwing Axe
+    [6088] = { b = 0, s = 0 }, -- Monster - Torch, Ranged
+    [6886] = { b = 0, s = 0 }, -- Monster - Throwing Knife
+    [13325] = { b = 0, s = 0 }, -- Fluorescent Green Mechanostrider
     [7192] = { b = 1200, s = 300 }, -- Schematic: Goblin Rocket Boots
     [8147] = { b = 400, s = 100 }, -- Tiny Copper Key
     [8148] = { b = 1500, s = 375 }, -- Tiny Silver Key
+    [20118] = { b = 0, s = 0 }, -- Highlander's Mail Girdle
+    [20119] = { b = 0, s = 0 }, -- Highlander's Mail Girdle
+    [20120] = { b = 0, s = 0 }, -- Highlander's Mail Girdle
+    [20121] = { b = 0, s = 0 }, -- Highlander's Mail Greaves
+    [20122] = { b = 0, s = 0 }, -- Highlander's Mail Greaves
+    [20123] = { b = 0, s = 0 }, -- Highlander's Mail Greaves
+    [19015] = { b = 0, s = 0 }, -- Monster - Item, 2H Alliance Wood Axe
     [128] = { b = 5, s = 1 }, -- Deprecated Tauren Trapper's Pants
     [997] = { b = 17, s = 3 }, -- Fire Sword of Crippling
     [1024] = { b = 6, s = 1 }, -- Plate Helmet D2 (test)
     [1027] = { b = 6, s = 1 }, -- Mail Helmet A (Test)
+    [1217] = { b = 0, s = 0 }, -- Unknown Reward
+    [1255] = { b = 0, s = 0 }, -- Deprecated Conjured Mana Gem
+    [23720] = { b = 0, s = 0 }, -- Riding Turtle
     [2929] = { b = 10, s = 2 }, -- Tomb Rot
     [7725] = { b = 28575, s = 7143 }, -- Tabard of the Scarlet Crusade
     [15141] = { b = 209688, s = 41937 }, -- Onyxia Scale Breastplate
@@ -11228,6 +14918,25 @@ VanillaItemPrices = {
     [22728] = { b = 20000, s = 5000 }, -- Steam Tonk Controller
     [22729] = { b = 8000, s = 2000 }, -- Schematic: Steam Tonk Controller
     [17967] = { b = 20000, s = 5000 }, -- Refined Scale of Onyxia
+    [1041] = { b = 100000, s = 0 }, -- Horn of the Black Wolf
+    [1133] = { b = 100000, s = 0 }, -- Horn of the Winter Wolf
+    [1134] = { b = 100000, s = 0 }, -- Horn of the Gray Wolf
+    [2413] = { b = 100000, s = 0 }, -- Palomino
+    [2415] = { b = 100000, s = 0 }, -- White Stallion
+    [5663] = { b = 1000000, s = 0 }, -- Horn of the Red Wolf
+    [5874] = { b = 100000, s = 0 }, -- Harness: Black Ram
+    [5875] = { b = 100000, s = 0 }, -- Harness: Blue Ram
+    [8583] = { b = 100000, s = 0 }, -- Horn of the Skeletal Mount
+    [8589] = { b = 100000, s = 0 }, -- Old Whistle of the Ivory Raptor
+    [8590] = { b = 100000, s = 0 }, -- Old Whistle of the Obsidian Raptor
+    [8627] = { b = 100000, s = 0 }, -- Reins of the Nightsaber
+    [8630] = { b = 100000, s = 0 }, -- Reins of the Bengal Tiger
+    [8633] = { b = 100000, s = 0 }, -- Reins of the Leopard
+    [16339] = { b = 1000000, s = 0 }, -- Commander's Steed
+    [20221] = { b = 10000000, s = 0 }, -- Foror's Fabled Steed
+    [13323] = { b = 100000, s = 0 }, -- Purple Mechanostrider
+    [13324] = { b = 100000, s = 0 }, -- Red and Blue Mechanostrider
+    [14062] = { b = 800000, s = 0 }, -- Kodo Mount
     [23193] = { b = 1000000, s = 250000 }, -- Skeletal Steed Reins
     [21044] = { b = 1250, s = 250 }, -- Reindeer Reins
     [2932] = { b = 200, s = 50 }, -- Torment Vine
@@ -11285,6 +14994,8 @@ VanillaItemPrices = {
     [156] = { b = 4, s = 1 }, -- Deprecated Tauren Recruit's Pants
     [157] = { b = 1, s = 1 }, -- Deprecated Tauren Recruit's Shirt
     [184] = { b = 500, s = 125 }, -- Deprecated Small Brown Pouch
+    [527] = { b = 0, s = 0 }, -- Deprecated Gnoll War Beads
+    [734] = { b = 0, s = 0 }, -- Deprecated Malakai's Medallion
     [741] = { b = 20, s = 5 }, -- Deprecated Copper Ingot
     [746] = { b = 75, s = 18 }, -- Lord Brandon's Tabard (Test)
     [751] = { b = 38, s = 7 }, -- Deprecated Wolf Femur
@@ -11302,7 +15013,10 @@ VanillaItemPrices = {
     [855] = { b = 2500, s = 625 }, -- Deprecated White Leather Satchel
     [875] = { b = 1, s = 1 }, -- Brown Horse Summoning
     [876] = { b = 7, s = 1 }, -- Worn Wooden Buckler
+    [877] = { b = 0, s = 0 }, -- Deprecated Old Skull
+    [883] = { b = 0, s = 0 }, -- Deprecated Fire Eyed Skull
     [894] = { b = 650, s = 162 }, -- Deprecated Ravager Claw
+    [898] = { b = 0, s = 0 }, -- Deprecated Broken Venomweb Fang
     [900] = { b = 1, s = 1 }, -- Deprecated Nightmare Summoning (Mount)
     [901] = { b = 1, s = 1 }, -- Deptecated White Stallion Summoning (Mount)
     [902] = { b = 1, s = 1 }, -- Deprecated Palomino Summoning (Mount)
@@ -11319,6 +15033,10 @@ VanillaItemPrices = {
     [941] = { b = 20000, s = 5000 }, -- Deprecated Speedstone
     [945] = { b = 17, s = 3 }, -- Shadow Sword
     [948] = { b = 17, s = 3 }, -- Nature Sword
+    [951] = { b = 0, s = 0 }, -- Tome of Whirlwind (TEST)
+    [956] = { b = 0, s = 0 }, -- Deprecated Area Trigger Flag - Jasperlode mine
+    [958] = { b = 0, s = 0 }, -- Deprecated Area Trigger Flag - Darkhollow Mine
+    [960] = { b = 0, s = 0 }, -- Deprecated Area Trigger Flag - Fargodeep
     [964] = { b = 50, s = 12 }, -- Deprecated Red Linen Shirt
     [965] = { b = 300, s = 75 }, -- Deprecated Red Linen Sack
     [966] = { b = 350, s = 87 }, -- Tome of Frost Shield
@@ -11371,6 +15089,7 @@ VanillaItemPrices = {
     [1061] = { b = 6000, s = 1500 }, -- Tablet of Nullify Poison II
     [1063] = { b = 6000, s = 1500 }, -- Tablet of Nullify Disease II
     [1072] = { b = 250, s = 62 }, -- Full Moonshine
+    [1078] = { b = 0, s = 0 }, -- Deprecated Writ of Lakeshire
     [1084] = { b = 200, s = 50 }, -- Codex of Renew
     [1085] = { b = 4200, s = 1050 }, -- Codex of Mind Vision
     [1086] = { b = 600, s = 150 }, -- Codex of Inner Fire
@@ -11392,6 +15111,7 @@ VanillaItemPrices = {
     [1109] = { b = 8000, s = 2000 }, -- Codex of Dominate
     [1111] = { b = 200, s = 50 }, -- Codex of Sleep
     [1112] = { b = 600, s = 150 }, -- Codex of Holy Word: Fortitude II
+    [1115] = { b = 0, s = 0 }, -- Deprecated Ragged Scalp
     [1119] = { b = 200, s = 50 }, -- Bottled Spirits
     [1122] = { b = 100000, s = 25000 }, -- Deprecated Amulet of the White Stallion
     [1123] = { b = 100000, s = 25000 }, -- Deprecated Amulet of the Pinto
@@ -11403,12 +15123,14 @@ VanillaItemPrices = {
     [1139] = { b = 9700, s = 2425 }, -- Libram: Cleanse
     [1141] = { b = 80, s = 20 }, -- Libram: Holy Light II
     [1144] = { b = 13000, s = 3250 }, -- Libram: Divine Shield
+    [1146] = { b = 0, s = 0 }, -- Libram: Resurrection
     [1149] = { b = 3000, s = 750 }, -- Libram: Seal of Might II
     [1150] = { b = 80, s = 20 }, -- Libram: Purify
     [1151] = { b = 900, s = 225 }, -- Libram: Holy Light III
     [1157] = { b = 54, s = 10 }, -- Deprecated Militia Handaxe
     [1162] = { b = 222, s = 44 }, -- Pirates Patch (Test)
     [1163] = { b = 223, s = 44 }, -- Dwarven Explorer's Monocle (Test)
+    [1164] = { b = 0, s = 0 }, -- Sam's Tome
     [1165] = { b = 20, s = 5 }, -- Test Food
     [1170] = { b = 189, s = 37 }, -- Deprecated Brown Leather Vest
     [1174] = { b = 325, s = 65 }, -- Deprecated Light Soldier Boots
@@ -11416,6 +15138,7 @@ VanillaItemPrices = {
     [1184] = { b = 1235, s = 308 }, -- Deprecated Scarlet Badge
     [1186] = { b = 3325, s = 831 }, -- Deprecated Gnoll Taskmaster Whip
     [1192] = { b = 1263, s = 252 }, -- Deprecated Overseer's Helm
+    [1199] = { b = 0, s = 0 }, -- Charged Soulstone
     [1216] = { b = 5989, s = 1197 }, -- Frost Bracers
     [1222] = { b = 58, s = 14 }, -- Broken Tooth
     [1224] = { b = 5300, s = 1325 }, -- Grimoire of Sense Demons
@@ -11430,18 +15153,23 @@ VanillaItemPrices = {
     [1245] = { b = 300, s = 75 }, -- Grimoire of Immolate II
     [1246] = { b = 1300, s = 325 }, -- Grimoire of Demon Breath
     [1250] = { b = 6700, s = 1675 }, -- Grimoire of Detect Lesser Invisibility
+    [1253] = { b = 0, s = 0 }, -- Deprecated Summoned Lockpick
     [1258] = { b = 4350, s = 1087 }, -- Bind On Use Test Item
     [1259] = { b = 12, s = 2 }, -- JYoo test item
     [1266] = { b = 3431, s = 686 }, -- Deprecated Orcslayer
+    [1267] = { b = 0, s = 0 }, -- Deprecated Cask of Merlot
     [1268] = { b = 500, s = 125 }, -- Deprecated Bottle of Moonshine
+    [1269] = { b = 0, s = 0 }, -- Deprecated Skin of Sweet Rum
     [1272] = { b = 653, s = 130 }, -- Deprecated Fine Spun Mantle
     [1279] = { b = 963, s = 192 }, -- Deprecated Soft Leather Hood
+    [1281] = { b = 0, s = 0 }, -- Deprecated Quiver (TEST)
     [1298] = { b = 445, s = 89 }, -- Deprecated Night Mage Wristguards
     [1311] = { b = 2714, s = 542 }, -- Deprecated Oslow's Wood Cutter
     [1312] = { b = 2178, s = 435 }, -- Deprecated Oslow's Hammer
     [1313] = { b = 2186, s = 437 }, -- Deprecated Oslow's Ice Pick
     [1321] = { b = 210, s = 52 }, -- Deprecated Broiled Sunfish
     [1323] = { b = 4, s = 1 }, -- Deprecated [PH] Recipe: Broiled Sunfish
+    [1324] = { b = 0, s = 0 }, -- Deprecated Parker's Lunch
     [1328] = { b = 2200, s = 550 }, -- Book of Faerie Fire
     [1332] = { b = 900, s = 225 }, -- Book of Cure Poison
     [1334] = { b = 300, s = 75 }, -- Book of Rejuvenation II
@@ -11451,6 +15179,7 @@ VanillaItemPrices = {
     [1350] = { b = 685, s = 171 }, -- Deprecated Hex Doll
     [1352] = { b = 800, s = 200 }, -- Cracked Skull Mortar
     [1354] = { b = 124, s = 24 }, -- Deprecated Homespun Shawl
+    [1356] = { b = 0, s = 0 }, -- Commendation - Elwynn Forest
     [1363] = { b = 415, s = 83 }, -- Deprecated Captain Sander's Eyepatch
     [1371] = { b = 9, s = 1 }, -- Deprecated Ragged Leather Shoulderpads
     [1379] = { b = 10, s = 2 }, -- Deprecated Frayed Shoulderpads
@@ -11470,6 +15199,7 @@ VanillaItemPrices = {
     [1492] = { b = 4, s = 1 }, -- Deprecated Recipe: Murloc Fin Soup
     [1500] = { b = 239, s = 47 }, -- Deprecated Calico Shoulderpads
     [1508] = { b = 556, s = 111 }, -- Deprecated Patched Leather Shoulderpads
+    [1527] = { b = 0, s = 0 }, -- Deprecated Fistful of Hay
     [1533] = { b = 250, s = 62 }, -- Deprecated Bloodscalp Idol
     [1534] = { b = 4200, s = 1050 }, -- Libram: Holy Light IV
     [1535] = { b = 9471, s = 1894 }, -- Deprecated Bloodscalp Vest
@@ -11501,15 +15231,20 @@ VanillaItemPrices = {
     [1655] = { b = 7600, s = 1900 }, -- Deprecated Codex of Sustenance III
     [1657] = { b = 6700, s = 1675 }, -- Codex of Resurrection II
     [1658] = { b = 6700, s = 1675 }, -- Codex of Shadow Word: Pain IV
+    [1663] = { b = 0, s = 0 }, -- Deprecated Stranglethorn Mine Map
+    [1672] = { b = 0, s = 0 }, -- Deprecated Ogre Head
     [1676] = { b = 3000, s = 750 }, -- Codex of Sleep II
     [1681] = { b = 1800, s = 450 }, -- Grimoire of Cripple
     [1684] = { b = 11105, s = 2221 }, -- Deprecated Totemic Headpiece
     [1689] = { b = 230, s = 57 }, -- Deprecated Medium Tiger Pelt
     [1690] = { b = 1325, s = 331 }, -- Deprecated Fine Panther Whisker
     [1691] = { b = 950, s = 237 }, -- Deprecated Ebony Panther Claw
+    [1692] = { b = 0, s = 0 }, -- Deprecated Shadowmaw Fang
     [1693] = { b = 280, s = 70 }, -- Deprecated Shadowmaw Pelt
     [1694] = { b = 280, s = 70 }, -- Deprecated Lashtail Hide
     [1695] = { b = 300, s = 75 }, -- Deprecated Jungle Stalker Pelt
+    [1698] = { b = 0, s = 0 }, -- Deprecated Lashtail Claw
+    [1699] = { b = 0, s = 0 }, -- Deprecated Jungle Stalker Tail
     [1700] = { b = 12154, s = 3038 }, -- Deprecated Blood Totem
     [1704] = { b = 570, s = 142 }, -- Deprecated Cold Basilisk Eye
     [1719] = { b = 17, s = 3 }, -- Deprecated Flint Troll Axe
@@ -11526,14 +15261,18 @@ VanillaItemPrices = {
     [1914] = { b = 850, s = 212 }, -- Deprecated Miniature Silver Hammer
     [1915] = { b = 120, s = 30 }, -- Deprecated Bag of Teeth
     [1918] = { b = 40, s = 10 }, -- Deprecated Lockpick
+    [1924] = { b = 0, s = 0 }, -- Deprecated Hollowed Wooden Tube
     [1940] = { b = 1269, s = 317 }, -- Deprecated Skin of Sweet Rum
     [1948] = { b = 2044, s = 408 }, -- Deprecated Large Broom
     [1950] = { b = 400, s = 100 }, -- Deprecated Gold Ingot
     [1960] = { b = 670, s = 134 }, -- Deprecated Ironforge Chain Pauldrons
     [1963] = { b = 119, s = 29 }, -- Deprecated Bone Chips
     [1969] = { b = 427, s = 85 }, -- Deprecated Stormwind Guard Belt
+    [1977] = { b = 0, s = 0 }, -- 20-slot Bag
     [1995] = { b = 240, s = 60 }, -- Deprecated Cat's Paw
     [1999] = { b = 6395, s = 1279 }, -- Deprecated Torn Leather Harness
+    [2002] = { b = 0, s = 0 }, -- Deprecated Jordan's Quiver
+    [2003] = { b = 0, s = 0 }, -- Deprecated Big Quiver
     [2012] = { b = 5200, s = 1300 }, -- Deprecated Phylactery of Rot
     [2016] = { b = 8847, s = 1769 }, -- Dusty Chain Armor
     [2038] = { b = 1745, s = 349 }, -- Deprecated Cougar Head Cap
@@ -11543,6 +15282,7 @@ VanillaItemPrices = {
     [2060] = { b = 32, s = 8 }, -- Deprecated Chunk of Boar Meat
     [2071] = { b = 10, s = 2 }, -- Deprecated Mountain Spring Water
     [2103] = { b = 1, s = 1 }, -- Test Arrow
+    [2104] = { b = 100, s = 0 }, -- Deprecated Standard Shot
     [2106] = { b = 4, s = 1 }, -- Deprecated Worn Pants
     [2107] = { b = 2, s = 1 }, -- Deprecated Travel-worn Boots
     [2115] = { b = 500, s = 125 }, -- Deprecated Small White Pouch
@@ -11558,6 +15298,7 @@ VanillaItemPrices = {
     [2306] = { b = 47, s = 9 }, -- Deprecated Light Winter Boots
     [2322] = { b = 75, s = 18 }, -- Deprecated Crag Boar Hide
     [2323] = { b = 223, s = 55 }, -- Deprecated Longsnout Hide
+    [2363] = { b = 0, s = 0 }, -- Deprecated Skeleton Key
     [2404] = { b = 100, s = 25 }, -- Deprecated Pattern: Light Winter Cloak
     [2405] = { b = 100, s = 25 }, -- Deprecated Pattern: Light Winter Boots
     [2410] = { b = 6, s = 1 }, -- Smoky Torch
@@ -11580,6 +15321,10 @@ VanillaItemPrices = {
     [2501] = { b = 721, s = 144 }, -- Wooden Warhammer
     [2502] = { b = 295, s = 59 }, -- Scuffed Dagger
     [2503] = { b = 519, s = 103 }, -- Adept Short Staff
+    [2513] = { b = 25, s = 0 }, -- Deprecated Iron Shot
+    [2514] = { b = 50, s = 0 }, -- Depricated Sharp Arrow
+    [2517] = { b = 25, s = 0 }, -- Deprecated Standard Arrow
+    [2518] = { b = 50, s = 0 }, -- Deprecated Solid Shot
     [2554] = { b = 100, s = 25 }, -- Deprecated Recipe: Elixir of Fortitude
     [2573] = { b = 76, s = 15 }, -- Deprecated Forest Silk Gloves
     [2574] = { b = 585, s = 117 }, -- Deprecated Trogg Vest
@@ -11587,15 +15332,20 @@ VanillaItemPrices = {
     [2599] = { b = 120, s = 30 }, -- Deprecated Pattern: Forest Silk Gloves
     [2600] = { b = 120, s = 30 }, -- Deprecated Pattern: Trogg Vest
     [2602] = { b = 650, s = 162 }, -- Deprecated Pattern: Feathered Robe
+    [2638] = { b = 0, s = 0 }, -- Deprecated Ironband's Powder Approval
     [2647] = { b = 169, s = 33 }, -- Deprecated Loose Chain Shoulderpads
     [2655] = { b = 15, s = 3 }, -- Deprecated Flimsy Chain Shoulderpads
     [2664] = { b = 5369, s = 1073 }, -- Spinner Fang
+    [2668] = { b = 0, s = 0 }, -- Threshadon Tooth
+    [2669] = { b = 0, s = 0 }, -- Threshadon Claw
     [2688] = { b = 50, s = 12 }, -- Squirrel Nut
     [2693] = { b = 80, s = 20 }, -- OLD Stormwind Seasoning Salts 
+    [2755] = { b = 0, s = 0 }, -- Green Hills of Stranglethorn
     [2789] = { b = 25, s = 6 }, -- Deprecated Bent Copper Lockpick
     [2790] = { b = 50, s = 12 }, -- Deprecated Straight Copper Lockpick
     [2791] = { b = 100, s = 25 }, -- Deprecated Fine Copper Lockpick
     [2792] = { b = 200, s = 50 }, -- Deprecated Worn Bronze Lockpick
+    [2793] = { b = 0, s = 0 }, -- Deprecated Book: The History of Stormwind
     [2803] = { b = 3000, s = 750 }, -- Deprecated Static Charm
     [2804] = { b = 8500, s = 2125 }, -- Deprecated Freezing Talisman
     [2808] = { b = 11820, s = 2364 }, -- Torch of Flame
@@ -11606,6 +15356,7 @@ VanillaItemPrices = {
     [2867] = { b = 3148, s = 629 }, -- Rough Bronze Bracers
     [2887] = { b = 20, s = 5 }, -- Ruined Wolf Pelt
     [2890] = { b = 20, s = 5 }, -- Ruined Boar Pelt
+    [2891] = { b = 0, s = 0 }, -- Letter to the City Architect
     [2895] = { b = 50, s = 12 }, -- Creeping Pain
     [2896] = { b = 100, s = 25 }, -- Creeping Anguish
     [2918] = { b = 2633, s = 526 }, -- Deprecated Coif of Inner Strength
@@ -11615,6 +15366,7 @@ VanillaItemPrices = {
     [2922] = { b = 1000, s = 250 }, -- Spirit Relic
     [2923] = { b = 2000, s = 500 }, -- Relic of Righteousness
     [2927] = { b = 200, s = 50 }, -- Creeping Torment
+    [2945] = { b = 0, s = 0 }, -- (OLD)Medium Throwing Knife
     [2948] = { b = 1250, s = 312 }, -- Deprecated Talisman of Cleansing
     [2993] = { b = 1025, s = 205 }, -- Deprecated Inscribed Leather Helm
     [2994] = { b = 1230, s = 246 }, -- Deprecated Seer's Monocle
@@ -11628,6 +15380,9 @@ VanillaItemPrices = {
     [3007] = { b = 664, s = 132 }, -- Deprecated Dark Iron Pauldrons
     [3015] = { b = 3250, s = 812 }, -- Deprecated Chatter's Rock
     [3028] = { b = 15434, s = 3086 }, -- Longbow
+    [3029] = { b = 200, s = 0 }, -- Depricated Whipwood Arrow
+    [3031] = { b = 450, s = 0 }, -- Depricated Razor Arrow
+    [3032] = { b = 200, s = 0 }, -- Deprecated Impact Shot
     [3044] = { b = 18, s = 3 }, -- OLDMonster - Mace, Standard Basic Offhand
     [3046] = { b = 2859, s = 571 }, -- Deprecated Glinting Scale Crown
     [3050] = { b = 4232, s = 846 }, -- Deprecated Winter Mail Leggings
@@ -11657,6 +15412,7 @@ VanillaItemPrices = {
     [3100] = { b = 8100, s = 2025 }, -- Tome of Blizzard II
     [3101] = { b = 20000, s = 5000 }, -- Tome of Frost Nova III
     [3102] = { b = 8100, s = 2025 }, -- Tome of Arcane Intellect III
+    [3109] = { b = 3, s = 0 }, -- (OLD)Wicked Throwing Dagger
     [3113] = { b = 80, s = 20 }, -- Codex of Holy Word: Shield
     [3114] = { b = 5000, s = 1250 }, -- Codex of Shadow Word: Befuddle
     [3115] = { b = 6700, s = 1675 }, -- Codex of Renew IV
@@ -11671,6 +15427,7 @@ VanillaItemPrices = {
     [3125] = { b = 750, s = 187 }, -- Tablet of Serpent Totem II
     [3126] = { b = 1000, s = 250 }, -- Tablet of Shock II
     [3127] = { b = 3000, s = 750 }, -- Tablet of Shock III
+    [3128] = { b = 0, s = 0 }, -- (OLD)Medium Throwing Axe
     [3129] = { b = 6700, s = 1675 }, -- Tablet of Lightning Bolt IV
     [3130] = { b = 5000, s = 1250 }, -- Tablet of Restoration IV
     [3132] = { b = 9700, s = 2425 }, -- Tablet of Molten Blast IV
@@ -11697,18 +15454,33 @@ VanillaItemPrices = {
     [3222] = { b = 6015, s = 1203 }, -- Wicked Dagger
     [3226] = { b = 350, s = 70 }, -- Deprecated Watchman Pauldrons
     [3232] = { b = 7430, s = 1486 }, -- Deprecated Drake-scale Leggings
+    [3242] = { b = 0, s = 0 }, -- OLDMonster - Chest, Plate Silver
+    [3243] = { b = 0, s = 0 }, -- OLDMonster - Legs, Plate Silver
+    [3244] = { b = 0, s = 0 }, -- OLDMonster - Feet, Plate Silver
+    [3245] = { b = 0, s = 0 }, -- OLDMonster - Hands, Plate Silver
+    [3246] = { b = 0, s = 0 }, -- OLDMonster - Shoulder, Plate Silver
+    [3247] = { b = 0, s = 0 }, -- OLDMonster - Waist, Plate Silver
+    [3249] = { b = 0, s = 0 }, -- Conjured test Item
     [3259] = { b = 20, s = 5 }, -- Ruined Bat Hide
     [3271] = { b = 25, s = 5 }, -- Deprecated Flax Mantle
     [3278] = { b = 8602, s = 1720 }, -- Aura Proc Damage Sword
     [3298] = { b = 300, s = 75 }, -- Deprecated Grizzled Bearskin Pouch
+    [3316] = { b = 0, s = 0 }, -- Alaric's Head
     [3320] = { b = 110, s = 22 }, -- Bonecaster Sash
     [3333] = { b = 411, s = 82 }, -- Deprecated Scarlet Captain's Pauldrons
+    [3338] = { b = 0, s = 0 }, -- Deprecated Obsidian Stone
+    [3410] = { b = 0, s = 0 }, -- Deprecated Glade Bear Fang
     [3436] = { b = 119, s = 23 }, -- Deprecated Quilted Mantle
     [3438] = { b = 115, s = 28 }, -- Ankh of Resurrection
     [3441] = { b = 650, s = 162 }, -- Deprecated Crippling Agent
     [3459] = { b = 305, s = 61 }, -- Deprecated Weathered Shoulderpads
     [3500] = { b = 250, s = 62 }, -- Deprecated Battered Lock
+    [3501] = { b = 0, s = 0 }, -- Deprecated Rusted Lock
+    [3503] = { b = 0, s = 0 }, -- Deprecated Forboding Document
+    [3504] = { b = 0, s = 0 }, -- Deprecated Encrypted Letterr
     [3507] = { b = 20, s = 5 }, -- Deprecated Test Fishliver Oil
+    [3513] = { b = 0, s = 0 }, -- Deprecated Contract for the Magistrate
+    [3519] = { b = 0, s = 0 }, -- Deprecated DEFAULT QUEST ITEM - Scroll
     [3522] = { b = 10, s = 2 }, -- Black Night Elf Breastplate
     [3523] = { b = 10, s = 2 }, -- Unused Black Night Elf Pants
     [3524] = { b = 7, s = 1 }, -- Unused Black Night Elf Boots
@@ -11737,12 +15509,20 @@ VanillaItemPrices = {
     [3549] = { b = 4, s = 1 }, -- Unused White Leather D03 Gloves
     [3557] = { b = 75, s = 18 }, -- Unused Tabard of Chow
     [3568] = { b = 1000, s = 250 }, -- Deprecated Oslow's Toolbox
+    [3580] = { b = 0, s = 0 }, -- Deprecated Iron Key
+    [3584] = { b = 0, s = 0 }, -- Deprecated Perenolde's Head
+    [3620] = { b = 0, s = 0 }, -- Lillith's Remains
+    [3624] = { b = 0, s = 0 }, -- Deprecated QDROP - Ma'ruk Wyrmscale
     [3646] = { b = 1247, s = 249 }, -- Deprecated Stonecloth Bracers
     [3648] = { b = 365, s = 73 }, -- Warrior's Buckler
     [3675] = { b = 225, s = 56 }, -- Burnt Out Torch
+    [3677] = { b = 0, s = 0 }, -- Deprecated Remington's List
+    [3686] = { b = 0, s = 0 }, -- Deprecated Jkaplan TEST
     [3687] = { b = 288592, s = 57718 }, -- Deprecated Unholy Avenger
     [3705] = { b = 2910, s = 727 }, -- Deprecated Rabid Fang
+    [3707] = { b = 0, s = 0 }, -- Nagaz Parchment
     [3738] = { b = 17195, s = 3439 }, -- Brewing Rod
+    [3744] = { b = 0, s = 0 }, -- Bloodstone Pendant
     [3746] = { b = 20000, s = 5000 }, -- Deprecated Test Strongbox
     [3762] = { b = 4000, s = 1000 }, -- Librarian's Satchel
     [3768] = { b = 250, s = 62 }, -- Deprecated Anti-magic Potion
@@ -11753,6 +15533,8 @@ VanillaItemPrices = {
     [3791] = { b = 12000, s = 3000 }, -- Relic of the Light
     [3861] = { b = 500, s = 125 }, -- Blacksteel Bar
     [3865] = { b = 36, s = 7 }, -- Test Offhand Weapon
+    [3878] = { b = 0, s = 0 }, -- Deprecated Conjured Mana Jewel
+    [3881] = { b = 0, s = 0 }, -- Deprecated Kurzen's Head
     [3883] = { b = 1665, s = 333 }, -- Deprecated Thick Cloth Hat
     [3884] = { b = 2090, s = 418 }, -- Deprecated Cured Leather Cap
     [3885] = { b = 2517, s = 503 }, -- Deprecated Scalemail Cap
@@ -11760,6 +15542,7 @@ VanillaItemPrices = {
     [3887] = { b = 3789, s = 757 }, -- Deprecated Cuirboulli Cap
     [3888] = { b = 4565, s = 913 }, -- Deprecated Polished Scale Cap
     [3895] = { b = 51437, s = 10287 }, -- TEST Legendary
+    [3929] = { b = 0, s = 0 }, -- Maury's Loot
     [3933] = { b = 13353, s = 2670 }, -- Deprecated Moon Glaive
     [3934] = { b = 13699, s = 2739 }, -- Deprecated Warden Blade
     [3952] = { b = 25547, s = 5109 }, -- Mesh Belt
@@ -11906,9 +15689,16 @@ VanillaItemPrices = {
     [4295] = { b = 1500, s = 375 }, -- Pattern: Double-stitched Leather Gloves OLD
     [4418] = { b = 520, s = 130 }, -- Deprecated Creeper Cakes
     [4427] = { b = 390, s = 97 }, -- Deprecated Scroll of Spirit Armor V
+    [4431] = { b = 0, s = 0 }, -- Deprecated Shard of Myzrael
     [4442] = { b = 1532, s = 306 }, -- Deprecated Dark Mantle
     [4451] = { b = 55, s = 13 }, -- Deprecated Stasis Totem
+    [4452] = { b = 0, s = 0 }, -- Deprecated Resonant Gem
+    [4475] = { b = 0, s = 0 }, -- Deprecated The Southern Kingdoms
+    [4486] = { b = 0, s = 0 }, -- Deprecated Jorell's Head
     [4501] = { b = 40000, s = 10000 }, -- Deprecated Brown Wayfarer's Knapsack
+    [4523] = { b = 0, s = 0 }, -- Deprecated Shadow Hunter Knife
+    [4524] = { b = 0, s = 0 }, -- Balloo's Memorial
+    [4559] = { b = 0, s = 0 }, -- CHU's QUEST ITEM
     [4573] = { b = 20000, s = 5000 }, -- Deprecated Pat's Test Strongbox
     [4578] = { b = 2145, s = 536 }, -- Deprecated Long Panther Tail
     [4579] = { b = 2950, s = 737 }, -- Deprecated Spotted Panther Skin
@@ -11924,10 +15714,17 @@ VanillaItemPrices = {
     [4688] = { b = 509, s = 101 }, -- Deprecated Hunting Spaulders
     [4691] = { b = 515, s = 103 }, -- Deprecated Ceremonial Leather Mantle
     [4704] = { b = 18, s = 3 }, -- OLDCeremonial Club
+    [4728] = { b = 0, s = 0 }, -- Twain's Shoulder
     [4730] = { b = 46, s = 9 }, -- Deprecated Prospector's Pick
+    [4747] = { b = 0, s = 0 }, -- Stormbull Well Water
+    [4748] = { b = 0, s = 0 }, -- Redhorn Well Water
+    [4749] = { b = 0, s = 0 }, -- Wildmane Well Water
     [4750] = { b = 22, s = 4 }, -- OLDWinterhoof Cleansing Totem
+    [4754] = { b = 0, s = 0 }, -- Deprecated Empty Skin
     [4756] = { b = 20, s = 5 }, -- Ruined Cat Pelt
+    [4760] = { b = 0, s = 0 }, -- OLDThunderhorn Cleansing Totem
     [4761] = { b = 278, s = 55 }, -- Deprecated Pearled Chain Pants
+    [4762] = { b = 0, s = 0 }, -- OLDWildmane Cleansing Totem
     [4763] = { b = 675, s = 135 }, -- Blackwood Recurve Bow
     [4764] = { b = 176, s = 35 }, -- Deprecated Avenger Shoulders
     [4773] = { b = 236, s = 47 }, -- Deprecated Blessed Bracers
@@ -11935,16 +15732,23 @@ VanillaItemPrices = {
     [4811] = { b = 1093, s = 218 }, -- Deprecated Studded Shoulders
     [4812] = { b = 1149, s = 229 }, -- Deprecated Crimson Shoulders
     [4815] = { b = 878, s = 175 }, -- Deprecated Heavy Brass Shoulder
+    [4839] = { b = 0, s = 0 }, -- Deprecated Demon Scarred Pelt
+    [4842] = { b = 0, s = 0 }, -- test
     [4853] = { b = 48, s = 9 }, -- TEST QUEST HELM
     [4855] = { b = 4190, s = 838 }, -- Unused Cloth Shoulder A01 Gray
     [4856] = { b = 4206, s = 841 }, -- Unused Cloth Shoulder A02 Yellow
     [4857] = { b = 4222, s = 844 }, -- Unused Cloth Shoulder B01 Silver
     [4858] = { b = 4238, s = 847 }, -- Unused Cloth Shoulder B02 Black
+    [4868] = { b = 0, s = 0 }, -- Deprecated Scorched Heart
+    [4884] = { b = 0, s = 0 }, -- Deprecated Small Scorpid Carapace
+    [4885] = { b = 0, s = 0 }, -- Deprecated Large Scorpid Carapace
+    [4889] = { b = 0, s = 0 }, -- Deprecated Mottled Boar Steaks
     [4899] = { b = 3990, s = 798 }, -- Test Crossbow
     [4900] = { b = 6677, s = 1335 }, -- Test Spear
     [4901] = { b = 6702, s = 1340 }, -- Test Polearm
     [4902] = { b = 13, s = 2 }, -- Deprecated Apprentice Wand
     [4912] = { b = 3886, s = 777 }, -- Test Wand JChow
+    [4927] = { b = 0, s = 0 }, -- Deprecated Keg of Chen's Stormstout
     [4930] = { b = 1000, s = 250 }, -- Handmade Leather Bag
     [4934] = { b = 114, s = 22 }, -- Deprecated Heavy Cord Shoulderpads
     [4943] = { b = 508, s = 101 }, -- Torka's Egg Cracker [UNUSED]
@@ -11953,6 +15757,7 @@ VanillaItemPrices = {
     [4956] = { b = 157, s = 31 }, -- Test Totem
     [4959] = { b = 1, s = 1 }, -- Throwing Tomahawk
     [4965] = { b = 745, s = 149 }, -- Bloodhoof Hand Axe
+    [4966] = { b = 0, s = 0 }, -- Mazzranache's Head
     [4981] = { b = 20000, s = 5000 }, -- Agmond's Belt Pouch
     [4985] = { b = 3887, s = 777 }, -- Test Proc Wand
     [4988] = { b = 14630, s = 3657 }, -- Burning Obsidian Band
@@ -11964,7 +15769,12 @@ VanillaItemPrices = {
     [5004] = { b = 7225, s = 1806 }, -- Mark of the Kirin Tor
     [5008] = { b = 6185, s = 1546 }, -- Quicksilver Ring
     [5010] = { b = 7215, s = 1803 }, -- Inscribed Gold Ring
+    [5014] = { b = 0, s = 0 }, -- Wrapping Paper (PT)
+    [5015] = { b = 0, s = 0 }, -- Wrapped Item (PT)
     [5024] = { b = 40, s = 10 }, -- Frost Vial
+    [5041] = { b = 0, s = 0 }, -- TEST Translation: Taurahe
+    [5045] = { b = 0, s = 0 }, -- Skull Gift
+    [5046] = { b = 0, s = 0 }, -- Locked Gift
     [5047] = { b = 5000, s = 1250 }, -- Skull Wrapping Paper
     [5049] = { b = 50, s = 12 }, -- Self-locking Ironpaper
     [5053] = { b = 5, s = 1 }, -- Deprecated Plain Brown Robe
@@ -12001,27 +15811,58 @@ VanillaItemPrices = {
     [5161] = { b = 15700, s = 3925 }, -- Deprecated Book of Barkskin II
     [5162] = { b = 20000, s = 5000 }, -- Deprecated Book of Battle Roar II
     [5163] = { b = 2900, s = 725 }, -- Book of Mark of the Wild III
+    [5171] = { b = 0, s = 0 }, -- Deprecated Neeru's Power Stone
     [5172] = { b = 100, s = 25 }, -- Death Capsule
+    [5174] = { b = 0, s = 0 }, -- Note from Neeru
+    [5222] = { b = 0, s = 0 }, -- Deprecated Mana Gem
+    [5223] = { b = 0, s = 0 }, -- Empty Mana Gem
+    [5226] = { b = 0, s = 0 }, -- Deprecated Conjured Mana Jewel
+    [5227] = { b = 0, s = 0 }, -- Empty Mana Jewel
+    [5228] = { b = 0, s = 0 }, -- Deprecated Empty Bloodstone
+    [5230] = { b = 0, s = 0 }, -- Deprecated Bloodstone
+    [5231] = { b = 0, s = 0 }, -- Deprecated Greater Bloodstone
     [5235] = { b = 206, s = 41 }, -- Alchemist's Wand
     [5255] = { b = 3426, s = 685 }, -- Quilboar Tomahawk
+    [5264] = { b = 0, s = 0 }, -- Complimentary Beer Token
+    [5265] = { b = 0, s = 0 }, -- Watered-down Beer
     [5282] = { b = 12, s = 2 }, -- Monster - Dagger, Fang Hook Curve
     [5283] = { b = 12, s = 2 }, -- Monster - Dagger, Ornate Spikey Base
+    [5294] = { b = 0, s = 0 }, -- Deprecated Hands of the New Moon
+    [5295] = { b = 0, s = 0 }, -- Deprecated Hands of the Crescent Moon
+    [5296] = { b = 0, s = 0 }, -- Deprecated Hands of the Quarter Moon
+    [5297] = { b = 0, s = 0 }, -- Deprecated Hands of the Gibbous Moon
+    [5298] = { b = 0, s = 0 }, -- Deprecated Hands of the Full Moon
     [5307] = { b = 1030, s = 206 }, -- Deprecated Skipper's Hat
     [5308] = { b = 689, s = 137 }, -- Deprecated Deckhand Gloves
+    [5330] = { b = 0, s = 0 }, -- Elven Cup Relic
     [5331] = { b = 945, s = 236 }, -- OLDBlackfathom MAGIC Relic
+    [5333] = { b = 0, s = 0 }, -- Deprecated Mathystra Relic
+    [5353] = { b = 0, s = 0 }, -- Message for Elissa Starbreeze
     [5358] = { b = 3134, s = 626 }, -- Deprecated Whisperwind Headdress
     [5365] = { b = 30, s = 7 }, -- Deprecated Pickpocket
+    [5372] = { b = 0, s = 0 }, -- Deprecated Glowing Shrunken Skull
     [5378] = { b = 5, s = 1 }, -- Shane Test (DELETE ME)
+    [5380] = { b = 0, s = 0 }, -- Sealed Letter to Elissa
+    [5381] = { b = 0, s = 0 }, -- Sealed Letter to Balthule
+    [5384] = { b = 0, s = 0 }, -- Deprecated Tower of Althalaxx Key
     [5400] = { b = 70, s = 17 }, -- Blood of Cobrahn
     [5401] = { b = 70, s = 17 }, -- Blood of Pythas
     [5402] = { b = 70, s = 17 }, -- Blood of Anacondra
     [5403] = { b = 70, s = 17 }, -- Blood of Serpentis
+    [5406] = { b = 0, s = 0 }, -- Empty Minor Bloodstone
+    [5407] = { b = 0, s = 0 }, -- Deprecated Empty Lesser Bloodstone
+    [5408] = { b = 0, s = 0 }, -- Deprecated Minor Bloodstone
+    [5409] = { b = 0, s = 0 }, -- Deprecated Lesser Bloodstone
+    [5410] = { b = 0, s = 0 }, -- OLDCeremonial Club
     [5434] = { b = 730, s = 182 }, -- Deprecated Pickpocket Water 31-40
     [5436] = { b = 1215, s = 303 }, -- Deprecated Pickpocket Undead 41-50
+    [5438] = { b = 0, s = 0 }, -- OLDPlague Vials
     [5449] = { b = 60, s = 15 }, -- Deprecated Cracked Elemental Bracer
     [5450] = { b = 85, s = 21 }, -- Deprecated Busted Elemental Bracer
     [5453] = { b = 40, s = 10 }, -- Deprecated Shattered Elemental Bracer
     [5454] = { b = 105, s = 26 }, -- Deprecated Split Elemental Bracer
+    [5515] = { b = 0, s = 0 }, -- Deprecated Iron Pummel
+    [5531] = { b = 0, s = 0 }, -- Deprecated Brakgul Deathbringer's Head
     [5545] = { b = 40896, s = 8179 }, -- Fast Test Polearm
     [5546] = { b = 105311, s = 21062 }, -- Fast Test Crossbow
     [5548] = { b = 106061, s = 21212 }, -- Fast Test Bow
@@ -12052,6 +15893,9 @@ VanillaItemPrices = {
     [5648] = { b = 2900, s = 725 }, -- Tome of Frost Armor III
     [5649] = { b = 2900, s = 725 }, -- Tome of Blizzard
     [5650] = { b = 2900, s = 725 }, -- Tome of Conjure Water III
+    [5651] = { b = 0, s = 0 }, -- Deprecated Dull Razormane Backstabber
+    [5652] = { b = 0, s = 0 }, -- Deprecated Cracked Razormane Wand
+    [5653] = { b = 0, s = 0 }, -- Deprecated Broken Razormane War Shield
     [5654] = { b = 400, s = 100 }, -- Instant Toxin
     [5657] = { b = 1000, s = 250 }, -- Recipe: Instant Toxin
     [5658] = { b = 350, s = 87 }, -- Libram: Seal of Might
@@ -12074,6 +15918,7 @@ VanillaItemPrices = {
     [5683] = { b = 35000, s = 8750 }, -- Libram: Divine Shield II
     [5684] = { b = 4200, s = 1050 }, -- Libram: Seal of Salvation
     [5685] = { b = 20000, s = 5000 }, -- Libram: Redemption
+    [5688] = { b = 0, s = 0 }, -- Test Language Item
     [5696] = { b = 80, s = 20 }, -- Tablet of Shock
     [5697] = { b = 200, s = 50 }, -- Tablet of Healing Totem
     [5698] = { b = 200, s = 50 }, -- Tablet of Lightning Shield
@@ -12116,32 +15961,75 @@ VanillaItemPrices = {
     [5822] = { b = 3613, s = 722 }, -- Hedgeseed Gauntlets
     [5823] = { b = 20, s = 5 }, -- Poisonous Mushroom
     [5828] = { b = 3350, s = 837 }, -- Ring of Uber Resists (TEST)
+    [5845] = { b = 0, s = 0 }, -- Flank of Meat
     [5857] = { b = 150, s = 37 }, -- Gnome Prize Box
     [5858] = { b = 150, s = 37 }, -- Goblin Prize Box
     [5859] = { b = 100, s = 25 }, -- Party Grenade
     [5878] = { b = 370, s = 92 }, -- Super Snuff
+    [5896] = { b = 0, s = 0 }, -- Theramore Guard Medallion UNUSED
+    [5916] = { b = 0, s = 0 }, -- Gnome Camera Key
+    [5937] = { b = 0, s = 0 }, -- Goblin Camera Key
+    [5949] = { b = 0, s = 0 }, -- Scrap of Paper
     [5953] = { b = 123758, s = 24751 }, -- TEST SWORD
     [5954] = { b = 124218, s = 24843 }, -- TEST SWORD 2
     [5968] = { b = 1295, s = 259 }, -- Rugged Boots
     [6036] = { b = 21078, s = 4215 }, -- Rogue Test Dagger
+    [6090] = { b = 0, s = 0 }, -- OLDNoboru's Cudgel
     [6130] = { b = 1, s = 1 }, -- Trapper's Shirt
     [6131] = { b = 5, s = 1 }, -- Trapper's Pants
     [6132] = { b = 1000, s = 250 }, -- Libram: Seal of Wisdom
     [6133] = { b = 900, s = 225 }, -- Libram: Seal of Fury
     [6174] = { b = 3474, s = 694 }, -- Twain Random Sword
+    [6192] = { b = 0, s = 0 }, -- Khan Hratha's Head
+    [6207] = { b = 0, s = 0 }, -- PVP - Horde Tower Plans
+    [6208] = { b = 0, s = 0 }, -- PVP - Alliance Tower Plans
+    [6209] = { b = 0, s = 0 }, -- PVP - Horde Mine Deed
+    [6210] = { b = 0, s = 0 }, -- PVP - Alliance Mine Deed
     [6213] = { b = 40, s = 10 }, -- Test Sharpening Stone
     [6216] = { b = 25, s = 6 }, -- Mystical Powder
     [6243] = { b = 2228, s = 445 }, -- Green Woolen Robe
+    [6244] = { b = 0, s = 0 }, -- ggggfg
     [6255] = { b = 4424, s = 884 }, -- Fishing Pole (JEFFTEST)
+    [6262] = { b = 0, s = 0 }, -- Galen's Journal
     [6273] = { b = 750, s = 187 }, -- Pattern: Green Woolen Robe
+    [6276] = { b = 0, s = 0 }, -- Musty Note
+    [6277] = { b = 0, s = 0 }, -- Musty Parchment
+    [6278] = { b = 0, s = 0 }, -- Musty Scroll
+    [6279] = { b = 0, s = 0 }, -- Musty Letter
+    [6280] = { b = 0, s = 0 }, -- Musty Missive
     [6374] = { b = 500, s = 125 }, -- Enchanted Powder
     [6437] = { b = 598, s = 149 }, -- Flayed Demon Skin (old)
     [6478] = { b = 3174, s = 634 }, -- Rat Stompers
+    [6489] = { b = 0, s = 0 }, -- Weatherworn Parchment
+    [6490] = { b = 0, s = 0 }, -- Dark Parchment
+    [6491] = { b = 0, s = 0 }, -- Heavy Parchment
+    [6492] = { b = 0, s = 0 }, -- Sooty Parchment
+    [6493] = { b = 0, s = 0 }, -- Tattered Parchment
+    [6494] = { b = 0, s = 0 }, -- Scrawled Parchment
+    [6495] = { b = 0, s = 0 }, -- Weatherbeaten Parchment
+    [6496] = { b = 0, s = 0 }, -- Detailed Parchment
+    [6497] = { b = 0, s = 0 }, -- Simple Parchment
+    [6498] = { b = 0, s = 0 }, -- Inscribed Kodo Leather
+    [6499] = { b = 0, s = 0 }, -- Inscribed Kodo Leather
+    [6500] = { b = 0, s = 0 }, -- Inscribed Kodo Leather
+    [6501] = { b = 0, s = 0 }, -- Inscribed Kodo Leather
+    [6516] = { b = 0, s = 0 }, -- Imp Summoning Scroll
+    [6544] = { b = 0, s = 0 }, -- Voidwalker Summoning Scroll
     [6589] = { b = 4225, s = 1056 }, -- Viridian Band
+    [6619] = { b = 0, s = 0 }, -- Manual: The Path of Defense
+    [6620] = { b = 0, s = 0 }, -- Elaborate Parchment
+    [6621] = { b = 0, s = 0 }, -- Manual of Taunt
+    [6623] = { b = 0, s = 0 }, -- Succubus Summoning Scroll
+    [6638] = { b = 0, s = 0 }, -- Air Sapta
+    [6639] = { b = 0, s = 0 }, -- Deprecated Rough Pebble
     [6644] = { b = 25, s = 6 }, -- Bloated Mackerel
     [6646] = { b = 125, s = 31 }, -- Bloated Albacore
+    [6648] = { b = 0, s = 0 }, -- Stoneskin Totem Scroll
+    [6649] = { b = 0, s = 0 }, -- Searing Totem Scroll
+    [6650] = { b = 0, s = 0 }, -- Healing Stream Totem Scroll
     [6673] = { b = 4210, s = 1052 }, -- Test HP Ring
     [6674] = { b = 4210, s = 1052 }, -- Test MP Ring
+    [6683] = { b = 0, s = 0 }, -- Tyranis' Pendant (old)
     [6698] = { b = 3350, s = 837 }, -- Stone of Pierce
     [6707] = { b = 3350, s = 837 }, -- Stone of Lapidis
     [6708] = { b = 3350, s = 837 }, -- Stone of Goodman
@@ -12153,18 +16041,30 @@ VanillaItemPrices = {
     [6734] = { b = 250, s = 62 }, -- Plans: Ironforge Chain
     [6736] = { b = 1800, s = 450 }, -- Plans: Ironforge Gauntlets
     [6754] = { b = 2000, s = 500 }, -- Large Moneybag
+    [6777] = { b = 0, s = 0 }, -- Tome of Righteousness
+    [6778] = { b = 0, s = 0 }, -- Tome of Justice
+    [6779] = { b = 0, s = 0 }, -- Tome of Nobility
     [6837] = { b = 6, s = 1 }, -- Wedding Dress
+    [6850] = { b = 0, s = 0 }, -- Bloodscalp Scalp
+    [6852] = { b = 0, s = 0 }, -- Eternal Eye
     [6891] = { b = 25, s = 6 }, -- Recipe: Herb Baked Egg
     [6896] = { b = 0, s = 1 }, -- Twain Component Test
+    [6897] = { b = 0, s = 0 }, -- Manual: Path of the Berserker
     [6899] = { b = 21530, s = 5382 }, -- Warlock Orb 35
     [6946] = { b = 11, s = 2 }, -- Monster - Gun, Club
+    [6988] = { b = 0, s = 0 }, -- Felhunter Summoning Scroll
+    [7007] = { b = 0, s = 0 }, -- Backus' Phat Lewt
     [7093] = { b = 800, s = 200 }, -- Pattern: Boots of Darkness
     [7170] = { b = 3462, s = 692 }, -- Twain Random Sword FOO
     [7171] = { b = 17, s = 3 }, -- TWAIN TEST ITEM VISUAL SWORD
     [7187] = { b = 4898, s = 979 }, -- VanCleef's Boots
     [7188] = { b = 7426, s = 1485 }, -- Stormwind Guard Shield
     [7248] = { b = 340, s = 68 }, -- Twain TEST Cloak
+    [7275] = { b = 0, s = 0 }, -- The Agamaggan Scrolls
     [7299] = { b = 2583, s = 516 }, -- Test - Magic Stone Helmet
+    [7347] = { b = 0, s = 0 }, -- Bingles' Cog Inverter
+    [7388] = { b = 0, s = 0 }, -- Skull Key
+    [7425] = { b = 0, s = 0 }, -- Cyrik's Head
     [7426] = { b = 4975, s = 1243 }, -- Cerulean Ring
     [7427] = { b = 15155, s = 3788 }, -- Cerulean Talisman
     [7466] = { b = 7685, s = 1921 }, -- Vermilion Band
@@ -12173,7 +16073,12 @@ VanillaItemPrices = {
     [7547] = { b = 12370, s = 3092 }, -- Onyx Ring
     [7548] = { b = 26030, s = 6507 }, -- Onyx Choker
     [7550] = { b = 30580, s = 7645 }, -- Warrior's Honor
+    [7681] = { b = 0, s = 0 }, -- Obsidian Golem Shard
     [7707] = { b = 28054, s = 5610 }, -- Twain Test
+    [7716] = { b = 0, s = 0 }, -- Shattered Necklace
+    [7868] = { b = 0, s = 0 }, -- Thieven' Kit
+    [7869] = { b = 0, s = 0 }, -- Lucius's Lockbox
+    [7872] = { b = 0, s = 0 }, -- Rusty Thieves' Tools
     [7925] = { b = 22238, s = 4447 }, -- Mithril Scale Gloves
     [7948] = { b = 6787, s = 1357 }, -- Girdle of Thero-shan
     [7949] = { b = 19950, s = 3990 }, -- Leggings of Thero-shan
@@ -12187,7 +16092,15 @@ VanillaItemPrices = {
     [7988] = { b = 10000, s = 2500 }, -- Plans: Ornate Mithril Boots
     [7994] = { b = 8000, s = 2000 }, -- Plans: Orcish War Leggings
     [8195] = { b = 26319, s = 5263 }, -- Nightscape Cloak
+    [8243] = { b = 0, s = 0 }, -- Scooby Snack
     [8388] = { b = 5000, s = 1250 }, -- Pattern: Nightscape Cloak
+    [8493] = { b = 0, s = 0 }, -- Weegli's Barrel
+    [8502] = { b = 15000, s = 0 }, -- Bronze Lotterybox
+    [8503] = { b = 25000, s = 0 }, -- Heavy Bronze Lotterybox
+    [8504] = { b = 45000, s = 0 }, -- Iron Lotterybox
+    [8505] = { b = 60000, s = 0 }, -- Heavy Iron Lotterybox
+    [8506] = { b = 90000, s = 0 }, -- Mithril Lotterybox
+    [8507] = { b = 120000, s = 0 }, -- Heavy Mithril Lotterybox
     [8543] = { b = 25, s = 300 }, -- Underwater Mushroom Cap
     [8546] = { b = 200, s = 50 }, -- Powerful Smelling Salts
     [8547] = { b = 800000, s = 200000 }, -- Formula: Powerful Smelling Salts 
@@ -12591,9 +16504,14 @@ VanillaItemPrices = {
     [9229] = { b = 18000, s = 4500 }, -- Grimoire of Life Drain IV
     [9230] = { b = 20000, s = 5000 }, -- Grimoire of Curse of Recklessness III
     [9231] = { b = 20000, s = 5000 }, -- Grimoire of Corruption IV
+    [9325] = { b = 0, s = 0 }, -- A Small Stave
     [9380] = { b = 141671, s = 28334 }, -- Jang'thraze the Protector
     [9417] = { b = 43180, s = 10795 }, -- Archaedic Shard
     [9443] = { b = 4, s = 1 }, -- Used Monster Sample
+    [9464] = { b = 0, s = 0 }, -- Deprecated Orwin's Shovel
+    [9529] = { b = 0, s = 0 }, -- Internal Warrior Equipment Kit L25
+    [9532] = { b = 0, s = 0 }, -- Internal Warrior Equipment Kit L30
+    [9537] = { b = 0, s = 0 }, -- Neatly Wrapped Box
     [9685] = { b = 161389, s = 32277 }, -- Will of the Mountain Giant
     [9888] = { b = 26021, s = 5204 }, -- Deprecated Elven Protector
     [10010] = { b = 28648, s = 5729 }, -- Stormcloth Pants
@@ -12609,26 +16527,55 @@ VanillaItemPrices = {
     [10319] = { b = 7000, s = 1750 }, -- Pattern: Stormcloth Headband
     [10322] = { b = 7500, s = 1875 }, -- Pattern: Stormcloth Shoulders
     [10324] = { b = 8000, s = 2000 }, -- Pattern: Stormcloth Boots
+    [10478] = { b = 0, s = 0 }, -- Roland's Mana Gem
     [10555] = { b = 6530, s = 1632 }, -- Resist Test Item
+    [10579] = { b = 300, s = 0 }, -- Explosive Arrow
     [10580] = { b = 3000, s = 750 }, -- Goblin \"Boom\" Box
     [10585] = { b = 3000, s = 750 }, -- Goblin Radio
+    [10594] = { b = 0, s = 0 }, -- [PH] Hakkar'i Urn
+    [10595] = { b = 0, s = 0 }, -- Kum'isha's Junk
     [10596] = { b = 10339, s = 2067 }, -- Deprecated Rose Colored Goggles
+    [10650] = { b = 0, s = 0 }, -- Plague-Infested Quilboar Mane
     [10651] = { b = 1028, s = 257 }, -- Cracked Arcane Focusing Crystal
     [10683] = { b = 35000, s = 8750 }, -- Explorer's Knapsack
     [10719] = { b = 6000, s = 1500 }, -- Mobile Alarm
     [10723] = { b = 3000, s = 750 }, -- Gnomish Ham Radio
+    [11085] = { b = 0, s = 0 }, -- Customer of the Month Coffer Key
     [11099] = { b = 1000, s = 250 }, -- Dark Iron Ore
     [11111] = { b = 536, s = 134 }, -- Broken Sprite Darter Egg
+    [11115] = { b = 0, s = 0 }, -- Secret Safe Key
+    [11170] = { b = 0, s = 0 }, -- Deprecated Silver Totem of Aquementas
+    [11171] = { b = 0, s = 0 }, -- Fel Iron
+    [11198] = { b = 0, s = 0 }, -- Rune of Escape
     [11199] = { b = 11, s = 2 }, -- Engineer's Shield 1
     [11200] = { b = 11, s = 2 }, -- Engineer's Shield 2
     [11201] = { b = 11, s = 2 }, -- Engineer's Shield 3
+    [11228] = { b = 0, s = 0 }, -- Frenzied Dragonflight Molt
+    [11442] = { b = 0, s = 0 }, -- Stormwind Deputy Kit
+    [11443] = { b = 0, s = 0 }, -- Deprecated Grim Guzzler Boar
+    [11473] = { b = 0, s = 0 }, -- PX83-Enigmatron
     [11505] = { b = 12, s = 2 }, -- Monster - Claw - Bear Offhand
+    [11609] = { b = 0, s = 0 }, -- Altered Black Dragonflight Molt
+    [11613] = { b = 0, s = 0 }, -- DEBUG Samophlange Manual Cover
+    [11616] = { b = 0, s = 0 }, -- DEBUG Samophlange Manual Page
+    [11663] = { b = 0, s = 0 }, -- [PH] Greater Arcane Amalgamation (MANA/FR)
+    [11664] = { b = 0, s = 0 }, -- [PH] Greater Arcane Amalgamation (HP/FR)
+    [11666] = { b = 0, s = 0 }, -- [PH] Greater Arcane Amalgamation (AC/FR)
+    [11667] = { b = 0, s = 0 }, -- [PH] Greater Arcane Amalgamation (STR/FR)
+    [11670] = { b = 0, s = 0 }, -- [PH] Greater Arcane Amalgamation (STA/FR)
+    [11671] = { b = 0, s = 0 }, -- [PH] Greater Arcane Amalgamation (AGI/FR)
+    [11672] = { b = 0, s = 0 }, -- [PH] Greater Arcane Amalgamation (SPI/FR)
+    [11673] = { b = 0, s = 0 }, -- [PH] Greater Arcane Amalgamation (INT/FR)
+    [11676] = { b = 0, s = 0 }, -- [PH] Legendary Arcane Amalgamation (Melee)
+    [11683] = { b = 0, s = 0 }, -- [PH] Legendary Arcane Amalgamation (Caster)
     [11838] = { b = 14, s = 2 }, -- Monster - Trident, Flame Wrath
     [11903] = { b = 4000, s = 1000 }, -- Cat Carrier (Corrupted Kitten)
     [12104] = { b = 104395, s = 20879 }, -- Brindlethorn Tunic
     [12105] = { b = 125722, s = 25144 }, -- Pridemail Leggings
     [12106] = { b = 84121, s = 16824 }, -- Boulderskin Breastplate
     [12107] = { b = 84428, s = 16885 }, -- Whispersilk Leggings
+    [12143] = { b = 0, s = 0 }, -- Dragonspine Key
+    [12186] = { b = 0, s = 0 }, -- Drakefire Amulet (OLD) (UNUSED)
     [12187] = { b = 51950, s = 10390 }, -- Test Defense Chest
     [12188] = { b = 52129, s = 10425 }, -- Test Armor Chest
     [12189] = { b = 47334, s = 9466 }, -- Test Strength Chest
@@ -12636,18 +16583,26 @@ VanillaItemPrices = {
     [12244] = { b = 47443, s = 9488 }, -- Test Agility Chest
     [12245] = { b = 47443, s = 9488 }, -- Test Spirit Chest
     [12258] = { b = 22747, s = 4549 }, -- Serpent Clasp Belt
+    [12369] = { b = 0, s = 0 }, -- Scepter of Vectus
+    [12385] = { b = 0, s = 0 }, -- test
+    [12440] = { b = 0, s = 0 }, -- Magic Knucklebone (DND)
     [12442] = { b = 45852, s = 11463 }, -- Charm Pouch (DND)
     [12443] = { b = 71587, s = 17896 }, -- Knucklebone Pouch (DND)
     [12468] = { b = 43221, s = 8644 }, -- Chilton Wand
     [12469] = { b = 145898, s = 29179 }, -- Mutilator
+    [12526] = { b = 0, s = 0 }, -- TEST Challenge to Urok
     [12585] = { b = 40000, s = 10000 }, -- Stormwind Medallion
     [12615] = { b = 137553, s = 27510 }, -- Savage Mail Tunic
     [12616] = { b = 109206, s = 21841 }, -- Savage Mail Boots
     [12617] = { b = 109596, s = 21919 }, -- Savage Mail Shoulders
+    [12729] = { b = 0, s = 0 }, -- Viagra
+    [12762] = { b = 0, s = 0 }, -- Secrecy of Plans
     [12763] = { b = 4000, s = 200 }, -- Un'Goro Etherfruit
     [12764] = { b = 168107, s = 33621 }, -- Thorium Greatsword
     [12769] = { b = 230772, s = 46154 }, -- Bleakwood Hew
+    [12778] = { b = 0, s = 0 }, -- Document Chest
     [12779] = { b = 176691, s = 35338 }, -- Rune Edge
+    [12789] = { b = 0, s = 0 }, -- Horn of Uber Buffing (test)
     [12795] = { b = 244108, s = 48821 }, -- Blood Talon
     [12802] = { b = 313125, s = 62625 }, -- Darkspear
     [12805] = { b = 15950, s = 3987 }, -- Orb of Fire
@@ -12669,15 +16624,83 @@ VanillaItemPrices = {
     [13080] = { b = 112562, s = 22512 }, -- Widow's Clutch
     [13090] = { b = 179777, s = 35955 }, -- Breastplate of the Chosen
     [13092] = { b = 150865, s = 30173 }, -- Deprecated Dragonstalker Tunic
+    [13149] = { b = 0, s = 0 }, -- Eldarathian Tome of Summoning Vol. 1
+    [13151] = { b = 0, s = 0 }, -- The Mystic Studies of Hor'ank
+    [13152] = { b = 0, s = 0 }, -- The Story With No Conclusion
+    [13153] = { b = 0, s = 0 }, -- Tome of Mal'cin Vorail
+    [13154] = { b = 0, s = 0 }, -- Jael'marin's Studies of the Arcane
+    [13214] = { b = 0, s = 0 }, -- TestBoots - Puffed Mail Green
+    [13223] = { b = 0, s = 0 }, -- Stratholme Courier's Pouch
     [13242] = { b = 80573, s = 16114 }, -- Deprecated Stormrage Boots
     [13247] = { b = 23350, s = 5837 }, -- Quartermaster Zigris' Footlocker
     [13291] = { b = 8, s = 1 }, -- Monster - Wand, Horde Red Feathered
     [13318] = { b = 7, s = 1 }, -- Monster - Shield, Horde A01 Red
+    [13330] = { b = 0, s = 0 }, -- Dereks Radish Bag
     [13338] = { b = 14, s = 2 }, -- Monster - Staff, Feathered Invert
+    [13342] = { b = 4000, s = 0 }, -- Pet Fish
+    [13343] = { b = 4000, s = 0 }, -- Pet Stone
     [13500] = { b = 24000, s = 6000 }, -- Recipe: Greater Holy Protection Potion
     [13503] = { b = 100000, s = 25000 }, -- Alchemists' Stone
+    [13517] = { b = 40000, s = 0 }, -- Recipe: Alchemists' Stone
+    [13543] = { b = 0, s = 0 }, -- Krastinov's Bag of Horrors UNUSED
     [13586] = { b = 47443, s = 9488 }, -- Test Crit Chest
     [13608] = { b = 11, s = 2 }, -- Monster - Item, Bucket - Metal Dirty
+    [13642] = { b = 0, s = 0 }, -- Level 15 Test Gear Cloth - Mage/Priest/Warlock
+    [13643] = { b = 0, s = 0 }, -- Level 15 Test Gear Leather - Druid/Shaman
+    [13644] = { b = 0, s = 0 }, -- Level 15 Test Gear Leather - Hunter/Rogue
+    [13645] = { b = 0, s = 0 }, -- Level 15 Test Gear Mail - Paladin/Warrior
+    [13646] = { b = 0, s = 0 }, -- Level 20 Test Gear Cloth - Mage/Priest/Warlock
+    [13647] = { b = 0, s = 0 }, -- Level 25 Test Gear Cloth - Mage/Priest/Warlock
+    [13648] = { b = 0, s = 0 }, -- Level 30 Test Gear Cloth - Mage/Priest/Warlock
+    [13649] = { b = 0, s = 0 }, -- Level 35 Test Gear Cloth - Mage/Priest/Warlock
+    [13650] = { b = 0, s = 0 }, -- Level 40 Test Gear Cloth - Mage/Priest/Warlock
+    [13651] = { b = 0, s = 0 }, -- Level 45 Test Gear Cloth - Mage/Priest/Warlock
+    [13652] = { b = 0, s = 0 }, -- Level 50 Test Gear Cloth - Mage/Priest/Warlock
+    [13653] = { b = 0, s = 0 }, -- Level 55 Test Gear Cloth - Mage/Priest/Warlock
+    [13654] = { b = 0, s = 0 }, -- Level 60 Test Gear Cloth - Mage/Priest/Warlock
+    [13655] = { b = 0, s = 0 }, -- Level 65 Test Gear Cloth - Mage
+    [13656] = { b = 0, s = 0 }, -- Level 20 Test Gear Mail - Paladin/Warrior
+    [13657] = { b = 0, s = 0 }, -- Level 25 Test Gear Mail - Paladin/Warrior
+    [13658] = { b = 0, s = 0 }, -- Level 30 Test Gear Mail - Paladin/Warrior
+    [13659] = { b = 0, s = 0 }, -- Level 35 Test Gear Mail - Paladin/Warrior
+    [13660] = { b = 0, s = 0 }, -- Level 20 Test Gear Leather - Druid/Shaman
+    [13661] = { b = 0, s = 0 }, -- Level 25 Test Gear Leather - Druid/Shaman
+    [13662] = { b = 0, s = 0 }, -- Level 30 Test Gear Leather - Druid/Shaman
+    [13663] = { b = 0, s = 0 }, -- Level 35 Test Gear Leather - Druid/Shaman
+    [13664] = { b = 0, s = 0 }, -- Level 20 Test Gear Leather - Hunter/Rogue
+    [13665] = { b = 0, s = 0 }, -- Level 25 Test Gear Leather - Hunter/Rogue
+    [13666] = { b = 0, s = 0 }, -- Level 30 Test Gear Leather - Hunter/Rogue
+    [13667] = { b = 0, s = 0 }, -- Level 35 Test Gear Leather - Hunter/Rogue
+    [13668] = { b = 0, s = 0 }, -- Level 40 Test Gear Leather - Druid
+    [13669] = { b = 0, s = 0 }, -- Level 45 Test Gear Leather - Druid
+    [13670] = { b = 0, s = 0 }, -- Level 50 Test Gear Leather - Druid
+    [13671] = { b = 0, s = 0 }, -- Level 55 Test Gear Leather - Druid
+    [13672] = { b = 0, s = 0 }, -- Level 60 Test Gear Leather - Druid
+    [13673] = { b = 0, s = 0 }, -- Level 65 Test Gear Leather - Druid
+    [13674] = { b = 0, s = 0 }, -- Level 40 Test Gear Leather - Rogue
+    [13675] = { b = 0, s = 0 }, -- Level 45 Test Gear Leather - Rogue
+    [13676] = { b = 0, s = 0 }, -- Level 50 Test Gear Leather - Rogue
+    [13677] = { b = 0, s = 0 }, -- Level 55 Test Gear Leather - Rogue
+    [13678] = { b = 0, s = 0 }, -- Level 60 Test Gear Leather - Rogue
+    [13679] = { b = 0, s = 0 }, -- Level 65 Test Gear Leather - Rogue
+    [13680] = { b = 0, s = 0 }, -- Level 40 Test Gear Plate - Paladin/Warrior
+    [13681] = { b = 0, s = 0 }, -- Level 45 Test Gear Plate - Paladin/Warrior
+    [13682] = { b = 0, s = 0 }, -- Level 50 Test Gear Plate - Paladin/Warrior
+    [13683] = { b = 0, s = 0 }, -- Level 55 Test Gear Plate - Paladin/Warrior
+    [13684] = { b = 0, s = 0 }, -- Level 60 Test Gear Plate - Paladin/Warrior
+    [13685] = { b = 0, s = 0 }, -- Level 65 Test Gear Plate - Paladin
+    [13686] = { b = 0, s = 0 }, -- Level 40 Test Gear Mail - Hunter
+    [13687] = { b = 0, s = 0 }, -- Level 45 Test Gear Mail - Hunter
+    [13688] = { b = 0, s = 0 }, -- Level 50 Test Gear Mail - Hunter
+    [13689] = { b = 0, s = 0 }, -- Level 55 Test Gear Mail - Hunter
+    [13690] = { b = 0, s = 0 }, -- Level 60 Test Gear Mail - Hunter
+    [13691] = { b = 0, s = 0 }, -- Level 65 Test Gear Mail - Hunter
+    [13692] = { b = 0, s = 0 }, -- Level 40 Test Gear Mail - Shaman
+    [13693] = { b = 0, s = 0 }, -- Level 45 Test Gear Mail - Shaman
+    [13694] = { b = 0, s = 0 }, -- Level 50 Test Gear Mail - Shaman
+    [13695] = { b = 0, s = 0 }, -- Level 55 Test Gear Mail - Shaman
+    [13696] = { b = 0, s = 0 }, -- Level 60 Test Gear Mail - Shaman
+    [13697] = { b = 0, s = 0 }, -- Level 65 Test Gear Mail - Shaman
     [13710] = { b = 47443, s = 9488 }, -- Test Stamina Chest
     [13711] = { b = 47443, s = 9488 }, -- Test Attack Power Chest
     [13712] = { b = 47443, s = 9488 }, -- Test Sword Chest
@@ -12768,6 +16791,7 @@ VanillaItemPrices = {
     [13847] = { b = 1500, s = 375 }, -- Spring/Summer Afternoon
     [13848] = { b = 1500, s = 375 }, -- Spring/Summer Evening
     [13849] = { b = 1500, s = 375 }, -- Spring/Summer Night
+    [13862] = { b = 0, s = 0 }, -- Monster - Item, Tankard Gold Offhand
     [13923] = { b = 8, s = 1 }, -- Monster - Gun, Tauren Blade Silver
     [13936] = { b = 86241, s = 17248 }, -- Deprecated Dreadmaster's Shroud
     [14083] = { b = 100, s = 20 }, -- Tyrande's Staff
@@ -12806,10 +16830,15 @@ VanillaItemPrices = {
     [14890] = { b = 127, s = 25 }, -- Test Glaive H
     [14891] = { b = 127, s = 25 }, -- Test Glaive I
     [14892] = { b = 128, s = 25 }, -- Test Glaive J
+    [15446] = { b = 0, s = 0 }, -- Stormwind Deputy Kit
+    [15586] = { b = 0, s = 0 }, -- Fast-growing Flower
+    [15688] = { b = 0, s = 0 }, -- Magic Beans
     [15769] = { b = 30000, s = 7500 }, -- Pattern: Onyxia Scale Cloak
     [15780] = { b = 120000, s = 30000 }, -- Pattern: Onyxia Scale Breastplate
     [15888] = { b = 134647, s = 26929 }, -- Deprecated Glorious Shield
     [15889] = { b = 115625, s = 23125 }, -- Deprecated Jademir Scale Shield
+    [16024] = { b = 0, s = 0 }, -- Ashbringer Test 001
+    [16025] = { b = 0, s = 0 }, -- Ashbringer Test 002
     [16026] = { b = 35802, s = 7160 }, -- PVP Plate Helm Alliance
     [16027] = { b = 47443, s = 9488 }, -- PVP Plate Breastplate Alliance
     [16028] = { b = 47443, s = 9488 }, -- PVP Plate Legplates Alliance
@@ -12828,16 +16857,31 @@ VanillaItemPrices = {
     [16064] = { b = 10332, s = 2066 }, -- Test Fire Res Waist Mail
     [16065] = { b = 12965, s = 2593 }, -- Test Fire Res Feet Leather
     [16066] = { b = 15686, s = 3137 }, -- Test Fire Res Feet Mail
+    [16067] = { b = 0, s = 0 }, -- Test Fire Res Ring
+    [16068] = { b = 0, s = 0 }, -- Test Fire Resist Cloth LockBox
+    [16069] = { b = 0, s = 0 }, -- Test Fire Resist Leather LockBox
+    [16070] = { b = 0, s = 0 }, -- Test Fire Resist Mail LockBox
+    [16071] = { b = 0, s = 0 }, -- Test Fire Resist Plate LockBox
     [16073] = { b = 20000, s = 5000 }, -- Artisan Cookbook
+    [16074] = { b = 0, s = 0 }, -- Test Potion LockBox (Warrior)
+    [16075] = { b = 0, s = 0 }, -- Test Potion LockBox (Rogue)
+    [16076] = { b = 0, s = 0 }, -- Test Potion LockBox (Paladin)
+    [16077] = { b = 0, s = 0 }, -- Test Potion LockBox (Hunter)
+    [16078] = { b = 0, s = 0 }, -- Test Potion LockBox (Druid)
+    [16079] = { b = 0, s = 0 }, -- Test Potion LockBox (Shaman)
+    [16080] = { b = 0, s = 0 }, -- Test Potion LockBox (Mage/Priest/Warlock)
+    [16081] = { b = 0, s = 0 }, -- Test Potion LockBox (Raid)
     [16082] = { b = 20000, s = 5000 }, -- Artisan Fishing - The Way of the Lure
     [16085] = { b = 20000, s = 5000 }, -- Artisan First Aid - Heal Thyself
     [16086] = { b = 2600, s = 650 }, -- Test Enchant Chest Health
     [16102] = { b = 2600, s = 650 }, -- Test Enchant Chest Mana
     [16103] = { b = 2600, s = 650 }, -- Test Enchant Boots Stamina
+    [16104] = { b = 0, s = 0 }, -- QAEnchhelp Cloak +7 Fire Resistance
     [16105] = { b = 2600, s = 650 }, -- Test Enchant Bracer Greater Stamina
     [16106] = { b = 2600, s = 650 }, -- Test Enchant Weapon Greater Striking
     [16107] = { b = 2600, s = 650 }, -- Test Enchant Bracer Greater Spirit
     [16108] = { b = 2600, s = 650 }, -- Test Enchant 2H Weapon Greater Impact
+    [16109] = { b = 0, s = 0 }, -- Test Enchantments LockBox (Enchanting Items)
     [16116] = { b = 11095, s = 2219 }, -- Test Nature Res Cloak Cloth
     [16117] = { b = 6899, s = 1379 }, -- Test Nature Res Hands Cloth
     [16118] = { b = 13800, s = 2760 }, -- Test Nature Res Legs Cloth
@@ -12885,12 +16929,33 @@ VanillaItemPrices = {
     [16163] = { b = 10350, s = 2070 }, -- Test Arcane Res Waist Mail
     [16164] = { b = 10350, s = 2070 }, -- Test Arcane Res Hands Mail
     [16172] = { b = 11399, s = 2279 }, -- Test Nature Res Hands Plate
+    [16173] = { b = 0, s = 0 }, -- Test Frost Resist Cloth LockBox
+    [16174] = { b = 0, s = 0 }, -- Test Frost Resist Leather LockBox
+    [16175] = { b = 0, s = 0 }, -- Test Frost Resist Mail LockBox
+    [16176] = { b = 0, s = 0 }, -- Test Frost Resist Plate LockBox
+    [16177] = { b = 0, s = 0 }, -- Test Nature Resist Plate LockBox
+    [16178] = { b = 0, s = 0 }, -- Test Nature Resist Leather LockBox
+    [16179] = { b = 0, s = 0 }, -- Test Nature Resist Mail LockBox
+    [16180] = { b = 0, s = 0 }, -- Test Nature Resist Cloth LockBox
+    [16181] = { b = 0, s = 0 }, -- Test Shadow Resist Cloth LockBox
+    [16182] = { b = 0, s = 0 }, -- Test Shadow Resist Leather LockBox
+    [16183] = { b = 0, s = 0 }, -- Test Shadow Resist Mail LockBox
+    [16184] = { b = 0, s = 0 }, -- Test Shadow Resist Plate LockBox
+    [16185] = { b = 0, s = 0 }, -- Test Arcane Resist Plate LockBox
+    [16186] = { b = 0, s = 0 }, -- Test Arcane Resist Cloth LockBox
+    [16187] = { b = 0, s = 0 }, -- Test Arcane Resist Leather LockBox
+    [16188] = { b = 0, s = 0 }, -- Test Arcane Resist Mail LockBox
+    [16191] = { b = 0, s = 0 }, -- Ornate Mirror
     [16211] = { b = 47443, s = 9488 }, -- Test Quality Modifier Chest
     [16212] = { b = 118609, s = 23721 }, -- TEST SWORD 3
     [16213] = { b = 47443, s = 9488 }, -- Test Quality Modifier Chest
+    [16308] = { b = 0, s = 0 }, -- Northridge Crowbar
     [16315] = { b = 4029, s = 805 }, -- Sergeant Major's Cape
     [16336] = { b = 14587, s = 2917 }, -- Sergeant Major's Cape
     [16337] = { b = 37455, s = 7491 }, -- Sergeant Major's Cape
+    [16338] = { b = 400000, s = 0 }, -- Knight-Lieutenant's Steed
+    [16343] = { b = 400000, s = 0 }, -- Blood Guard's Mount
+    [16344] = { b = 5000000, s = 0 }, -- Lieutenant General's Mount
     [16367] = { b = 24050, s = 4810 }, -- Knight-Captain's Silk Sash
     [16370] = { b = 24326, s = 4865 }, -- Knight-Captain's Silk Cuffs
     [16394] = { b = 30857, s = 6171 }, -- Knight-Captain's Leather Bracers
@@ -12944,10 +17009,18 @@ VanillaItemPrices = {
     [17040] = { b = 11, s = 2 }, -- Monster - Mace, Frying Pan
     [17041] = { b = 11, s = 2 }, -- Monster - Mace, Frying Pan w/ Eggs
     [17108] = { b = 96854, s = 24213 }, -- Mark of Deflection
+    [17115] = { b = 0, s = 0 }, -- Squirrel Token
+    [17116] = { b = 0, s = 0 }, -- Squirrel Token
+    [17122] = { b = 0, s = 0 }, -- ALEX BUG TEST ITEM
     [17142] = { b = 795578, s = 159115 }, -- Shard of the Defiler
+    [17162] = { b = 0, s = 0 }, -- Eric Test Item A
+    [17163] = { b = 0, s = 0 }, -- Eric Test Item B
     [17199] = { b = 36, s = 9 }, -- Bad Egg Nog
     [17342] = { b = 18, s = 3 }, -- JYoo Random Item Test
     [17343] = { b = 6, s = 1 }, -- Test Random Chest
+    [17347] = { b = 0, s = 0 }, -- Syndicate Man Tracker (MURP)
+    [17354] = { b = 0, s = 0 }, -- Master Ryson's All Seeing Eye
+    [17409] = { b = 0, s = 0 }, -- Encrusted Crystal Fragment
     [17412] = { b = 10, s = 2 }, -- zzOLDCodex of Prayer of Fortitude
     [17563] = { b = 25249, s = 5049 }, -- Knight-Captain's Dreadweave Bracers
     [17565] = { b = 23721, s = 4744 }, -- Knight-Captain's Dreadweave Belt
@@ -12965,11 +17038,77 @@ VanillaItemPrices = {
     [17615] = { b = 23721, s = 4744 }, -- Legionnaire's Satin Cuffs
     [17619] = { b = 43448, s = 8689 }, -- General's Satin Bracers
     [17621] = { b = 43757, s = 8751 }, -- General's Satin Cinch
+    [17731] = { b = 0, s = 0 }, -- Scroll of Celebras
     [17769] = { b = 43365, s = 8673 }, -- Sagebrush Spaulders
     [17783] = { b = 134500, s = 33625 }, -- Talisman of Binding Fragment
     [17802] = { b = 1305681, s = 261136 }, -- Thunderfury, Blessed Blade of the Windseeker DEPRECATED
+    [17824] = { b = 0, s = 0 }, -- Level 65 Test Gear Cloth - Priest
+    [17825] = { b = 0, s = 0 }, -- Level 65 Test Gear Cloth - Warlock
+    [17826] = { b = 0, s = 0 }, -- Level 65 Test Gear Plate - Warrior
+    [17827] = { b = 0, s = 0 }, -- QAEnchant Bracer +9 Strength
+    [17828] = { b = 0, s = 0 }, -- QAEnchant Bracer +9 Stamina
+    [17829] = { b = 0, s = 0 }, -- QAEnchant Bracer +9 Spirit
+    [17830] = { b = 0, s = 0 }, -- QAEnchant Bracer +7 Intellect
+    [17831] = { b = 0, s = 0 }, -- Level 60 Test Gear Cloth - Mage/Priest/Warlock 2
+    [17832] = { b = 0, s = 0 }, -- Level 60 Test Gear Leather - Druid 2
+    [17833] = { b = 0, s = 0 }, -- Level 60 Test Gear Leather - Rogue 2
+    [17834] = { b = 0, s = 0 }, -- Level 60 Test Gear Mail - Hunter 2
+    [17835] = { b = 0, s = 0 }, -- Level 60 Test Gear Mail - Shaman 2
+    [17836] = { b = 0, s = 0 }, -- Level 60 Test Gear Plate - Paladin/Warrior 2
+    [17837] = { b = 0, s = 0 }, -- Level 55 Test Gear Cloth - Mage/Priest/Warlock 2
+    [17838] = { b = 0, s = 0 }, -- Level 55 Test Gear Leather - Druid 2
+    [17839] = { b = 0, s = 0 }, -- Level 55 Test Gear Leather - Rogue 2
+    [17840] = { b = 0, s = 0 }, -- Level 55 Test Gear Mail - Hunter 2
+    [17841] = { b = 0, s = 0 }, -- Level 55 Test Gear Mail - Shaman 2
+    [17842] = { b = 0, s = 0 }, -- Level 55 Test Gear Plate - Paladin/Warrior 2
+    [17843] = { b = 0, s = 0 }, -- Level 50 Test Gear Cloth - Mage/Priest/Warlock 2
+    [17844] = { b = 0, s = 0 }, -- Level 50 Test Gear Leather - Druid 2
+    [17845] = { b = 0, s = 0 }, -- Level 50 Test Gear Leather - Rogue 2
+    [17846] = { b = 0, s = 0 }, -- Level 50 Test Gear Mail - Hunter 2
+    [17847] = { b = 0, s = 0 }, -- Level 50 Test Gear Mail - Shaman 2
+    [17848] = { b = 0, s = 0 }, -- Level 50 Test Gear Plate - Paladin/Warrior 2
+    [17851] = { b = 0, s = 0 }, -- Level 65 Test Gear Cloth - Mage 2
+    [17852] = { b = 0, s = 0 }, -- Level 65 Test Gear Cloth - Priest 2
+    [17853] = { b = 0, s = 0 }, -- Level 65 Test Gear Cloth - Warlock 2
+    [17854] = { b = 0, s = 0 }, -- Level 65 Test Gear Leather - Druid 2
+    [17855] = { b = 0, s = 0 }, -- Level 65 Test Gear Leather - Rogue 2
+    [17856] = { b = 0, s = 0 }, -- Level 65 Test Gear Leather - Rogue 3
+    [17857] = { b = 0, s = 0 }, -- Level 65 Test Gear Mail - Hunter 2
+    [17858] = { b = 0, s = 0 }, -- Level 65 Test Gear Mail - Hunter 3
+    [17859] = { b = 0, s = 0 }, -- Level 65 Test Gear Mail - Shaman 2
+    [17860] = { b = 0, s = 0 }, -- Level 65 Test Gear Plate - Paladin 2
+    [17861] = { b = 0, s = 0 }, -- Level 65 Test Gear Plate - Warrior 2
+    [17862] = { b = 0, s = 0 }, -- Level 65 Test Gear Plate - Warrior 3
+    [17882] = { b = 0, s = 0 }, -- QAEnchant Chest +100 Health
+    [17883] = { b = 0, s = 0 }, -- QAEnchant Chest +100 Mana
+    [17884] = { b = 0, s = 0 }, -- QAEnchant Cloak +5 Resistances
+    [17885] = { b = 0, s = 0 }, -- QAEnchant Cloak +70 Armor
+    [17886] = { b = 0, s = 0 }, -- zzOLD - QAEnchant Weapon Winter's Might
+    [17887] = { b = 0, s = 0 }, -- QAEnchant 2H Weapon +9 Damage
+    [17888] = { b = 0, s = 0 }, -- QAEnchant Weapon +5 Damage
+    [17889] = { b = 0, s = 0 }, -- zzOLD - QAEnchant 2H Weapon Major Intellect
+    [17890] = { b = 0, s = 0 }, -- zzOLD - QAEnchant Shield +7 Spirit
+    [17891] = { b = 0, s = 0 }, -- QAEnchant Shield +7 Stamina
+    [17892] = { b = 0, s = 0 }, -- QAEnchant Shield +8 Frost Resistance
+    [17893] = { b = 0, s = 0 }, -- QAEnchant Shield +9 Spirit
+    [17894] = { b = 0, s = 0 }, -- QAEnchant Boots +7 Agility
+    [17895] = { b = 0, s = 0 }, -- QAEnchant Boots +5 Spirit
+    [17896] = { b = 0, s = 0 }, -- QAEnchant Boots +7 Stamina
+    [17897] = { b = 0, s = 0 }, -- QAEnchant Gloves +7 Strength
+    [17898] = { b = 0, s = 0 }, -- QAEnchant Gloves +7 Agility
+    [17899] = { b = 0, s = 0 }, -- QAEnchant Gloves +1% Haste
+    [17910] = { b = 0, s = 0 }, -- Test Enchantments LockBox (Enchanting Items) 2
+    [17911] = { b = 0, s = 0 }, -- Test Enchantments LockBox (Enchanting Items) 3
     [18023] = { b = 62153, s = 15538 }, -- Blood Ruby Pendant
     [18063] = { b = 1000000, s = 250000 }, -- Test Epic Mount
+    [18105] = { b = 0, s = 0 }, -- PVP TEST Alliance Ear
+    [18106] = { b = 0, s = 0 }, -- PVP TEST Horde Ear
+    [18153] = { b = 0, s = 0 }, -- Red Moro'gai Gem
+    [18155] = { b = 0, s = 0 }, -- Blue Moro'gai Gem
+    [18156] = { b = 0, s = 0 }, -- Green Moro'gai Gem
+    [18157] = { b = 0, s = 0 }, -- Black Moro'gai Gem
+    [18158] = { b = 0, s = 0 }, -- Gold Moro'gai Gem
+    [18159] = { b = 0, s = 0 }, -- White Moro'gai Gem
     [18161] = { b = 4, s = 1 }, -- 5% Test Speed Boots
     [18162] = { b = 4, s = 1 }, -- 8% Test Speed Boots
     [18163] = { b = 4, s = 1 }, -- 10% Test Speed Boots
@@ -12985,18 +17124,26 @@ VanillaItemPrices = {
     [18342] = { b = 147213, s = 29442 }, -- Quel'dorai Guard
     [18355] = { b = 59984, s = 14996 }, -- Ferra's Collar
     [18438] = { b = 20000, s = 5000 }, -- Sergeant's Mark
+    [18589] = { b = 0, s = 0 }, -- Dormant Wind Kissed Blade DEPRECATED
+    [18593] = { b = 0, s = 0 }, -- Thorium Brotherhood Contract (OLD)
     [18595] = { b = 100000, s = 25000 }, -- Blood Opal
     [18599] = { b = 22000, s = 5500 }, -- QAEnchant 2H Weapon +25 Agility
     [18627] = { b = 1000, s = 250 }, -- Gong of Dethmoora
     [18630] = { b = 1000, s = 250 }, -- Doomsday Flare
+    [18666] = { b = 0, s = 0 }, -- QAEnchant Weapon Crusader
+    [18667] = { b = 0, s = 0 }, -- QAEnchant Weapon Icy Chill
+    [18668] = { b = 0, s = 0 }, -- QAEnchant Weapon Spell Power
+    [18669] = { b = 0, s = 0 }, -- QAEnchant Weapon Healing Power
     [18685] = { b = 60000, s = 5000 }, -- Shadowy Potion OLD
     [18747] = { b = 41191, s = 8238 }, -- Item Properties Test
     [18763] = { b = 99831, s = 19966 }, -- TEST GUN Alliance20 
     [18764] = { b = 100198, s = 20039 }, -- TEST GUN Raid
     [18765] = { b = 100566, s = 20113 }, -- TEST GUN Horde50
     [18800] = { b = 463393, s = 92678 }, -- TEST 1H Amberseal Keeper
+    [18801] = { b = 0, s = 0 }, -- TEST 1H Benediction
     [18881] = { b = 1573535, s = 314707 }, -- TEST Ragnaros Hammer
     [18882] = { b = 1049023, s = 209804 }, -- TEST Level 80 Epic
+    [18942] = { b = 0, s = 0 }, -- Fiery Flux
     [18963] = { b = 4000, s = 1000 }, -- Turtle Egg (Albino)
     [18964] = { b = 4000, s = 1000 }, -- Turtle Egg (Loggerhead)
     [18965] = { b = 4000, s = 1000 }, -- Turtle Egg (Hawksbill)
@@ -13006,6 +17153,7 @@ VanillaItemPrices = {
     [18971] = { b = 224050, s = 56012 }, -- Ring of Critical Testing 3
     [18982] = { b = 224050, s = 56012 }, -- Ring of Critical Testing 4
     [19065] = { b = 71324, s = 17831 }, -- Emerald Circle
+    [19082] = { b = 300, s = 0 }, -- Monster - Fire Arrow
     [19122] = { b = 84564, s = 21141 }, -- Woven Ivy Necklace DEPRECATED
     [19129] = { b = 41775, s = 8355 }, -- Everglowing Robe
     [19158] = { b = 1573535, s = 314707 }, -- TEST Sulfuras, Hand of Ragnaros
@@ -13036,6 +17184,7 @@ VanillaItemPrices = {
     [19455] = { b = 663185, s = 132637 }, -- 3500 Test 2h Axe 70 purple
     [19456] = { b = 839219, s = 167843 }, -- 2900 Test sword 80 purple
     [19457] = { b = 839219, s = 167843 }, -- 1500 Test sword 80 purple
+    [19482] = { b = 0, s = 0 }, -- LeCraft Rabbit Pelt
     [19486] = { b = 11, s = 2 }, -- Monster - Item, Fish - Green Offhand
     [19487] = { b = 11, s = 2 }, -- Monster - Item, Fish - Orange Offhand
     [19488] = { b = 11, s = 2 }, -- Monster - Item, Fish - Purple Offhand
@@ -13045,9 +17194,11 @@ VanillaItemPrices = {
     [19503] = { b = 839219, s = 167843 }, -- 2200 Test sword 80 purple
     [19504] = { b = 515207, s = 103041 }, -- 2200 Test sword 70 purple
     [19622] = { b = 274611, s = 54922 }, -- 1800 Test Dagger 63 blue
+    [19642] = { b = 0, s = 0 }, -- iCoke Prize Voucher
     [19662] = { b = 1049023, s = 209804 }, -- 3500 Test 2h Axe 80 purple
     [19742] = { b = 118609, s = 23721 }, -- Earthborn Kilt TEST
     [19743] = { b = 16907, s = 3381 }, -- Cloaked Hood TEST
+    [19804] = { b = 0, s = 0 }, -- Pale Ghoulfish
     [19809] = { b = 299602, s = 59920 }, -- 2500 Test 2h Axe 60 blue
     [19810] = { b = 240602, s = 48120 }, -- 1000 Test dagger 60 blue
     [19811] = { b = 296524, s = 59304 }, -- 2500 Test 2h Axe 60 blue (bear)
@@ -13056,12 +17207,18 @@ VanillaItemPrices = {
     [19847] = { b = 161860, s = 32372 }, -- Zandalar Demoniac's Robe DEPRECATED
     [19868] = { b = 328695, s = 65739 }, -- Mandokir's Sting DEPRECATED
     [19926] = { b = 150236, s = 30047 }, -- Flowing Ritual Robes DEPRECATED
+    [19932] = { b = 0, s = 0 }, -- UNUSED Empowered Mojo Bundle
     [19966] = { b = 276888, s = 55377 }, -- Thrice Strung Longbow DEPRECATED
     [19983] = { b = 9, s = 1 }, -- Monster - Wand, Horde Demon Skull Red
     [19986] = { b = 56881, s = 11376 }, -- Pirate's Eye Patch
     [19987] = { b = 12, s = 2 }, -- Monster - Dagger, Vulture Black
+    [19989] = { b = 0, s = 0 }, -- Tome of Devouring Shadows
     [20003] = { b = 157980, s = 31596 }, -- Devilsaur Claws
     [20005] = { b = 159141, s = 31828 }, -- Devilsaur Claws
+    [20020] = { b = 0, s = 0 }, -- Bundle of Goods
+    [20024] = { b = 0, s = 0 }, -- Putrid Bile Duct
+    [20026] = { b = 0, s = 0 }, -- Rotting Flesh
+    [20084] = { b = 0, s = 0 }, -- Hunting Net
     [20135] = { b = 283661, s = 56732 }, -- 90 Epic Warrior Bracelets
     [20136] = { b = 569387, s = 113877 }, -- 90 Epic Warrior Breastplate
     [20137] = { b = 285754, s = 57150 }, -- 90 Epic Warrior Gauntlets
@@ -13186,14 +17343,23 @@ VanillaItemPrices = {
     [20361] = { b = 71229, s = 14245 }, -- 63 Green Frost Shroud
     [20362] = { b = 297869, s = 59573 }, -- 63 Green Frost Staff
     [20363] = { b = 179387, s = 35877 }, -- 63 Green Frost Wand
+    [20364] = { b = 0, s = 0 }, -- Test Ammo Lockbox
+    [20367] = { b = 0, s = 0 }, -- Hunting Gear
     [20368] = { b = 177914, s = 35582 }, -- Bland Bow of Steadiness
     [20370] = { b = 1879481, s = 375896 }, -- Test Staff 90 epic
     [20372] = { b = 908656, s = 181731 }, -- Test Staff 77 epic
+    [20423] = { b = 0, s = 0 }, -- Sandy Scorpid Claw
     [20445] = { b = 31555, s = 7888 }, -- Test Defense Ring +120
     [20446] = { b = 31555, s = 7888 }, -- Test Defense Ring +80
+    [20460] = { b = 0, s = 0 }, -- Brann Bronzebeard's Lost Letter
+    [20462] = { b = 0, s = 0 }, -- Hallow's End Medallion
+    [20475] = { b = 0, s = 0 }, -- Soul Gem
+    [20485] = { b = 0, s = 0 }, -- Duke's Seal
+    [20489] = { b = 0, s = 0 }, -- Crown of the Council
     [20502] = { b = 106389, s = 21277 }, -- Ironbark Shield
     [20522] = { b = 207772, s = 41554 }, -- Feral Staff
     [20524] = { b = 75730, s = 15146 }, -- Shadowhide Leggings
+    [20525] = { b = 0, s = 0 }, -- Earthen Sigil
     [20583] = { b = 23694, s = 4738 }, -- Sturdy Female Dwarf Mask
     [20584] = { b = 23782, s = 4756 }, -- Sturdy Female Gnome Mask
     [20585] = { b = 23872, s = 4774 }, -- Sturdy Female Human Mask
@@ -13210,22 +17376,41 @@ VanillaItemPrices = {
     [20596] = { b = 25498, s = 5099 }, -- Sturdy Male Tauren Mask
     [20597] = { b = 23155, s = 4631 }, -- Sturdy Male Troll Mask
     [20598] = { b = 23245, s = 4649 }, -- Sturdy Male Undead Mask
+    [20609] = { b = 0, s = 0 }, -- Voodoo Feathers
+    [20651] = { b = 0, s = 0 }, -- Orange Murloc Egg
+    [20737] = { b = 0, s = 0 }, -- Singed Corestone
     [20739] = { b = 800, s = 200 }, -- Deadwood Headdress Feather DEPRECATED
     [20740] = { b = 1000, s = 250 }, -- Winterfall Spirit Beads DEPRECATED
     [20814] = { b = 2500, s = 3 }, -- Master's Throwing Dagger
     [20834] = { b = 2400, s = 600 }, -- Ornate Spyglass XT
+    [20883] = { b = 0, s = 0 }, -- Qiraji Glyphed Jewel
+    [20887] = { b = 0, s = 0 }, -- Qiraji Engraved Jewel
     [20908] = { b = 13, s = 3 }, -- Festival of Nian Firework
+    [20936] = { b = 0, s = 0 }, -- Qiraji Blessed Jewel
+    [20937] = { b = 0, s = 0 }, -- Qiraji Encased Jewel
+    [20946] = { b = 0, s = 0 }, -- Tactical Task Briefing III
+    [21043] = { b = 0, s = 0 }, -- Mysterious Envelope
     [21101] = { b = 368168, s = 73633 }, -- Staff of Spell Penetration - Fire (TEST)
     [21102] = { b = 343264, s = 68652 }, -- Staff of Spell Penetration - Frost (TEST)
     [21124] = { b = 496523, s = 99304 }, -- Ahn'Qiraj Wand [PH]
     [21125] = { b = 830727, s = 166145 }, -- Ahn'Qiraj Staff [PH]
     [21127] = { b = 669614, s = 133922 }, -- Ahn'Qiraj Mace [PH]
     [21135] = { b = 1, s = 1 }, -- Assassin's Throwing Axe
+    [21141] = { b = 0, s = 0 }, -- Destroyed Red Scepter Shard
+    [21152] = { b = 0, s = 0 }, -- The Nightmare's Corruption
+    [21159] = { b = 0, s = 0 }, -- Hive'Zora Scout Orders
     [21163] = { b = 160, s = 40 }, -- Bloated Firefin
     [21168] = { b = 6000, s = 1500 }, -- Baby Shark
+    [21173] = { b = 0, s = 0 }, -- Empty Festive Mug
     [21193] = { b = 160000, s = 40000 }, -- D'Sak's Sack
     [21194] = { b = 160000, s = 40000 }, -- D'Sak's Big Sack
     [21195] = { b = 160000, s = 40000 }, -- D'Sak's Sacktastic
+    [21236] = { b = 0, s = 0 }, -- Winter Veil Loaf
+    [21238] = { b = 0, s = 0 }, -- Winter Veil Cookie UNUSED
+    [21240] = { b = 0, s = 0 }, -- Winter Veil Candy
+    [21246] = { b = 0, s = 0 }, -- Combat Task Briefing I
+    [21247] = { b = 0, s = 0 }, -- Combat Task Briefing II
+    [21274] = { b = 0, s = 0 }, -- Test Stackable Items
     [21276] = { b = 1051883, s = 210376 }, -- Blessed Qiraji Naturalist Staff UNUSED
     [21313] = { b = 160000, s = 40000 }, -- D'Sak's Small bag
     [21339] = { b = 158575, s = 31715 }, -- Doomcaller's Handwraps [PH]
@@ -13275,19 +17460,93 @@ VanillaItemPrices = {
     [21612] = { b = 436544, s = 87308 }, -- Wormscale Stompers
     [21613] = { b = 363459, s = 72691 }, -- Wormhide Boots
     [21614] = { b = 330061, s = 66012 }, -- Wormhide Protector
+    [21628] = { b = 0, s = 0 }, -- Test AQ Resource - Copper
+    [21629] = { b = 0, s = 0 }, -- Test AQ Resource - Iron
+    [21630] = { b = 0, s = 0 }, -- Test AQ Resource - Thorium
+    [21631] = { b = 0, s = 0 }, -- Test AQ Resource - Light Leather
+    [21632] = { b = 0, s = 0 }, -- Test AQ Resource - Medium Leather
+    [21633] = { b = 0, s = 0 }, -- Test AQ Resource - Thick Leather
+    [21634] = { b = 0, s = 0 }, -- Test AQ Resource - Linen Bandage
+    [21636] = { b = 0, s = 0 }, -- Test AQ Resource - Silk Bandage
+    [21637] = { b = 0, s = 0 }, -- Test AQ Resource - Runecloth Bandage
+    [21638] = { b = 0, s = 0 }, -- Test AQ Resource - Spotted Yellowtail
+    [21641] = { b = 0, s = 0 }, -- Test AQ Resource - Rainbow Fin Albacore
+    [21642] = { b = 0, s = 0 }, -- Test AQ Resource - Roast Raptor
+    [21643] = { b = 0, s = 0 }, -- Test AQ Resource - Arthas' Tear
+    [21644] = { b = 0, s = 0 }, -- Test AQ Resource - Stranglekelp
+    [21646] = { b = 0, s = 0 }, -- Test AQ Resource - Purple Lotus
+    [21649] = { b = 0, s = 0 }, -- Test AQ Resource - Tin
+    [21653] = { b = 0, s = 0 }, -- Test AQ Resource - Mithril
+    [21655] = { b = 0, s = 0 }, -- Test AQ Resource - Heavy Leather
+    [21656] = { b = 0, s = 0 }, -- Test AQ Resource - Rugged Leather
+    [21657] = { b = 0, s = 0 }, -- Test AQ Resource - Wool Bandages
+    [21658] = { b = 0, s = 0 }, -- Test AQ Resource - Mageweave Bandages
+    [21659] = { b = 0, s = 0 }, -- Test AQ Resource - Lean Wolf Steak
+    [21660] = { b = 0, s = 0 }, -- Test AQ Resource - Baked Salmon
+    [21661] = { b = 0, s = 0 }, -- Test AQ Resource - Firebloom
+    [21662] = { b = 0, s = 0 }, -- Test AQ Resource - Peacebloom
     [21717] = { b = 200, s = 50 }, -- Large Purple Rocket Cluster
     [21719] = { b = 200, s = 50 }, -- Large White Rocket Cluster
     [21720] = { b = 200, s = 50 }, -- Large Yellow Rocket Cluster
     [21736] = { b = 1000000, s = 250000 }, -- Riding Gryphon Reins
+    [21739] = { b = 0, s = 0 }, -- Lunar Festival Invitation DEBUG
     [21782] = { b = 274611, s = 54922 }, -- 2000 Test sword 63 blue
     [21795] = { b = 14, s = 2 }, -- Monster - Staff, Ahn'Qiraj
+    [21811] = { b = 0, s = 0 }, -- [PH] Object of Affection
     [21890] = { b = 210067, s = 42013 }, -- Gloves of the Fallen Prophet
+    [21923] = { b = 0, s = 0 }, -- [PH] Picnic Parcel
+    [21930] = { b = 0, s = 0 }, -- [PH] Valentine Lockbox, Quest, Common
+    [21962] = { b = 0, s = 0 }, -- [PH] Valentine Quest Item, UncommonStormwind
+    [21963] = { b = 0, s = 0 }, -- [PH] Valentine Quest Item, UncommonIronforge
+    [21964] = { b = 0, s = 0 }, -- [PH] Valentine Quest Item, UncommonDarnassus
+    [22020] = { b = 0, s = 0 }, -- QAEnchant Weapon +15 Agility
+    [22021] = { b = 0, s = 0 }, -- QAEnchant Weapon +22 Intellect
+    [22022] = { b = 0, s = 0 }, -- QAEnchant Weapon +15 Strength
+    [22023] = { b = 0, s = 0 }, -- QAEnchant Weapon +20 Spirit
+    [22024] = { b = 0, s = 0 }, -- QAEnchant Weapon Unholy
+    [22025] = { b = 0, s = 0 }, -- QAEnchant Weapon Lifestealing
+    [22026] = { b = 0, s = 0 }, -- zzOLD - QAEnchant 2H Weapon +9 Damage
+    [22027] = { b = 0, s = 0 }, -- zzOLD - QAEnchant Weapon +5 Damage
+    [22028] = { b = 0, s = 0 }, -- QAEnchant Chest +4 Stats
+    [22029] = { b = 0, s = 0 }, -- QAEnchant Gloves +20 Frost Damage
+    [22030] = { b = 0, s = 0 }, -- QAEnchant Gloves +20 Fire Damage
+    [22031] = { b = 0, s = 0 }, -- QAEnchant Gloves +20 Shadow Damage
+    [22032] = { b = 0, s = 0 }, -- QAEnchant Gloves +30 Healing
+    [22033] = { b = 0, s = 0 }, -- QAEnchant Gloves +15 Agility
+    [22034] = { b = 0, s = 0 }, -- QAEnchant Gloves +2% Threat
+    [22035] = { b = 0, s = 0 }, -- QAEnchant Gloves +5 Skinning
+    [22036] = { b = 0, s = 0 }, -- QAEnchant Bracer +4 Mana5
+    [22037] = { b = 0, s = 0 }, -- QAEnchant Bracer +24 Healing
+    [22038] = { b = 0, s = 0 }, -- QAEnchant Shield +2% Block Chance
+    [22039] = { b = 0, s = 0 }, -- QAEnchant Cloak +15 Fire Resistance
+    [22040] = { b = 0, s = 0 }, -- QAEnchant Cloak +15 Nature Resistance
+    [22041] = { b = 0, s = 0 }, -- QAEnchant Cloak +8 Stealth
+    [22042] = { b = 0, s = 0 }, -- QAEnchant Cloak -2% Threat
+    [22043] = { b = 0, s = 0 }, -- QAEnchant Cloak +1% Dodge
+    [22045] = { b = 0, s = 0 }, -- Test QARaid Uber Ammo Lockbox
+    [22114] = { b = 0, s = 0 }, -- Pink Murloc Egg
+    [22130] = { b = 0, s = 0 }, -- Symbol of Love
+    [22151] = { b = 0, s = 0 }, -- Anthion's Holy Water
     [22152] = { b = 50, s = 12 }, -- Anthion's Pouch
     [22230] = { b = 49894, s = 9978 }, -- Frightmaw Hide
     [22233] = { b = 23350, s = 5837 }, -- Zigris' Footlocker
+    [22258] = { b = 0, s = 0 }, -- Love Potion
     [22273] = { b = 57042, s = 11408 }, -- Moonshadow Hood
+    [22316] = { b = 0, s = 0 }, -- Test Relic
     [22346] = { b = 14, s = 2 }, -- Monster - Mace2H, Unstoppable Force
+    [22386] = { b = 0, s = 0 }, -- Head of Instructor Razuvious DEP
+    [22387] = { b = 0, s = 0 }, -- Heart of Anub'Rekhan
     [22391] = { b = 343264, s = 68652 }, -- Monster - Staff, Lord Valthalak
+    [22485] = { b = 0, s = 0 }, -- [UNUSED] Scourge Invasion Focus Object
+    [22486] = { b = 0, s = 0 }, -- [UNUSED] Scourge Invasion Boss Summoner
+    [22584] = { b = 0, s = 0 }, -- QAEnchant Cloak +3 Agility
+    [22585] = { b = 0, s = 0 }, -- QAEnchant Gloves +5 Mining
+    [22586] = { b = 0, s = 0 }, -- QAEnchant Gloves +5 Herbalism
+    [22587] = { b = 0, s = 0 }, -- QAEnchant Boots +8% Speed
+    [22588] = { b = 0, s = 0 }, -- QAEnchant Cloak +10 Shadow Resistance
+    [22619] = { b = 0, s = 0 }, -- Craftsman's Writ - Greater Frost Protection Potion
+    [22625] = { b = 0, s = 0 }, -- Craftsman's Writ - Baked Salmon
+    [22626] = { b = 0, s = 0 }, -- Craftsman's Writ - Runn Tum Tuber Surprise
     [22684] = { b = 120000, s = 30000 }, -- Pattern: Glacial Gloves
     [22685] = { b = 120000, s = 30000 }, -- Pattern: Glacial Cloak
     [22686] = { b = 150000, s = 37500 }, -- Pattern: Glacial Vest
@@ -13301,32 +17560,170 @@ VanillaItemPrices = {
     [22703] = { b = 150000, s = 37500 }, -- Plans: Icebane Breastplate
     [22704] = { b = 150000, s = 37500 }, -- Plans: Icebane Gauntlets
     [22705] = { b = 150000, s = 37500 }, -- Plans: Icebane Bracers
+    [22765] = { b = 0, s = 0 }, -- Mildewed Letter
+    [22780] = { b = 0, s = 0 }, -- White Murloc Egg
+    [22781] = { b = 0, s = 0 }, -- Polar Bear Collar
     [22805] = { b = 746762, s = 149352 }, -- Naxxramas Sword 1H 1 [PH]
     [22814] = { b = 1101475, s = 220295 }, -- Naxxramas Sword 2H 2 [PH]
     [22817] = { b = 906186, s = 181237 }, -- Naxxramas Polearm [PH]
+    [22933] = { b = 0, s = 0 }, -- [UNUSED] Abom Stoone
     [23034] = { b = 291450, s = 58290 }, -- Nax PH Crit Plate Shoulders
     [23058] = { b = 353421, s = 88355 }, -- Life Channeling Necklace
     [23072] = { b = 290197, s = 58039 }, -- Fists of the Unrelenting
+    [23086] = { b = 0, s = 0 }, -- [UNUSED] Letter Cookie
+    [23162] = { b = 0, s = 0 }, -- Foror's Crate of Endless Resist Gear Storage
+    [23163] = { b = 0, s = 0 }, -- Performer's Wand
+    [23164] = { b = 0, s = 0 }, -- Bubbly Beverage
+    [23172] = { b = 0, s = 0 }, -- Refreshing Red Apple
+    [23175] = { b = 0, s = 0 }, -- Tasty Summer Treat
     [23176] = { b = 15, s = 3 }, -- Fizzy Energy Drink
     [23215] = { b = 2000, s = 500 }, -- Bag of Smorc Ingredients
+    [23224] = { b = 0, s = 0 }, -- Summer Gift Package
+    [23227] = { b = 0, s = 0 }, -- iCoke Gift Box Voucher
+    [23245] = { b = 0, s = 0 }, -- [PH] Everburning Elixir
     [23271] = { b = 80000, s = 20000 }, -- QATest Darkmoon Faire Tickets
+    [23325] = { b = 0, s = 0 }, -- [PH] Picnic Parcel
+    [23360] = { b = 0, s = 0 }, -- Head of Instructor Razuvious
     [23418] = { b = 2000, s = 500 }, -- Test Sapper Charge
+    [23567] = { b = 0, s = 0 }, -- [PH] Silithus PvP Dust [DEP]
+    [23656] = { b = 0, s = 0 }, -- Promotion Test Item
     [23683] = { b = 3000, s = 750 }, -- Crystal Flake Throat Lozenge
     [23684] = { b = 6000, s = 1500 }, -- Crystal Infused Bandage
     [23689] = { b = 25000, s = 6250 }, -- Manual: Crystal Infused Bandage
     [23690] = { b = 25000, s = 6250 }, -- Recipe: Crystal Flake Throat Lozenge
+    [23696] = { b = 0, s = 0 }, -- [PH] Potion of Heightened Senses [DEP]
+    [23698] = { b = 0, s = 0 }, -- [PH] Nature Resist Potion [DEP]
+    [23699] = { b = 0, s = 0 }, -- [PH] Light Consumable [DEP]
+    [23700] = { b = 0, s = 0 }, -- [PH] Glorious Standard of the Alliance [DEP]
+    [23701] = { b = 0, s = 0 }, -- [PH] Victorious Standard of the Horde [DEP]
     [23705] = { b = 50000, s = 12500 }, -- Tabard of Flame
     [23709] = { b = 50000, s = 12500 }, -- Tabard of Frost
     [23710] = { b = 50000, s = 12500 }, -- Upperdeck Tabard #3
     [23712] = { b = 5000, s = 1250 }, -- White Tiger Cub
     [23713] = { b = 5000, s = 1250 }, -- Hippogryph Hatchling
+    [23714] = { b = 0, s = 0 }, -- Perpetual Purple Firework
+    [23715] = { b = 0, s = 0 }, -- Permanent Lung Juice Cocktail
+    [23716] = { b = 0, s = 0 }, -- Carved Ogre Idol
+    [23718] = { b = 0, s = 0 }, -- Permanent Ground Scorpok Assay
+    [23719] = { b = 0, s = 0 }, -- Permanent Cerebral Cortex Compound
+    [23721] = { b = 0, s = 0 }, -- Permanent Gizzard Gum
+    [23722] = { b = 0, s = 0 }, -- Permanent R.O.I.D.S.
     [23725] = { b = 2600, s = 650 }, -- QAEnchant Fiery Weapon
     [23727] = { b = 2600, s = 650 }, -- QAEnchant Gloves +5 Fishing
     [23728] = { b = 2600, s = 650 }, -- QAEnchant Gloves Riding Skill
+    [23794] = { b = 0, s = 0 }, -- Permanent Sheen of Zanza
+    [23795] = { b = 0, s = 0 }, -- Permanent Spirit of Zanza
+    [23796] = { b = 0, s = 0 }, -- Permanent Swiftness of Zanza
     [24071] = { b = 393470, s = 78694 }, -- Bland Dagger
     [24358] = { b = 365815, s = 91453 }, -- QATest +1000 Spell Dmg Ring
     [2556] = { b = 160, s = 40 }, -- Recipe: Elixir of Tongues
+    [17] = { b = 0, s = 0 }, -- Martin Fury
     [192] = { b = 271373, s = 54274 }, -- Martin Thunder
+    [2248] = { b = 0, s = 0 }, -- Martin Fury
+    [2301] = { b = 0, s = 0 }, -- Light Hide Soft Boots
+    [2543] = { b = 0, s = 0 }, -- Militia Pants
+    [2952] = { b = 0, s = 0 }, -- Fine Light Hide Jerkin
+    [3038] = { b = 0, s = 0 }, -- Archer's Longbow
+    [3043] = { b = 0, s = 0 }, -- Elven Arrow
+    [3104] = { b = 0, s = 0 }, -- Keen Throwing Knife
+    [3105] = { b = 0, s = 0 }, -- Large Throwing Knife
+    [3106] = { b = 0, s = 0 }, -- Wicked Throwing Dagger
+    [3359] = { b = 0, s = 0 }, -- Martin Thunder3.1.2
+    [3398] = { b = 0, s = 0 }, -- Martin Thunder3 jesse test
+    [3479] = { b = 0, s = 0 }, -- Bronze Scale Curiass
+    [3579] = { b = 0, s = 0 }, -- Ornate Copper Shoulders
+    [3896] = { b = 0, s = 0 }, -- Twain Test
+    [4081] = { b = 0, s = 0 }, -- Blackforge Leggings
+    [4574] = { b = 0, s = 0 }, -- Destroy Me
+    [4642] = { b = 0, s = 0 }, -- Star of Xil'yeh
+    [5031] = { b = 0, s = 0 }, -- ZZZZZZZZ
+    [5032] = { b = 0, s = 0 }, -- ZZZZZ sword
+    [5033] = { b = 0, s = 0 }, -- ZZZZZ sword 2
+    [5034] = { b = 0, s = 0 }, -- ZZZZZ sword 3
+    [5035] = { b = 0, s = 0 }, -- ZZZZZ sword 4
+    [5036] = { b = 0, s = 0 }, -- ZZZZZ
+    [5037] = { b = 0, s = 0 }, -- ZZZZZ sword 5
+    [5039] = { b = 0, s = 0 }, -- ZZZZZ sword 6
+    [5070] = { b = 0, s = 0 }, -- Worn Shadow Wand
+    [5290] = { b = 0, s = 0 }, -- Monster - Bow, Black Bow White Grip
+    [6128] = { b = 0, s = 0 }, -- Primitive Robe
+    [6141] = { b = 0, s = 0 }, -- Stalker's Pants
+    [6142] = { b = 0, s = 0 }, -- Stalker's Harness
+    [6143] = { b = 0, s = 0 }, -- Stalker's Shoes
+    [6606] = { b = 0, s = 0 }, -- Dervish Mantle
+    [7066] = { b = 0, s = 0 }, -- Exotic Silk Dress
+    [7167] = { b = 0, s = 0 }, -- Test Copper Dagger
+    [7169] = { b = 0, s = 0 }, -- Test COpper Dagger
+    [7677] = { b = 0, s = 0 }, -- Black Metal Greatsword
+    [7940] = { b = 0, s = 0 }, -- Heavy Mithril Axe
+    [9042] = { b = 0, s = 0 }, -- Monster - Claw Offhand
+    [9239] = { b = 0, s = 0 }, -- Mallet of Zul'Farrak
+    [9376] = { b = 0, s = 0 }, -- Jang'thraze
+    [9377] = { b = 0, s = 0 }, -- Sang'thraze
+    [10006] = { b = 0, s = 0 }, -- Red Mageweave Vest
+    [10037] = { b = 0, s = 0 }, -- Shadoweave Mask
+    [10422] = { b = 0, s = 0 }, -- Silvered Bronze Pants
+    [11182] = { b = 0, s = 0 }, -- gfdgdf
+    [11183] = { b = 0, s = 0 }, -- xdds
+    [11344] = { b = 0, s = 0 }, -- Big Voodoo Test
+    [11345] = { b = 0, s = 0 }, -- Barbaric Kilt
+    [12221] = { b = 0, s = 0 }, -- Blump Family Fishing Pole
+    [12222] = { b = 0, s = 0 }, -- Blump Family Fishing Hat
+    [12246] = { b = 0, s = 0 }, -- test thing
+    [12333] = { b = 0, s = 0 }, -- Monster - Polearm, Horde
+    [12407] = { b = 0, s = 0 }, -- Thorium Shoulders
+    [12413] = { b = 0, s = 0 }, -- Thorium Leggings
+    [12423] = { b = 0, s = 0 }, -- Imperial Plate Helmet
+    [12686] = { b = 0, s = 0 }, -- Finkle's Skinner
+    [12767] = { b = 0, s = 0 }, -- Thorium Stiletto
+    [12948] = { b = 0, s = 0 }, -- Monster - Item, Handheld Holy Symbol 
+    [13256] = { b = 0, s = 0 }, -- Egan's Blaster
+    [13294] = { b = 0, s = 0 }, -- dsds
+    [13472] = { b = 0, s = 0 }, -- Onyxia Scale Cloak
+    [13516] = { b = 0, s = 0 }, -- Onyxia's Cloak of C-Blockage
+    [13919] = { b = 0, s = 0 }, -- Monster - Polearm, Black - Black Flame
+    [14689] = { b = 0, s = 0 }, -- Battle Chain Boots
+    [14690] = { b = 0, s = 0 }, -- Battle Chain Armguards
+    [14692] = { b = 0, s = 0 }, -- Battle Chain Cape
+    [14693] = { b = 0, s = 0 }, -- Battle Chain Belt
+    [14694] = { b = 0, s = 0 }, -- Battle Chain Gloves
+    [14695] = { b = 0, s = 0 }, -- Battle Chain Leggings
+    [14697] = { b = 0, s = 0 }, -- Battle Chain Chestguard
+    [14698] = { b = 0, s = 0 }, -- Brackwater Chain Surcoat
+    [14699] = { b = 0, s = 0 }, -- Brackwater Chain Greaves
+    [14700] = { b = 0, s = 0 }, -- Brackwater Chain Bindings
+    [14701] = { b = 0, s = 0 }, -- Brackwater Chain Cloak
+    [14702] = { b = 0, s = 0 }, -- Brackwater Chain Girdle
+    [14703] = { b = 0, s = 0 }, -- Brackwater Chain Handgrips
+    [14704] = { b = 0, s = 0 }, -- Brackwater Chain Legguards
+    [14705] = { b = 0, s = 0 }, -- Brackwater Chain Shield
+    [14819] = { b = 0, s = 0 }, -- Monster - Mace2H, Horde Stump Maul
+    [15089] = { b = 0, s = 0 }, -- Wicked Leather Armor
+    [16128] = { b = 0, s = 0 }, -- Test Nature Res Head Leather
+    [16130] = { b = 0, s = 0 }, -- Test Nature Res Head Plate
+    [16133] = { b = 0, s = 0 }, -- Test Nature Res Head Mail
     [16334] = { b = 30000, s = 7500 }, -- Sergeant's Insignia
     [16340] = { b = 14802, s = 2960 }, -- First Sergeant's Cloak
+    [18439] = { b = 0, s = 0 }, -- Corporal's Cloak
+    [18732] = { b = 0, s = 0 }, -- Officer's Tabard
+    [18733] = { b = 0, s = 0 }, -- Officer's Tabard
+    [19285] = { b = 0, s = 0 }, -- Fast Test Ammo
+    [19294] = { b = 0, s = 0 }, -- Darkmoon Boquet
+    [19359] = { b = 0, s = 0 }, -- Blackwing Mace1H[PH]
+    [19985] = { b = 0, s = 0 }, -- Highlander's Plate Girdle
+    [20133] = { b = 0, s = 0 }, -- Skyfury Gauntlets
+    [20294] = { b = 0, s = 0 }, -- 90 Green Rogue Boots
+    [20386] = { b = 0, s = 0 }, -- Dummy Mask
+    [20523] = { b = 0, s = 0 }, -- Shadowhide Leggings
+    [20529] = { b = 0, s = 0 }, -- Robes of Servitude
+    [20880] = { b = 0, s = 0 }, -- Golden Token
+    [20905] = { b = 0, s = 0 }, -- Festival of Nian Firework
+    [21169] = { b = 0, s = 0 }, -- Empty Festive Mug
+    [21170] = { b = 0, s = 0 }, -- Filled Festive Mug
+    [21172] = { b = 0, s = 0 }, -- Empty Festive Mugg
+    [21797] = { b = 0, s = 0 }, -- Indalamar's Sword of Pwnage
+    [21798] = { b = 0, s = 0 }, -- Indalamar's Sword of Perpetual Winter's Night
+    [21799] = { b = 0, s = 0 }, -- Indalamar's Sword of Pwnage
+    [21832] = { b = 0, s = 0 }, -- Mercer's Hat
+    [22751] = { b = 0, s = 0 }, -- Sentinel's Plate Legguards
 }
