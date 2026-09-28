@@ -406,13 +406,13 @@ function PUISellValue:InjectTooltipPrice(tooltip, itemID, count)
     -- If no prices are known or enabled, exit cleanly
     if not showSell and not showBuy and not showAH then return end
 
-    -- Check if MerchantFrame is open (Blizzard native money frame handles bag sell price)
-    local atMerchant = MerchantFrame and MerchantFrame:IsShown()
+    -- Only suppress our custom Vendor Sell row if Blizzard's native money frame is actively shown (bag items at merchant)
+    local hasBlizzNativeSell = (tooltip == GameTooltip and GameTooltipMoneyFrame1 and GameTooltipMoneyFrame1:IsShown())
 
     tooltip._primusSellValueInjected = true
 
     -- 1. Vendor Sell Price Row
-    if showSell and not atMerchant then
+    if showSell and not hasBlizzNativeSell then
         if sellPrice > 0 then
             if count > 1 and sellDB:Get("showStackPrice", true) then
                 local totalStr = Utils.FormatMoney(sellPrice * count)
@@ -427,7 +427,7 @@ function PUISellValue:InjectTooltipPrice(tooltip, itemID, count)
     end
 
     -- 2. Vendor Buy Price Row (When known from merchant stock)
-    if showBuy and not atMerchant then
+    if showBuy then
         if count > 1 and sellDB:Get("showStackPrice", true) then
             local totalStr = Utils.FormatMoney(buyPrice * count)
             local eachStr  = Utils.FormatMoney(buyPrice)
