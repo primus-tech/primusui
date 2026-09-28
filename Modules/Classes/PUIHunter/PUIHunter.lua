@@ -845,9 +845,35 @@ function PUIHunter:OnEnable()
         swingBar:Hide()
     end)
 
+    -- Cast completion hook for Aimed Shot / Multi-Shot swing resets
+    local lastHunterCast = nil
+    Events:Register("SPELLCAST_START", self, function(owner, event, spellName, duration)
+        lastHunterCast = spellName
+    end)
+
+    Events:Register("SPELLCAST_STOP", self, function()
+        if lastHunterCast == "Aimed Shot" or lastHunterCast == "Multi-Shot" then
+            local speed = UnitRangedDamage("player") or 2.5
+            swingDuration = speed
+            swingStartTime = GetTime()
+            swingBar:SetMinMaxValues(0, swingDuration)
+            swingBar:SetValue(0)
+            swingBar:Show()
+        end
+        lastHunterCast = nil
+    end)
+
+    Events:Register("SPELLCAST_FAILED", self, function()
+        lastHunterCast = nil
+    end)
+
+    Events:Register("SPELLCAST_INTERRUPTED", self, function()
+        lastHunterCast = nil
+    end)
+
     Events:Listen("PRIMUS_COMBAT_EVENT", self, function(owner, data)
         if not data then return end
-        if data.isSwing and data.isRanged and data.source == UnitName("player") then
+        if (data.isSwing or data.isRanged) and data.source == UnitName("player") then
             local speed = UnitRangedDamage("player") or 2.5
             swingDuration = speed
             swingStartTime = GetTime()
@@ -877,20 +903,26 @@ function PUIHunter:OnEnable()
         PUIHunter:UpdateHUD()
     end)
 
-    -- Tickers
-    Time:Every(0.04, function()
+    -- Auto-Shot Swing Bar Driver
+    local swingThrottle = 0
+    swingBar:SetScript("OnUpdate", function()
+        local elapsed = arg1 or 0.04
+        swingThrottle = swingThrottle + elapsed
+        if swingThrottle < 0.033 then return end
+        swingThrottle = 0
+
         if swingStartTime > 0 and swingBar:IsShown() then
-            local elapsed = GetTime() - swingStartTime
-            if elapsed <= swingDuration then
-                swingBar:SetValue(elapsed)
-                local rem = swingDuration - elapsed
+            local passed = GetTime() - swingStartTime
+            if passed <= swingDuration then
+                swingBar:SetValue(passed)
+                local rem = swingDuration - passed
                 swingBar.text:SetText(string.format("Auto Shot: %.1fs", rem))
             else
                 swingBar:SetValue(swingDuration)
                 swingBar.text:SetText("Auto Shot: Ready")
             end
         end
-    end, self)
+    end)
 
     Time:Every(2.0, function()
         PUIHunter:UpdateHUD()
@@ -903,8 +935,11 @@ function PUIHunter:OnDisable()
     Time:CancelAll(self)
     Events:UnregisterOwner(self)
     swingStartTime = 0
+    if swingBar then
+        swingBar:SetScript("OnUpdate", nil)
+        swingBar:Hide()
+    end
     if hudFrame then hudFrame:Hide() end
-    if swingBar then swingBar:Hide() end
 end
 
 

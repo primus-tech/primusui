@@ -296,6 +296,16 @@ function Utils.FormatMoney(copper, formatType)
     return str
 end
 
+-- Safely get CVar value without throwing if CVar does not exist in 1.12.1
+function Utils.GetCVar(cvarName, defaultVal)
+    if not cvarName or type(GetCVar) ~= "function" then return defaultVal end
+    local ok, val = pcall(GetCVar, cvarName)
+    if ok and val ~= nil then
+        return val
+    end
+    return defaultVal
+end
+
 -- =========================================================================
 -- SPELLBOOK & KNOWN SPELL HELPERS
 -- =========================================================================

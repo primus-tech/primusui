@@ -355,9 +355,18 @@ function PUIHud:OnEnable()
         PUIHud:ResetPlayerSwing()
     end)
 
+    Events:Register("PLAYER_ENTER_COMBAT", "PUIHud", function()
+        local speed = UnitAttackSpeed("player") or 2.0
+        PUIHud:TriggerPlayerSwing(speed, false)
+    end)
+
+    Events:Register("PLAYER_LEAVE_COMBAT", "PUIHud", function()
+        PUIHud:ResetPlayerSwing()
+    end)
+
     Events:Listen("PRIMUS_COMBAT_EVENT", "PUIHud", function(owner, data)
         if not data then return end
-        if data.isSwing and data.source == UnitName("player") then
+        if (data.isSwing or data.isRanged) and data.source == UnitName("player") then
             local speed
             if data.isRanged then
                 speed = UnitRangedDamage("player") or 2.5
@@ -371,20 +380,31 @@ function PUIHud:OnEnable()
     end)
 
     -- 5. Spellcast & GCD Hook
+    local lastCastSpell = nil
+
     Events:Register("SPELLCAST_START", "PUIHud", function(owner, event, spellName, duration)
+        lastCastSpell = spellName
         PUIHud:StartCast(spellName, (duration or 1000) / 1000, false)
         PUIHud:TriggerGCD(1.5)
     end)
 
     Events:Register("SPELLCAST_STOP", "PUIHud", function()
+        if lastCastSpell == "Aimed Shot" or lastCastSpell == "Multi-Shot" or lastCastSpell == "Slam" then
+            local isRanged = (lastCastSpell ~= "Slam")
+            local speed = isRanged and (UnitRangedDamage("player") or 2.5) or (UnitAttackSpeed("player") or 2.0)
+            PUIHud:TriggerPlayerSwing(speed, isRanged)
+        end
+        lastCastSpell = nil
         PUIHud:StopCast()
     end)
 
     Events:Register("SPELLCAST_FAILED", "PUIHud", function()
+        lastCastSpell = nil
         PUIHud:StopCast()
     end)
 
     Events:Register("SPELLCAST_INTERRUPTED", "PUIHud", function()
+        lastCastSpell = nil
         PUIHud:StopCast()
     end)
 
@@ -393,6 +413,7 @@ function PUIHud:OnEnable()
     end)
 
     Events:Register("SPELLCAST_CHANNEL_START", "PUIHud", function(owner, event, duration, spellName)
+        lastCastSpell = spellName
         PUIHud:StartCast(spellName, (duration or 1000) / 1000, true)
         PUIHud:TriggerGCD(1.5)
     end)
@@ -402,12 +423,19 @@ function PUIHud:OnEnable()
     end)
 
     Events:Register("SPELLCAST_CHANNEL_STOP", "PUIHud", function()
+        lastCastSpell = nil
         PUIHud:StopCast()
     end)
 
-    -- 6. Real-time 0.04s Ticker for Swing Bars, GCD, CastBar, Live Range & Alpha Easing
+    -- 6. Direct Frame OnUpdate Driver (Swing Bars, GCD, CastBar, Live Range & Alpha Easing)
     local lastCockpitUpdate = 0
-    Time:Every(0.04, function()
+    local hudUpdateThrottle = 0
+    hudFrame:SetScript("OnUpdate", function()
+        local elapsed = arg1 or 0.04
+        hudUpdateThrottle = hudUpdateThrottle + elapsed
+        if hudUpdateThrottle < 0.033 then return end
+        hudUpdateThrottle = 0
+
         local now = GetTime()
 
         -- Alpha Easing
@@ -430,7 +458,7 @@ function PUIHud:OnEnable()
             lastCockpitUpdate = now
             PUIHud:UpdateCockpitButtons()
         end
-    end, "PUIHud")
+    end)
 
     -- Initial refreshes
     self:UpdatePlayerWing()
@@ -451,6 +479,7 @@ function PUIHud:OnDisable()
     Events:UnregisterOwner("PUIHud")
 
     if hudFrame then
+        hudFrame:SetScript("OnUpdate", nil)
         hudFrame:Hide()
     end
 

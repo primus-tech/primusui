@@ -20,6 +20,36 @@ local activeTimers = {}
 local activeCount  = 0
 local timerIDCounter = 0
 
+-- Dedicated isolated timer node pool (avoids pointer aliasing with global Memory pool)
+local timerPool = {}
+local timerPoolSize = 0
+
+local function AcquireTimerNode()
+    if timerPoolSize > 0 then
+        local node = timerPool[timerPoolSize]
+        timerPool[timerPoolSize] = nil
+        timerPoolSize = timerPoolSize - 1
+        return node
+    end
+    return {}
+end
+
+local function ReleaseTimerNode(node)
+    if not node then return end
+    node.id = nil
+    node.callback = nil
+    node.arg = nil
+    node.owner = nil
+    node.cancelled = nil
+    node.repeating = nil
+    node.remaining = nil
+    node.interval = nil
+    if timerPoolSize < 64 then
+        timerPoolSize = timerPoolSize + 1
+        timerPool[timerPoolSize] = node
+    end
+end
+
 -- Keyed throttles and debounces
 local throttles = {}
 local debounces = {}
@@ -35,32 +65,40 @@ local function Ticker_OnUpdate()
     local i = 1
     while i <= activeCount do
         local timer = activeTimers[i]
-        if timer then
+        if not timer then
+            table.remove(activeTimers, i)
+            activeCount = activeCount - 1
+        elseif timer.cancelled then
+            table.remove(activeTimers, i)
+            activeCount = activeCount - 1
+            ReleaseTimerNode(timer)
+        else
             timer.remaining = timer.remaining - elapsed
             if timer.remaining <= 0 then
-                -- Execute timer callback safely
-                if timer.callback then
-                    Debug:SafeCall(timer.callback, timer.arg)
-                end
+                local cb = timer.callback
+                local cbArg = timer.arg
+                local isRepeating = timer.repeating and not timer.cancelled
 
-                if timer.repeating and not timer.cancelled then
+                if isRepeating then
                     timer.remaining = timer.interval
                     i = i + 1
                 else
-                    -- Remove one-shot or cancelled timer
                     table.remove(activeTimers, i)
                     activeCount = activeCount - 1
-                    Memory:ReleaseTable(timer)
+                    ReleaseTimerNode(timer)
+                end
+
+                if cb then
+                    Debug:SafeCall(cb, cbArg)
                 end
             else
                 i = i + 1
             end
-        else
-            i = i + 1
         end
     end
 
-    if activeCount == 0 then
+    if activeCount <= 0 then
+        activeCount = 0
         tickerFrame:Hide()
     end
 end
@@ -78,8 +116,14 @@ function Time:After(delaySeconds, callback, callbackArg, owner)
     if not callback or type(callback) ~= "function" then return nil end
     delaySeconds = math.max(0, delaySeconds or 0)
 
+    -- Flexible overload: Time:After(delay, callback, owner)
+    if owner == nil and (type(callbackArg) == "string" or type(callbackArg) == "table") then
+        owner = callbackArg
+        callbackArg = nil
+    end
+
     timerIDCounter = timerIDCounter + 1
-    local node = Memory:AcquireTable()
+    local node = AcquireTimerNode()
     node.id = timerIDCounter
     node.remaining = delaySeconds
     node.interval = delaySeconds
@@ -101,8 +145,14 @@ function Time:Every(intervalSeconds, callback, callbackArg, owner)
     if not callback or type(callback) ~= "function" then return nil end
     intervalSeconds = math.max(0.01, intervalSeconds or 1)
 
+    -- Flexible overload: Time:Every(interval, callback, owner)
+    if owner == nil and (type(callbackArg) == "string" or type(callbackArg) == "table") then
+        owner = callbackArg
+        callbackArg = nil
+    end
+
     timerIDCounter = timerIDCounter + 1
-    local node = Memory:AcquireTable()
+    local node = AcquireTimerNode()
     node.id = timerIDCounter
     node.remaining = intervalSeconds
     node.interval = intervalSeconds
@@ -121,14 +171,27 @@ end
 
 -- Cancel a timer by ID or node reference
 function Time:Cancel(timerId)
-    if not timerId then return end
+    if not timerId then return false end
+    local isNum = (type(timerId) == "number")
+    local isTab = (type(timerId) == "table")
+    if not isNum and not isTab then return false end
+
     for i = 1, activeCount do
         local timer = activeTimers[i]
-        if timer and (timer.id == timerId or timer == timerId) then
-            timer.cancelled = true
-            timer.repeating = false
-            timer.remaining = 0
-            return true
+        if timer then
+            local match = false
+            if isNum and timer.id == timerId then
+                match = true
+            elseif isTab and timer == timerId then
+                match = true
+            end
+
+            if match then
+                timer.cancelled = true
+                timer.repeating = false
+                timer.remaining = 0
+                return true
+            end
         end
     end
     return false

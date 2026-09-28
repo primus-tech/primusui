@@ -49,7 +49,7 @@ function PUIAutoMechanics:RegisterOptionsFlare()
         name = "PUIAutoMechanics",
         category = "Utility",
         label = "Auto Mechanics",
-        icon = "Interface\Icons\Ability_Mount_Raptor",
+        icon = "Interface\\Icons\\Ability_Mount_Raptor",
         desc = "Auto-dismount on action, auto-stand on spellcast, and auto-skip taxi prompts.",
     })
 end

@@ -136,16 +136,18 @@ local function CreateBankSlot(parent, index)
 
         if isBankOpen and this.bagID and this.slotID then
             if this.bagID == -1 then
-                local link = GetContainerItemLink(-1, this.slotID) or this.itemLink
-                if link then
-                    local rawLink = Utils.ExtractLink(link) or link
-                    GameTooltip:SetHyperlink(rawLink)
+                local invSlot = this.invSlot or (BankButtonIDToInvSlotID and BankButtonIDToInvSlotID(this.slotID, nil)) or (39 + this.slotID)
+                if invSlot and GetInventoryItemTexture("player", invSlot) then
+                    GameTooltip:SetInventoryItem("player", invSlot)
+                    GameTooltip:Show()
                     hasItem = true
                 end
             else
                 local texture = GetContainerItemInfo(this.bagID, this.slotID)
                 if texture then
-                    hasItem = GameTooltip:SetBagItem(this.bagID, this.slotID)
+                    GameTooltip:SetBagItem(this.bagID, this.slotID)
+                    GameTooltip:Show()
+                    hasItem = true
                 end
             end
         end
@@ -154,13 +156,12 @@ local function CreateBankSlot(parent, index)
             local rawLink = Utils.ExtractLink(this.itemLink) or this.itemLink
             if rawLink then
                 GameTooltip:SetHyperlink(rawLink)
+                GameTooltip:Show()
                 hasItem = true
             end
         end
 
-        if hasItem or (GameTooltip:NumLines() and GameTooltip:NumLines() > 0) then
-            GameTooltip:Show()
-        else
+        if not hasItem then
             GameTooltip:Hide()
         end
     end)
@@ -285,8 +286,10 @@ local function CreateBankBagSlot(parent, bagIndex)
             GameTooltip:AddLine(string.format("Cost: %s", Utils.FormatMoney(cost)), 1.0, 1.0, 1.0)
             GameTooltip:Show()
         elseif isBankOpen and invSlot then
-            local hasItem = GameTooltip:SetInventoryItem("player", invSlot)
-            if not hasItem then
+            local hasBag = GetInventoryItemTexture("player", invSlot)
+            if hasBag then
+                GameTooltip:SetInventoryItem("player", invSlot)
+            else
                 GameTooltip:SetText(BANK_BAG or "Bank Bag Slot", 1.0, 1.0, 1.0)
             end
             GameTooltip:Show()
@@ -321,19 +324,27 @@ function PUIBank:ScanLiveBank()
     -- 1. Main Bank Container (-1) (24 base slots)
     for slotID = 1, 24 do
         slotIndex = slotIndex + 1
-        local texture, count, locked, quality = GetContainerItemInfo(-1, slotID)
-        local link = GetContainerItemLink(-1, slotID)
+        local invSlot = BankButtonIDToInvSlotID and BankButtonIDToInvSlotID(slotID, nil) or (39 + slotID)
+        local texture = (invSlot and GetInventoryItemTexture("player", invSlot)) or GetContainerItemInfo(-1, slotID)
+        local link = (invSlot and GetInventoryItemLink("player", invSlot)) or GetContainerItemLink(-1, slotID)
+        local count = (invSlot and GetInventoryItemCount("player", invSlot)) or 1
+        local quality = 1
+        if link then
+            local _, _, q = GetItemInfo(link)
+            quality = q or 1
+        end
         local name = link and GetItemInfo(link) or ""
 
         items[slotIndex] = {
             texture = texture,
-            count   = count or 1,
+            count   = (count and count > 0) and count or 1,
             link    = link,
             name    = name or "",
             quality = quality or 1,
             bagID   = -1,
             slotID  = slotID,
-            locked  = locked,
+            invSlot = invSlot,
+            locked  = false,
         }
     end
 
@@ -358,6 +369,10 @@ function PUIBank:ScanLiveBank()
                 local texture, count, locked, quality = GetContainerItemInfo(bagID, slotID)
                 local link = GetContainerItemLink(bagID, slotID)
                 local name = link and GetItemInfo(link) or ""
+                if link and not quality then
+                    local _, _, q = GetItemInfo(link)
+                    quality = q or 1
+                end
 
                 items[slotIndex] = {
                     texture = texture,
@@ -426,6 +441,7 @@ function PUIBank:UpdateBankSlots()
         totalCount = totalCount + 1
         slotBtn.bagID = item.bagID
         slotBtn.slotID = item.slotID
+        slotBtn.invSlot = item.invSlot
         slotBtn.itemLink = item.link
         slotBtn.itemCount = item.count
 

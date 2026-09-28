@@ -67,7 +67,7 @@ function PUICastBar:RegisterOptionsFlare()
         name = "PUICastBar",
         category = "Combat",
         label = "Cast Bar Engine",
-        icon = "Interface\Icons\Spell_Holy_FlashHeal",
+        icon = "Interface\\Icons\\Spell_Holy_FlashHeal",
         desc = "Monitors spellcast and channel timers across player, pet, and target.",
     })
 end

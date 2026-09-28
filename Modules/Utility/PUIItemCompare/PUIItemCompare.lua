@@ -81,8 +81,16 @@ local function SkinBlizzardShoppingTooltips()
     end
 end
 
+local isComparing = false
+
 local function ShowComparison(parentTooltip, itemLink)
-    if not compareDB:Get("enabled", true) or not itemLink or not parentTooltip then
+    if isComparing then return end
+    if not parentTooltip or parentTooltip == compareTip1 or parentTooltip == compareTip2 then
+        HideComparisonTooltips()
+        return
+    end
+
+    if not compareDB:Get("enabled", true) or not itemLink then
         HideComparisonTooltips()
         return
     end
@@ -111,6 +119,8 @@ local function ShowComparison(parentTooltip, itemLink)
         HideComparisonTooltips()
         return
     end
+
+    isComparing = true
 
     -- Determine optimal screen anchoring side (Left vs Right of parent tooltip)
     local parentLeft = (parentTooltip.GetLeft and parentTooltip:GetLeft()) or 0
@@ -152,6 +162,8 @@ local function ShowComparison(parentTooltip, itemLink)
     else
         compareTip2:Hide()
     end
+
+    isComparing = false
 end
 
 -- Hook standard 1.12 Tooltip Item Setters
@@ -159,11 +171,13 @@ local function HookTooltipMethods(tip)
     if not tip then return end
 
     Events:Hook(tip, "SetBagItem", function(self, bag, slot)
+        if self == compareTip1 or self == compareTip2 then return end
         local link = GetContainerItemLink(bag, slot)
         ShowComparison(self, link)
     end)
 
     Events:Hook(tip, "SetInventoryItem", function(self, unit, slot)
+        if self == compareTip1 or self == compareTip2 then return end
         local numSlot = tonumber(slot)
         if (unit ~= "player") or (numSlot and numSlot > 19 and numSlot <= 23) then
             local link = (numSlot and numSlot >= 1 and numSlot <= 23) and GetInventoryItemLink(unit, slot) or nil
@@ -178,32 +192,39 @@ local function HookTooltipMethods(tip)
     end)
 
     Events:Hook(tip, "SetQuestItem", function(self, qtype, slot)
+        if self == compareTip1 or self == compareTip2 then return end
         local link = GetQuestItemLink(qtype, slot)
         ShowComparison(self, link)
     end)
 
     Events:Hook(tip, "SetQuestLogItem", function(self, qtype, slot)
+        if self == compareTip1 or self == compareTip2 then return end
         local link = GetQuestLogItemLink(qtype, slot)
         ShowComparison(self, link)
     end)
 
     Events:Hook(tip, "SetLootItem", function(self, slot)
+        if self == compareTip1 or self == compareTip2 then return end
         local link = GetLootSlotLink(slot)
         ShowComparison(self, link)
     end)
 
     Events:Hook(tip, "SetLootRollItem", function(self, slot)
+        if self == compareTip1 or self == compareTip2 then return end
         local link = GetLootRollItemLink(slot)
         ShowComparison(self, link)
     end)
 
     Events:Hook(tip, "SetHyperlink", function(self, link)
+        if self == compareTip1 or self == compareTip2 then return end
         local cleanLink = Utils.ExtractLink(link) or link
         ShowComparison(self, cleanLink)
     end)
 
-    Events:HookScript(tip, "OnHide", function()
-        HideComparisonTooltips()
+    Events:HookScript(tip, "OnHide", function(self)
+        if self == GameTooltip or self == ItemRefTooltip then
+            HideComparisonTooltips()
+        end
     end)
 end
 

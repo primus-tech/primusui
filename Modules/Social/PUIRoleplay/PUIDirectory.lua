@@ -152,7 +152,7 @@ function Directory:BuildFrame()
     -- Sortable Table Header Row
     local headerRow = CreateFrame("Frame", nil, f)
     headerRow:SetPoint("TOPLEFT", searchEB, "BOTTOMLEFT", 0, -6)
-    headerRow:SetPoint("TOPRIGHT", f, "TOPRIGHT", -12, -64)
+    headerRow:SetWidth(478)
     headerRow:SetHeight(22)
     headerRow:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -203,15 +203,15 @@ function Directory:BuildFrame()
         return btn
     end
     
-    local btnStatus = CreateSortHeaderButton(nil, 88, "Status", "status")
+    local btnStatus = CreateSortHeaderButton(nil, 84, "Status", "status")
     btnStatus:SetPoint("LEFT", headerRow, "LEFT", 2, 0)
     f.btnStatus = btnStatus
     
-    local btnName = CreateSortHeaderButton(nil, 234, "Adventurer / RP Name", "name")
+    local btnName = CreateSortHeaderButton(nil, 226, "Adventurer / RP Name", "name")
     btnName:SetPoint("LEFT", btnStatus, "RIGHT", 4, 0)
     f.btnName = btnName
     
-    local btnZone = CreateSortHeaderButton(nil, 160, "Current Zone", "zone")
+    local btnZone = CreateSortHeaderButton(nil, 158, "Current Zone", "zone")
     btnZone:SetPoint("LEFT", btnName, "RIGHT", 4, 0)
     f.btnZone = btnZone
     
@@ -222,7 +222,7 @@ function Directory:BuildFrame()
     
     for i = 1, VISIBLE_ROWS do
         local row = CreateFrame("Button", nil, f)
-        row:SetWidth(496)
+        row:SetWidth(478)
         row:SetHeight(ROW_HEIGHT)
         row:SetPoint("TOPLEFT", headerRow, "BOTTOMLEFT", 0, -(i - 1) * (ROW_HEIGHT + 1) - 2)
         row:SetBackdrop({
@@ -235,20 +235,20 @@ function Directory:BuildFrame()
         row:SetBackdropBorderColor(0.14, 0.14, 0.17, 1.0)
         
         local statusTxt = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        statusTxt:SetPoint("LEFT", row, "LEFT", 8, 0)
-        statusTxt:SetWidth(84)
+        statusTxt:SetPoint("LEFT", row, "LEFT", 6, 0)
+        statusTxt:SetWidth(80)
         statusTxt:SetJustifyH("LEFT")
         row.statusTxt = statusTxt
         
         local nameTxt = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        nameTxt:SetPoint("LEFT", row, "LEFT", 96, 0)
-        nameTxt:SetWidth(230)
+        nameTxt:SetPoint("LEFT", row, "LEFT", 90, 0)
+        nameTxt:SetWidth(222)
         nameTxt:SetJustifyH("LEFT")
         row.nameTxt = nameTxt
         
         local zoneTxt = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        zoneTxt:SetPoint("LEFT", row, "LEFT", 334, 0)
-        zoneTxt:SetWidth(155)
+        zoneTxt:SetPoint("LEFT", row, "LEFT", 320, 0)
+        zoneTxt:SetWidth(152)
         zoneTxt:SetJustifyH("LEFT")
         row.zoneTxt = zoneTxt
         
@@ -318,37 +318,49 @@ function Directory:BuildFrame()
         f.rows[i] = row
     end
 
-    -- Scrollbar Slider on Right
+    -- Scrollbar Slider on Right (Elevated Frame Level, clear of rows)
     local scrollbar = CreateFrame("Slider", "Primus_PUIRoleplay_DirectoryScrollBar", f)
-    scrollbar:SetWidth(12)
-    scrollbar:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, -66)
-    scrollbar:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -10, 16)
+    scrollbar:SetWidth(14)
+    scrollbar:SetPoint("TOPLEFT", headerRow, "TOPRIGHT", 4, 0)
+    scrollbar:SetPoint("BOTTOMLEFT", headerRow, "BOTTOMRIGHT", 4, -(VISIBLE_ROWS * (ROW_HEIGHT + 1) + 2))
     scrollbar:SetOrientation("VERTICAL")
     scrollbar:SetMinMaxValues(0, 0)
     scrollbar:SetValue(0)
     scrollbar:SetValueStep(1)
+    scrollbar:SetFrameLevel(f:GetFrameLevel() + 25)
+    scrollbar:EnableMouse(true)
+    scrollbar:EnableMouseWheel(true)
     scrollbar:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false, tileSize = 0, edgeSize = 1,
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
-    scrollbar:SetBackdropColor(0.03, 0.03, 0.05, 0.8)
-    scrollbar:SetBackdropBorderColor(0.15, 0.15, 0.2, 1.0)
+    scrollbar:SetBackdropColor(0.02, 0.03, 0.05, 0.9)
+    scrollbar:SetBackdropBorderColor(0.18, 0.20, 0.26, 1.0)
     
     local thumb = scrollbar:CreateTexture(nil, "OVERLAY")
     thumb:SetTexture("Interface\\Buttons\\WHITE8X8")
-    thumb:SetVertexColor(0.0, 0.6, 0.9, 0.8)
-    thumb:SetWidth(10)
-    thumb:SetHeight(24)
+    thumb:SetVertexColor(0.0, 0.7, 1.0, 0.9)
+    thumb:SetWidth(12)
+    thumb:SetHeight(32)
     scrollbar:SetThumbTexture(thumb)
     
     scrollbar:SetScript("OnValueChanged", function()
         Directory:UpdateScroll(math.floor(this:GetValue()))
     end)
+    scrollbar:SetScript("OnMouseWheel", function()
+        local current = this:GetValue()
+        if arg1 > 0 then
+            this:SetValue(math.max(0, current - 1))
+        elseif arg1 < 0 then
+            local _, maxVal = this:GetMinMaxValues()
+            this:SetValue(math.min(maxVal, current + 1))
+        end
+    end)
     f.scrollbar = scrollbar
 
-    -- Mousewheel support
+    -- Mousewheel support for whole directory frame
     f:EnableMouseWheel(true)
     f:SetScript("OnMouseWheel", function()
         local current = scrollbar:GetValue()
