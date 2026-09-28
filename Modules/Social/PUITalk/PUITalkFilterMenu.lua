@@ -32,6 +32,8 @@ local CHANNEL_MENU_ITEMS = {
     { key = "LFG",          label = "4. LookingForGroup",  color = "e6c099" },
     { key = "WORLD",        label = "World / Custom",      color = "e6c099" },
     { key = "SYSTEM",       label = "System Messages",     color = "ffff00" },
+    { key = "SKILL",        label = "Skills & Profession", color = "70b0ff" },
+    { key = "COMBAT_INFO",  label = "XP, Honor & Rep",     color = "80d0ff" },
     { key = "MONSTER",      label = "Monster Say/Emotes",  color = "ffd100" },
     { key = "LOOT",         label = "Loot & Money",        color = "00cc00" },
 }
@@ -41,7 +43,7 @@ function PUITalk:CreateChannelContextMenu()
 
     local menu = CreateFrame("Frame", "Primus_PUITalkChannelMenu", UIParent)
     menu:SetWidth(190)
-    menu:SetHeight(335)
+    menu:SetHeight(375)
     menu:SetFrameStrata("DIALOG")
     menu:SetFrameLevel(100)
     menu:SetBackdrop(Media:Fetch("border", "1Pixel"))

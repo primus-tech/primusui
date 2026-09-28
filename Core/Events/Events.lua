@@ -195,6 +195,10 @@ function Events:Hook(targetTable, methodName, hookFunc)
                 local _, _, clean = string.find(a2, "|H(.-)|h")
                 if clean then a2 = clean end
             end
+            local r1, r2, r3, r4
+            if orig then
+                r1, r2, r3, r4 = orig(a1, a2, a3, a4, a5, a6, a7, a8)
+            end
             local currentHooks = targetTable._primusHooks and targetTable._primusHooks[methodName]
             if currentHooks then
                 local hCount = table.getn(currentHooks)
@@ -202,9 +206,7 @@ function Events:Hook(targetTable, methodName, hookFunc)
                     Debug:SafeCall(currentHooks[h], a1, a2, a3, a4, a5, a6, a7, a8)
                 end
             end
-            if orig then
-                return orig(a1, a2, a3, a4, a5, a6, a7, a8)
-            end
+            return r1, r2, r3, r4
         end
     end
 

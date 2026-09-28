@@ -49,6 +49,8 @@ PUITalk.db = DB:RegisterNamespace("PUITalk", {
         LFG          = true,
         WORLD        = true,
         SYSTEM       = true,
+        SKILL        = true,
+        COMBAT_INFO  = true,
         MONSTER      = true,
         LOOT         = true,
     },
@@ -290,6 +292,8 @@ PUITalk.CHANNEL_COLORS = {
     ["OFFICER"]      = { r = 0.25, g = 0.75, b = 0.25 },
     ["WHISPER"]      = { r = 1.00, g = 0.50, b = 1.00 },
     ["SYSTEM"]       = { r = 1.00, g = 1.00, b = 0.00 },
+    ["SKILL"]        = { r = 0.44, g = 0.69, b = 1.00 },
+    ["COMBAT_INFO"]  = { r = 0.50, g = 0.80, b = 1.00 },
     ["CHANNEL"]      = { r = 0.90, g = 0.75, b = 0.60 },
     ["MONSTER"]      = { r = 1.00, g = 0.85, b = 0.40 },
     ["LOOT"]         = { r = 0.00, g = 0.67, b = 0.00 },
@@ -300,3 +304,85 @@ function PUITalk:GetChannelColor(chanType)
     if col then return col.r, col.g, col.b end
     return 1.0, 1.0, 1.0
 end
+
+-- =========================================================================
+-- 6. HYPERLINK INTERACTION ROUTER
+-- =========================================================================
+
+function PUITalk:HandleHyperlinkClick(link, text, button)
+    if not link then return end
+
+    -- 1. Web URLs (Linkified by PUITalk)
+    if string.sub(link, 1, 4) == "url:" then
+        local url = string.sub(link, 5)
+        if self.ShowURLCopyPopup then
+            self:ShowURLCopyPopup(url)
+        end
+        return
+    end
+
+    -- 2. Player Links (e.g. "player:PlayerName")
+    if string.sub(link, 1, 6) == "player" then
+        local name = string.sub(link, 8)
+        if name and string.len(name) > 0 then
+            name = string.gsub(name, "([^%s]*)%s+([^%s]*)%s+([^%s]*)", "%3")
+            name = string.gsub(name, "([^%s]*)%s+([^%s]*)", "%2")
+
+            if IsShiftKeyDown() then
+                local staticPopup = StaticPopup_Visible("ADD_IGNORE") or
+                                    StaticPopup_Visible("ADD_FRIEND") or
+                                    StaticPopup_Visible("ADD_GUILDMEMBER") or
+                                    StaticPopup_Visible("ADD_RAIDMEMBER")
+                if staticPopup then
+                    local eb = _G[staticPopup .. "EditBox"]
+                    if eb and eb.SetText then eb:SetText(name) return end
+                end
+
+                if self.masterFrame and self.masterFrame.editBox and self.masterFrame.editBox:HasFocus() then
+                    self.masterFrame.editBox:Insert(name)
+                elseif ChatFrameEditBox and ChatFrameEditBox:IsVisible() then
+                    ChatFrameEditBox:Insert(name)
+                else
+                    SendWho("n-" .. name)
+                end
+            elseif button == "RightButton" then
+                if self.OpenDMContextMenu then
+                    self:OpenDMContextMenu(nil, string.lower(name), name)
+                elseif FriendsFrame_ShowDropdown then
+                    FriendsFrame_ShowDropdown(name, 1)
+                end
+            else
+                if self.db:Get("divertWhispers", true) then
+                    self:OpenDMConversation(name)
+                    self:FocusInput("")
+                else
+                    ChatFrame_SendTell(name)
+                end
+            end
+        end
+        return
+    end
+
+    -- 3. Items, Spells, Quests, Enchants
+    if IsControlKeyDown() then
+        if DressUpItemLink then DressUpItemLink(text or link) end
+    elseif IsShiftKeyDown() then
+        if self.masterFrame and self.masterFrame.editBox and self.masterFrame.editBox:HasFocus() then
+            self.masterFrame.editBox:Insert(text or link)
+        elseif ChatFrameEditBox and ChatFrameEditBox:IsVisible() then
+            ChatFrameEditBox:Insert(text or link)
+        else
+            self:FocusInput("")
+            if self.masterFrame and self.masterFrame.editBox then
+                self.masterFrame.editBox:Insert(text or link)
+            end
+        end
+    else
+        ShowUIPanel(ItemRefTooltip)
+        if not ItemRefTooltip:IsVisible() then
+            ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
+        end
+        ItemRefTooltip:SetHyperlink(link)
+    end
+end
+

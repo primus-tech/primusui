@@ -55,6 +55,9 @@ function PUITalk:CreateChatView(viewport, master)
             end
         end
     end)
+    chatMsgFrame:SetScript("OnHyperlinkClick", function()
+        PUITalk:HandleHyperlinkClick(arg1, arg2, arg3)
+    end)
     viewChat.msgFrame = chatMsgFrame
     master.viewChat = viewChat
     return viewChat

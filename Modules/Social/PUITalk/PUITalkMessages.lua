@@ -175,6 +175,9 @@ function PUITalk:CreateMessagesView(viewport, master)
     dmMsgFrame:SetScript("OnMouseWheel", function()
         if arg1 > 0 then dmMsgFrame:ScrollUp() else dmMsgFrame:ScrollDown() end
     end)
+    dmMsgFrame:SetScript("OnHyperlinkClick", function()
+        PUITalk:HandleHyperlinkClick(arg1, arg2, arg3)
+    end)
     viewMessages.msgFrame = dmMsgFrame
     master.viewMessages = viewMessages
     return viewMessages
