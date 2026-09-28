@@ -372,3 +372,14 @@ function Database:Search(query, category, maxResults)
 
     return results
 end
+
+function Database:IsQuestCompleted(qid)
+    return PUIQuest.IsQuestCompleted and PUIQuest:IsQuestCompleted(qid)
+end
+
+function Database:QueryServer()
+    if PUIQuest.QueryServer then
+        PUIQuest:QueryServer()
+    end
+end
+

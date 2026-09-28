@@ -81,6 +81,23 @@ function Patchtable:Apply()
         ApplyDiff(DB["minimap"], DB["minimap-turtle"])
     end
 
+    -- Northwind zone typo workaround for custom 1.12 clients
+    if GetMapZones then
+        for id, name in pairs({GetMapZones(2)}) do
+            if name == "Northwind " and DB["zones"] and DB["zones"]["enUS-turtle"] then
+                DB["zones"]["enUS-turtle"][5581] = "Northwind "
+            end
+        end
+    end
+
+    -- Apply Octo / Turtle curated manual overwrites
+    if PUIQuest.Overwrites and PUIQuest.Overwrites.Apply then
+        PUIQuest.Overwrites:Apply(DB)
+    end
+
+    -- Octo / Turtle WoW web database URL
+    PUIQuest.dburl = "https://octowow.st/db/?quest="
+
     isPatched = true
     if PUIQuest.Database and PUIQuest.Database.Reload then
         PUIQuest.Database:Reload()

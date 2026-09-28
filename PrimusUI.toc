@@ -133,6 +133,7 @@ Modules\Player\PUIQuest\DB-Turtle\enUS\objects-turtle.lua
 Modules\Player\PUIQuest\DB-Turtle\enUS\quests-turtle.lua
 Modules\Player\PUIQuest\DB-Turtle\enUS\professions-turtle.lua
 Modules\Player\PUIQuest\DB-Turtle\enUS\zones-turtle.lua
+Modules\Player\PUIQuest\Overwrites.lua
 Modules\Player\PUIQuest\Patchtable.lua
 Modules\Player\PUIQuest\Database.lua
 Modules\Player\PUIQuest\Map.lua

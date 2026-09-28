@@ -561,20 +561,24 @@ function Map:Update()
             for qID, qInfo in pairs(questData) do
                 local minLvl = qInfo["min"] or 1
                 local qLvl = qInfo["lvl"] or minLvl
-                if pLevel >= minLvl and qInfo["start"] and qInfo["start"]["U"] then
-                    for _, uID in pairs(qInfo["start"]["U"]) do
-                        local unit = PUIQuest.Database:FindUnit(uID)
-                        if unit and unit.spawns then
-                            local coords = GetZoneCoords(unit.spawns, currentZoneName, mapZone)
-                            if table.getn(coords) > 0 then
-                                local qEntry = PUIQuest.Database:FindQuest(qID)
-                                local qTitle = qEntry and qEntry.title or ("Quest #" .. qID)
-                                local inLog = false
-                                for i = 1, numEntries do
-                                    if GetQuestLogTitle(i) == qTitle then inLog = true; break end
-                                end
+                local isComplete = PUIQuest.IsQuestCompleted and PUIQuest:IsQuestCompleted(qID)
+                local prereqsMet = (not PUIQuest.ArePrereqsCompleted) or PUIQuest:ArePrereqsCompleted(qID)
 
-                                if not inLog then
+                if not isComplete and prereqsMet and pLevel >= minLvl then
+                    local qEntry = PUIQuest.Database:FindQuest(qID)
+                    local qTitle = qEntry and qEntry.title or ("Quest #" .. qID)
+                    local inLog = false
+                    for i = 1, numEntries do
+                        if GetQuestLogTitle(i) == qTitle then inLog = true; break end
+                    end
+
+                    if not inLog then
+                        -- Check Unit Quest Givers
+                        if qInfo["start"] and qInfo["start"]["U"] then
+                            for _, uID in pairs(qInfo["start"]["U"]) do
+                                local unit = PUIQuest.Database:FindUnit(uID)
+                                if unit and unit.spawns then
+                                    local coords = GetZoneCoords(unit.spawns, currentZoneName, mapZone)
                                     for _, coord in pairs(coords) do
                                         local pin = AcquirePin()
                                         PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
@@ -587,6 +591,34 @@ function Map:Update()
                                             level = qLvl,
                                             minLevel = minLvl,
                                             npcName = unit.name,
+                                            pinType = "AVAILABLE",
+                                            x = coord.x,
+                                            y = coord.y,
+                                        }
+                                        table.insert(activePins, pin)
+                                    end
+                                end
+                            end
+                        end
+
+                        -- Check Object Quest Givers (Posters, Items in world, Triggers)
+                        if qInfo["start"] and qInfo["start"]["O"] then
+                            for _, oID in pairs(qInfo["start"]["O"]) do
+                                local obj = PUIQuest.Database:FindObject(oID)
+                                if obj and obj.spawns then
+                                    local coords = GetZoneCoords(obj.spawns, currentZoneName, mapZone)
+                                    for _, coord in pairs(coords) do
+                                        local pin = AcquirePin()
+                                        PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
+                                        pin.icon:SetTexture(nil)
+                                        local col = GetDifficultyColor(qLvl)
+                                        pin.label:SetText("!")
+                                        pin.label:SetTextColor(col.r, col.g, col.b)
+                                        pin.data = {
+                                            title = qTitle,
+                                            level = qLvl,
+                                            minLevel = minLvl,
+                                            npcName = obj.name,
                                             pinType = "AVAILABLE",
                                             x = coord.x,
                                             y = coord.y,
