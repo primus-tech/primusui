@@ -152,7 +152,21 @@ function PUISellValue:ExtractItemID(itemLinkOrString)
     if idStr then
         return tonumber(idStr)
     end
-    return tonumber(itemLinkOrString)
+    local num = tonumber(itemLinkOrString)
+    if num then return num end
+
+    -- Fallback: If item name passed, resolve via GetItemInfo
+    if type(itemLinkOrString) == "string" and itemLinkOrString ~= "" then
+        local cleanName = CleanItemName(itemLinkOrString)
+        if cleanName and cleanName ~= "" then
+            local _, link = GetItemInfo(cleanName)
+            if link then
+                local _, _, idFromLink = string.find(link, "item:(%d+)")
+                if idFromLink then return tonumber(idFromLink) end
+            end
+        end
+    end
+    return nil
 end
 
 -- Get Vendor Sell Price (How much vendor gives you)
@@ -525,40 +539,99 @@ local function HookTooltip(tooltip)
         end
     end
 
-    -- 5. Crafting Reagents
+    -- 5. Crafting Reagents & Craft Items (CraftFrame)
     if tooltip.SetCraftItem then
         local origSetCraftItem = tooltip.SetCraftItem
         tooltip.SetCraftItem = function(self, skillIndex, reagentIndex)
             ClearTooltipFlag(self)
             local r1, r2, r3, r4 = origSetCraftItem(self, skillIndex, reagentIndex)
-            local link = GetCraftReagentItemLink(skillIndex, reagentIndex)
-            if link then
-                local itemID = PUISellValue:ExtractItemID(link)
-                local _, _, count = GetCraftReagentInfo(skillIndex, reagentIndex)
-                PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
+            if reagentIndex then
+                local link = GetCraftReagentItemLink and GetCraftReagentItemLink(skillIndex, reagentIndex)
+                local count = 1
+                if GetCraftReagentInfo then
+                    local reagentName, _, reagentCount = GetCraftReagentInfo(skillIndex, reagentIndex)
+                    count = reagentCount or 1
+                    if not link and reagentName then
+                        local _, l = GetItemInfo(reagentName)
+                        link = l or reagentName
+                    end
+                end
+                if not link then
+                    local textLeft1 = _G[self:GetName() .. "TextLeft1"]
+                    if textLeft1 and textLeft1:GetText() then link = textLeft1:GetText() end
+                end
+                if link then
+                    local itemID = PUISellValue:ExtractItemID(link)
+                    PUISellValue:InjectTooltipPrice(self, itemID or link, count or 1)
+                end
+            else
+                local link = GetCraftItemLink and GetCraftItemLink(skillIndex)
+                if not link and GetCraftInfo then
+                    local craftName = GetCraftInfo(skillIndex)
+                    if craftName then
+                        local _, l = GetItemInfo(craftName)
+                        link = l or craftName
+                    end
+                end
+                if not link then
+                    local textLeft1 = _G[self:GetName() .. "TextLeft1"]
+                    if textLeft1 and textLeft1:GetText() then link = textLeft1:GetText() end
+                end
+                if link then
+                    local itemID = PUISellValue:ExtractItemID(link)
+                    PUISellValue:InjectTooltipPrice(self, itemID or link, 1)
+                end
             end
             return r1, r2, r3, r4
         end
     end
 
-    -- 6. TradeSkill Items & Reagents
+    -- 6. TradeSkill Items & Reagents (TradeSkillFrame)
     if tooltip.SetTradeSkillItem then
         local origSetTradeSkillItem = tooltip.SetTradeSkillItem
         tooltip.SetTradeSkillItem = function(self, skillIndex, reagentIndex)
             ClearTooltipFlag(self)
             local r1, r2, r3, r4 = origSetTradeSkillItem(self, skillIndex, reagentIndex)
             if reagentIndex then
-                local link = GetTradeSkillReagentItemLink(skillIndex, reagentIndex)
+                local link = GetTradeSkillReagentItemLink and GetTradeSkillReagentItemLink(skillIndex, reagentIndex)
+                local count = 1
+                if GetTradeSkillReagentInfo then
+                    local reagentName, _, reagentCount = GetTradeSkillReagentInfo(skillIndex, reagentIndex)
+                    count = reagentCount or 1
+                    if not link and reagentName then
+                        local _, l = GetItemInfo(reagentName)
+                        link = l or reagentName
+                    end
+                end
+                if not link then
+                    local textLeft1 = _G[self:GetName() .. "TextLeft1"]
+                    if textLeft1 and textLeft1:GetText() then link = textLeft1:GetText() end
+                end
                 if link then
                     local itemID = PUISellValue:ExtractItemID(link)
-                    local _, _, count = GetTradeSkillReagentInfo(skillIndex, reagentIndex)
-                    PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
+                    PUISellValue:InjectTooltipPrice(self, itemID or link, count or 1)
                 end
             else
-                local link = GetTradeSkillItemLink(skillIndex)
+                local link = GetTradeSkillItemLink and GetTradeSkillItemLink(skillIndex)
+                local count = 1
+                if GetTradeSkillNumMade then
+                    local minMade, maxMade = GetTradeSkillNumMade(skillIndex)
+                    count = minMade or 1
+                end
+                if not link and GetTradeSkillInfo then
+                    local skillName = GetTradeSkillInfo(skillIndex)
+                    if skillName then
+                        local _, l = GetItemInfo(skillName)
+                        link = l or skillName
+                    end
+                end
+                if not link then
+                    local textLeft1 = _G[self:GetName() .. "TextLeft1"]
+                    if textLeft1 and textLeft1:GetText() then link = textLeft1:GetText() end
+                end
                 if link then
                     local itemID = PUISellValue:ExtractItemID(link)
-                    PUISellValue:InjectTooltipPrice(self, itemID, 1)
+                    PUISellValue:InjectTooltipPrice(self, itemID or link, count or 1)
                 end
             end
             return r1, r2, r3, r4

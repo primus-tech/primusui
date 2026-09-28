@@ -363,6 +363,64 @@ local function HookTooltipMethods(tip)
         if link then ShowComparison(self, link) else HideComparisonTooltips() end
     end)
 
+    -- TradeSkill Crafted Items (TradeSkillFrame)
+    Events:Hook(tip, "SetTradeSkillItem", function(self, skillIndex, reagentIndex)
+        if self == compareTip1 or self == compareTip2 then return end
+        if reagentIndex then
+            HideComparisonTooltips()
+            return
+        end
+        local link = GetTradeSkillItemLink and GetTradeSkillItemLink(skillIndex)
+        if not link and GetTradeSkillInfo then
+            local skillName = GetTradeSkillInfo(skillIndex)
+            if skillName then
+                local _, l = GetItemInfo(skillName)
+                link = l
+            end
+        end
+        if not link then
+            local textLeft1 = _G[self:GetName() .. "TextLeft1"]
+            if textLeft1 and textLeft1:GetText() then
+                local _, l = GetItemInfo(textLeft1:GetText())
+                link = l
+            end
+        end
+        if link then
+            ShowComparison(self, link)
+        else
+            HideComparisonTooltips()
+        end
+    end)
+
+    -- Craft Items (CraftFrame)
+    Events:Hook(tip, "SetCraftItem", function(self, skillIndex, reagentIndex)
+        if self == compareTip1 or self == compareTip2 then return end
+        if reagentIndex then
+            HideComparisonTooltips()
+            return
+        end
+        local link = GetCraftItemLink and GetCraftItemLink(skillIndex)
+        if not link and GetCraftInfo then
+            local craftName = GetCraftInfo(skillIndex)
+            if craftName then
+                local _, l = GetItemInfo(craftName)
+                link = l
+            end
+        end
+        if not link then
+            local textLeft1 = _G[self:GetName() .. "TextLeft1"]
+            if textLeft1 and textLeft1:GetText() then
+                local _, l = GetItemInfo(textLeft1:GetText())
+                link = l
+            end
+        end
+        if link then
+            ShowComparison(self, link)
+        else
+            HideComparisonTooltips()
+        end
+    end)
+
     Events:Hook(tip, "SetHyperlink", function(self, link)
         if self == compareTip1 or self == compareTip2 then return end
         local cleanLink = Utils.ExtractLink(link) or link
