@@ -16,6 +16,8 @@ Core\Debug\Debug.lua
 Core\Time\Time.lua
 Core\Events\Events.lua
 Core\DB\DB.lua
+Core\DB\VanillaItemPrices.lua
+Core\DB\PUIBasePriceDB.lua
 Core\Media\Media.lua
 Core\Anim\Anim.lua
 Core\Widgets\Widgets.lua

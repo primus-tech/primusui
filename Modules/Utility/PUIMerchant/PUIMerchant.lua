@@ -29,7 +29,8 @@ local merchantDB = DB:RegisterNamespace("PUIMerchant", {
     enabled = true,
     quickBuyout = true,
     showTooltipPrices = true,
-    priceData = {}, -- [itemName] = { minBuyout = 0, totalBuyout = 0, count = 0, lastSeen = 0 }
+    realms = {}, -- [realmName] = { priceData = { [itemName] = { minBuyout = 0, totalBuyout = 0, count = 0, lastSeen = 0 } }, lastScan = 0, totalListings = 0 }
+    priceData = {}, -- fallback global dictionary
 })
 
 local isScanning = false
@@ -46,34 +47,68 @@ local function CleanItemName(linkOrName)
     return name or linkOrName
 end
 
--- Record an Auction Listing into the Market Database
-function PUIMerchant:RecordAuction(itemName, unitPrice)
-    if not itemName or not unitPrice or unitPrice <= 0 then return end
+-- Get or Initialize Realm Price Data
+function PUIMerchant:GetRealmPriceData(realm)
+    realm = realm or GetRealmName() or "Default"
+    if not merchantDB.data.realms then
+        merchantDB.data.realms = {}
+    end
+    if not merchantDB.data.realms[realm] then
+        merchantDB.data.realms[realm] = {
+            priceData = {},
+            lastScan = 0,
+            totalListings = 0,
+        }
+    end
+    return merchantDB.data.realms[realm]
+end
 
-    local pData = merchantDB.priceData[itemName]
+-- Record an Auction Listing into the Market Database (Partitioned by Realm)
+function PUIMerchant:RecordAuction(itemName, unitPrice, realm)
+    if not itemName or not unitPrice or unitPrice <= 0 then return end
+    local clean = CleanItemName(itemName)
+    if not clean or clean == "" then return end
+
+    local realmData = self:GetRealmPriceData(realm)
+    local pData = realmData.priceData[clean]
+    local now = Time:GetServerTimestamp()
+
     if not pData then
         pData = {
             minBuyout = unitPrice,
             totalBuyout = unitPrice,
             count = 1,
-            lastSeen = Time:GetServerTimestamp(),
+            lastSeen = now,
         }
-        merchantDB.priceData[itemName] = pData
+        realmData.priceData[clean] = pData
     else
         if pData.minBuyout == 0 or unitPrice < pData.minBuyout then
             pData.minBuyout = unitPrice
         end
         pData.totalBuyout = pData.totalBuyout + unitPrice
         pData.count = pData.count + 1
-        pData.lastSeen = Time:GetServerTimestamp()
+        pData.lastSeen = now
     end
+
+    -- Keep legacy global priceData synchronized
+    if not merchantDB.data.priceData then merchantDB.data.priceData = {} end
+    merchantDB.data.priceData[clean] = pData
 end
 
--- Get Market Price Info for an Item
-function PUIMerchant:GetItemPriceInfo(itemName)
+-- Get Market Price Info for an Item (Partitioned by Realm)
+function PUIMerchant:GetItemPriceInfo(itemName, realm)
     if not itemName then return nil end
     local clean = CleanItemName(itemName)
-    local pData = merchantDB.priceData[clean]
+    if not clean or clean == "" then return nil end
+
+    local realmData = self:GetRealmPriceData(realm)
+    local pData = realmData and realmData.priceData and realmData.priceData[clean]
+
+    if not pData or pData.count == 0 then
+        -- Fallback to global priceData if realm entry is empty
+        pData = merchantDB.data.priceData and merchantDB.data.priceData[clean]
+    end
+
     if not pData or pData.count == 0 then return nil end
 
     local avgBuyout = math.floor(pData.totalBuyout / pData.count)

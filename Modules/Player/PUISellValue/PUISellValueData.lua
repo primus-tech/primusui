@@ -342,3 +342,96 @@ PUISellValue.StaticDB = PUISellValue.StaticDB or {
     [22820] = 145000,-- Wand of the Whispering Dead
     [22821] = 142000,-- Eye of Diminution
 }
+
+-- =========================================================================
+-- VENDOR BUY PRICES (STATIC BASELINE FOR COMMON MERCHANT GOODS)
+-- =========================================================================
+PUISellValue.BuyStaticDB = PUISellValue.BuyStaticDB or {
+    -- Drinks & Water
+    [159]   = 25,     -- Refreshing Spring Water (5c sell -> 25c buy)
+    [1179]  = 125,    -- Ice Cold Milk
+    [1205]  = 250,    -- Melon Juice
+    [1708]  = 500,    -- Sweet Nectar
+    [1645]  = 1500,   -- Moonberry Juice
+    [8766]  = 5000,   -- Morning Glory Dew
+
+    -- Food & Bread
+    [4540]  = 25,     -- Tough Jerky
+    [4541]  = 100,    -- Freshly Baked Bread
+    [4542]  = 500,    -- Moist Cornbread
+    [4544]  = 1500,   -- Mulgore Spice Bread
+    [4601]  = 5000,   -- Soft Banana Bread
+
+    -- Hunter Ammunition
+    [2512]  = 10,     -- Rough Arrow (x200 = 20s)
+    [2515]  = 40,     -- Sharp Arrow (x200 = 80s)
+    [3030]  = 150,    -- Razor Arrow (x200 = 3g)
+    [11285] = 500,    -- Jagged Arrow (x200 = 10g)
+    [19316] = 1500,   -- Thorium Headed Arrow
+    [2516]  = 10,     -- Light Shot (x200 = 20s)
+    [2519]  = 40,     -- Heavy Shot (x200 = 80s)
+    [3033]  = 150,    -- Solid Shot (x200 = 3g)
+    [11284] = 500,    -- Accurate Slugs (x200 = 10g)
+    [19317] = 1500,   -- Thorium Shells
+
+    -- Class Reagents
+    [17020] = 1000,   -- Arcane Powder (Mage Arcane Intellect)
+    [17031] = 1000,   -- Wild Thornroot (Druid Gift of the Wild)
+    [17032] = 1000,   -- Wild Berries (Druid Mark of the Wild)
+    [17033] = 2000,   -- Ironwood Seed (Druid Rebirth)
+    [17034] = 2000,   -- Maple Seed
+    [17035] = 1000,   -- Stranglethorn Seed
+    [17036] = 1000,   -- Ashwood Seed
+    [17037] = 1000,   -- Hornbeam Seed
+    [17038] = 1000,   -- Ironwood Tree Seed
+    [17056] = 2000,   -- Light Feather (Mage/Priest Slow Fall / Levitate)
+    [17057] = 2000,   -- Fish Oil (Shaman Water Walking)
+    [17058] = 4000,   -- Shiny Fish Scales (Shaman Water Breathing)
+    [17030] = 2000,   -- Ankh (Shaman Reincarnation)
+    [17028] = 2000,   -- Holy Candle (Priest Prayer of Fortitude)
+    [17029] = 10000,  -- Sacred Candle (Priest Prayer of Spirit/Shadow)
+    [17026] = 1000,   -- Symbol of Divinity (Paladin Divine Intervention)
+    [21177] = 2000,   -- Symbol of Kings (Paladin Greater Blessing)
+    [17039] = 10000,  -- Rune of Teleportation (Mage)
+    [17040] = 20000,  -- Rune of Portals (Mage)
+    [5173]  = 10,     -- Flash Powder (Rogue Vanish)
+    [5174]  = 100,    -- Blinding Powder (Rogue Blind)
+    [5060]  = 2500,   -- Thieves' Tools (Rogue Pick Lock)
+    [16583] = 10000,  -- Infernal Stone (Warlock Inferno)
+    [16584] = 15000,  -- Demonic Figurine (Warlock Doomguard)
+
+    -- Profession Basics & Tools
+    [5956]  = 500,    -- Blacksmith Hammer
+    [2901]  = 1000,   -- Mining Pick
+    [7005]  = 1000,   -- Skinning Knife
+    [6256]  = 250,    -- Fishing Pole
+    [6365]  = 5000,   -- Strong Fishing Pole
+    [4470]  = 100,    -- Simple Wood
+    [4471]  = 500,    -- Flint and Tinder
+    [2320]  = 10,     -- Coarse Thread
+    [2321]  = 100,    -- Fine Thread
+    [4291]  = 500,    -- Silken Thread
+    [8343]  = 2000,   -- Heavy Silken Thread
+    [14341] = 5000,   -- Rune Thread
+    [2324]  = 100,    -- Bleach
+    [2325]  = 250,    -- Black Dye
+    [2604]  = 100,    -- Red Dye
+    [2605]  = 250,    -- Green Dye
+    [4357]  = 500,    -- Rough Blasting Powder
+    [4360]  = 1000,   -- Heavy Blasting Powder
+    [4377]  = 2000,   -- Solid Blasting Powder
+    [10505] = 4000,   -- Dense Blasting Powder
+    [3371]  = 150,    -- Empty Vial
+    [3372]  = 400,    -- Leaded Vial
+    [8925]  = 1000,   -- Crystal Vial
+    [2678]  = 50,     -- Mild Spices
+    [30817] = 200,    -- Simple Flour
+
+    -- Vendor Bags
+    [4496]  = 500,    -- Small Brown Pouch (6 slot = 5s)
+    [4497]  = 2500,   -- Heavy Brown Bag (8 slot = 25s)
+    [4498]  = 10000,  -- Brown Leather Satchel (10 slot = 1g)
+    [4499]  = 50000,  -- Huge Brown Sack (12 slot = 5g)
+    [4500]  = 100000, -- Travelers Backpack (14 slot = 10g)
+}
+

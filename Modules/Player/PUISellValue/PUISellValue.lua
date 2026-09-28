@@ -38,11 +38,14 @@ local Debug   = Primus.Debug
 local Console = Primus.Console
 
 local sellDB = DB:RegisterNamespace("PUISellValue", {
-    enabled = true,
-    showSinglePrice = true,
-    showStackPrice = true,
-    showNoSellValue = false,
-    realms = {},
+    enabled          = true,
+    showSellPrice    = true,
+    showBuyPrice     = true,
+    showAuctionPrice = true,
+    showSinglePrice  = true,
+    showStackPrice   = true,
+    showNoSellValue  = false,
+    realms           = {},
 })
 
 -- Ensure global storage alias for external scripts / macros
@@ -62,20 +65,32 @@ scanTip:SetScript("OnTooltipCleared", function()
     lastScannedMoney = 0
 end)
 
+-- Clean Item Name Extractor
+local function CleanItemName(linkOrName)
+    if not linkOrName then return nil end
+    local _, _, name = string.find(linkOrName, "%[(.+)%]")
+    return name or linkOrName
+end
+
 -- =========================================================================
 -- REALM CACHE MANAGEMENT
 -- =========================================================================
 
-function PUISellValue:GetRealmData()
-    local realm = GetRealmName() or "Default"
+function PUISellValue:GetRealmData(realm)
+    realm = realm or GetRealmName() or "Default"
     if not sellDB.data.realms then
         sellDB.data.realms = {}
     end
     if not sellDB.data.realms[realm] then
         sellDB.data.realms[realm] = {
             prices = {},
+            buyPrices = {},
             learnedCount = 0,
+            learnedBuyCount = 0,
         }
+    end
+    if not sellDB.data.realms[realm].buyPrices then
+        sellDB.data.realms[realm].buyPrices = {}
     end
     -- Keep global alias synchronized
     if _G.PrimusGlobalDB and not _G.PrimusGlobalDB.PUISellValue then
@@ -84,13 +99,13 @@ function PUISellValue:GetRealmData()
     return sellDB.data.realms[realm]
 end
 
-function PUISellValue:LearnPrice(itemID, price)
+function PUISellValue:LearnPrice(itemID, price, realm)
     if not itemID or not price or price < 0 then return false end
     itemID = tonumber(itemID)
     price = tonumber(price)
     if not itemID or not price then return false end
 
-    local rData = self:GetRealmData()
+    local rData = self:GetRealmData(realm)
     if not rData.prices then rData.prices = {} end
 
     if rData.prices[itemID] ~= price then
@@ -104,8 +119,28 @@ function PUISellValue:LearnPrice(itemID, price)
     return false
 end
 
+function PUISellValue:LearnBuyPrice(itemID, price, realm)
+    if not itemID or not price or price <= 0 then return false end
+    itemID = tonumber(itemID)
+    price = tonumber(price)
+    if not itemID or not price then return false end
+
+    local rData = self:GetRealmData(realm)
+    if not rData.buyPrices then rData.buyPrices = {} end
+
+    if rData.buyPrices[itemID] ~= price then
+        local isNew = (rData.buyPrices[itemID] == nil)
+        rData.buyPrices[itemID] = price
+        if isNew then
+            rData.learnedBuyCount = (rData.learnedBuyCount or 0) + 1
+        end
+        return true
+    end
+    return false
+end
+
 -- =========================================================================
--- HYBRID PRICE RESOLUTION ENGINE
+-- HYBRID PRICE RESOLUTION ENGINE (SELL, BUY, AUCTION & VANILLAITEMPRICES)
 -- =========================================================================
 
 function PUISellValue:ExtractItemID(itemLinkOrString)
@@ -120,24 +155,67 @@ function PUISellValue:ExtractItemID(itemLinkOrString)
     return tonumber(itemLinkOrString)
 end
 
+-- Get Vendor Sell Price (How much vendor gives you)
 function PUISellValue:GetSellPrice(item)
     if not item then return nil end
     local itemID = self:ExtractItemID(item)
-    if not itemID then return nil end
+    local itemName = CleanItemName(item)
 
     -- 1. Tier 2: Live Realm Auto-Learning Cache
     local rData = self:GetRealmData()
-    if rData and rData.prices and rData.prices[itemID] ~= nil then
+    if itemID and rData and rData.prices and rData.prices[itemID] ~= nil then
         return rData.prices[itemID], "REALM_CACHE"
     end
 
-    -- 2. Tier 1: Built-in Static DB
-    if PUISellValue.StaticDB and PUISellValue.StaticDB[itemID] ~= nil then
+    -- 2. Tier 1: PUIBasePriceDB Core Database & Built-in Static DB
+    local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
+    if itemID and baseDB and baseDB.GetSellPrice then
+        local bp = baseDB:GetSellPrice(itemID)
+        if bp ~= nil then return bp, "PUI_BASE_PRICE_DB" end
+    end
+    if itemID and PUISellValue.StaticDB and PUISellValue.StaticDB[itemID] ~= nil then
         return PUISellValue.StaticDB[itemID], "STATIC_DB"
     end
 
-    -- 3. Query PUIQuest Canonical Database
-    if Primus.PUIQuest and Primus.PUIQuest.Database then
+    -- 3. VanillaItemPrices Integration (_G.VanillaItemPrices / VanillaItemPrices bridge)
+    local vip = _G.VanillaItemPrices or VanillaItemPrices
+    if vip then
+        if itemID and vip[itemID] ~= nil then
+            local val = vip[itemID]
+            if type(val) == "number" then
+                return val, "VANILLA_ITEM_PRICES"
+            elseif type(val) == "table" then
+                local sPrice = val.s or val.sell or val.sellPrice or val.price or val[1]
+                if sPrice then return sPrice, "VANILLA_ITEM_PRICES" end
+            end
+        end
+        if itemName and vip[itemName] ~= nil then
+            local val = vip[itemName]
+            if type(val) == "number" then
+                return val, "VANILLA_ITEM_PRICES"
+            elseif type(val) == "table" then
+                local sPrice = val.s or val.sell or val.sellPrice or val.price or val[1]
+                if sPrice then return sPrice, "VANILLA_ITEM_PRICES" end
+            end
+        end
+    end
+
+    -- 4. External Addon Fallbacks (SellValue, ItemPrices, Informant)
+    if itemID then
+        local sv = _G.SellValueDB or _G.ItemPrices or _G.InformantDB
+        if sv and sv[itemID] ~= nil then
+            local val = sv[itemID]
+            if type(val) == "number" then
+                return val, "EXTERNAL_DB"
+            elseif type(val) == "table" then
+                local sPrice = val.s or val.sell or val.price or val[1]
+                if sPrice then return sPrice, "EXTERNAL_DB" end
+            end
+        end
+    end
+
+    -- 5. Query PUIQuest Canonical Database
+    if itemID and Primus.PUIQuest and Primus.PUIQuest.Database then
         local puiPrice = Primus.PUIQuest.Database:GetItemVendorPrice(itemID)
         if puiPrice and puiPrice > 0 then
             return puiPrice, "PUIQUEST_DB"
@@ -147,9 +225,104 @@ function PUISellValue:GetSellPrice(item)
     return nil, nil
 end
 
+-- Get Vendor Buy Price (How much vendor charges you)
+function PUISellValue:GetBuyPrice(item)
+    if not item then return nil end
+    local itemID = self:ExtractItemID(item)
+    local itemName = CleanItemName(item)
+
+    -- 1. Tier 2: Live Realm Auto-Learned Buy Cache (from merchant visits)
+    local rData = self:GetRealmData()
+    if itemID and rData and rData.buyPrices and rData.buyPrices[itemID] ~= nil then
+        return rData.buyPrices[itemID], "REALM_BUY_CACHE"
+    end
+
+    -- 2. Tier 1: PUIBasePriceDB Core Database & Built-in BuyStaticDB
+    local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
+    if itemID and baseDB and baseDB.GetBuyPrice then
+        local bp = baseDB:GetBuyPrice(itemID)
+        if bp ~= nil then return bp, "PUI_BASE_PRICE_DB" end
+    end
+    if itemID and PUISellValue.BuyStaticDB and PUISellValue.BuyStaticDB[itemID] ~= nil then
+        return PUISellValue.BuyStaticDB[itemID], "STATIC_BUY_DB"
+    end
+
+    -- 3. VanillaItemPrices Integration
+    local vip = _G.VanillaItemPrices or VanillaItemPrices
+    if vip then
+        if itemID and type(vip[itemID]) == "table" then
+            local bPrice = vip[itemID].b or vip[itemID].buy or vip[itemID].buyPrice or vip[itemID][2]
+            if bPrice and bPrice > 0 then
+                return bPrice, "VANILLA_ITEM_PRICES"
+            end
+        end
+        if itemName and type(vip[itemName]) == "table" then
+            local bPrice = vip[itemName].b or vip[itemName].buy or vip[itemName].buyPrice or vip[itemName][2]
+            if bPrice and bPrice > 0 then
+                return bPrice, "VANILLA_ITEM_PRICES"
+            end
+        end
+    end
+
+    return nil, nil
+end
+
+-- Get Auction Market Price (Partitioned by Realm)
+function PUISellValue:GetAuctionPrice(item, realm)
+    if not item then return nil end
+    local itemName = CleanItemName(item)
+    if not itemName or itemName == "" then return nil end
+
+    local merchant = Primus.PUIMerchant or _G.PUIMerchant
+    if merchant and merchant.GetItemPriceInfo then
+        return merchant:GetItemPriceInfo(itemName, realm)
+    end
+    return nil
+end
+
 -- =========================================================================
--- AUTONOMOUS LIVE MERCHANT SCANNER
+-- AUTONOMOUS LIVE MERCHANT SCANNER (SELL & BUY PRICES)
 -- =========================================================================
+
+function PUISellValue:ScanMerchantGoods()
+    if not MerchantFrame or not MerchantFrame:IsShown() then return 0, 0 end
+
+    local newSell = 0
+    local newBuy = 0
+
+    -- 1. Scan Merchant Offerings (Buy Prices & Inherent Sell Prices)
+    local numMerchantItems = GetMerchantNumItems() or 0
+    for i = 1, numMerchantItems do
+        local link = GetMerchantItemLink(i)
+        local name, texture, price, quantity, numAvailable, isUsable = GetMerchantItemInfo(i)
+        if link and price and price > 0 then
+            local itemID = self:ExtractItemID(link)
+            if itemID then
+                local unitBuyPrice = math.floor(price / math.max(1, quantity or 1))
+                if unitBuyPrice > 0 and self:LearnBuyPrice(itemID, unitBuyPrice) then
+                    newBuy = newBuy + 1
+                end
+
+                -- Also scan item tooltip to capture sell price
+                lastScannedMoney = 0
+                scanTip:ClearLines()
+                scanTip:SetMerchantItem(i)
+                if lastScannedMoney > 0 then
+                    local unitSellPrice = math.floor(lastScannedMoney / math.max(1, quantity or 1))
+                    if unitSellPrice > 0 and self:LearnPrice(itemID, unitSellPrice) then
+                        newSell = newSell + 1
+                    end
+                end
+            end
+        end
+    end
+
+    -- 2. Scan Player Inventory at Merchant
+    local bagSell = self:ScanBagsAtMerchant()
+    newSell = newSell + bagSell
+
+    return newSell, newBuy
+end
 
 function PUISellValue:ScanBagsAtMerchant()
     if not MerchantFrame or not MerchantFrame:IsShown() then return 0 end
@@ -179,7 +352,6 @@ function PUISellValue:ScanBagsAtMerchant()
                             end
                         elseif lastScannedMoney == 0 then
                             -- Item has zero vendor sell price (unsellable quest item / soulbound currency)
-                            -- Record as 0 to cache definitive zero sell value
                             if self:LearnPrice(itemID, 0) then
                                 newLearned = newLearned + 1
                             end
@@ -194,50 +366,86 @@ function PUISellValue:ScanBagsAtMerchant()
 end
 
 -- =========================================================================
--- UNIVERSAL TOOLTIP INJECTION ENGINE
+-- UNIVERSAL TOOLTIP INJECTION ENGINE (SELL, BUY & REALM AUCTION)
 -- =========================================================================
-
-local function FormatPriceRow(singlePrice, count)
-    count = (count and count > 0) and count or 1
-
-    if singlePrice == 0 then
-        return "|cffffd100Sell:|r", "|cff888888No sell value|r"
-    end
-
-    if count > 1 and sellDB:Get("showStackPrice", true) then
-        local totalPrice = singlePrice * count
-        local totalStr = Utils.FormatMoney(totalPrice)
-        local eachStr = Utils.FormatMoney(singlePrice)
-        local leftText = string.format("|cffffd100Sell (x%d):|r", count)
-        local rightText = string.format("%s (%s ea)", totalStr, eachStr)
-        return leftText, rightText
-    else
-        local priceStr = Utils.FormatMoney(singlePrice)
-        return "|cffffd100Sell:|r", priceStr
-    end
-end
 
 function PUISellValue:InjectTooltipPrice(tooltip, itemID, count)
     if not tooltip or not sellDB:Get("enabled", true) then return end
     if tooltip._primusSellValueInjected then return end
 
-    -- Strictly suppress when MerchantFrame is open (Blizzard native row renders)
-    if MerchantFrame and MerchantFrame:IsShown() then return end
+    count = (count and count > 0) and count or 1
+    local realm = GetRealmName() or "Default"
 
-    if not itemID then return end
-    itemID = tonumber(itemID)
-    if not itemID then return end
-
-    local price, source = self:GetSellPrice(itemID)
-    if price == nil then return end
-
-    if price == 0 and not sellDB:Get("showNoSellValue", false) then
-        return
+    local itemName = nil
+    local titleObj = _G[tooltip:GetName() .. "TextLeft1"]
+    if titleObj and titleObj:GetText() then
+        itemName = CleanItemName(titleObj:GetText())
     end
 
-    local leftText, rightText = FormatPriceRow(price, count)
-    tooltip:AddDoubleLine(leftText, rightText)
+    -- If itemID is not numeric, try to extract from itemName
+    if not itemID and itemName then
+        local _, link = GetItemInfo(itemName)
+        if link then itemID = self:ExtractItemID(link) end
+    end
+
+    local sellPrice, sellSrc = self:GetSellPrice(itemID or itemName)
+    local buyPrice, buySrc = self:GetBuyPrice(itemID or itemName)
+    local minBuyout, avgBuyout, seenCount = self:GetAuctionPrice(itemName or itemID, realm)
+
+    local showSell = sellDB:Get("showSellPrice", true) and (sellPrice ~= nil)
+    local showBuy  = sellDB:Get("showBuyPrice", true) and (buyPrice ~= nil and buyPrice > 0)
+    local showAH   = sellDB:Get("showAuctionPrice", true) and (avgBuyout ~= nil and avgBuyout > 0)
+
+    -- If no prices are known or enabled, exit cleanly
+    if not showSell and not showBuy and not showAH then return end
+
+    -- Check if MerchantFrame is open (Blizzard native money frame handles bag sell price)
+    local atMerchant = MerchantFrame and MerchantFrame:IsShown()
+
     tooltip._primusSellValueInjected = true
+
+    -- 1. Vendor Sell Price Row
+    if showSell and not atMerchant then
+        if sellPrice > 0 then
+            if count > 1 and sellDB:Get("showStackPrice", true) then
+                local totalStr = Utils.FormatMoney(sellPrice * count)
+                local eachStr  = Utils.FormatMoney(sellPrice)
+                tooltip:AddDoubleLine(string.format("|cffffd100Vendor Sell (x%d):|r", count), string.format("%s (%s ea)", totalStr, eachStr))
+            else
+                tooltip:AddDoubleLine("|cffffd100Vendor Sell:|r", Utils.FormatMoney(sellPrice))
+            end
+        elseif sellPrice == 0 and sellDB:Get("showNoSellValue", false) then
+            tooltip:AddDoubleLine("|cffffd100Vendor Sell:|r", "|cff888888No sell value|r")
+        end
+    end
+
+    -- 2. Vendor Buy Price Row (When known from merchant stock)
+    if showBuy and not atMerchant then
+        if count > 1 and sellDB:Get("showStackPrice", true) then
+            local totalStr = Utils.FormatMoney(buyPrice * count)
+            local eachStr  = Utils.FormatMoney(buyPrice)
+            tooltip:AddDoubleLine(string.format("|cff69ccf0Vendor Buy (x%d):|r", count), string.format("%s (%s ea)", totalStr, eachStr))
+        else
+            tooltip:AddDoubleLine("|cff69ccf0Vendor Buy:|r", Utils.FormatMoney(buyPrice))
+        end
+    end
+
+    -- 3. Auction House Market Valuation Row (Partitioned by Realm)
+    if showAH then
+        if count > 1 and sellDB:Get("showStackPrice", true) then
+            local totalStr = Utils.FormatMoney(avgBuyout * count)
+            local eachStr  = Utils.FormatMoney(avgBuyout)
+            tooltip:AddDoubleLine(string.format("|cff33ccffAH Market (x%d):|r", count), string.format("%s (%s ea)", totalStr, eachStr))
+        else
+            tooltip:AddDoubleLine(string.format("|cff33ccffAH Market (%s):|r", realm), Utils.FormatMoney(avgBuyout))
+        end
+
+        if minBuyout and minBuyout > 0 then
+            local seenStr = (seenCount and seenCount > 0) and string.format(" |cff888888(Seen: %dx)|r", seenCount) or ""
+            tooltip:AddDoubleLine("|cffaaaaaaAH Min Buyout:|r", Utils.FormatMoney(minBuyout) .. seenStr)
+        end
+    end
+
     tooltip:Show()
 end
 
@@ -537,13 +745,13 @@ function PUISellValue:RegisterOptionsFlare()
     if not Options or not Options.RegisterModuleOptions then return end
 
     Options:RegisterModuleOptions("PUISellValue", "Player", {
-        title = "PUISellValue: Vendor Pricing Engine",
-        description = "Hybrid vendor sell price resolution engine with universal tooltip injection and autonomous realm learning.",
+        title = "PUISellValue: Item Pricing & Valuation",
+        description = "Hybrid vendor sell/buy price engine with VanillaItemPrices bridge, realm-partitioned auction market pricing, and universal tooltip injection.",
         icon = "Interface\\Icons\\INV_Misc_Coin_02",
         fields = {
             {
                 key = "enabled",
-                label = "Enable PUISellValue Tooltip Price Injection",
+                label = "Enable Tooltip Price Injections",
                 type = "checkbox",
                 default = true,
                 get = function() return sellDB:Get("enabled", true) end,
@@ -553,8 +761,32 @@ function PUISellValue:RegisterOptionsFlare()
                 end,
             },
             {
+                key = "showSellPrice",
+                label = "Display Vendor Sell Price",
+                type = "checkbox",
+                default = true,
+                get = function() return sellDB:Get("showSellPrice", true) end,
+                set = function(val) sellDB:Set("showSellPrice", val) end,
+            },
+            {
+                key = "showBuyPrice",
+                label = "Display Vendor Buy Price (When Known)",
+                type = "checkbox",
+                default = true,
+                get = function() return sellDB:Get("showBuyPrice", true) end,
+                set = function(val) sellDB:Set("showBuyPrice", val) end,
+            },
+            {
+                key = "showAuctionPrice",
+                label = "Display AH Market Valuation (By Realm)",
+                type = "checkbox",
+                default = true,
+                get = function() return sellDB:Get("showAuctionPrice", true) end,
+                set = function(val) sellDB:Set("showAuctionPrice", val) end,
+            },
+            {
                 key = "showSinglePrice",
-                label = "Display Single Item Unit Sell Value",
+                label = "Display Single Item Unit Value",
                 type = "checkbox",
                 default = true,
                 get = function() return sellDB:Get("showSinglePrice", true) end,
@@ -562,7 +794,7 @@ function PUISellValue:RegisterOptionsFlare()
             },
             {
                 key = "showStackPrice",
-                label = "Display Total Stack Sell Value For Multiples",
+                label = "Display Total Stack Value For Multiples",
                 type = "checkbox",
                 default = true,
                 get = function() return sellDB:Get("showStackPrice", true) end,
@@ -596,25 +828,27 @@ function PUISellValue:OnInitialize()
     if Console and Console.RegisterSubCommand then
         Console:RegisterSubCommand("sell", function(args)
             PUISellValue:HandleSlashCommand(args)
-        end, "Vendor sell price diagnostics & realm cache status (/pui sell)")
+        end, "Vendor pricing & realm auction diagnostics (/pui sell)")
     end
 
     -- Hook Tooltips
     HookTooltip(GameTooltip)
     HookTooltip(ItemRefTooltip)
+    if ShoppingTooltip1 then HookTooltip(ShoppingTooltip1) end
+    if ShoppingTooltip2 then HookTooltip(ShoppingTooltip2) end
 end
 
 function PUISellValue:OnEnable()
-    -- Merchant Interaction Auto-Learning
+    -- Merchant Interaction Auto-Learning (Sell & Buy Prices)
     Events:Register("MERCHANT_SHOW", "PUISellValue", function()
-        local count = PUISellValue:ScanBagsAtMerchant()
-        if count > 0 then
-            Debug:Info("PUISellValue", string.format("Learned %d new vendor prices from inventory.", count))
+        local newSell, newBuy = PUISellValue:ScanMerchantGoods()
+        if (newSell + newBuy) > 0 then
+            Debug:Info("PUISellValue", string.format("Learned %d sell prices and %d buy prices from merchant.", newSell, newBuy))
         end
     end)
 
     Events:Register("MERCHANT_UPDATE", "PUISellValue", function()
-        PUISellValue:ScanBagsAtMerchant()
+        PUISellValue:ScanMerchantGoods()
     end)
 end
 
@@ -627,17 +861,27 @@ end
 -- =========================================================================
 
 function PUISellValue:HandleSlashCommand(args)
-    local rData = self:GetRealmData()
     local realm = GetRealmName() or "Default"
-    local learned = rData.learnedCount or Utils.Count(rData.prices)
+    local rData = self:GetRealmData(realm)
+    local learnedSell = rData.learnedCount or Utils.Count(rData.prices or {})
+    local learnedBuy = rData.learnedBuyCount or Utils.Count(rData.buyPrices or {})
     local staticCount = Utils.Count(PUISellValue.StaticDB or {})
+    local buyStaticCount = Utils.Count(PUISellValue.BuyStaticDB or {})
+    local vipCount = Utils.Count(_G.VanillaItemPrices or VanillaItemPrices or {})
+
+    local merchant = Primus.PUIMerchant or _G.PUIMerchant
+    local realmAHData = merchant and merchant.GetRealmPriceData and merchant:GetRealmPriceData(realm)
+    local ahCount = realmAHData and Utils.Count(realmAHData.priceData or {}) or 0
 
     if not args or args == "" or args == "status" then
-        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PrimusUI: PUISellValue Engine Status ===", "69ccf0"))
+        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PrimusUI: Pricing & Valuation Database Status ===", "69ccf0"))
         DEFAULT_CHAT_FRAME:AddMessage(string.format("• Active Realm: |cffffd100%s|r", realm))
-        DEFAULT_CHAT_FRAME:AddMessage(string.format("• Learned Realm Items: |cff00ff00%d|r", learned))
-        DEFAULT_CHAT_FRAME:AddMessage(string.format("• Tier 1 Static DB Items: |cff00ff00%d|r", staticCount))
-        DEFAULT_CHAT_FRAME:AddMessage("• Subcommands: |cffffffff/pui sell scan|r (scan bags), |cffffffff/pui sell price <itemID/link>|r, |cffffffff/pui sell clear|r")
+        DEFAULT_CHAT_FRAME:AddMessage(string.format("• Learned Realm Sell Prices: |cff00ff00%d items|r", learnedSell))
+        DEFAULT_CHAT_FRAME:AddMessage(string.format("• Learned Realm Buy Prices:  |cff00ff00%d items|r", learnedBuy))
+        DEFAULT_CHAT_FRAME:AddMessage(string.format("• Built-In Static Database:  |cff00e5ff%d items (Sell)|r / |cff00e5ff%d items (Buy)|r", staticCount, buyStaticCount))
+        DEFAULT_CHAT_FRAME:AddMessage(string.format("• VanillaItemPrices Bridge:   |cffffcc00%d entries loaded|r", vipCount))
+        DEFAULT_CHAT_FRAME:AddMessage(string.format("• AH Realm Market Listings:  |cff33ccff%d cataloged items|r", ahCount))
+        DEFAULT_CHAT_FRAME:AddMessage("• Subcommands: |cffffffff/pui sell scan|r (scan merchant), |cffffffff/pui sell price <itemID/link>|r, |cffffffff/pui sell clear|r")
         return
     end
 
@@ -649,8 +893,8 @@ function PUISellValue:HandleSlashCommand(args)
             DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUISellValue]: You must be at a vendor window to scan and learn item prices.", "ffbb33"))
             return
         end
-        local newCount = self:ScanBagsAtMerchant()
-        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUISellValue]: Scanned inventory at merchant. Learned %d new item prices.", newCount), "69ccf0"))
+        local newSell, newBuy = self:ScanMerchantGoods()
+        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUISellValue]: Scanned merchant window. Learned %d new sell prices and %d new buy prices.", newSell, newBuy), "69ccf0"))
     elseif cmd == "price" then
         local target = tokens[2]
         if not target then
@@ -658,20 +902,36 @@ function PUISellValue:HandleSlashCommand(args)
             return
         end
         local itemID = self:ExtractItemID(target)
-        if not itemID then
-            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUISellValue]: Invalid item ID or link specified.", "ff4444"))
-            return
-        end
-        local price, source = self:GetSellPrice(itemID)
-        if price then
-            local srcText = (source == "REALM_CACHE") and "Learned Realm Cache" or "Static Built-In DB"
-            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUISellValue]: Item %d Sell Price: %s (Source: %s)", itemID, Utils.FormatMoney(price), srcText), "69ccf0"))
+        local itemName = CleanItemName(target)
+
+        local sellPrice, sellSrc = self:GetSellPrice(itemID or itemName)
+        local buyPrice, buySrc = self:GetBuyPrice(itemID or itemName)
+        local minBuyout, avgBuyout, seenCount = self:GetAuctionPrice(itemName or itemID, realm)
+
+        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("=== Pricing for: %s (ID: %s) [Realm: %s] ===", itemName or tostring(itemID), tostring(itemID or "N/A"), realm), "69ccf0"))
+        if sellPrice then
+            DEFAULT_CHAT_FRAME:AddMessage(string.format("• Vendor Sell: |cffffffff%s|r (|cffaaaaaaSource: %s|r)", Utils.FormatMoney(sellPrice), tostring(sellSrc or "Unknown")))
         else
-            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUISellValue]: No sell price known for item %d.", itemID), "ffbb33"))
+            DEFAULT_CHAT_FRAME:AddMessage("• Vendor Sell: |cff888888Unknown|r")
+        end
+
+        if buyPrice then
+            DEFAULT_CHAT_FRAME:AddMessage(string.format("• Vendor Buy:  |cffffffff%s|r (|cffaaaaaaSource: %s|r)", Utils.FormatMoney(buyPrice), tostring(buySrc or "Unknown")))
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("• Vendor Buy:  |cff888888Unknown|r")
+        end
+
+        if avgBuyout then
+            local seenStr = (seenCount and seenCount > 0) and string.format(" (Seen: %dx)", seenCount) or ""
+            DEFAULT_CHAT_FRAME:AddMessage(string.format("• AH Market:   |cffffffff%s|r%s | Min Buyout: |cffffffff%s|r", Utils.FormatMoney(avgBuyout), seenStr, Utils.FormatMoney(minBuyout or avgBuyout)))
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("• AH Market:   |cff888888No scan data recorded on this realm|r")
         end
     elseif cmd == "clear" then
         rData.prices = {}
+        rData.buyPrices = {}
         rData.learnedCount = 0
+        rData.learnedBuyCount = 0
         DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUISellValue]: Cleared learned price cache for realm '%s'.", realm), "ffbb33"))
     else
         DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUISellValue]: Unknown command. Use '/pui sell' for status.", "ff4444"))
