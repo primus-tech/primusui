@@ -64,11 +64,16 @@ function PUITalk:SuppressBlizzardChat()
             ChatFrameEditBox._primusPUITalkHooked = true
             local origInsert = ChatFrameEditBox.Insert
             ChatFrameEditBox.Insert = function(self, text)
+                if PUITalk.FocusInput then
+                    PUITalk:FocusInput("")
+                end
                 if PUITalk.masterFrame and PUITalk.masterFrame.editBox then
-                    if not PUITalk.masterFrame.editBox:HasFocus() then
-                        PUITalk:FocusInput("")
+                    if PUITalk.masterFrame.editBox.Insert then
+                        PUITalk.masterFrame.editBox:Insert(text)
+                    else
+                        local cur = PUITalk.masterFrame.editBox:GetText() or ""
+                        PUITalk.masterFrame.editBox:SetText(cur .. text)
                     end
-                    PUITalk.masterFrame.editBox:Insert(text)
                     return
                 end
                 if origInsert then origInsert(self, text) end
@@ -76,7 +81,10 @@ function PUITalk:SuppressBlizzardChat()
 
             local origIsVisible = ChatFrameEditBox.IsVisible
             ChatFrameEditBox.IsVisible = function(self)
-                if PUITalk.masterFrame and PUITalk.masterFrame.editBox and PUITalk.masterFrame.editBox:HasFocus() then
+                if PUITalk.IsInputFocused and PUITalk:IsInputFocused() then
+                    return 1
+                end
+                if PUITalk.masterFrame and PUITalk.masterFrame.editBox and PUITalk.masterFrame.editBox.hasFocus then
                     return 1
                 end
                 if origIsVisible then return origIsVisible(self) end

@@ -151,6 +151,12 @@ function PUITalk:CreateUniversalInput(f)
     editBox:SetFont(Media:Fetch("font", "Default"), 10, "")
     editBox:SetAutoFocus(false)
     editBox:SetHistoryLines(30)
+    editBox:SetScript("OnEditFocusGained", function()
+        this.hasFocus = true
+    end)
+    editBox:SetScript("OnEditFocusLost", function()
+        this.hasFocus = false
+    end)
     editBox:SetScript("OnUpdate", function()
         if this.pendingText ~= nil then
             this:SetText(this.pendingText)
@@ -158,6 +164,7 @@ function PUITalk:CreateUniversalInput(f)
         end
     end)
     editBox:SetScript("OnEnterPressed", function()
+        this.hasFocus = false
         local text = this:GetText()
         if text and text ~= "" then
             PUITalk:HandleInputSubmit(text)
@@ -167,6 +174,7 @@ function PUITalk:CreateUniversalInput(f)
         this:ClearFocus()
     end)
     editBox:SetScript("OnEscapePressed", function()
+        this.hasFocus = false
         this.pendingText = nil
         this:SetText("")
         this:ClearFocus()
@@ -312,11 +320,9 @@ function PUITalk:FocusInput(text)
             editBox.pendingText = text
             editBox:SetText("")
         end
-    else
-        editBox.pendingText = ""
-        editBox:SetText("")
     end
 
+    editBox.hasFocus = true
     editBox:SetFocus()
 
     -- Ensure default Blizzard ChatFrameEditBox stays hidden

@@ -305,6 +305,13 @@ function PUITalk:GetChannelColor(chanType)
     return 1.0, 1.0, 1.0
 end
 
+function PUITalk:IsInputFocused()
+    if self.masterFrame and self.masterFrame.editBox then
+        return self.masterFrame.editBox.hasFocus == true
+    end
+    return false
+end
+
 -- =========================================================================
 -- 6. HYPERLINK INTERACTION ROUTER
 -- =========================================================================
@@ -338,10 +345,16 @@ function PUITalk:HandleHyperlinkClick(link, text, button)
                     if eb and eb.SetText then eb:SetText(name) return end
                 end
 
-                if self.masterFrame and self.masterFrame.editBox and self.masterFrame.editBox:HasFocus() then
-                    self.masterFrame.editBox:Insert(name)
-                elseif ChatFrameEditBox and ChatFrameEditBox:IsVisible() then
-                    ChatFrameEditBox:Insert(name)
+                if not self:IsInputFocused() then
+                    self:FocusInput("")
+                end
+                if self.masterFrame and self.masterFrame.editBox then
+                    if self.masterFrame.editBox.Insert then
+                        self.masterFrame.editBox:Insert(name)
+                    else
+                        local cur = self.masterFrame.editBox:GetText() or ""
+                        self.masterFrame.editBox:SetText(cur .. name)
+                    end
                 else
                     SendWho("n-" .. name)
                 end
@@ -367,14 +380,16 @@ function PUITalk:HandleHyperlinkClick(link, text, button)
     if IsControlKeyDown() then
         if DressUpItemLink then DressUpItemLink(text or link) end
     elseif IsShiftKeyDown() then
-        if self.masterFrame and self.masterFrame.editBox and self.masterFrame.editBox:HasFocus() then
-            self.masterFrame.editBox:Insert(text or link)
-        elseif ChatFrameEditBox and ChatFrameEditBox:IsVisible() then
-            ChatFrameEditBox:Insert(text or link)
-        else
+        if not self:IsInputFocused() then
             self:FocusInput("")
-            if self.masterFrame and self.masterFrame.editBox then
-                self.masterFrame.editBox:Insert(text or link)
+        end
+        if self.masterFrame and self.masterFrame.editBox then
+            local insText = text or link
+            if self.masterFrame.editBox.Insert then
+                self.masterFrame.editBox:Insert(insText)
+            else
+                local cur = self.masterFrame.editBox:GetText() or ""
+                self.masterFrame.editBox:SetText(cur .. insText)
             end
         end
     else
