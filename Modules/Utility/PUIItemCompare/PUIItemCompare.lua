@@ -371,8 +371,9 @@ local function HookTooltipMethods(tip)
             return
         end
         local link = GetTradeSkillItemLink and GetTradeSkillItemLink(skillIndex)
+        local skillName = nil
         if not link and GetTradeSkillInfo then
-            local skillName = GetTradeSkillInfo(skillIndex)
+            skillName = GetTradeSkillInfo(skillIndex)
             if skillName then
                 local _, l = GetItemInfo(skillName)
                 link = l
@@ -381,9 +382,15 @@ local function HookTooltipMethods(tip)
         if not link then
             local textLeft1 = _G[self:GetName() .. "TextLeft1"]
             if textLeft1 and textLeft1:GetText() then
-                local _, l = GetItemInfo(textLeft1:GetText())
-                link = l
+                local tName = textLeft1:GetText()
+                local _, l = GetItemInfo(tName)
+                link = l or tName
             end
+        end
+        local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
+        if link and not string.find(tostring(link), "item:") and baseDB and baseDB.GetItemID then
+            local id = baseDB:GetItemID(link)
+            if id then link = "item:" .. id .. ":0:0:0" end
         end
         if link then
             ShowComparison(self, link)
@@ -400,8 +407,9 @@ local function HookTooltipMethods(tip)
             return
         end
         local link = GetCraftItemLink and GetCraftItemLink(skillIndex)
+        local craftName = nil
         if not link and GetCraftInfo then
-            local craftName = GetCraftInfo(skillIndex)
+            craftName = GetCraftInfo(skillIndex)
             if craftName then
                 local _, l = GetItemInfo(craftName)
                 link = l
@@ -410,9 +418,15 @@ local function HookTooltipMethods(tip)
         if not link then
             local textLeft1 = _G[self:GetName() .. "TextLeft1"]
             if textLeft1 and textLeft1:GetText() then
-                local _, l = GetItemInfo(textLeft1:GetText())
-                link = l
+                local tName = textLeft1:GetText()
+                local _, l = GetItemInfo(tName)
+                link = l or tName
             end
+        end
+        local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
+        if link and not string.find(tostring(link), "item:") and baseDB and baseDB.GetItemID then
+            local id = baseDB:GetItemID(link)
+            if id then link = "item:" .. id .. ":0:0:0" end
         end
         if link then
             ShowComparison(self, link)

@@ -172,7 +172,11 @@ end
 -- Get Vendor Sell Price (How much vendor gives you)
 function PUISellValue:GetSellPrice(item)
     if not item then return nil end
+    local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
     local itemID = self:ExtractItemID(item)
+    if not itemID and baseDB and baseDB.GetItemID then
+        itemID = baseDB:GetItemID(item)
+    end
     local itemName = CleanItemName(item)
 
     -- 1. Tier 2: Live Realm Auto-Learning Cache
@@ -182,9 +186,8 @@ function PUISellValue:GetSellPrice(item)
     end
 
     -- 2. Tier 1: PUIBasePriceDB Core Database & Built-in Static DB
-    local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
-    if itemID and baseDB and baseDB.GetSellPrice then
-        local bp = baseDB:GetSellPrice(itemID)
+    if baseDB and baseDB.GetSellPrice then
+        local bp = baseDB:GetSellPrice(itemID or item)
         if bp ~= nil then return bp, "PUI_BASE_PRICE_DB" end
     end
     if itemID and PUISellValue.StaticDB and PUISellValue.StaticDB[itemID] ~= nil then
@@ -193,24 +196,13 @@ function PUISellValue:GetSellPrice(item)
 
     -- 3. VanillaItemPrices Integration (_G.VanillaItemPrices / VanillaItemPrices bridge)
     local vip = _G.VanillaItemPrices or VanillaItemPrices
-    if vip then
-        if itemID and vip[itemID] ~= nil then
-            local val = vip[itemID]
-            if type(val) == "number" then
-                return val, "VANILLA_ITEM_PRICES"
-            elseif type(val) == "table" then
-                local sPrice = val.s or val.sell or val.sellPrice or val.price or val[1]
-                if sPrice then return sPrice, "VANILLA_ITEM_PRICES" end
-            end
-        end
-        if itemName and vip[itemName] ~= nil then
-            local val = vip[itemName]
-            if type(val) == "number" then
-                return val, "VANILLA_ITEM_PRICES"
-            elseif type(val) == "table" then
-                local sPrice = val.s or val.sell or val.sellPrice or val.price or val[1]
-                if sPrice then return sPrice, "VANILLA_ITEM_PRICES" end
-            end
+    if vip and itemID and vip[itemID] ~= nil then
+        local val = vip[itemID]
+        if type(val) == "number" then
+            return val, "VANILLA_ITEM_PRICES"
+        elseif type(val) == "table" then
+            local sPrice = val.s or val.sell or val.sellPrice or val.price or val[1]
+            if sPrice then return sPrice, "VANILLA_ITEM_PRICES" end
         end
     end
 
@@ -242,7 +234,11 @@ end
 -- Get Vendor Buy Price (How much vendor charges you)
 function PUISellValue:GetBuyPrice(item)
     if not item then return nil end
+    local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
     local itemID = self:ExtractItemID(item)
+    if not itemID and baseDB and baseDB.GetItemID then
+        itemID = baseDB:GetItemID(item)
+    end
     local itemName = CleanItemName(item)
 
     -- 1. Tier 2: Live Realm Auto-Learned Buy Cache (from merchant visits)
@@ -252,9 +248,8 @@ function PUISellValue:GetBuyPrice(item)
     end
 
     -- 2. Tier 1: PUIBasePriceDB Core Database & Built-in BuyStaticDB
-    local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
-    if itemID and baseDB and baseDB.GetBuyPrice then
-        local bp = baseDB:GetBuyPrice(itemID)
+    if baseDB and baseDB.GetBuyPrice then
+        local bp = baseDB:GetBuyPrice(itemID or item)
         if bp ~= nil then return bp, "PUI_BASE_PRICE_DB" end
     end
     if itemID and PUISellValue.BuyStaticDB and PUISellValue.BuyStaticDB[itemID] ~= nil then
@@ -263,18 +258,10 @@ function PUISellValue:GetBuyPrice(item)
 
     -- 3. VanillaItemPrices Integration
     local vip = _G.VanillaItemPrices or VanillaItemPrices
-    if vip then
-        if itemID and type(vip[itemID]) == "table" then
-            local bPrice = vip[itemID].b or vip[itemID].buy or vip[itemID].buyPrice or vip[itemID][2]
-            if bPrice and bPrice > 0 then
-                return bPrice, "VANILLA_ITEM_PRICES"
-            end
-        end
-        if itemName and type(vip[itemName]) == "table" then
-            local bPrice = vip[itemName].b or vip[itemName].buy or vip[itemName].buyPrice or vip[itemName][2]
-            if bPrice and bPrice > 0 then
-                return bPrice, "VANILLA_ITEM_PRICES"
-            end
+    if vip and itemID and type(vip[itemID]) == "table" then
+        local bPrice = vip[itemID].b or vip[itemID].buy or vip[itemID].buyPrice or vip[itemID][2]
+        if bPrice and bPrice > 0 then
+            return bPrice, "VANILLA_ITEM_PRICES"
         end
     end
 
@@ -396,10 +383,16 @@ function PUISellValue:InjectTooltipPrice(tooltip, itemID, count)
         itemName = CleanItemName(titleObj:GetText())
     end
 
-    -- If itemID is not numeric, try to extract from itemName
-    if not itemID and itemName then
-        local _, link = GetItemInfo(itemName)
-        if link then itemID = self:ExtractItemID(link) end
+    -- If itemID is not numeric, resolve via PUIBasePriceDB and GetItemInfo
+    local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
+    if not itemID or type(itemID) ~= "number" then
+        if baseDB and baseDB.GetItemID then
+            itemID = baseDB:GetItemID(itemID or itemName)
+        end
+        if not itemID and itemName then
+            local _, link = GetItemInfo(itemName)
+            if link then itemID = self:ExtractItemID(link) end
+        end
     end
 
     local sellPrice, sellSrc = self:GetSellPrice(itemID or itemName)
@@ -911,6 +904,56 @@ function PUISellValue:OnInitialize()
     if ShoppingTooltip2 then HookTooltip(ShoppingTooltip2) end
 end
 
+local function HookTradeSkillButtons()
+    if TradeSkillFrame then
+        for i = 1, 8 do
+            local btn = _G["TradeSkillSkill" .. i]
+            if btn and not btn._primusTooltipHooked then
+                btn._primusTooltipHooked = true
+                local origOnEnter = btn:GetScript("OnEnter")
+                btn:SetScript("OnEnter", function()
+                    if origOnEnter then origOnEnter() end
+                    local skillIndex = this:GetID() + (FauxScrollFrame_GetOffset and FauxScrollFrame_GetOffset(TradeSkillListScrollFrame) or 0)
+                    local skillName, skillType = GetTradeSkillInfo(skillIndex)
+                    if skillName and skillType ~= "header" then
+                        GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+                        GameTooltip:SetTradeSkillItem(skillIndex)
+                    end
+                end)
+                local origOnLeave = btn:GetScript("OnLeave")
+                btn:SetScript("OnLeave", function()
+                    if origOnLeave then origOnLeave() end
+                    GameTooltip:Hide()
+                end)
+            end
+        end
+    end
+
+    if CraftFrame then
+        for i = 1, 8 do
+            local btn = _G["Craft" .. i]
+            if btn and not btn._primusTooltipHooked then
+                btn._primusTooltipHooked = true
+                local origOnEnter = btn:GetScript("OnEnter")
+                btn:SetScript("OnEnter", function()
+                    if origOnEnter then origOnEnter() end
+                    local craftIndex = this:GetID() + (FauxScrollFrame_GetOffset and FauxScrollFrame_GetOffset(CraftListScrollFrame) or 0)
+                    local craftName, craftSubSpellName, craftType = GetCraftInfo(craftIndex)
+                    if craftName and craftType ~= "header" then
+                        GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+                        GameTooltip:SetCraftItem(craftIndex)
+                    end
+                end)
+                local origOnLeave = btn:GetScript("OnLeave")
+                btn:SetScript("OnLeave", function()
+                    if origOnLeave then origOnLeave() end
+                    GameTooltip:Hide()
+                end)
+            end
+        end
+    end
+end
+
 function PUISellValue:OnEnable()
     -- Merchant Interaction Auto-Learning (Sell & Buy Prices)
     Events:Register("MERCHANT_SHOW", "PUISellValue", function()
@@ -922,6 +965,23 @@ function PUISellValue:OnEnable()
 
     Events:Register("MERCHANT_UPDATE", "PUISellValue", function()
         PUISellValue:ScanMerchantGoods()
+    end)
+
+    -- TradeSkill and Craft UI Tooltip enhancements
+    Events:Register("TRADE_SKILL_SHOW", "PUISellValue", function()
+        HookTradeSkillButtons()
+    end)
+    Events:Register("TRADE_SKILL_UPDATE", "PUISellValue", function()
+        HookTradeSkillButtons()
+    end)
+    Events:Register("CRAFT_SHOW", "PUISellValue", function()
+        HookTradeSkillButtons()
+    end)
+    Events:Register("CRAFT_UPDATE", "PUISellValue", function()
+        HookTradeSkillButtons()
+    end)
+    Events:Register("ADDON_LOADED", "PUISellValue", function()
+        HookTradeSkillButtons()
     end)
 end
 

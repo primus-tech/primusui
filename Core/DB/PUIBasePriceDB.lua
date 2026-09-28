@@ -23,14 +23,69 @@ PUIBasePriceDB.Data = VanillaItemPrices
 -- Storage Tables
 PUIBasePriceDB.SellPrices = PUIBasePriceDB.SellPrices or {}
 PUIBasePriceDB.BuyPrices  = PUIBasePriceDB.BuyPrices or {}
+PUIBasePriceDB.NameToID   = PUIBasePriceDB.NameToID or {}
+
+local NameToID = PUIBasePriceDB.NameToID
+local isIndexBuilt = false
+
+local function BuildNameIndex()
+    if isIndexBuilt then return end
+    if Primus.PUIQuest and Primus.PUIQuest.DB and Primus.PUIQuest.DB["items"] and Primus.PUIQuest.DB["items"]["enUS"] then
+        local enUS = Primus.PUIQuest.DB["items"]["enUS"]
+        for id, name in pairs(enUS) do
+            if type(name) == "string" and name ~= "" then
+                local clean = string.lower(name)
+                if not NameToID[clean] then
+                    NameToID[clean] = id
+                end
+            end
+        end
+        isIndexBuilt = true
+    end
+end
 
 -- =========================================================================
--- DATABASE ACCESSORS
+-- DATABASE ACCESSORS & NAME RESOLUTION
 -- =========================================================================
 
-function PUIBasePriceDB:GetSellPrice(itemID)
-    if not itemID then return nil end
-    itemID = tonumber(itemID)
+function PUIBasePriceDB:GetItemID(itemOrName)
+    if not itemOrName then return nil end
+    if type(itemOrName) == "number" then return itemOrName end
+    local _, _, idStr = string.find(itemOrName, "item:(%d+)")
+    if idStr then return tonumber(idStr) end
+    local num = tonumber(itemOrName)
+    if num then return num end
+
+    -- String / Name Resolution
+    if type(itemOrName) == "string" and itemOrName ~= "" then
+        local clean = string.gsub(itemOrName, "|c%x%x%x%x%x%x%x%x", "")
+        clean = string.gsub(clean, "|r", "")
+        clean = string.gsub(clean, "|H.-|h", "")
+        clean = string.gsub(clean, "|h", "")
+        clean = string.gsub(clean, "^%s*(.-)%s*$", "%1")
+        clean = string.gsub(clean, "^%[(.-)%]$", "%1")
+        local lower = string.lower(clean)
+
+        if not isIndexBuilt then BuildNameIndex() end
+        if NameToID[lower] then return NameToID[lower] end
+
+        -- Client cache fallback
+        local _, link = GetItemInfo(clean)
+        if link then
+            local _, _, idFromLink = string.find(link, "item:(%d+)")
+            if idFromLink then
+                local id = tonumber(idFromLink)
+                NameToID[lower] = id
+                return id
+            end
+        end
+    end
+    return nil
+end
+
+function PUIBasePriceDB:GetSellPrice(itemOrName)
+    if not itemOrName then return nil end
+    local itemID = self:GetItemID(itemOrName)
     if not itemID then return nil end
 
     if self.SellPrices[itemID] ~= nil then
@@ -50,9 +105,9 @@ function PUIBasePriceDB:GetSellPrice(itemID)
     return nil
 end
 
-function PUIBasePriceDB:GetBuyPrice(itemID)
-    if not itemID then return nil end
-    itemID = tonumber(itemID)
+function PUIBasePriceDB:GetBuyPrice(itemOrName)
+    if not itemOrName then return nil end
+    local itemID = self:GetItemID(itemOrName)
     if not itemID then return nil end
 
     if self.BuyPrices[itemID] ~= nil then
