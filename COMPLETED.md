@@ -154,9 +154,13 @@
   - Direct Alt-Click / Left-Click navigation focus handshake with `PUIQuest`.
 - [x] **PUIQuest: Cannibalized & Canonical Standalone Quest Engine & Database (`Modules/Player/PUIQuest/`):**
   - **Zero Legacy Shims / No Metatable Proxies**: 100% native PrimusUI architecture where all Vanilla 1.12.1 + Turtle WoW databases load cleanly into `Primus.PUIQuest.DB` without legacy `pfDB` globals.
-  - **Dual Database & Dynamic Runtime Delta Patcher (`Patchtable.lua`)**: Comprehensive database supporting standard Vanilla 1.12.1 and Turtle WoW / Custom extensions (items, quests, units, objects, refloot, zones, areatriggers, minimap coordinates, meta, and locales) with 1-click dynamic runtime toggling in `/pui config` or `/pui quest turtle`. Supports custom race bitmasks (`Goblin` [256], `BloodElf` [512]).
-  - **Multi-Index Query Engine (`Database.lua`)**: High-performance querying across items, quests, units, objects, vendor buy/sell prices, item drops, and full-text substring search.
-  - **World Map POI Pin System (`Map.lua`)**: Frame-pooled pins on `WorldMapButton` with level-difficulty colored headers, cluster peeking for dense locations, interactive tooltips, and custom icons (`!` available, `?` turn-in, numbered spawns).
+  - **Dual Database & Dynamic Runtime Delta Patcher (`Patchtable.lua`)**: Comprehensive database supporting standard Vanilla 1.12.1 and Turtle WoW / Octo WoW extensions (items, quests, units, objects, refloot, zones, areatriggers, minimap coordinates, meta, and locales) with 1-click dynamic runtime toggling in `/pui config` or `/pui quest turtle`. Supports custom race bitmasks (`Goblin` [256], `BloodElf` [512]) and class bitmasks.
+  - **450+ Curated Overwrites Ingested (`Overwrites.lua`)**: Ported all manual coordinate corrections, interaction triggers, relocated NPCs (e.g. Swamp of Sorrows, Stormwind, Dun Morogh), and faction/race overrides directly from pfQuest-octo into `PUIQuest.Overwrites`.
+  - **Live Server Quest Status Synchronization (`.queststatus` / `TWQUEST`)**: Built-in `CHAT_MSG_ADDON` protocol receiver with `/pui quest sync` that queries server completion state, recursively completes prerequisite trees (`pre`) and mutually exclusive chains (`close`), and persists to character history.
+  - **Multi-Index Query Engine (`Database.lua`)**: High-performance querying across items, quests, units, objects, vendor buy/sell prices, item drops, full-text substring search, and completion status checking (`Database:IsQuestCompleted`).
+  - **World Map POI Pin System (`Map.lua`)**: Frame-pooled pins on `WorldMapButton` with level-difficulty colored headers, cluster peeking for dense locations, interactive tooltips, custom icons (`!` available, `?` turn-in, numbered spawns), dynamic GPS route trails connecting player to target, and smart available quest filtering (filtering out completed quests and checking race/class/prerequisites).
+  - **Instance Minimap Support (`PUIQuest:HasMinimap`)**: Dynamic map texture support for custom battlegrounds and dungeon instances with continent ID < 3 (e.g., Alterac Valley).
+  - **Complete Redundant Dependency Purge**: Safely purged `pfQuest-octo-main` as all data and features are 100% native to `PrimusUI`.
   - **108-Frame 3D HUD Navigation Arrow Engine (`Tracker.lua`)**:
     - High-definition 3D rendered sprite sheet texture (`3darrow.tga`, 1024×1024, 32-bit alpha) using an exact **9 columns × 12 rows = 108 frames** grid ($3.33^\circ$ angular resolution across full $360^\circ$).
     - Exact 4:3 frame aspect ratio ($44 \times 33\text{ px}$) matching native $316 \times 237\text{ px}$ cell geometry with sub-pixel margin insets eliminating texture bleeding.
@@ -211,10 +215,11 @@
 - [x] **PUIGathering Tracker (`Modules/Gathering/PUIGathering/`):**
   - Mining and herbalism node recording with minimap pin tracking.
 - [x] **PUISellValue: Hybrid Item Pricing & Vendor Sell Value Engine (`Modules/Player/PUISellValue/`):**
-  - Hybrid 2-tier resolution architecture: Tier 1 built-in static database (`PUISellValueData.lua`) seeded with standard Vanilla 1.12.1 + Turtle WoW items, and Tier 2 autonomous live realm-learning cache (`PrimusGlobalDB.PUISellValue.realms[GetRealmName()].prices[itemID]`).
+  - Hybrid 2-tier resolution architecture: Tier 1 built-in static database (`PUIBasePriceDB` / `VanillaItemPrices`) seeded with standard Vanilla 1.12.1 + Turtle/Octo WoW items, and Tier 2 autonomous live realm-learning cache (`PrimusGlobalDB.PUISellValue.realms[GetRealmName()].prices[itemID]`).
   - Universal tooltip injection hooking `SetBagItem`, `SetInventoryItem`, `SetHyperlink`, `SetAction`, `SetCraftItem`, `SetTradeSkillItem`, `SetLootItem`, `SetLootRollItem`, `SetQuestItem`, `SetQuestLogItem`, `SetInboxItem`, `SetSendMailItem`, `SetAuctionItem`, `SetAuctionSellItem`, `SetTradePlayerItem`, and `SetTradeTargetItem`.
+  - TradeSkill & Crafting integration displaying live reagent purchase costs, created item sell values, and shift-click item comparison.
+  - Equipped item price tooltip support with contextual merchant window suppression to prevent duplicate lines.
   - Single item (`Sell: 1g 25s 40c`) and stack price (`Sell (x5): 7g 27s 00c (1g 25s 40c ea)`) formatting using native copper conversion.
-  - Native merchant suppression preventing duplicate rows when `MerchantFrame` is open.
   - Autonomous live vendor price extraction on `MERCHANT_SHOW`, `MERCHANT_UPDATE`, and bag item scans.
   - Full Options Flare integration and `/pui sell` diagnostic CLI router commands.
 - [x] **Vendor Suite & Merchant Automation (`Modules/Player/PUIVendor/`):**
@@ -242,7 +247,9 @@
   - **Tab 1 (`[💬 Chat]`):** Virtualized game channels, class-colored names, clickable web URLs with 1-click copy popup, sticky channels, fast mousewheel scrolling, and chat history copy frame `[C]`.
   - **Tab 2 (`[✉️ Messages]`):** Direct whisper conversation sub-tabs, session message history, unread badge counters, audio chimes, and double-send elimination.
   - **Tab 3 (`[👥 Social]`):** Real-time Friends list and Guild roster with online status, level, class, zone, and 1-click `[💬 DM]` button switching to Tab 2.
-  - Docked universal input edit box with context pills (`#General`, `To: <Player>`, `Social`).
+  - Docked universal input edit box with context pills (`#General`, `To: <Player>`, `Social`) and robust focus handling (`PUITalk:IsInputFocused`).
+  - Seamless Shift-Click hyperlink insertion from bags, spellbook, trade skills, and quest log.
+  - System and social event routing: Skill-up announcements, loot alerts, combat feedback, and error suppression.
   - Integrated Whisper Diversion suppressing whispers from main chat log and routing to Tab 2.
 - [x] **Inspect Suite (`Modules/Utility/Inspect/`):**
   - Throttled inspect queue preventing client lockups, with target gear and talent tree caching.
