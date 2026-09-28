@@ -108,6 +108,67 @@ function PUITalk:SuppressBlizzardChat()
         end
     end
 
+    -- Hook native FrameXML click handlers to auto-open and route Shift-clicked items to PUITalk
+    if PaperDollItemSlotButton_OnClick and not PaperDollItemSlotButton_OnClick._primusHooked then
+        local origPaperDoll_OnClick = PaperDollItemSlotButton_OnClick
+        PaperDollItemSlotButton_OnClick = function(button, ignoreModifiers)
+            if button == "LeftButton" and IsShiftKeyDown() and not ignoreModifiers then
+                local link = GetInventoryItemLink("player", this:GetID())
+                if link and ChatFrameEditBox then
+                    ChatFrameEditBox:Insert(link)
+                    return
+                end
+            end
+            return origPaperDoll_OnClick(button, ignoreModifiers)
+        end
+        PaperDollItemSlotButton_OnClick._primusHooked = true
+    end
+
+    if QuestLogRewardItem_OnClick and not QuestLogRewardItem_OnClick._primusHooked then
+        local origQL_OnClick = QuestLogRewardItem_OnClick
+        QuestLogRewardItem_OnClick = function()
+            if IsShiftKeyDown() and this.rewardType ~= "spell" then
+                local link = GetQuestLogItemLink(this.type, this:GetID())
+                if link and ChatFrameEditBox then
+                    ChatFrameEditBox:Insert(link)
+                    return
+                end
+            end
+            return origQL_OnClick()
+        end
+        QuestLogRewardItem_OnClick._primusHooked = true
+    end
+
+    if QuestRewardItem_OnClick and not QuestRewardItem_OnClick._primusHooked then
+        local origQR_OnClick = QuestRewardItem_OnClick
+        QuestRewardItem_OnClick = function()
+            if IsShiftKeyDown() and this.rewardType ~= "spell" then
+                local link = GetQuestItemLink(this.type, this:GetID())
+                if link and ChatFrameEditBox then
+                    ChatFrameEditBox:Insert(link)
+                    return
+                end
+            end
+            return origQR_OnClick()
+        end
+        QuestRewardItem_OnClick._primusHooked = true
+    end
+
+    if LootFrameItem_OnClick and not LootFrameItem_OnClick._primusHooked then
+        local origLoot_OnClick = LootFrameItem_OnClick
+        LootFrameItem_OnClick = function(button)
+            if IsShiftKeyDown() then
+                local link = GetLootSlotLink(this.slot)
+                if link and ChatFrameEditBox then
+                    ChatFrameEditBox:Insert(link)
+                    return
+                end
+            end
+            return origLoot_OnClick(button)
+        end
+        LootFrameItem_OnClick._primusHooked = true
+    end
+
     if ChatFrameMenuButton then
         ChatFrameMenuButton:Hide()
         ChatFrameMenuButton.Show = function() end

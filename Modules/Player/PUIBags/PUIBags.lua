@@ -322,10 +322,12 @@ local function CreateBagSlot(parent, index)
             if IsControlKeyDown() and link then
                 DressUpItemLink(link)
             elseif IsShiftKeyDown() then
-                if ChatFrameEditBox and ChatFrameEditBox:IsVisible() and link then
-                    ChatFrameEditBox:Insert(link)
+                if PUITalk and PUITalk.IsInputFocused and PUITalk:IsInputFocused() and link then
+                    if ChatFrameEditBox then ChatFrameEditBox:Insert(link) end
                 elseif this.itemCount and this.itemCount > 1 then
                     OpenStackSplitFrame(this.itemCount, this, "BOTTOMLEFT", "TOPLEFT")
+                elseif link and ChatFrameEditBox then
+                    ChatFrameEditBox:Insert(link)
                 end
             elseif arg1 == "LeftButton" then
                 PickupContainerItem(bagID, slotID)
