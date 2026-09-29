@@ -237,22 +237,22 @@
   - [x] Tier 2 autonomous realm auto-learning cache (`PrimusGlobalDB.PUISellValue.realms[GetRealmName()].prices[itemID]`) recording prices on merchant visits.
   - [x] Universal tooltip injection (`GameTooltip:SetBagItem`, `SetInventoryItem`, `SetHyperlink`, `SetAction`, `SetCraftItem`, `SetTradeSkillItem`, etc.) displaying single item and stack prices with TradeSkill reagent cost and product value calculations.
   - [x] Shift-click item comparison and equipped gear price tooltips.
-- [ ] **`PUIBags` & Inventory Advanced Innovations (`Modules/Player/PUIBags/`):**
+- [x] **`PUIBags` & Inventory Advanced Innovations (`Modules/Player/PUIBags/`):**
   - [x] Unified All-In-One inventory window for Bags 0–4 with live item search and quality-colored borders.
   - [x] Collapsible equipped bag tray with interactive bag spotlight filter (dims other slots to 20%).
   - [x] Shift-click bag slot pickup, drag & drop equipment, and dynamic money footer with native 1.12.1 `UI-MoneyIcons`.
-  - [ ] **Automated Inventory Sorting & Stack Defragmentation (`[SORT]`):**
-    - [ ] Partial stack consolidation & merge pipeline across all standard bags.
-    - [ ] Rule-based priority sorting: Quest Items &rarr; Consumables &rarr; Trade Goods &rarr; Wearable Equipment &rarr; Utility/Tools &rarr; Junk/Trash &rarr; Free Slots.
-    - [ ] Throttled cursor swap pipeline (`PickupContainerItem`) with `ITEM_LOCK_CHANGED` queue handler ensuring safe execution without packet loss.
-    - [ ] Special bag isolation (Soul bags, Quivers, Herb bags, Mining sacks excluded from general reordering).
-  - [ ] **Dynamic Layout Presentation Presets:**
-    - [ ] *Preset 1 (Default):* Unified Continuous Grid (Configurable Columns 6..16).
-    - [ ] *Preset 2:* Grouped by Bag Containers (Discrete headers per bag).
-    - [ ] *Preset 3:* Categorized Smart Sections (Visual headers: `[EQUIPMENT]`, `[CONSUMABLES]`, `[TRADE GOODS]`, `[QUEST]`, `[JUNK]`, `[EMPTY]`).
-  - [ ] **Free Slot Breakdown & Special Bag Tinting:**
-    - [ ] Header counter showing total free slots + special bag badges (e.g., `18 Free (4 Ammo, 2 Soul)`).
-    - [ ] Color-coded backdrop tints for special container slots (Quivers = Orange, Soul Bags = Purple, Herb = Green, Mining = Grey).
+  - [x] **Automated Inventory Sorting & Stack Defragmentation (`[SORT]`):**
+    - [x] Partial stack consolidation & merge pipeline across all standard bags.
+    - [x] Rule-based priority sorting: Quest Items &rarr; Consumables &rarr; Trade Goods &rarr; Wearable Equipment &rarr; Utility/Tools &rarr; Junk/Trash &rarr; Free Slots.
+    - [x] Throttled cursor swap pipeline (`PickupContainerItem`) with `ITEM_LOCK_CHANGED` queue handler ensuring safe execution without packet loss.
+    - [x] Special bag isolation (Soul bags, Quivers, Herb bags, Mining sacks excluded from general reordering).
+  - [x] **Dynamic Layout Presentation Presets:**
+    - [x] *Preset 1 (Default):* Unified Continuous Grid (Configurable Columns 6..16).
+    - [x] *Preset 2:* Grouped by Bag Containers (Discrete headers per bag).
+    - [x] *Preset 3:* Categorized Smart Sections (Visual headers: `[EQUIPMENT]`, `[CONSUMABLES]`, `[TRADE GOODS]`, `[QUEST]`, `[JUNK]`, `[FREE SLOTS]`).
+  - [x] **Free Slot Breakdown & Special Bag Tinting:**
+    - [x] Header counter showing total free slots + special bag badges (e.g., `18 Free (4 Ammo, 2 Soul)`).
+    - [x] Color-coded backdrop tints for special container slots (Quivers = Orange, Soul Bags = Purple, Herb = Green, Mining = Grey).
   - [ ] **Bank Frame Integration (`PUIBank`):**
     - [ ] Unified Bank window with matching search, sort, bag tray, and purchase slot controls.
 - [x] **`Reputation` Module / Multi-Faction Watchbar (`Modules/Bars/PUIHotbars/PUIXPBar.lua`):**

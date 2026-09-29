@@ -138,11 +138,21 @@
 ---
 
 - [x] **PUIBags & PUIBank Unified Containers (`Modules/Player/PUIBags/` & `PUIBank/`):**
-  - Consolidated single-window inventory and bank with live search filtering and item quality borders.
-  - Interactive top bag bar tray (Bags 0–4) with 1-click header toggle button.
-  - Plain left-click bag space highlight filtering (dimming unselected bags to 20% alpha) with active gold border indicator.
-  - Shift-click / drag bag pickup & swap (`PickupBagFromSlot(invSlot)`).
-  - Native 1.12.1 `UI-MoneyIcons` spritesheet integration with dynamic right-to-left layout.
+  - **3 Presentation Layout Presets (`layoutPreset`)**:
+    - *Preset 1 (Default):* Unified Continuous Grid (customizable 6–16 columns, slot size 24–48px, spacing 2–8px).
+    - *Preset 2:* Grouped by Bag Containers (discrete headers per bag: Backpack, Bag 1..4 with item counts and slot names).
+    - *Preset 3:* Categorized Smart Sections (discrete styled headers: `[Quest Items]`, `[Consumables]`, `[Trade Goods]`, `[Equipment]`, `[Utility & Tools]`, `[Recipes]`, `[Miscellaneous]`, `[Junk]`, `[Free Slots]`).
+  - **Automated Defragmentation & Auto-Sort Engine (`PUISort.lua`, `[SORT]` button)**:
+    - Stack consolidation merging partial stacks of matching item IDs.
+    - Rule-based priority sorting hierarchy (Quest &rarr; Consumables &rarr; Trade Goods &rarr; Equipment &rarr; Utility &rarr; Recipes &rarr; Misc &rarr; Junk &rarr; Free).
+    - Throttled non-blocking cursor move queue (`ExecuteMoves`) with lock-state validation (`ITEM_LOCK_CHANGED`), safety timeout, and progress percentage feedback.
+  - **Special Container Classification & Slot Tinting (`PUICategories.lua`)**:
+    - Automatic detection and color-coding for Quivers/Ammo Pouches (Orange), Soul Bags (Purple), Herb Bags (Green), Mining Sacks (Grey), and Enchanting Bags (Cyan).
+  - **Header Telemetry & Free Slot Allocation Breakdown**:
+    - Real-time counter showing total free slots + specialized container breakdown (e.g., `22 Free (4 Ammo, 2 Soul)`).
+  - **Interactive Equipped Bag Bar Tray (Bags 0–4)**:
+    - 1-click header toggle button, plain left-click spotlight filtering (dimming unselected bags to 20%), and shift-click / drag bag pickup & swap (`PickupBagFromSlot`).
+  - **Footer Currency**: Native 1.12.1 `UI-MoneyIcons` spritesheet integration with dynamic right-to-left gold, silver, and copper layout.
   - Offline persistent caching for Bank container.
 - [x] **PUIQuestWatch: Persistent Advanced Quest Tracker (`Modules/Player/PUIQuestWatch/`):**
   - Completely neutralized Blizzard 5-minute auto-expiry bug (`AutoQuestWatch_OnUpdate`).
