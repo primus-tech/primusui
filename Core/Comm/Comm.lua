@@ -56,6 +56,8 @@ function Comm:Send(subPrefix, data, channel, target)
         else
             return -- Not in a group
         end
+    elseif channel == "GUILD" and not IsInGuild() then
+        return -- Not in a guild
     end
 
     SendAddonMessage(commPrefix, fullMessage, channel, target)

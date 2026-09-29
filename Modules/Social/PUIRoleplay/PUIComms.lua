@@ -11,7 +11,7 @@ local Comms = {}
 PUIRoleplay.Comms = Comms
 
 local channelName = "TTRP"
-local minChatLevel = 10
+local minChatLevel = 5
 local timeBetweenPings = 30
 
 -- Throttling & Deduplication State
@@ -54,6 +54,9 @@ end
 -- Channel Sending via ChatThrottleLib or Native Fallback
 --------------------------------------------------------------------------------
 function Comms:CanChat()
+    if (UnitLevel("player") or 0) < minChatLevel then
+        return false
+    end
     local chanNumber = GetChannelName(channelName)
     if chanNumber and chanNumber > 0 then
         return true
@@ -72,6 +75,8 @@ function Comms:CanChat()
 end
 
 function Comms:SendChannelMessage(message, priority)
+    if not self:CanChat() then return end
+
     local chanNumber = GetChannelName(channelName)
     if not chanNumber or chanNumber == 0 then
         chanNumber = GetChannelName(string.lower(channelName))
@@ -101,6 +106,10 @@ end
 -- Channel Handshake & Join
 --------------------------------------------------------------------------------
 function Comms:JoinRPChannel()
+    if (UnitLevel("player") or 0) < minChatLevel then
+        return
+    end
+
     local chanList = { GetChannelList() }
     local found = false
     if chanList and table.getn(chanList) > 0 then
@@ -118,7 +127,9 @@ function Comms:JoinRPChannel()
     
     -- Send initial announcement pings spaced safely
     Primus.Time:After(3.0, function()
-        Comms:SendPing("A")
+        if Comms:CanChat() then
+            Comms:SendPing("A")
+        end
     end, PUIRoleplay)
 end
 
@@ -163,7 +174,9 @@ end
 
 function Comms:StartPingTicker()
     Primus.Time:Every(timeBetweenPings, function()
-        Comms:SendPing("P")
+        if Comms:CanChat() then
+            Comms:SendPing("P")
+        end
     end, PUIRoleplay)
 end
 

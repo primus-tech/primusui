@@ -366,7 +366,9 @@ function PUIRoleplay:OnEnable()
         local cs = string.lower(chanStr or "")
         if ch == "ttrp" or cs == "ttrp" or string.find(cs, "ttrp") then
             if noticeType == "YOU_JOINED" or noticeType == "YOU_CHANGED" then
-                PUIRoleplay.Comms:SendPing("A")
+                if PUIRoleplay.Comms and PUIRoleplay.Comms:CanChat() then
+                    PUIRoleplay.Comms:SendPing("A")
+                end
             end
         end
     end)
@@ -376,6 +378,14 @@ function PUIRoleplay:OnEnable()
         PUIRoleplay.Comms:JoinRPChannel()
     end)
     
+    -- Level up unlock (e.g. Level 5 global channel access on Turtle/Octo WoW)
+    Primus.Events:Register("PLAYER_LEVEL_UP", self, function(owner, event, newLevel)
+        local lvl = tonumber(newLevel) or UnitLevel("player") or 0
+        if lvl >= 5 then
+            PUIRoleplay.Comms:JoinRPChannel()
+        end
+    end)
+
     -- Target Updates
     Primus.Events:Register("PLAYER_TARGET_CHANGED", self, function()
         if PUIRoleplay.Glance then
@@ -383,7 +393,7 @@ function PUIRoleplay:OnEnable()
         end
         if UnitIsPlayer("target") and not UnitIsUnit("target", "player") then
             local name = UnitName("target")
-            if name then
+            if name and PUIRoleplay.Comms and PUIRoleplay.Comms:CanChat() then
                 local charData = PUIRoleplay:GetCharacterData(name)
                 if not charData or not charData.keyT then
                     PUIRoleplay.Comms:SendRequest("T", name)

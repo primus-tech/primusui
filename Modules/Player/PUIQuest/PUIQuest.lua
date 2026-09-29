@@ -265,6 +265,10 @@ queryFrame:SetScript("OnUpdate", function()
 end)
 
 function PUIQuest:QueryServer()
+    if not IsInGuild() then
+        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuest]: Server quest synchronization (.queststatus) requires being in a guild.", "ffbb33"))
+        return
+    end
     DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIQuest]: Requesting completed quest status from server (.queststatus)...", "69ccf0"))
     queryFrame:Show()
 end
