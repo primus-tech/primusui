@@ -129,8 +129,10 @@
     - `Timers.lua`: Dual-swing timing rails (Player MH/OH/Ranged + Enemy melee cadence) & GCD rail.
     - `Triage.lua`: Central triage array (Top MT pins, critical HP queue, and Emerald Green heal reassurance flash).
     - `PUIHud.lua`: Master coordinator, 0.04s situational alpha easing engine (20% idle, 80% target, 100% combat/low HP), and Options Flare handshake.
-- [x] **PUIAuras Aura Management Suite (`Modules/HUD/PUIAuras/`):**
-  - Modern virtual buff, debuff, and weapon enchant grid with live duration countdowns, stack counts, and dispel classification borders.
+- [x] **PUIAuras & PUIWings Aura Management Suite (`Modules/HUD/PUIAuras/` & `PUIWings.lua`):**
+  - Modern virtual buff, debuff, and weapon enchant tracking with live duration countdowns (hours &rarr; minutes &rarr; seconds), stack counts, and dispel classification borders.
+  - **Dynamic Time & Color Formatting (`Utils.FormatAuraDuration` & `Utils.GetAuraDurationColor`)**: Formats hours (`%dh`), minutes (`%dm` when &ge; 60s), and seconds (`%ds` when < 60s) with tiered urgency color-coding (Yellow &ge; 1m, Orange < 1m, Red < 10s).
+  - **PUIWings 1Hz Live Ticker & Weapon Enchant Support**: Built-in duration countdowns on player HUD wings and automatic detection/tracking for Main-Hand & Off-Hand weapon enchants/poisons/oils.
   - **PUIHud Mutual Exclusivity & Intelligent Auto-Hiding**: Seamlessly hides the top-right aura grid when `PUIHud` is active (as `PUIHud` provides vertical buff and debuff column readouts on its outermost cockpit wings), preventing UI redundancy.
   - Dynamically restores the top-right grid whenever `PUIHud` is disabled, toggled off via `/pui hud toggle`, or if the user unchecks `Hide When PUIHud Is Active` in `/pui config`.
   - Full declarative Options Flare configuration (grid sizing, icons per row, spacing, and HUD auto-hide toggle) and PUIMover registration.
