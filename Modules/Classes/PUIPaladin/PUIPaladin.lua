@@ -369,7 +369,7 @@ end
 
 -- Update Bubble / Hearthstone HUD Status
 function PUIPaladin:UpdateRetreatStatus()
-    if not hudFrame or not hudFrame.retreatBar then return end
+    if not hudFrame or not hudFrame.retreatBar or not hudFrame.panicBtn or not hudFrame.bubbleBtn or not hudFrame.hearthBtn then return end
 
     local bubbleName, bubbleCD, _, bubbleActive = self:GetBubbleInfo()
     local hsBag, hsSlot, hsCD = self:GetHearthstoneInfo()
@@ -602,6 +602,8 @@ function PUIPaladin:OnInitialize()
         GameTooltip:Show()
     end)
     panicBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    hudFrame.panicBtn = panicBtn
+
     local mover = PUIMover or Primus.PUIMover
     if mover and mover.Register then
         mover:Register(hudFrame, "PaladinHUD", "Paladin Blessing Matrix", "CLASS")
