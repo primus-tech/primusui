@@ -9,7 +9,8 @@ Primus.PUIRoleplay = PUIRoleplay
 _G.PUIRoleplay = PUIRoleplay
 Primus:RegisterModule("PUIRoleplay", PUIRoleplay, "Social")
 
-local db = nil
+local charDB = nil
+local globalDB = nil
 
 local defaultCharTemplate = {
     keyM = "PUI10",
@@ -45,7 +46,7 @@ local defaultCharTemplate = {
     notes = ""
 }
 
-local defaults = {
+local charDefaults = {
     selected_profile = "0",
     profiles = {
         ["0"] = defaultCharTemplate,
@@ -53,7 +54,10 @@ local defaults = {
         ["2"] = defaultCharTemplate,
         ["3"] = defaultCharTemplate
     },
-    character_notes = {},
+    character_notes = {}
+}
+
+local globalDefaults = {
     known_characters = {},
     queryable_players = {},
     settings = {
@@ -82,20 +86,31 @@ end
 --------------------------------------------------------------------------------
 -- Database & Profile Helpers
 --------------------------------------------------------------------------------
-function PUIRoleplay:GetData()
-    if db and db.data then
-        return db.data
+function PUIRoleplay:GetCharData()
+    if charDB and charDB.data then
+        return charDB.data
     end
-    return defaults
+    return charDefaults
+end
+
+function PUIRoleplay:GetGlobalData()
+    if globalDB and globalDB.data then
+        return globalDB.data
+    end
+    return globalDefaults
+end
+
+function PUIRoleplay:GetData()
+    return self:GetCharData()
 end
 
 function PUIRoleplay:GetActiveProfileSlot()
-    local data = self:GetData()
+    local data = self:GetCharData()
     return data.selected_profile or "0"
 end
 
 function PUIRoleplay:SetActiveProfileSlot(slot)
-    local data = self:GetData()
+    local data = self:GetCharData()
     data.selected_profile = tostring(slot)
     if not data.profiles then data.profiles = {} end
     if not data.profiles[data.selected_profile] then
@@ -105,29 +120,39 @@ function PUIRoleplay:SetActiveProfileSlot(slot)
 end
 
 function PUIRoleplay:GetMyProfile()
-    local data = self:GetData()
+    local data = self:GetCharData()
     local slot = self:GetActiveProfileSlot()
     if not data.profiles then data.profiles = {} end
     if not data.profiles[slot] then
         data.profiles[slot] = Primus.Utils.DeepCopy(defaultCharTemplate)
     end
     local prof = data.profiles[slot]
-    if not prof.full_name or prof.full_name == "" then
-        prof.full_name = UnitName("player") or "Player"
+    local pName = UnitName("player")
+    local pRace = UnitRace("player")
+    local pClass = UnitClass("player")
+
+    if pName and pName ~= "" and pName ~= "Unknown Being" then
+        if not prof.full_name or prof.full_name == "" then
+            prof.full_name = pName
+        end
     end
-    if not prof.race or prof.race == "" then
-        prof.race = UnitRace("player") or ""
+    if pRace and pRace ~= "" then
+        if not prof.race or prof.race == "" then
+            prof.race = pRace
+        end
     end
-    if not prof.class or prof.class == "" then
-        prof.class = UnitClass("player") or ""
-        local cData = PUIRoleplay.ClassData[prof.class]
-        if cData then prof.class_color = cData[4] end
+    if pClass and pClass ~= "" then
+        if not prof.class or prof.class == "" or prof.class ~= pClass then
+            prof.class = pClass
+            local cData = PUIRoleplay.ClassData and PUIRoleplay.ClassData[prof.class]
+            if cData then prof.class_color = cData[4] end
+        end
     end
     return prof
 end
 
 function PUIRoleplay:SaveMyProfile(prof)
-    local data = self:GetData()
+    local data = self:GetCharData()
     local slot = self:GetActiveProfileSlot()
     if not data.profiles then data.profiles = {} end
     data.profiles[slot] = prof
@@ -137,47 +162,47 @@ end
 function PUIRoleplay:GetCharacterData(name)
     if not name or name == "" then return nil end
     if name == UnitName("player") then return self:GetMyProfile() end
-    local data = self:GetData()
-    if not data.known_characters then data.known_characters = {} end
-    return data.known_characters[name]
+    local gData = self:GetGlobalData()
+    if not gData.known_characters then gData.known_characters = {} end
+    return gData.known_characters[name]
 end
 
 function PUIRoleplay:GetOrCreateCharacterData(name)
     if not name or name == "" then return {} end
     if name == UnitName("player") then return self:GetMyProfile() end
-    local data = self:GetData()
-    if not data.known_characters then data.known_characters = {} end
-    if not data.known_characters[name] then
-        data.known_characters[name] = {}
+    local gData = self:GetGlobalData()
+    if not gData.known_characters then gData.known_characters = {} end
+    if not gData.known_characters[name] then
+        gData.known_characters[name] = {}
     end
-    return data.known_characters[name]
+    return gData.known_characters[name]
 end
 
 function PUIRoleplay:GetAllKnownCharacters()
-    local data = self:GetData()
-    if not data.known_characters then data.known_characters = {} end
-    return data.known_characters
+    local gData = self:GetGlobalData()
+    if not gData.known_characters then gData.known_characters = {} end
+    return gData.known_characters
 end
 
 function PUIRoleplay:SetCharacterNote(name, note)
     if not name or name == "" then return end
-    local data = self:GetData()
-    if not data.character_notes then data.character_notes = {} end
-    data.character_notes[name] = note
+    local cData = self:GetCharData()
+    if not cData.character_notes then cData.character_notes = {} end
+    cData.character_notes[name] = note
     self:SyncGlobalBridges()
 end
 
 function PUIRoleplay:GetCharacterNote(name)
     if not name or name == "" then return "" end
-    local data = self:GetData()
-    if not data.character_notes then data.character_notes = {} end
-    return data.character_notes[name] or ""
+    local cData = self:GetCharData()
+    if not cData.character_notes then cData.character_notes = {} end
+    return cData.character_notes[name] or ""
 end
 
 function PUIRoleplay:GetSettings()
-    local data = self:GetData()
-    if not data.settings then data.settings = defaults.settings end
-    return data.settings
+    local gData = self:GetGlobalData()
+    if not gData.settings then gData.settings = globalDefaults.settings end
+    return gData.settings
 end
 
 function PUIRoleplay:GetICState()
@@ -200,18 +225,18 @@ end
 
 function PUIRoleplay:RecordQueryablePlayer(name)
     if not name or name == "" then return end
-    local data = self:GetData()
-    if not data.queryable_players then data.queryable_players = {} end
-    data.queryable_players[name] = time()
+    local gData = self:GetGlobalData()
+    if not gData.queryable_players then gData.queryable_players = {} end
+    gData.queryable_players[name] = time()
     self:SyncGlobalBridges()
 end
 
 function PUIRoleplay:IsPlayerOnline(name)
     if not name or name == "" then return false end
     if name == UnitName("player") then return true end
-    local data = self:GetData()
-    if data and data.queryable_players and data.queryable_players[name] then
-        local lastSeen = data.queryable_players[name]
+    local gData = self:GetGlobalData()
+    if gData and gData.queryable_players and gData.queryable_players[name] then
+        local lastSeen = gData.queryable_players[name]
         if type(lastSeen) == "number" and lastSeen > (time() - 90) then
             return true
         end
@@ -223,17 +248,18 @@ end
 -- Global Bridges (100% Seamless TurtleRP Cross-Compatibility)
 --------------------------------------------------------------------------------
 function PUIRoleplay:SyncGlobalBridges()
-    local data = self:GetData()
-    if not data.known_characters then data.known_characters = {} end
-    if not data.profiles then data.profiles = {} end
-    if not data.queryable_players then data.queryable_players = {} end
-    if not data.settings then data.settings = defaults.settings end
+    local gData = self:GetGlobalData()
+    local cData = self:GetCharData()
+    if not gData.known_characters then gData.known_characters = {} end
+    if not gData.queryable_players then gData.queryable_players = {} end
+    if not gData.settings then gData.settings = globalDefaults.settings end
+    if not cData.profiles then cData.profiles = {} end
 
-    _G.TurtleRPCharacters = data.known_characters
+    _G.TurtleRPCharacters = gData.known_characters
     _G.TurtleRPCharacterInfo = self:GetMyProfile()
-    _G.TurtleRPPlayerProfiles = data.profiles
-    _G.TurtleRPQueryablePlayers = data.queryable_players
-    _G.TurtleRPSettings = data.settings
+    _G.TurtleRPPlayerProfiles = cData.profiles
+    _G.TurtleRPQueryablePlayers = gData.queryable_players
+    _G.TurtleRPSettings = gData.settings
     
     if UnitName("player") then
         _G.TurtleRPCharacters[UnitName("player")] = _G.TurtleRPCharacterInfo
@@ -276,29 +302,54 @@ end
 -- Module Lifecycle (OnInitialize, OnEnable, OnDisable)
 --------------------------------------------------------------------------------
 function PUIRoleplay:OnInitialize()
-    db = Primus.DB:RegisterNamespace("PUIRoleplay", defaults)
+    charDB = Primus.DB:RegisterNamespace("PUIRoleplay", charDefaults, true)
+    globalDB = Primus.DB:RegisterNamespace("PUIRoleplay_Global", globalDefaults, false)
     
-    -- If known_characters is empty but TurtleRP has saved data in _G, copy it over
-    local data = self:GetData()
-    if data and data.known_characters then
-        if _G.TurtleRPCharacters and type(_G.TurtleRPCharacters) == "table" then
-            for k, v in pairs(_G.TurtleRPCharacters) do
-                if not data.known_characters[k] and type(v) == "table" then
-                    data.known_characters[k] = Primus.Utils.DeepCopy(v)
+    -- 1. Migrate legacy account-wide PUIRoleplay namespace data if exists
+    if _G.PrimusGlobalDB and _G.PrimusGlobalDB.namespaces and _G.PrimusGlobalDB.namespaces["PUIRoleplay"] then
+        local legacy = _G.PrimusGlobalDB.namespaces["PUIRoleplay"]
+        local gData = self:GetGlobalData()
+        if legacy.known_characters and type(legacy.known_characters) == "table" then
+            for k, v in pairs(legacy.known_characters) do
+                if not gData.known_characters[k] and type(v) == "table" then
+                    gData.known_characters[k] = Primus.Utils.DeepCopy(v)
                 end
             end
         end
-        if _G.TurtleRPQueryablePlayers and type(_G.TurtleRPQueryablePlayers) == "table" then
-            if not data.queryable_players then data.queryable_players = {} end
-            for k, v in pairs(_G.TurtleRPQueryablePlayers) do
-                if not data.queryable_players[k] then
-                    data.queryable_players[k] = v
+        if legacy.queryable_players and type(legacy.queryable_players) == "table" then
+            for k, v in pairs(legacy.queryable_players) do
+                if not gData.queryable_players[k] then
+                    gData.queryable_players[k] = v
+                end
+            end
+        end
+        if legacy.settings and type(legacy.settings) == "table" then
+            for k, v in pairs(legacy.settings) do
+                if gData.settings[k] == nil then
+                    gData.settings[k] = v
                 end
             end
         end
     end
 
-    -- Initialize default fields if missing
+    -- 2. If known_characters is empty but TurtleRP has saved data in _G, copy it over
+    local gData = self:GetGlobalData()
+    if _G.TurtleRPCharacters and type(_G.TurtleRPCharacters) == "table" then
+        for k, v in pairs(_G.TurtleRPCharacters) do
+            if not gData.known_characters[k] and type(v) == "table" then
+                gData.known_characters[k] = Primus.Utils.DeepCopy(v)
+            end
+        end
+    end
+    if _G.TurtleRPQueryablePlayers and type(_G.TurtleRPQueryablePlayers) == "table" then
+        for k, v in pairs(_G.TurtleRPQueryablePlayers) do
+            if not gData.queryable_players[k] then
+                gData.queryable_players[k] = v
+            end
+        end
+    end
+
+    -- 3. Ensure player character profile keys and attributes are properly initialized
     local myProf = self:GetMyProfile()
     if not myProf.keyM or myProf.keyM == "" then myProf.keyM = self:GenerateKey() end
     if not myProf.keyT or myProf.keyT == "" then myProf.keyT = self:GenerateKey() end
@@ -351,6 +402,10 @@ function PUIRoleplay:OnInitialize()
 end
 
 function PUIRoleplay:OnEnable()
+    -- Ensure player character profile is loaded and synchronized
+    self:GetMyProfile()
+    self:SyncGlobalBridges()
+
     -- Register Comms Channel Listener
     Primus.Events:Register("CHAT_MSG_CHANNEL", self, function(owner, event, msg, sender, lang, chanStr, target, flags, zoneId, chanNum, chanName)
         local ch = string.lower(chanName or "")
@@ -375,6 +430,8 @@ function PUIRoleplay:OnEnable()
 
     -- Player entering world
     Primus.Events:Register("PLAYER_ENTERING_WORLD", self, function()
+        PUIRoleplay:GetMyProfile()
+        PUIRoleplay:SyncGlobalBridges()
         PUIRoleplay.Comms:JoinRPChannel()
     end)
     
