@@ -89,6 +89,8 @@ Modules\Bars\PUIHotbars\PUIHotbars.lua
 # =========================================================================
 # PLAYER & CHARACTER MODULES (Tier 3)
 # =========================================================================
+Modules\Player\PUIBags\PUICategories.lua
+Modules\Player\PUIBags\PUISort.lua
 Modules\Player\PUIBags\PUIBags.lua
 Modules\Player\PUIBank\PUIBank.lua
 Modules\Player\PUICharacterSheet\PUICharacterSheet.lua

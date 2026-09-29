@@ -1,10 +1,17 @@
 --[[
-    PrimusUI Module: PUIBags (All-In-One Unified Inventory)
+    PrimusUI Module: PUIBags (All-In-One Unified Inventory & Layout Engine)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
-    Provides a modern unified bag window for bags 0–4 with item search,
-    quality-colored borders, free slot counter, equipped bag bar tray (with hide/show toggle),
-    and live Gold/Silver/Copper money display.
+    Features:
+    1. Three Layout Presentation Presets:
+       - Preset 1: Unified Continuous Grid (Configurable 6–16 columns).
+       - Preset 2: Grouped by Bag Containers (Discrete headers per bag).
+       - Preset 3: Categorized Smart Sections (Quest, Consumables, Trade Goods, Equipment, Utility, Junk, Free).
+    2. Automated Defragmentation & Auto-Sort Engine ([SORT] button).
+    3. Special Container Awareness & Slot Tinting (Quivers, Soul Bags, Herb Bags, Mining Sacks, Enchanting Bags).
+    4. Header Telemetry & Free Slot Allocation Breakdown.
+    5. Equipped Bag Bar Tray with interactive spotlight dimming and shift-click pickup.
+    6. Native Vanilla 1.12.1 Money Display Footer.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -16,24 +23,30 @@ Primus.PUIBags = PUIBags
 _G.PUIBags = PUIBags
 Primus:RegisterModule("PUIBags", PUIBags, "Player")
 
-local DB       = Primus.DB
-local Widgets  = Primus.Widgets
-local Media    = Primus.Media
-local Utils    = Primus.Utils
-local Events   = Primus.Events
-local PUIMover = Primus.PUIMover
+local DB         = Primus.DB
+local Widgets    = Primus.Widgets
+local Media      = Primus.Media
+local Utils      = Primus.Utils
+local Events     = Primus.Events
+local PUIMover   = Primus.PUIMover
+local Categories = PUIBags.Categories
+local Sort       = PUIBags.Sort
 
 local bagsDB = DB:RegisterNamespace("PUIBags", {
-    enabled     = true,
-    cols        = 8,
-    slotSize    = 34,
-    spacing     = 4,
-    showBagTray = true, -- Toggleable 5 equipped bag tray
+    enabled         = true,
+    layoutPreset    = "grid",   -- "grid", "containers", "categorized"
+    cols            = 8,
+    slotSize        = 34,
+    spacing         = 4,
+    showBagTray     = true,
+    tintSpecialBags = true,
 })
 
 local bagFrame         = nil
 local bagSlots         = {}
 local bagTraySlots     = {}
+local sectionHeaders   = {}
+local containerHeaders = {}
 local searchFilter     = ""
 local highlightedBagID = nil
 
@@ -138,7 +151,6 @@ local function CreateBagTraySlot(parent, bagID)
 
     slot:SetScript("OnClick", function()
         if IsShiftKeyDown() then
-            -- Shift-Click: Pick up or swap the bag!
             if bagID == 0 then
                 DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIBags]: The backpack cannot be unequipped.", "ffbb33"))
                 return
@@ -152,7 +164,6 @@ local function CreateBagTraySlot(parent, bagID)
                 end
             end
         else
-            -- Plain Click: Highlight bag space or place bag if holding one on cursor
             if CursorHasItem() and bagID > 0 then
                 local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
                 if invSlot then
@@ -161,7 +172,6 @@ local function CreateBagTraySlot(parent, bagID)
                 end
             end
 
-            -- Toggle highlight for this bag in the unified window
             if highlightedBagID == bagID then
                 highlightedBagID = nil
             else
@@ -248,7 +258,6 @@ local function UpdateBagTray()
         local baseAlpha = (isAnySelected and not isSelected) and 0.45 or 1.0
 
         if isSelected then
-            -- Bright highlight border on selected bag button
             slot:SetBackdropBorderColor(1.0, 0.85, 0.10, 1)
         elseif bagID == 0 then
             slot.icon:SetTexture("Interface\\Buttons\\Button-Backpack-Up")
@@ -278,10 +287,75 @@ local function UpdateBagTray()
 end
 
 -- =========================================================================
+-- SECTION & CONTAINER HEADERS
+-- =========================================================================
+
+local function GetSectionHeader(parent, index)
+    if sectionHeaders[index] then return sectionHeaders[index] end
+
+    local hdr = CreateFrame("Frame", "PUIBags_SectionHeader_" .. index, parent)
+    hdr:SetHeight(18)
+    hdr:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    hdr:SetBackdropColor(0.05, 0.05, 0.08, 0.85)
+    hdr:SetBackdropBorderColor(0.3, 0.3, 0.35, 0.8)
+
+    local icon = hdr:CreateTexture(nil, "ARTWORK")
+    icon:SetWidth(14)
+    icon:SetHeight(14)
+    icon:SetPoint("LEFT", hdr, "LEFT", 4, 0)
+    hdr.icon = icon
+
+    local label = hdr:CreateFontString(nil, "OVERLAY")
+    label:SetFont(Media:Fetch("font", "Default"), 10, "OUTLINE")
+    label:SetPoint("LEFT", icon, "RIGHT", 4, 0)
+    label:SetTextColor(0.4, 0.85, 1.0)
+    hdr.label = label
+
+    local count = hdr:CreateFontString(nil, "OVERLAY")
+    count:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+    count:SetPoint("RIGHT", hdr, "RIGHT", -6, 0)
+    count:SetTextColor(0.7, 0.7, 0.7)
+    hdr.count = count
+
+    sectionHeaders[index] = hdr
+    return hdr
+end
+
+local function GetContainerHeader(parent, bagID)
+    if containerHeaders[bagID] then return containerHeaders[bagID] end
+
+    local hdr = CreateFrame("Frame", "PUIBags_ContainerHeader_" .. bagID, parent)
+    hdr:SetHeight(18)
+    hdr:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    hdr:SetBackdropColor(0.05, 0.05, 0.08, 0.85)
+    hdr:SetBackdropBorderColor(0.35, 0.35, 0.40, 0.8)
+
+    local icon = hdr:CreateTexture(nil, "ARTWORK")
+    icon:SetWidth(14)
+    icon:SetHeight(14)
+    icon:SetPoint("LEFT", hdr, "LEFT", 4, 0)
+    hdr.icon = icon
+
+    local label = hdr:CreateFontString(nil, "OVERLAY")
+    label:SetFont(Media:Fetch("font", "Default"), 10, "OUTLINE")
+    label:SetPoint("LEFT", icon, "RIGHT", 4, 0)
+    label:SetTextColor(1.0, 0.82, 0.0)
+    hdr.label = label
+
+    local count = hdr:CreateFontString(nil, "OVERLAY")
+    count:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+    count:SetPoint("RIGHT", hdr, "RIGHT", -6, 0)
+    count:SetTextColor(0.7, 0.7, 0.7)
+    hdr.count = count
+
+    containerHeaders[bagID] = hdr
+    return hdr
+end
+
+-- =========================================================================
 -- CONTAINER ITEM SLOTS
 -- =========================================================================
 
--- Create single clean container slot button (Zero Blizzard ContainerTemplate dependency)
 local function CreateBagSlot(parent, index)
     local size = bagsDB:Get("slotSize") or 34
     local slot = CreateFrame("Button", "Primus_PUIBagSlot_" .. index, parent)
@@ -291,20 +365,17 @@ local function CreateBagSlot(parent, index)
     slot:SetBackdropColor(0.08, 0.08, 0.10, 0.9)
     slot:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
 
-    -- Icon Texture
     local icon = slot:CreateTexture(slot:GetName() .. "Icon", "BORDER")
     icon:SetPoint("TOPLEFT", slot, "TOPLEFT", 1, -1)
     icon:SetPoint("BOTTOMRIGHT", slot, "BOTTOMRIGHT", -1, 1)
     icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
     slot.icon = icon
 
-    -- Stack Count
     local count = slot:CreateFontString(slot:GetName() .. "Count", "OVERLAY")
     count:SetFont(Media:Fetch("font", "Default"), 10, "OUTLINE")
     count:SetPoint("BOTTOMRIGHT", slot, "BOTTOMRIGHT", -2, 2)
     slot.count = count
 
-    -- Highlight Texture
     local highlight = slot:CreateTexture(nil, "HIGHLIGHT")
     highlight:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
     highlight:SetBlendMode("ADD")
@@ -374,112 +445,393 @@ local function CreateBagSlot(parent, index)
     return slot
 end
 
--- Refresh bag slot items, bag tray, and dynamic grid layout
+-- =========================================================================
+-- DYNAMIC LAYOUT & SLOT REFRESH
+-- =========================================================================
+
 function PUIBags:UpdateBagSlots()
     if not bagFrame or not bagFrame:IsShown() then return end
 
-    local cols = bagsDB:Get("cols") or 8
-    local size = bagsDB:Get("slotSize") or 34
-    local spacing = bagsDB:Get("spacing") or 4
-    local showTray = bagsDB:Get("showBagTray", true)
-
-    local slotIndex = 0
-    local freeSlots = 0
-    local totalSlots = 0
+    local layoutPreset = bagsDB:Get("layoutPreset", "grid")
+    local cols         = bagsDB:Get("cols", 8)
+    local size         = bagsDB:Get("slotSize", 34)
+    local spacing      = bagsDB:Get("spacing", 4)
+    local showTray     = bagsDB:Get("showBagTray", true)
+    local tintSpecial  = bagsDB:Get("tintSpecialBags", true)
 
     -- Update Bag Tray
     UpdateBagTray()
 
     -- Adjust Slot Container vertical anchor based on Bag Tray visibility
     bagFrame.slotContainer:ClearAllPoints()
-    if showTray then
-        bagFrame.slotContainer:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -62)
-        bagFrame.slotContainer:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 32)
-    else
-        bagFrame.slotContainer:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -32)
-        bagFrame.slotContainer:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 32)
-    end
+    local topPadding = showTray and 62 or 32
+    bagFrame.slotContainer:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -topPadding)
+    bagFrame.slotContainer:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 32)
 
-    for bagID = 0, 4 do
-        local numSlots = GetContainerNumSlots(bagID)
-        if numSlots > 0 then
-            totalSlots = totalSlots + numSlots
-            for slotID = 1, numSlots do
-                slotIndex = slotIndex + 1
-                local slotBtn = bagSlots[slotIndex] or CreateBagSlot(bagFrame.slotContainer, slotIndex)
-                slotBtn.bagID = bagID
-                slotBtn.slotID = slotID
+    -- Hide all section headers & container headers before rebuilding
+    for _, hdr in pairs(sectionHeaders) do hdr:Hide() end
+    for _, hdr in pairs(containerHeaders) do hdr:Hide() end
 
-                -- Position slot in grid
-                local row = math.floor((slotIndex - 1) / cols)
-                local col = Utils.Mod(slotIndex - 1, cols)
-                slotBtn:ClearAllPoints()
-                slotBtn:SetPoint("TOPLEFT", bagFrame.slotContainer, "TOPLEFT", col * (size + spacing), -(row * (size + spacing)))
+    local slotButtonIndex = 0
+    local freeSlots = 0
+    local totalSlots = 0
 
-                local texture, itemCount, locked, quality = GetContainerItemInfo(bagID, slotID)
-                local itemLink = GetContainerItemLink(bagID, slotID)
-                slotBtn.itemLink = itemLink
-                slotBtn.itemCount = itemCount
+    local gridWidth = cols * (size + spacing) - spacing
+    local totalHeight = 0
 
-                if texture then
-                    slotBtn.icon:SetTexture(texture)
-                    slotBtn.icon:Show()
+    -- =====================================================================
+    -- PRESET 1: UNIFIED CONTINUOUS GRID
+    -- =====================================================================
+    if layoutPreset == "grid" then
+        for bagID = 0, 4 do
+            local numSlots = GetContainerNumSlots(bagID) or 0
+            if numSlots > 0 then
+                local isSpecial, specInfo = Categories and Categories:GetSpecialContainerType(bagID)
 
-                    if itemCount and itemCount > 1 then
-                        slotBtn.count:SetText(itemCount)
-                        slotBtn.count:Show()
+                for slotID = 1, numSlots do
+                    totalSlots = totalSlots + 1
+                    slotButtonIndex = slotButtonIndex + 1
+
+                    local slotBtn = bagSlots[slotButtonIndex] or CreateBagSlot(bagFrame.slotContainer, slotButtonIndex)
+                    slotBtn:SetWidth(size)
+                    slotBtn:SetHeight(size)
+                    slotBtn.bagID = bagID
+                    slotBtn.slotID = slotID
+
+                    local row = math.floor((slotButtonIndex - 1) / cols)
+                    local col = Utils.Mod(slotButtonIndex - 1, cols)
+                    slotBtn:ClearAllPoints()
+                    slotBtn:SetPoint("TOPLEFT", bagFrame.slotContainer, "TOPLEFT", col * (size + spacing), -(row * (size + spacing)))
+
+                    local texture, itemCount, locked, quality = GetContainerItemInfo(bagID, slotID)
+                    local itemLink = GetContainerItemLink(bagID, slotID)
+                    slotBtn.itemLink = itemLink
+                    slotBtn.itemCount = itemCount
+
+                    -- Background & Special Container Tinting
+                    if tintSpecial and isSpecial and specInfo then
+                        slotBtn:SetBackdropColor(specInfo.r, specInfo.g, specInfo.b, specInfo.a)
                     else
-                        slotBtn.count:Hide()
+                        slotBtn:SetBackdropColor(0.08, 0.08, 0.10, 0.9)
                     end
 
-                    if locked then
-                        slotBtn.icon:SetVertexColor(0.4, 0.4, 0.4)
-                    else
-                        slotBtn.icon:SetVertexColor(1, 1, 1)
-                    end
+                    if texture then
+                        slotBtn.icon:SetTexture(texture)
+                        slotBtn.icon:Show()
 
-                    -- Apply quality border color
-                    if quality and QUALITY_COLORS[quality] then
-                        local c = QUALITY_COLORS[quality]
-                        slotBtn:SetBackdropBorderColor(c.r, c.g, c.b, 1)
-                    else
-                        slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
-                    end
+                        if itemCount and itemCount > 1 then
+                            slotBtn.count:SetText(itemCount)
+                            slotBtn.count:Show()
+                        else
+                            slotBtn.count:Hide()
+                        end
 
-                    -- Calculate slot visibility & opacity based on highlightedBagID and searchFilter
-                    local slotAlpha = 1.0
-                    if highlightedBagID ~= nil and bagID ~= highlightedBagID then
-                        slotAlpha = 0.20
-                    end
-                    if searchFilter ~= "" and itemLink then
-                        local itemName = GetItemInfo(itemLink)
-                        if itemName and not string.find(string.lower(itemName), string.lower(searchFilter)) then
+                        if locked then
+                            slotBtn.icon:SetVertexColor(0.4, 0.4, 0.4)
+                        else
+                            slotBtn.icon:SetVertexColor(1, 1, 1)
+                        end
+
+                        if quality and QUALITY_COLORS[quality] then
+                            local c = QUALITY_COLORS[quality]
+                            slotBtn:SetBackdropBorderColor(c.r, c.g, c.b, 1)
+                        elseif isSpecial and specInfo then
+                            slotBtn:SetBackdropBorderColor(specInfo.borderColor.r, specInfo.borderColor.g, specInfo.borderColor.b, 1)
+                        else
+                            slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+                        end
+
+                        local slotAlpha = 1.0
+                        if highlightedBagID ~= nil and bagID ~= highlightedBagID then
                             slotAlpha = 0.20
                         end
-                    end
-                    slotBtn:SetAlpha(slotAlpha)
-                else
-                    freeSlots = freeSlots + 1
-                    slotBtn.icon:Hide()
-                    slotBtn.count:Hide()
-                    slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+                        if searchFilter ~= "" and itemLink then
+                            local itemName = GetItemInfo(itemLink)
+                            if itemName and not string.find(string.lower(itemName), string.lower(searchFilter)) then
+                                slotAlpha = 0.20
+                            end
+                        end
+                        slotBtn:SetAlpha(slotAlpha)
+                    else
+                        freeSlots = freeSlots + 1
+                        slotBtn.icon:Hide()
+                        slotBtn.count:Hide()
 
-                    local slotAlpha = 1.0
-                    if highlightedBagID ~= nil and bagID ~= highlightedBagID then
-                        slotAlpha = 0.20
-                    elseif searchFilter ~= "" then
-                        slotAlpha = 0.20
+                        if isSpecial and specInfo then
+                            slotBtn:SetBackdropBorderColor(specInfo.borderColor.r, specInfo.borderColor.g, specInfo.borderColor.b, 0.7)
+                        else
+                            slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+                        end
+
+                        local slotAlpha = 1.0
+                        if highlightedBagID ~= nil and bagID ~= highlightedBagID then
+                            slotAlpha = 0.20
+                        elseif searchFilter ~= "" then
+                            slotAlpha = 0.20
+                        end
+                        slotBtn:SetAlpha(slotAlpha)
                     end
-                    slotBtn:SetAlpha(slotAlpha)
+
+                    slotBtn:Show()
                 end
-
-                slotBtn:Show()
             end
         end
+
+        local totalRows = math.ceil(totalSlots / cols)
+        totalHeight = totalRows * (size + spacing)
+
+    -- =====================================================================
+    -- PRESET 2: GROUPED BY BAG CONTAINERS
+    -- =====================================================================
+    elseif layoutPreset == "containers" then
+        local currentY = 0
+
+        for bagID = 0, 4 do
+            local numSlots = GetContainerNumSlots(bagID) or 0
+            if numSlots > 0 then
+                local isSpecial, specInfo = Categories and Categories:GetSpecialContainerType(bagID)
+
+                -- Container Header
+                local hdr = GetContainerHeader(bagFrame.slotContainer, bagID)
+                hdr:SetWidth(gridWidth)
+                hdr:ClearAllPoints()
+                hdr:SetPoint("TOPLEFT", bagFrame.slotContainer, "TOPLEFT", 0, -currentY)
+
+                local bagName = (bagID == 0) and "Backpack" or (GetBagName(bagID) or string.format("Bag %d", bagID))
+                if isSpecial and specInfo then
+                    hdr.icon:SetTexture("Interface\\Icons\\INV_Misc_Bag_08")
+                    hdr.label:SetText(string.format("%s (%s)", bagName, specInfo.short))
+                elseif bagID == 0 then
+                    hdr.icon:SetTexture("Interface\\Buttons\\Button-Backpack-Up")
+                    hdr.label:SetText(bagName)
+                else
+                    local invSlot = ContainerIDToInventoryID and ContainerIDToInventoryID(bagID)
+                    local tex = invSlot and GetInventoryItemTexture("player", invSlot)
+                    hdr.icon:SetTexture(tex or "Interface\\PaperDoll\\UI-PaperDoll-Slot-Bag")
+                    hdr.label:SetText(bagName)
+                end
+                hdr.count:SetText(string.format("%d Slots", numSlots))
+                hdr:Show()
+
+                currentY = currentY + 22
+
+                for slotID = 1, numSlots do
+                    totalSlots = totalSlots + 1
+                    slotButtonIndex = slotButtonIndex + 1
+
+                    local slotBtn = bagSlots[slotButtonIndex] or CreateBagSlot(bagFrame.slotContainer, slotButtonIndex)
+                    slotBtn:SetWidth(size)
+                    slotBtn:SetHeight(size)
+                    slotBtn.bagID = bagID
+                    slotBtn.slotID = slotID
+
+                    local relIndex = slotID - 1
+                    local row = math.floor(relIndex / cols)
+                    local col = Utils.Mod(relIndex, cols)
+                    slotBtn:ClearAllPoints()
+                    slotBtn:SetPoint("TOPLEFT", bagFrame.slotContainer, "TOPLEFT", col * (size + spacing), -(currentY + row * (size + spacing)))
+
+                    local texture, itemCount, locked, quality = GetContainerItemInfo(bagID, slotID)
+                    local itemLink = GetContainerItemLink(bagID, slotID)
+                    slotBtn.itemLink = itemLink
+                    slotBtn.itemCount = itemCount
+
+                    if tintSpecial and isSpecial and specInfo then
+                        slotBtn:SetBackdropColor(specInfo.r, specInfo.g, specInfo.b, specInfo.a)
+                    else
+                        slotBtn:SetBackdropColor(0.08, 0.08, 0.10, 0.9)
+                    end
+
+                    if texture then
+                        slotBtn.icon:SetTexture(texture)
+                        slotBtn.icon:Show()
+                        if itemCount and itemCount > 1 then
+                            slotBtn.count:SetText(itemCount)
+                            slotBtn.count:Show()
+                        else
+                            slotBtn.count:Hide()
+                        end
+                        if locked then
+                            slotBtn.icon:SetVertexColor(0.4, 0.4, 0.4)
+                        else
+                            slotBtn.icon:SetVertexColor(1, 1, 1)
+                        end
+                        if quality and QUALITY_COLORS[quality] then
+                            local c = QUALITY_COLORS[quality]
+                            slotBtn:SetBackdropBorderColor(c.r, c.g, c.b, 1)
+                        elseif isSpecial and specInfo then
+                            slotBtn:SetBackdropBorderColor(specInfo.borderColor.r, specInfo.borderColor.g, specInfo.borderColor.b, 1)
+                        else
+                            slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+                        end
+                        local slotAlpha = 1.0
+                        if highlightedBagID ~= nil and bagID ~= highlightedBagID then
+                            slotAlpha = 0.20
+                        end
+                        if searchFilter ~= "" and itemLink then
+                            local itemName = GetItemInfo(itemLink)
+                            if itemName and not string.find(string.lower(itemName), string.lower(searchFilter)) then
+                                slotAlpha = 0.20
+                            end
+                        end
+                        slotBtn:SetAlpha(slotAlpha)
+                    else
+                        freeSlots = freeSlots + 1
+                        slotBtn.icon:Hide()
+                        slotBtn.count:Hide()
+                        if isSpecial and specInfo then
+                            slotBtn:SetBackdropBorderColor(specInfo.borderColor.r, specInfo.borderColor.g, specInfo.borderColor.b, 0.7)
+                        else
+                            slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+                        end
+                        local slotAlpha = 1.0
+                        if highlightedBagID ~= nil and bagID ~= highlightedBagID then
+                            slotAlpha = 0.20
+                        elseif searchFilter ~= "" then
+                            slotAlpha = 0.20
+                        end
+                        slotBtn:SetAlpha(slotAlpha)
+                    end
+
+                    slotBtn:Show()
+                end
+
+                local bagRows = math.ceil(numSlots / cols)
+                currentY = currentY + bagRows * (size + spacing) + 6
+            end
+        end
+
+        totalHeight = currentY
+
+    -- =====================================================================
+    -- PRESET 3: CATEGORIZED SMART SECTIONS
+    -- =====================================================================
+    elseif layoutPreset == "categorized" then
+        -- 1. Classify all slots into category buckets (1..9)
+        local buckets = {}
+        for c = 1, 9 do buckets[c] = {} end
+
+        for bagID = 0, 4 do
+            local numSlots = GetContainerNumSlots(bagID) or 0
+            for slotID = 1, numSlots do
+                totalSlots = totalSlots + 1
+                local prio = Categories:ClassifyItem(bagID, slotID)
+                table.insert(buckets[prio], { bag = bagID, slot = slotID })
+            end
+        end
+
+        local currentY = 0
+
+        for catID = 1, 9 do
+            local slotList = buckets[catID]
+            local numInCat = table.getn(slotList)
+
+            if numInCat > 0 then
+                -- Section Header
+                local hdr = GetSectionHeader(bagFrame.slotContainer, catID)
+                hdr:SetWidth(gridWidth)
+                hdr:ClearAllPoints()
+                hdr:SetPoint("TOPLEFT", bagFrame.slotContainer, "TOPLEFT", 0, -currentY)
+
+                hdr.icon:SetTexture(Categories.CATEGORY_ICONS[catID] or "Interface\\Icons\\INV_Misc_QuestionMark")
+                hdr.label:SetText(Categories.CATEGORY_NAMES[catID] or "Category")
+                hdr.count:SetText(string.format("%d Items", numInCat))
+                hdr:Show()
+
+                currentY = currentY + 22
+
+                for idx = 1, numInCat do
+                    local ref = slotList[idx]
+                    slotButtonIndex = slotButtonIndex + 1
+
+                    local slotBtn = bagSlots[slotButtonIndex] or CreateBagSlot(bagFrame.slotContainer, slotButtonIndex)
+                    slotBtn:SetWidth(size)
+                    slotBtn:SetHeight(size)
+                    slotBtn.bagID = ref.bag
+                    slotBtn.slotID = ref.slot
+
+                    local relIndex = idx - 1
+                    local row = math.floor(relIndex / cols)
+                    local col = Utils.Mod(relIndex, cols)
+                    slotBtn:ClearAllPoints()
+                    slotBtn:SetPoint("TOPLEFT", bagFrame.slotContainer, "TOPLEFT", col * (size + spacing), -(currentY + row * (size + spacing)))
+
+                    local isSpecial, specInfo = Categories and Categories:GetSpecialContainerType(ref.bag)
+                    local texture, itemCount, locked, quality = GetContainerItemInfo(ref.bag, ref.slot)
+                    local itemLink = GetContainerItemLink(ref.bag, ref.slot)
+                    slotBtn.itemLink = itemLink
+                    slotBtn.itemCount = itemCount
+
+                    if tintSpecial and isSpecial and specInfo then
+                        slotBtn:SetBackdropColor(specInfo.r, specInfo.g, specInfo.b, specInfo.a)
+                    else
+                        slotBtn:SetBackdropColor(0.08, 0.08, 0.10, 0.9)
+                    end
+
+                    if texture then
+                        slotBtn.icon:SetTexture(texture)
+                        slotBtn.icon:Show()
+                        if itemCount and itemCount > 1 then
+                            slotBtn.count:SetText(itemCount)
+                            slotBtn.count:Show()
+                        else
+                            slotBtn.count:Hide()
+                        end
+                        if locked then
+                            slotBtn.icon:SetVertexColor(0.4, 0.4, 0.4)
+                        else
+                            slotBtn.icon:SetVertexColor(1, 1, 1)
+                        end
+                        if quality and QUALITY_COLORS[quality] then
+                            local c = QUALITY_COLORS[quality]
+                            slotBtn:SetBackdropBorderColor(c.r, c.g, c.b, 1)
+                        elseif isSpecial and specInfo then
+                            slotBtn:SetBackdropBorderColor(specInfo.borderColor.r, specInfo.borderColor.g, specInfo.borderColor.b, 1)
+                        else
+                            slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+                        end
+                        local slotAlpha = 1.0
+                        if highlightedBagID ~= nil and ref.bag ~= highlightedBagID then
+                            slotAlpha = 0.20
+                        end
+                        if searchFilter ~= "" and itemLink then
+                            local itemName = GetItemInfo(itemLink)
+                            if itemName and not string.find(string.lower(itemName), string.lower(searchFilter)) then
+                                slotAlpha = 0.20
+                            end
+                        end
+                        slotBtn:SetAlpha(slotAlpha)
+                    else
+                        freeSlots = freeSlots + 1
+                        slotBtn.icon:Hide()
+                        slotBtn.count:Hide()
+                        if isSpecial and specInfo then
+                            slotBtn:SetBackdropBorderColor(specInfo.borderColor.r, specInfo.borderColor.g, specInfo.borderColor.b, 0.7)
+                        else
+                            slotBtn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+                        end
+                        local slotAlpha = 1.0
+                        if highlightedBagID ~= nil and ref.bag ~= highlightedBagID then
+                            slotAlpha = 0.20
+                        elseif searchFilter ~= "" then
+                            slotAlpha = 0.20
+                        end
+                        slotBtn:SetAlpha(slotAlpha)
+                    end
+
+                    slotBtn:Show()
+                end
+
+                local catRows = math.ceil(numInCat / cols)
+                currentY = currentY + catRows * (size + spacing) + 6
+            end
+        end
+
+        totalHeight = currentY
     end
 
-    -- Hide unused slot buttons
-    for i = totalSlots + 1, 140 do
+    -- Hide all unused slot buttons beyond slotButtonIndex
+    for i = slotButtonIndex + 1, 160 do
         if bagSlots[i] then
             bagSlots[i]:Hide()
         end
@@ -487,24 +839,56 @@ function PUIBags:UpdateBagSlots()
 
     -- Dynamically resize bag window to fit active slots and panels
     if totalSlots > 0 then
-        local rows = math.ceil(totalSlots / cols)
-        local gridWidth = cols * (size + spacing) - spacing
-        local panelWidth = math.max(gridWidth + 20, 260)
-        local gridHeight = rows * (size + spacing)
-        local extraHeight = (showTray and 62 or 32) + 36 -- Top padding + bottom footer
-        local panelHeight = gridHeight + extraHeight
+        local panelWidth = math.max(gridWidth + 20, 280)
+        local extraHeight = topPadding + 38
+        local panelHeight = math.max(totalHeight + extraHeight, 140)
 
         bagFrame:SetWidth(panelWidth)
         bagFrame:SetHeight(panelHeight)
     end
 
-    -- Update info text (Free Slots)
+    -- Update info text (Free Slot Telemetry Breakdown)
     if bagFrame.infoText then
-        bagFrame.infoText:SetText(string.format("Free: %d / %d", freeSlots, totalSlots))
+        if Categories and Categories.GetFreeSlotSummary then
+            local _, _, summaryText = Categories:GetFreeSlotSummary()
+            bagFrame.infoText:SetText(summaryText or string.format("Free: %d / %d", freeSlots, totalSlots))
+        else
+            bagFrame.infoText:SetText(string.format("Free: %d / %d", freeSlots, totalSlots))
+        end
     end
 
     -- Update Money Display
     UpdateMoneyDisplay()
+end
+
+-- =========================================================================
+-- SORTING PROTOCOL HANDLERS
+-- =========================================================================
+
+function PUIBags:SortBags()
+    if Sort and Sort.Start then
+        Sort:Start()
+    end
+end
+
+function PUIBags:OnSortStarted(totalMoves)
+    if bagFrame and bagFrame.sortBtn then
+        bagFrame.sortBtn:SetText("...")
+        bagFrame.sortBtn:Disable()
+    end
+end
+
+function PUIBags:OnSortProgress(current, total)
+    if bagFrame and bagFrame.sortBtn then
+        bagFrame.sortBtn:SetText(string.format("%d%%", math.floor((current / total) * 100)))
+    end
+end
+
+function PUIBags:OnSortFinished()
+    if bagFrame and bagFrame.sortBtn then
+        bagFrame.sortBtn:SetText("Sort")
+        bagFrame.sortBtn:Enable()
+    end
 end
 
 -- Toggle Bags
@@ -552,11 +936,12 @@ function PUIBags:OnInitialize()
             MainMenuBarBackpackButton:SetChecked(0)
         end
         highlightedBagID = nil
+        if Sort and Sort.Stop then Sort:Stop() end
     end)
 
     -- Header Controls: Search EditBox
     local searchBox = CreateFrame("EditBox", "Primus_PUIBagSearchBox", bagFrame)
-    searchBox:SetWidth(120)
+    searchBox:SetWidth(110)
     searchBox:SetHeight(18)
     searchBox:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -8)
     searchBox:SetBackdrop(Media:Fetch("border", "1Pixel"))
@@ -585,7 +970,7 @@ function PUIBags:OnInitialize()
     local trayToggleBtn = CreateFrame("Button", "Primus_PUIBagTrayToggleBtn", bagFrame)
     trayToggleBtn:SetWidth(18)
     trayToggleBtn:SetHeight(18)
-    trayToggleBtn:SetPoint("LEFT", searchBox, "RIGHT", 6, 0)
+    trayToggleBtn:SetPoint("LEFT", searchBox, "RIGHT", 5, 0)
     trayToggleBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
     trayToggleBtn:SetBackdropColor(0.08, 0.08, 0.10, 0.9)
     local isTrayShown = bagsDB:Get("showBagTray", true)
@@ -611,6 +996,36 @@ function PUIBags:OnInitialize()
     end)
     bagFrame.trayToggleBtn = trayToggleBtn
 
+    -- Auto-Sort Button (Header)
+    local sortBtn = CreateFrame("Button", "Primus_PUIBagSortBtn", bagFrame)
+    sortBtn:SetWidth(38)
+    sortBtn:SetHeight(18)
+    sortBtn:SetPoint("LEFT", trayToggleBtn, "RIGHT", 5, 0)
+    sortBtn:SetBackdrop(Media:Fetch("border", "1Pixel"))
+    sortBtn:SetBackdropColor(0.08, 0.08, 0.10, 0.9)
+    sortBtn:SetBackdropBorderColor(0.3, 0.6, 0.9, 0.8)
+
+    local sortText = sortBtn:CreateFontString(nil, "OVERLAY")
+    sortText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+    sortText:SetPoint("CENTER", sortBtn, "CENTER", 0, 0)
+    sortText:SetText("Sort")
+    sortText:SetTextColor(0.4, 0.85, 1.0)
+    sortBtn.label = sortText
+
+    sortBtn:SetScript("OnClick", function()
+        PUIBags:SortBags()
+    end)
+    sortBtn:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(this, "ANCHOR_TOP")
+        GameTooltip:SetText("Auto-Sort Inventory", 1.0, 0.82, 0.0)
+        GameTooltip:AddLine("Consolidates partial stacks and sorts items by priority (Quest, Consumables, Trade Goods, Equipment, Junk).", 0.7, 0.7, 0.7)
+        GameTooltip:Show()
+    end)
+    sortBtn:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    bagFrame.sortBtn = sortBtn
+
     -- Free Space Text (Header Right)
     local infoText = bagFrame:CreateFontString(nil, "OVERLAY")
     infoText:SetFont(Media:Fetch("font", "Default"), 10, "OUTLINE")
@@ -630,16 +1045,16 @@ function PUIBags:OnInitialize()
         CreateBagTraySlot(bagTray, b)
     end
 
-    -- Container for slot grid
+    -- Container for slot grid & sections
     local slotContainer = CreateFrame("Frame", nil, bagFrame)
     slotContainer:SetPoint("TOPLEFT", bagFrame, "TOPLEFT", 10, -62)
     slotContainer:SetPoint("BOTTOMRIGHT", bagFrame, "BOTTOMRIGHT", -10, 32)
     bagFrame.slotContainer = slotContainer
 
     -- Pre-instantiate initial 80 slots in grid
-    local cols = bagsDB:Get("cols") or 8
-    local size = bagsDB:Get("slotSize") or 34
-    local spacing = bagsDB:Get("spacing") or 4
+    local cols = bagsDB:Get("cols", 8)
+    local size = bagsDB:Get("slotSize", 34)
+    local spacing = bagsDB:Get("spacing", 4)
 
     for i = 1, 80 do
         local slot = CreateBagSlot(slotContainer, i)
@@ -745,8 +1160,9 @@ function PUIBags:RegisterOptionsFlare()
     if not Options or not Options.RegisterModuleOptions then return end
 
     Options:RegisterModuleOptions("PUIBags", "Player", {
-        title = "PUIBags: Unified Inventory",
-        description = "Single-window inventory frame with item search, quality borders, bag bar tray, and money display.",
+        title = "PUIBags: Unified Inventory & Sorter",
+        description = "Unified single-window inventory with automated defragmentation & sorting, 3 presentation layouts, special bag tinting, and free slot breakdown.",
+        icon = "Interface\\Icons\\INV_Misc_Bag_08",
         fields = {
             {
                 key = "enabled",
@@ -757,6 +1173,33 @@ function PUIBags:RegisterOptionsFlare()
                 set = function(val)
                     bagsDB:Set("enabled", val)
                     if val then PUIBags:OnEnable() else PUIBags:OnDisable() end
+                end,
+            },
+            {
+                key = "layoutPreset",
+                label = "Presentation Layout Preset",
+                type = "dropdown",
+                options = {
+                    { value = "grid", label = "Unified Continuous Grid" },
+                    { value = "containers", label = "Grouped by Bag Containers" },
+                    { value = "categorized", label = "Categorized Smart Sections" },
+                },
+                default = "grid",
+                get = function() return bagsDB:Get("layoutPreset", "grid") end,
+                set = function(val)
+                    bagsDB:Set("layoutPreset", val)
+                    if bagFrame then PUIBags:UpdateBagSlots() end
+                end,
+            },
+            {
+                key = "tintSpecialBags",
+                label = "Color-Code Special Containers (Ammo/Soul/Herb/Mining)",
+                type = "checkbox",
+                default = true,
+                get = function() return bagsDB:Get("tintSpecialBags", true) end,
+                set = function(val)
+                    bagsDB:Set("tintSpecialBags", val)
+                    if bagFrame then PUIBags:UpdateBagSlots() end
                 end,
             },
             {
@@ -795,6 +1238,20 @@ function PUIBags:RegisterOptionsFlare()
                 get = function() return bagsDB:Get("slotSize", 34) end,
                 set = function(val)
                     bagsDB:Set("slotSize", val)
+                    if bagFrame then PUIBags:UpdateBagSlots() end
+                end,
+            },
+            {
+                key = "spacing",
+                label = "Slot Spacing (px)",
+                type = "slider",
+                min = 2,
+                max = 8,
+                step = 1,
+                default = 4,
+                get = function() return bagsDB:Get("spacing", 4) end,
+                set = function(val)
+                    bagsDB:Set("spacing", val)
                     if bagFrame then PUIBags:UpdateBagSlots() end
                 end,
             },
@@ -871,7 +1328,7 @@ function PUIBags:OnEnable()
         _G.OpenBackpack = function() if bagsDB:Get("enabled", true) and bagFrame and not bagFrame:IsShown() then bagFrame:Show() end end
         _G.CloseBackpack = function() if bagsDB:Get("enabled", true) and bagFrame and bagFrame:IsShown() then bagFrame:Hide() end end
         _G.OpenBag = function(bagID) if bagsDB:Get("enabled", true) and bagFrame and not bagFrame:IsShown() then bagFrame:Show() end end
-        _G.CloseBag = function(bagID) if bagsDB:Get("enabled", true) and bagFrame and bagFrame:IsShown() then bagFrame:Hide() end end
+        _G.CloseBag = function(bagID) if bagsDB:Get("enabled", true) and bagFrame and not bagFrame:IsShown() then bagFrame:Hide() end end
         _G.OpenAllBags = function(force)
             if not bagsDB:Get("enabled", true) or not bagFrame then return end
             if force then
