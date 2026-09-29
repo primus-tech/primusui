@@ -24,19 +24,19 @@ function Overwrites:Apply(targetDB)
 
 
     -- Ensure subcategory containers exist
-    pfDB[areatrigger] = pfDB[areatrigger] or {}
-    pfDB[areatrigger][data-turtle] = pfDB[areatrigger][data-turtle] or {}
+    pfDB["areatrigger"] = pfDB["areatrigger"] or {}
+    pfDB["areatrigger"]["data-turtle"] = pfDB["areatrigger"]["data-turtle"] or {}
 
-    pfDB[items] = pfDB[items] or {}
-    pfDB[items][data-turtle] = pfDB[items][data-turtle] or {}
+    pfDB["items"] = pfDB["items"] or {}
+    pfDB["items"]["data-turtle"] = pfDB["items"]["data-turtle"] or {}
 
-    pfDB[units] = pfDB[units] or {}
-    pfDB[units][data-turtle] = pfDB[units][data-turtle] or {}
-    pfDB[units][enUS-turtle] = pfDB[units][enUS-turtle] or {}
+    pfDB["units"] = pfDB["units"] or {}
+    pfDB["units"]["data-turtle"] = pfDB["units"]["data-turtle"] or {}
+    pfDB["units"]["enUS-turtle"] = pfDB["units"]["enUS-turtle"] or {}
 
-    pfDB[quests] = pfDB[quests] or {}
-    pfDB[quests][data-turtle] = pfDB[quests][data-turtle] or {}
-    pfDB[quests][enUS-turtle] = pfDB[quests][enUS-turtle] or {}
+    pfDB["quests"] = pfDB["quests"] or {}
+    pfDB["quests"]["data-turtle"] = pfDB["quests"]["data-turtle"] or {}
+    pfDB["quests"]["enUS-turtle"] = pfDB["quests"]["enUS-turtle"] or {}
 
     -- Helper to ensure entity table exists before property assignment
     local function ensure(tbl, id)
