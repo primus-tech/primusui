@@ -55,14 +55,7 @@ end
 
 -- Format remaining duration (seconds to string)
 local function FormatDuration(seconds)
-    if not seconds or seconds <= 0 then return "" end
-    if seconds >= 3600 then
-        return string.format("%dh", math.floor(seconds / 3600))
-    elseif seconds >= 60 then
-        return string.format("%dm", math.floor(seconds / 60))
-    else
-        return string.format("%ds", math.floor(seconds))
-    end
+    return Utils.FormatAuraDuration(seconds)
 end
 
 -- Create an individual aura slot button
@@ -155,7 +148,10 @@ function PUIAuras:UpdateAuras()
         btn.isWeaponEnchant = true
         btn.weaponSlot = 16
         btn.icon:SetTexture(GetInventoryItemTexture("player", 16) or "Interface\\Icons\\INV_Sword_04")
-        btn.duration:SetText(FormatDuration((mainHandExp or 0) / 1000))
+        local durSec = (mainHandExp or 0) / 1000
+        btn.duration:SetText(Utils.FormatAuraDuration(durSec))
+        local dr, dg, db = Utils.GetAuraDurationColor(durSec)
+        btn.duration:SetTextColor(dr, dg, db)
         btn.count:SetText("")
         btn:SetBackdropBorderColor(0.8, 0.4, 0.0, 1) -- Orange border for weapon buff
         btn:Show()
@@ -169,7 +165,10 @@ function PUIAuras:UpdateAuras()
         btn.isWeaponEnchant = true
         btn.weaponSlot = 17
         btn.icon:SetTexture(GetInventoryItemTexture("player", 17) or "Interface\\Icons\\INV_Sword_04")
-        btn.duration:SetText(FormatDuration((offHandExp or 0) / 1000))
+        local durSec = (offHandExp or 0) / 1000
+        btn.duration:SetText(Utils.FormatAuraDuration(durSec))
+        local dr, dg, db = Utils.GetAuraDurationColor(durSec)
+        btn.duration:SetTextColor(dr, dg, db)
         btn.count:SetText("")
         btn:SetBackdropBorderColor(0.8, 0.4, 0.0, 1)
         btn:Show()
@@ -190,7 +189,9 @@ function PUIAuras:UpdateAuras()
             local stacks = GetPlayerBuffApplications(buffIndex)
 
             btn.icon:SetTexture(texture)
-            btn.duration:SetText(FormatDuration(timeLeft))
+            btn.duration:SetText(Utils.FormatAuraDuration(timeLeft))
+            local dr, dg, db = Utils.GetAuraDurationColor(timeLeft)
+            btn.duration:SetTextColor(dr, dg, db)
             btn.count:SetText((stacks and stacks > 1) and tostring(stacks) or "")
             btn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
             btn:Show()
@@ -213,7 +214,9 @@ function PUIAuras:UpdateAuras()
             local debuffType = GetPlayerBuffDispelType(debuffIndex) or "None"
 
             btn.icon:SetTexture(texture)
-            btn.duration:SetText(FormatDuration(timeLeft))
+            btn.duration:SetText(Utils.FormatAuraDuration(timeLeft))
+            local dr, dg, db = Utils.GetAuraDurationColor(timeLeft)
+            btn.duration:SetTextColor(dr, dg, db)
             btn.count:SetText((stacks and stacks > 1) and tostring(stacks) or "")
 
             local color = Auras and Auras.DispelColors and (Auras.DispelColors[debuffType] or Auras.DispelColors["None"]) or { r = 0.8, g = 0.2, b = 0.2 }

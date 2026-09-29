@@ -520,3 +520,31 @@ function Utils.GetContainerItemDurability(bagID, slotID)
     return nil, nil
 end
 
+-- =========================================================================
+-- AURA DURATION & TIME FORMATTERS
+-- =========================================================================
+
+-- Format aura time remaining: hours ("1h"), minutes ("15m", "2m"), then seconds ("59s", "8s")
+function Utils.FormatAuraDuration(seconds)
+    if not seconds or seconds <= 0 then return "" end
+    if seconds >= 3600 then
+        return string.format("%dh", math.floor(seconds / 3600))
+    elseif seconds >= 60 then
+        return string.format("%dm", math.ceil(seconds / 60))
+    else
+        return string.format("%ds", math.floor(seconds))
+    end
+end
+
+-- Dynamic color tier for aura duration (Yellow >= 1m, Orange < 1m, Red < 10s)
+function Utils.GetAuraDurationColor(seconds)
+    if not seconds or seconds <= 0 then
+        return 1, 1, 1
+    elseif seconds < 10 then
+        return 1.0, 0.25, 0.25 -- Red (critical urgency)
+    elseif seconds < 60 then
+        return 1.0, 0.70, 0.10 -- Orange (under 1 minute)
+    else
+        return 1.0, 1.0, 0.40  -- Yellow (minutes remaining)
+    end
+end

@@ -429,6 +429,7 @@ function PUIHud:OnEnable()
 
     -- 6. Direct Frame OnUpdate Driver (Swing Bars, GCD, CastBar, Live Range & Alpha Easing)
     local lastCockpitUpdate = 0
+    local lastAuraUpdate = 0
     local hudUpdateThrottle = 0
     hudFrame:SetScript("OnUpdate", function()
         local elapsed = arg1 or 0.04
@@ -457,6 +458,12 @@ function PUIHud:OnEnable()
         if (now - lastCockpitUpdate) >= 0.10 then
             lastCockpitUpdate = now
             PUIHud:UpdateCockpitButtons()
+        end
+
+        -- 1Hz Live Aura Duration Countdown Ticker
+        if (now - lastAuraUpdate) >= 1.0 then
+            lastAuraUpdate = now
+            PUIHud:UpdateAuras()
         end
     end)
 

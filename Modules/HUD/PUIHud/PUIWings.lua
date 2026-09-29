@@ -284,6 +284,13 @@ local function CreateAuraSlot(parent, isTarget, index)
     count:SetTextColor(1, 1, 1)
     btn.count = count
 
+    local duration = btn:CreateFontString(nil, "OVERLAY")
+    duration:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
+    duration:SetPoint("CENTER", btn, "CENTER", 0, 0)
+    duration:SetTextColor(1, 1, 0.4)
+    duration:Hide()
+    btn.duration = duration
+
     btn:SetScript("OnEnter", function()
         if isTarget then
             if btn.isDebuff and btn.unitSlot then
@@ -294,7 +301,10 @@ local function CreateAuraSlot(parent, isTarget, index)
                 GameTooltip:SetUnitBuff("target", btn.unitSlot)
             end
         else
-            if btn.buffIndex then
+            if btn.isWeaponEnchant and btn.weaponSlot then
+                GameTooltip:SetOwner(btn, "ANCHOR_LEFT")
+                GameTooltip:SetInventoryItem("player", btn.weaponSlot)
+            elseif btn.buffIndex then
                 GameTooltip:SetOwner(btn, "ANCHOR_LEFT")
                 GameTooltip:SetPlayerBuff(btn.buffIndex)
             end
@@ -357,8 +367,62 @@ function PUIHud:BuildAuraColumns(parent, leftWing, rightWing)
 end
 
 function PUIHud:UpdateAuras()
-    -- Update Player Auras (Up to 4 Buffs + 4 Debuffs)
+    -- Update Player Auras (Up to 4 Buffs/Enchants + 4 Debuffs)
     local slotIdx = 1
+
+    -- 1. Temporary Weapon Enchants (Main Hand & Off Hand)
+    local hasMainHand, mainHandExp, _, hasOffHand, offHandExp = GetWeaponEnchantInfo()
+    if hasMainHand and slotIdx <= 4 then
+        local btn = playerAuraButtons[slotIdx]
+        if btn then
+            btn.buffIndex = nil
+            btn.isDebuff = false
+            btn.isWeaponEnchant = true
+            btn.weaponSlot = 16
+            btn.icon:SetTexture(GetInventoryItemTexture("player", 16) or "Interface\\Icons\\INV_Sword_04")
+            btn.count:SetText("")
+            local durSec = (mainHandExp or 0) / 1000
+            if durSec > 0 then
+                btn.duration:SetText(Utils.FormatAuraDuration(durSec))
+                local dr, dg, db = Utils.GetAuraDurationColor(durSec)
+                btn.duration:SetTextColor(dr, dg, db)
+                btn.duration:Show()
+            else
+                btn.duration:SetText("")
+                btn.duration:Hide()
+            end
+            btn:SetBackdropBorderColor(0.8, 0.4, 0.0, 0.9)
+            btn:Show()
+            slotIdx = slotIdx + 1
+        end
+    end
+
+    if hasOffHand and slotIdx <= 4 then
+        local btn = playerAuraButtons[slotIdx]
+        if btn then
+            btn.buffIndex = nil
+            btn.isDebuff = false
+            btn.isWeaponEnchant = true
+            btn.weaponSlot = 17
+            btn.icon:SetTexture(GetInventoryItemTexture("player", 17) or "Interface\\Icons\\INV_Sword_04")
+            btn.count:SetText("")
+            local durSec = (offHandExp or 0) / 1000
+            if durSec > 0 then
+                btn.duration:SetText(Utils.FormatAuraDuration(durSec))
+                local dr, dg, db = Utils.GetAuraDurationColor(durSec)
+                btn.duration:SetTextColor(dr, dg, db)
+                btn.duration:Show()
+            else
+                btn.duration:SetText("")
+                btn.duration:Hide()
+            end
+            btn:SetBackdropBorderColor(0.8, 0.4, 0.0, 0.9)
+            btn:Show()
+            slotIdx = slotIdx + 1
+        end
+    end
+
+    -- 2. Player Buffs
     for i = 0, 15 do
         if slotIdx > 4 then break end
         local buffIndex = GetPlayerBuff(i, "HELPFUL")
@@ -368,9 +432,22 @@ function PUIHud:UpdateAuras()
             if btn and tex then
                 btn.buffIndex = buffIndex
                 btn.isDebuff = false
+                btn.isWeaponEnchant = false
                 btn.icon:SetTexture(tex)
                 local stack = GetPlayerBuffApplications(buffIndex)
                 btn.count:SetText(stack > 1 and tostring(stack) or "")
+
+                local timeLeft = GetPlayerBuffTimeLeft(buffIndex)
+                if timeLeft and timeLeft > 0 then
+                    btn.duration:SetText(Utils.FormatAuraDuration(timeLeft))
+                    local dr, dg, db = Utils.GetAuraDurationColor(timeLeft)
+                    btn.duration:SetTextColor(dr, dg, db)
+                    btn.duration:Show()
+                else
+                    btn.duration:SetText("")
+                    btn.duration:Hide()
+                end
+
                 btn:SetBackdropBorderColor(0.2, 0.7, 0.3, 0.8)
                 btn:Show()
                 slotIdx = slotIdx + 1
@@ -378,6 +455,7 @@ function PUIHud:UpdateAuras()
         end
     end
 
+    -- 3. Player Debuffs
     for i = 0, 15 do
         if slotIdx > 8 then break end
         local debuffIndex = GetPlayerBuff(i, "HARMFUL")
@@ -387,10 +465,25 @@ function PUIHud:UpdateAuras()
             if btn and tex then
                 btn.buffIndex = debuffIndex
                 btn.isDebuff = true
+                btn.isWeaponEnchant = false
                 btn.icon:SetTexture(tex)
                 local stack = GetPlayerBuffApplications(debuffIndex)
                 btn.count:SetText(stack > 1 and tostring(stack) or "")
-                btn:SetBackdropBorderColor(0.9, 0.2, 0.2, 0.9)
+
+                local timeLeft = GetPlayerBuffTimeLeft(debuffIndex)
+                if timeLeft and timeLeft > 0 then
+                    btn.duration:SetText(Utils.FormatAuraDuration(timeLeft))
+                    local dr, dg, db = Utils.GetAuraDurationColor(timeLeft)
+                    btn.duration:SetTextColor(dr, dg, db)
+                    btn.duration:Show()
+                else
+                    btn.duration:SetText("")
+                    btn.duration:Hide()
+                end
+
+                local debuffType = GetPlayerBuffDispelType(debuffIndex) or "none"
+                local c = DISPEL_COLORS[debuffType] or DISPEL_COLORS["none"]
+                btn:SetBackdropBorderColor(c[1], c[2], c[3], 0.9)
                 btn:Show()
                 slotIdx = slotIdx + 1
             end
@@ -398,7 +491,11 @@ function PUIHud:UpdateAuras()
     end
 
     for j = slotIdx, 8 do
-        if playerAuraButtons[j] then playerAuraButtons[j]:Hide() end
+        if playerAuraButtons[j] then
+            playerAuraButtons[j].duration:SetText("")
+            playerAuraButtons[j].duration:Hide()
+            playerAuraButtons[j]:Hide()
+        end
     end
 
     -- Update Target Auras (Up to 4 Buffs + 4 Debuffs)
@@ -419,6 +516,10 @@ function PUIHud:UpdateAuras()
                 btn.isDebuff = false
                 btn.icon:SetTexture(tex)
                 btn.count:SetText("")
+                if btn.duration then
+                    btn.duration:SetText("")
+                    btn.duration:Hide()
+                end
                 btn:SetBackdropBorderColor(0.2, 0.7, 0.3, 0.8)
                 btn:Show()
                 tSlot = tSlot + 1
@@ -436,6 +537,10 @@ function PUIHud:UpdateAuras()
                 btn.isDebuff = true
                 btn.icon:SetTexture(tex)
                 btn.count:SetText(stack and stack > 1 and tostring(stack) or "")
+                if btn.duration then
+                    btn.duration:SetText("")
+                    btn.duration:Hide()
+                end
                 local c = DISPEL_COLORS[dType or "none"] or DISPEL_COLORS["none"]
                 btn:SetBackdropBorderColor(c[1], c[2], c[3], 0.9)
                 btn:Show()
@@ -445,6 +550,12 @@ function PUIHud:UpdateAuras()
     end
 
     for j = tSlot, 8 do
-        if targetAuraButtons[j] then targetAuraButtons[j]:Hide() end
+        if targetAuraButtons[j] then
+            if targetAuraButtons[j].duration then
+                targetAuraButtons[j].duration:SetText("")
+                targetAuraButtons[j].duration:Hide()
+            end
+            targetAuraButtons[j]:Hide()
+        end
     end
 end
