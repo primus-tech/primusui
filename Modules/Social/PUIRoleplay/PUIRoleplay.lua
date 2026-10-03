@@ -197,6 +197,25 @@ function PUIRoleplay:SaveMyProfile(prof)
     self:SyncGlobalBridges()
 end
 
+function PUIRoleplay:ComposeFullName(p)
+    if not p then return "" end
+    local nameComposite = ""
+    if p.first_name and p.first_name ~= "" then
+        nameComposite = p.first_name
+        if p.middle_name and p.middle_name ~= "" then
+            nameComposite = nameComposite .. " " .. p.middle_name
+        end
+        if p.last_name and p.last_name ~= "" then
+            nameComposite = nameComposite .. " " .. p.last_name
+        end
+    elseif p.full_name and p.full_name ~= "" then
+        nameComposite = p.full_name
+    else
+        nameComposite = UnitName("player") or ""
+    end
+    return nameComposite
+end
+
 function PUIRoleplay:GetPersonalityTraits(profile)
     local prof = profile or self:GetMyProfile()
     if not prof.personality_traits or table.getn(prof.personality_traits) == 0 then
