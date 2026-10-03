@@ -127,6 +127,42 @@ function PUILogViewer:OnInitialize()
 end
 
 --------------------------------------------------------------------------------
+-- URL Link Extractor Helper (Vanilla WoW 1.12.1 / Lua 5.0.2)
+--------------------------------------------------------------------------------
+function PUILogViewer:ExtractURLs(text)
+    if not text or text == "" then return {} end
+    local urls = {}
+    local clean = string.gsub(text, "|c%x%x%x%x%x%x%x%x", "")
+    clean = string.gsub(clean, "|r", "")
+    clean = string.gsub(clean, "|H.-|h(.-)|h", "%1")
+
+    local patterns = {
+        "https?://%S+",
+        "www%.%S+",
+        "discord%.gg/%S+",
+        "discord%.com/%S+",
+        "twitch%.tv/%S+",
+        "youtube%.com/%S+",
+        "youtu%.be/%S+",
+        "imgur%.com/%S+",
+        "carrd%.co/%S+",
+        "toyhou%.se/%S+",
+        "github%.com/%S+",
+        "spotify%.com/%S+",
+        "soundcloud%.com/%S+",
+        "deviantart%.com/%S+",
+        "artstation%.com/%S+"
+    }
+    for _, pat in ipairs(patterns) do
+        for url in string.gfind(clean, pat) do
+            url = string.gsub(url, "[%.,!%?)%]\"]+$", "")
+            table.insert(urls, url)
+        end
+    end
+    return urls
+end
+
+--------------------------------------------------------------------------------
 -- Build Master Log Viewer Window
 --------------------------------------------------------------------------------
 function PUILogViewer:BuildFrame()
@@ -181,11 +217,11 @@ function PUILogViewer:BuildFrame()
     closeBtn:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight")
     closeBtn:SetScript("OnClick", function() f:Hide() end)
 
-    -- Tab Bar (4 Stream Views)
-    local tabNames = { "RP & Chat", "Dice & Rolls", "Errors & Debug", "All Stream" }
+    -- Tab Bar (5 Stream Views: RP, Dice, Debug, All, URLs)
+    local tabNames = { "RP & Chat", "Dice & Rolls", "Errors & Debug", "All Stream", "URLs & Links" }
     local tabs = {}
-    local tabW = 110
-    for i = 1, 4 do
+    local tabW = 104
+    for i = 1, 5 do
         local tBtn = CreateFrame("Button", nil, f)
         tBtn:SetWidth(tabW)
         tBtn:SetHeight(22)
@@ -239,23 +275,24 @@ function PUILogViewer:BuildFrame()
     end)
     f.searchEB = searchEB
 
-    -- Quick Filter Chips Bar
+    -- Quick Filter Chips Bar (8 chips)
     local chipBar = CreateFrame("Frame", nil, f)
     chipBar:SetPoint("TOPLEFT", searchEB, "BOTTOMLEFT", 0, -4)
     chipBar:SetWidth(536)
     chipBar:SetHeight(20)
 
     local chipDefs = {
-        { id = "ALL",     label = "All Channels" },
-        { id = "RP",      label = "Say / Emote" },
+        { id = "ALL",     label = "All" },
+        { id = "RP",      label = "Say/Emote" },
         { id = "WHISPER", label = "Whispers" },
-        { id = "GROUP",   label = "Party / Raid" },
+        { id = "GROUP",   label = "Group" },
         { id = "GUILD",   label = "Guild" },
-        { id = "ROLL",    label = "Rolls & D20" },
+        { id = "ROLL",    label = "Rolls/D20" },
+        { id = "URL",     label = "URLs" },
         { id = "ERROR",   label = "Errors" }
     }
     f.chipBtns = {}
-    local cW = 73
+    local cW = 63
     for cIdx, c in ipairs(chipDefs) do
         local cBtn = CreateFrame("Button", nil, chipBar)
         cBtn:SetWidth(cW)
@@ -278,6 +315,13 @@ function PUILogViewer:BuildFrame()
 
         cBtn:SetScript("OnClick", function()
             activeFilter = this.chipId
+            if this.chipId == "RP" then activeTab = 1
+            elseif this.chipId == "ROLL" then activeTab = 2
+            elseif this.chipId == "ERROR" then activeTab = 3
+            elseif this.chipId == "ALL" then activeTab = 4
+            elseif this.chipId == "URL" then activeTab = 5
+            end
+            PUILogViewer:UpdateTabHighlights()
             PUILogViewer:UpdateChipHighlights()
             PUILogViewer:Refresh()
         end)
@@ -401,29 +445,37 @@ function PUILogViewer:BuildFrame()
     return f
 end
 
+function PUILogViewer:UpdateTabHighlights()
+    local f = logFrame
+    if not f or not f.tabs then return end
+    for i = 1, 5 do
+        local tab = f.tabs[i]
+        if tab then
+            if i == activeTab then
+                tab:SetBackdropColor(0.16, 0.18, 0.24, 1.0)
+                tab:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
+                tab.text:SetTextColor(0.0, 0.90, 1.0)
+            else
+                tab:SetBackdropColor(0.06, 0.06, 0.08, 0.9)
+                tab:SetBackdropBorderColor(0.20, 0.22, 0.26, 1.0)
+                tab.text:SetTextColor(0.70, 0.70, 0.75)
+            end
+        end
+    end
+end
+
 function PUILogViewer:SelectTab(tabIdx)
     activeTab = tabIdx
     local f = self:BuildFrame()
 
-    for i = 1, 4 do
-        local tab = f.tabs[i]
-        if i == tabIdx then
-            tab:SetBackdropColor(0.16, 0.18, 0.24, 1.0)
-            tab:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
-            tab.text:SetTextColor(0.0, 0.90, 1.0)
-        else
-            tab:SetBackdropColor(0.06, 0.06, 0.08, 0.9)
-            tab:SetBackdropBorderColor(0.20, 0.22, 0.26, 1.0)
-            tab.text:SetTextColor(0.70, 0.70, 0.75)
-        end
-    end
-
     if tabIdx == 1 then activeFilter = "RP"
     elseif tabIdx == 2 then activeFilter = "ROLL"
     elseif tabIdx == 3 then activeFilter = "ERROR"
-    else activeFilter = "ALL"
+    elseif tabIdx == 4 then activeFilter = "ALL"
+    elseif tabIdx == 5 then activeFilter = "URL"
     end
 
+    self:UpdateTabHighlights()
     self:UpdateChipHighlights()
     self:Refresh()
 end
@@ -461,6 +513,24 @@ function PUILogViewer:Refresh()
                 table.insert(lines, line)
             end
         end
+    elseif activeFilter == "URL" or activeTab == 5 then
+        for _, entry in ipairs(logs) do
+            local foundUrls = PUILogViewer:ExtractURLs(entry.text)
+            if foundUrls and table.getn(foundUrls) > 0 then
+                for _, u in ipairs(foundUrls) do
+                    local formattedLine = string.format("[%s - %s] %s:\n  LINK: %s\n  TEXT: \"%s\"\n",
+                        entry.timeShort or entry.time or "",
+                        entry.channel or entry.category or "CHAT",
+                        entry.sender or "Unknown",
+                        u,
+                        entry.text or "")
+
+                    if q == "" or string.find(string.lower(formattedLine), q, 1, true) then
+                        table.insert(lines, formattedLine)
+                    end
+                end
+            end
+        end
     else
         for _, entry in ipairs(logs) do
             local matchesFilter = false
@@ -493,7 +563,13 @@ function PUILogViewer:Refresh()
     end
 
     local text = table.concat(lines, "\n")
-    if text == "" then text = "No log records found matching current criteria." end
+    if text == "" then
+        if activeFilter == "URL" or activeTab == 5 then
+            text = "No web links or URLs detected in the chat log stream."
+        else
+            text = "No log records found matching current criteria."
+        end
+    end
     f.logEB:SetText(text)
 end
 
@@ -504,11 +580,30 @@ function PUILogViewer:ExportSceneToClipboard()
     DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffPrimus Log Viewer:|r Log text highlighted. Press |cffffcc00Ctrl+C|r to copy.")
 end
 
+function PUILogViewer:ShowURLPopup(url)
+    if Primus.PUITalk and Primus.PUITalk.ShowURLCopyPopup then
+        Primus.PUITalk:ShowURLCopyPopup(url)
+        return
+    end
+    local f = self:BuildFrame()
+    f.logEB:SetText(url or "")
+    f:Show()
+    f.logEB:HighlightText(0, string.len(url or ""))
+    f.logEB:SetFocus()
+end
+
 function PUILogViewer:Open(filter)
     local f = self:BuildFrame()
     f:Show()
     if filter then
         activeFilter = filter
+        if filter == "RP" then activeTab = 1
+        elseif filter == "ROLL" then activeTab = 2
+        elseif filter == "ERROR" then activeTab = 3
+        elseif filter == "ALL" then activeTab = 4
+        elseif filter == "URL" then activeTab = 5
+        end
+        self:UpdateTabHighlights()
         self:UpdateChipHighlights()
     end
     self:Refresh()
@@ -528,3 +623,16 @@ SLASH_PUILOG5 = "/elephant"
 SlashCmdList["PUILOG"] = function(msg)
     PUILogViewer:Toggle()
 end
+
+SLASH_PUIURL1 = "/puiurl"
+SLASH_PUIURL2 = "/urls"
+SLASH_PUIURL3 = "/links"
+SLASH_PUIURL4 = "/urlviewer"
+SlashCmdList["PUIURL"] = function(msg)
+    if msg and msg ~= "" then
+        PUILogViewer:ShowURLPopup(msg)
+    else
+        PUILogViewer:Open("URL")
+    end
+end
+
