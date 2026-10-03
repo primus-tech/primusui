@@ -34,8 +34,8 @@ function SheetTabs:BuildPanel7(parent, f)
     for i = 0, 3 do
         local pBtn = CreateFrame("Button", nil, p7)
         pBtn:SetWidth(110)
-        pBtn:SetHeight(24)
-        pBtn:SetPoint("TOPLEFT", profHeader, "BOTTOMLEFT", i * 118, -6)
+        pBtn:SetHeight(22)
+        pBtn:SetPoint("TOPLEFT", profHeader, "BOTTOMLEFT", i * 118, -4)
         pBtn:SetBackdrop({
             bgFile = "Interface\\Buttons\\WHITE8X8",
             edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -58,8 +58,53 @@ function SheetTabs:BuildPanel7(parent, f)
         p7.profBtns[i] = pBtn
     end
 
+    -- Addon Importer & Code Converter Action Buttons
+    local importAddonBtn = CreateFrame("Button", nil, p7)
+    importAddonBtn:SetWidth(232)
+    importAddonBtn:SetHeight(22)
+    importAddonBtn:SetPoint("TOPLEFT", profHeader, "BOTTOMLEFT", 0, -32)
+    importAddonBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    importAddonBtn:SetBackdropColor(0.08, 0.22, 0.32, 0.95)
+    importAddonBtn:SetBackdropBorderColor(0.0, 0.75, 1.0, 1.0)
+    local iaTxt = importAddonBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    iaTxt:SetPoint("CENTER", importAddonBtn, "CENTER", 0, 0)
+    iaTxt:SetText("|cff00ccff[Import from TurtleRP / MRP / TRP]|r")
+    importAddonBtn:SetScript("OnClick", function()
+        if PUIRoleplay.Importer and PUIRoleplay.Importer.Open then
+            PUIRoleplay.Importer:Open()
+        end
+    end)
+    p7.importAddonBtn = importAddonBtn
+
+    local importCodeBtn = CreateFrame("Button", nil, p7)
+    importCodeBtn:SetWidth(232)
+    importCodeBtn:SetHeight(22)
+    importCodeBtn:SetPoint("LEFT", importAddonBtn, "RIGHT", 14, 0)
+    importCodeBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    importCodeBtn:SetBackdropColor(0.18, 0.14, 0.08, 0.95)
+    importCodeBtn:SetBackdropBorderColor(1.0, 0.75, 0.20, 1.0)
+    local icTxt = importCodeBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    icTxt:SetPoint("CENTER", importCodeBtn, "CENTER", 0, 0)
+    icTxt:SetText("|cffffd100[Export / Import Code String]|r")
+    importCodeBtn:SetScript("OnClick", function()
+        if PUIRoleplay.Importer and PUIRoleplay.Importer.OpenStringModal then
+            PUIRoleplay.Importer:OpenStringModal()
+        end
+    end)
+    p7.importCodeBtn = importCodeBtn
+
     local oocHeader = p7:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    oocHeader:SetPoint("TOPLEFT", profHeader, "BOTTOMLEFT", 0, -42)
+    oocHeader:SetPoint("TOPLEFT", importAddonBtn, "BOTTOMLEFT", 0, -8)
     oocHeader:SetText("|cff55ff88Public OOC Notes (Broadcasted over Wire):|r")
 
     local oocEB = self:CreateStyledEditBox(p7, 478, 20)
@@ -75,7 +120,7 @@ function SheetTabs:BuildPanel7(parent, f)
     p7.oocEB = oocEB
 
     local notesHeader = p7:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    notesHeader:SetPoint("TOPLEFT", oocEB, "BOTTOMLEFT", 0, -10)
+    notesHeader:SetPoint("TOPLEFT", oocEB, "BOTTOMLEFT", 0, -8)
     notesHeader:SetText("|cffffd100Private Character / GM Notes (Saved Locally):|r")
 
     local notesScrollBg = self:Create1PxBackdrop(p7, 0.04, 0.04, 0.07, 0.95, 0.28, 0.28, 0.35, 1.0)

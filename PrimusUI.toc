@@ -192,6 +192,7 @@ Modules\Social\PUIRoleplay\PUIListener.lua
 Modules\Social\PUIRoleplay\PUIElephant.lua
 Modules\Social\PUIRoleplay\PUIDice.lua
 Modules\Social\PUIRoleplay\PUIExtended.lua
+Modules\Social\PUIRoleplay\PUIImporter.lua
 Modules\Social\PUIRoleplay\PUITray.lua
 Modules\Social\PUIRoleplay\PUIRoleplay.lua
 
