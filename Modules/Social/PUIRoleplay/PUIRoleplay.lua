@@ -552,6 +552,10 @@ function PUIRoleplay:OnDisable()
     if Primus_PUIRoleplay_Directory then Primus_PUIRoleplay_Directory:Hide() end
     if Primus_PUIRoleplay_Listener then Primus_PUIRoleplay_Listener:Hide() end
     if Primus_PUIRoleplay_Elephant then Primus_PUIRoleplay_Elephant:Hide() end
+    if Primus_PUIRoleplay_DiceFrame then Primus_PUIRoleplay_DiceFrame:Hide() end
+    if Primus_PUIRoleplay_BagFrame then Primus_PUIRoleplay_BagFrame:Hide() end
+    if Primus_PUIRoleplay_ItemForge then Primus_PUIRoleplay_ItemForge:Hide() end
+    if Primus_PUIRoleplay_DocFrame then Primus_PUIRoleplay_DocFrame:Hide() end
     if self.Tray then self.Tray:Hide() end
 end
 
@@ -633,6 +637,16 @@ function PUIRoleplay:RegisterFlare()
             if PUIRoleplay.Tray then PUIRoleplay.Tray:Toggle() end
         end)
         toggleTrayBtn:SetPoint("LEFT", toggleLogsBtn, "RIGHT", 12, 0)
+
+        local toggleDiceBtn = Primus.Widgets:CreateButton(frame, "DiceMaster (D20)", 160, 24, function()
+            if PUIRoleplay.Dice then PUIRoleplay.Dice:Toggle() end
+        end)
+        toggleDiceBtn:SetPoint("TOPLEFT", toggleLogsBtn, "BOTTOMLEFT", 0, -8)
+
+        local toggleBagBtn = Primus.Widgets:CreateButton(frame, "RP Bag / Extended", 160, 24, function()
+            if PUIRoleplay.Extended then PUIRoleplay.Extended:ToggleBag() end
+        end)
+        toggleBagBtn:SetPoint("LEFT", toggleDiceBtn, "RIGHT", 12, 0)
 
         return frame
     end)

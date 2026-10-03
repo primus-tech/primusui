@@ -77,7 +77,7 @@ function Tray:BuildFrame()
     if trayFrame then return trayFrame end
 
     local f = CreateFrame("Frame", "Primus_PUIRoleplay_Tray", UIParent)
-    f:SetWidth(256)
+    f:SetWidth(364)
     f:SetHeight(28)
     f:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -220, -180)
     f:SetFrameStrata("MEDIUM")
@@ -152,7 +152,63 @@ function Tray:BuildFrame()
     f.bioBtn = bioBtn
     xOffset = xOffset + 22 + btnSpacing
 
-    -- 4. RP Directory & Map Button
+    -- 4. DiceMaster D20 Tabletop & Combat Engine
+    local diceBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\INV_Misc_Dice_02")
+    diceBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
+    diceBtn.tooltipTitle = "DiceMaster D20 Tabletop"
+    diceBtn.tooltipText = "Open D20 roller, stat modifiers, advantage/disadvantage, and tabletop HP & status tracker."
+    diceBtn.tooltipSubText = "|cff69ccf0Left-Click:|r Open DiceMaster"
+    diceBtn:SetScript("OnClick", function()
+        if PUIRoleplay.Dice and PUIRoleplay.Dice.Toggle then
+            PUIRoleplay.Dice:Toggle()
+        end
+    end)
+    f.diceBtn = diceBtn
+    xOffset = xOffset + 22 + btnSpacing
+
+    -- 5. RP Extended Inventory Pouch (Bag)
+    local bagBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\INV_Misc_Bag_08")
+    bagBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
+    bagBtn.tooltipTitle = "RP Extended Inventory"
+    bagBtn.tooltipText = "Open custom roleplay inventory pouch, craft RP items, and inspect artifacts."
+    bagBtn.tooltipSubText = "|cff69ccf0Left-Click:|r Open RP Bag"
+    bagBtn:SetScript("OnClick", function()
+        if PUIRoleplay.Extended and PUIRoleplay.Extended.ToggleBag then
+            PUIRoleplay.Extended:ToggleBag()
+        end
+    end)
+    f.bagBtn = bagBtn
+    xOffset = xOffset + 22 + btnSpacing
+
+    -- 6. Parchment Documents & Written Letters
+    local docBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\INV_Misc_Note_01")
+    docBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
+    docBtn.tooltipTitle = "Parchment Documents & Letters"
+    docBtn.tooltipText = "Compose, seal, and read in-game written letters and books."
+    docBtn.tooltipSubText = "|cff69ccf0Left-Click:|r Open Documents"
+    docBtn:SetScript("OnClick", function()
+        if PUIRoleplay.Extended and PUIRoleplay.Extended.OpenDocumentEngine then
+            PUIRoleplay.Extended:OpenDocumentEngine()
+        end
+    end)
+    f.docBtn = docBtn
+    xOffset = xOffset + 22 + btnSpacing
+
+    -- 7. Story Logger / Elephant Archive
+    local eleBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\INV_Misc_Book_06")
+    eleBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
+    eleBtn.tooltipTitle = "Elephant Story Logger"
+    eleBtn.tooltipText = "Open roleplay story logger, review past scene transcripts, and export to Discord/Markdown."
+    eleBtn.tooltipSubText = "|cff69ccf0Left-Click:|r Open Story Archive"
+    eleBtn:SetScript("OnClick", function()
+        if PUIRoleplay.Elephant and PUIRoleplay.Elephant.Toggle then
+            PUIRoleplay.Elephant:Toggle()
+        end
+    end)
+    f.eleBtn = eleBtn
+    xOffset = xOffset + 22 + btnSpacing
+
+    -- 8. RP Directory & Map Button
     local dirBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\INV_Misc_Map_01")
     dirBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
     dirBtn.tooltipTitle = "RP Directory & Map"
@@ -164,7 +220,7 @@ function Tray:BuildFrame()
     f.dirBtn = dirBtn
     xOffset = xOffset + 22 + btnSpacing
 
-    -- 5. Emotes & Extended Chat Composer Button
+    -- 9. Emotes & Extended Chat Composer Button
     local chatBtn = CreateTrayButton(f, 22, 22, "Interface\\GossipFrame\\GossipGossipIcon")
     chatBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
     chatBtn.tooltipTitle = "RP Emote Composer"
@@ -178,7 +234,7 @@ function Tray:BuildFrame()
     f.chatBtn = chatBtn
     xOffset = xOffset + 22 + btnSpacing
 
-    -- 6. Show / Hide Helm Toggle
+    -- 10. Show / Hide Helm Toggle
     local helmBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\INV_Helmet_08")
     helmBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
     helmBtn.tooltipTitle = "Toggle Helm"
@@ -191,7 +247,7 @@ function Tray:BuildFrame()
     f.helmBtn = helmBtn
     xOffset = xOffset + 22 + btnSpacing
 
-    -- 7. Show / Hide Cloak Toggle
+    -- 11. Show / Hide Cloak Toggle
     local cloakBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\INV_Misc_Cape_10")
     cloakBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
     cloakBtn.tooltipTitle = "Toggle Cloak"
@@ -204,7 +260,7 @@ function Tray:BuildFrame()
     f.cloakBtn = cloakBtn
     xOffset = xOffset + 22 + btnSpacing
 
-    -- 8. Overhead Names Toggle (NPC & Player)
+    -- 12. Overhead Names Toggle (NPC & Player)
     local namesBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\Spell_Shadow_MindSteal")
     namesBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
     namesBtn.tooltipTitle = "Toggle Overhead Names"
@@ -225,7 +281,7 @@ function Tray:BuildFrame()
     f.namesBtn = namesBtn
     xOffset = xOffset + 22 + btnSpacing
 
-    -- 9. Walk / Run Speed Toggle
+    -- 13. Walk / Run Speed Toggle
     local walkBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\INV_Boots_01")
     walkBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
     walkBtn.tooltipTitle = "Toggle Walk / Run"

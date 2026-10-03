@@ -188,6 +188,46 @@ function Sheet:BuildFrame()
     end)
     f.cardPreviewBtn = cardPreviewBtn
 
+    local diceHeaderBtn = CreateFrame("Button", nil, headerArea)
+    diceHeaderBtn:SetWidth(48)
+    diceHeaderBtn:SetHeight(18)
+    diceHeaderBtn:SetPoint("TOPLEFT", cardPreviewBtn, "BOTTOMLEFT", 0, -4)
+    diceHeaderBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    diceHeaderBtn:SetBackdropColor(0.10, 0.12, 0.16, 0.95)
+    diceHeaderBtn:SetBackdropBorderColor(0.0, 0.70, 0.95, 0.8)
+    local dhText = diceHeaderBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    dhText:SetPoint("CENTER", diceHeaderBtn, "CENTER", 0, 0)
+    dhText:SetText("|cff00ccffDice|r")
+    diceHeaderBtn:SetScript("OnClick", function()
+        if PUIRoleplay.Dice then PUIRoleplay.Dice:Toggle() end
+    end)
+    f.diceHeaderBtn = diceHeaderBtn
+
+    local bagHeaderBtn = CreateFrame("Button", nil, headerArea)
+    bagHeaderBtn:SetWidth(48)
+    bagHeaderBtn:SetHeight(18)
+    bagHeaderBtn:SetPoint("TOPRIGHT", cardPreviewBtn, "BOTTOMRIGHT", 0, -4)
+    bagHeaderBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    bagHeaderBtn:SetBackdropColor(0.14, 0.12, 0.08, 0.95)
+    bagHeaderBtn:SetBackdropBorderColor(1.0, 0.75, 0.2, 0.8)
+    local bhText = bagHeaderBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    bhText:SetPoint("CENTER", bagHeaderBtn, "CENTER", 0, 0)
+    bhText:SetText("|cffffd100Bag|r")
+    bagHeaderBtn:SetScript("OnClick", function()
+        if PUIRoleplay.Extended then PUIRoleplay.Extended:ToggleBag() end
+    end)
+    f.bagHeaderBtn = bagHeaderBtn
+
     ----------------------------------------------------------------------------
     -- 7-Tab Navigation Bar (Including TotalRP3 Personality Traits Spectrum)
     ----------------------------------------------------------------------------
