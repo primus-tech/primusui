@@ -186,9 +186,32 @@ PUIRoleplay.DefaultProfile = {
     ooc_boundaries      = "",
     ooc_notes           = "",
 
-    -- 8. Technical Metadata & Keys
+    -- 8. Psychological & Personality Traits Spectrum (TotalRP3 Compatible)
+    personality_traits  = nil,
+
+    -- 9. Technical Metadata & Keys
     keyM                = "",
+    keyT                = "",
+    keyD                = "",
+    keyL                = "",
+    keyX                = "",
+    keyP                = "",
     icon                = "1",
+}
+
+--------------------------------------------------------------------------------
+-- Default Personality Trait Spectrum Axes (Standard TotalRP3 Archetypes)
+--------------------------------------------------------------------------------
+PUIRoleplay.DefaultPersonalityTraits = {
+    { id = "chaotic_lawful",    leftName = "Chaotic",   rightName = "Lawful",     leftIcon = "INV_Misc_Dice_02",        rightIcon = "Spell_Holy_SealOfSacrifice", value = 10, isCustom = false },
+    { id = "cruel_merciful",    leftName = "Cruel",     rightName = "Merciful",   leftIcon = "Ability_Rogue_Eviscerate", rightIcon = "Spell_Holy_HolyBolt",        value = 10, isCustom = false },
+    { id = "impulsive_cautious", leftName = "Impulsive", rightName = "Cautious",   leftIcon = "Ability_Warrior_Charge",  rightIcon = "Ability_Defend",             value = 10, isCustom = false },
+    { id = "selfish_altruistic", leftName = "Selfish",   rightName = "Altruistic", leftIcon = "INV_Misc_Coin_02",        rightIcon = "Spell_Holy_PrayerOfHealing", value = 10, isCustom = false },
+    { id = "skeptical_pious",   leftName = "Skeptical", rightName = "Pious",      leftIcon = "INV_Misc_Book_06",        rightIcon = "Spell_Holy_HolySmite",       value = 10, isCustom = false },
+    { id = "ascetic_hedonistic", leftName = "Ascetic",   rightName = "Hedonistic", leftIcon = "INV_Drink_04",            rightIcon = "INV_Misc_Food_14",           value = 10, isCustom = false },
+    { id = "serious_playful",   leftName = "Serious",   rightName = "Playful",    leftIcon = "Spell_Shadow_AntiShadow", rightIcon = "Spell_Magic_PolymorphPig",   value = 10, isCustom = false },
+    { id = "shy_bold",          leftName = "Timid",     rightName = "Bold",       leftIcon = "Ability_Druid_Cower",     rightIcon = "Ability_Racial_BloodRage",   value = 10, isCustom = false },
+    { id = "humble_proud",      leftName = "Humble",    rightName = "Proud",      leftIcon = "INV_Cloth_01",            rightIcon = "INV_Crown_01",               value = 10, isCustom = false },
 }
 
 PUIRoleplay.ClassData = {

@@ -189,12 +189,12 @@ function Sheet:BuildFrame()
     f.cardPreviewBtn = cardPreviewBtn
 
     ----------------------------------------------------------------------------
-    -- 6-Tab Navigation Bar
+    -- 7-Tab Navigation Bar (Including TotalRP3 Personality Traits Spectrum)
     ----------------------------------------------------------------------------
-    local tabNames = { "Identity", "Appearance", "Lore", "RP Style", "Dating/18+", "Notes" }
+    local tabNames = { "Identity", "Appearance", "Traits", "Lore", "RP Style", "Dating/18+", "Notes" }
     local tabs = {}
-    local tabWidth = 80
-    for i = 1, 6 do
+    local tabWidth = 68
+    for i = 1, 7 do
         local tab = CreateFrame("Button", nil, f)
         tab:SetWidth(tabWidth)
         tab:SetHeight(24)
@@ -233,14 +233,15 @@ function Sheet:BuildFrame()
     contentBox:SetBackdropBorderColor(0.22, 0.22, 0.26, 1.0)
     f.contentBox = contentBox
 
-    -- Build all 6 Tab Panels via Sheet.Tabs
+    -- Build all 7 Tab Panels via Sheet.Tabs
     if Sheet.Tabs then
-        Sheet.Tabs:BuildPanel1(contentBox, f)
-        Sheet.Tabs:BuildPanel2(contentBox, f)
-        Sheet.Tabs:BuildPanel3(contentBox, f)
-        Sheet.Tabs:BuildPanel4(contentBox, f)
-        Sheet.Tabs:BuildPanel5(contentBox, f)
-        Sheet.Tabs:BuildPanel6(contentBox, f)
+        if Sheet.Tabs.BuildPanel1 then Sheet.Tabs:BuildPanel1(contentBox, f) end
+        if Sheet.Tabs.BuildPanel2 then Sheet.Tabs:BuildPanel2(contentBox, f) end
+        if Sheet.Tabs.BuildPanel3 then Sheet.Tabs:BuildPanel3(contentBox, f) end
+        if Sheet.Tabs.BuildPanel4 then Sheet.Tabs:BuildPanel4(contentBox, f) end
+        if Sheet.Tabs.BuildPanel5 then Sheet.Tabs:BuildPanel5(contentBox, f) end
+        if Sheet.Tabs.BuildPanel6 then Sheet.Tabs:BuildPanel6(contentBox, f) end
+        if Sheet.Tabs.BuildPanel7 then Sheet.Tabs:BuildPanel7(contentBox, f) end
     end
 
     sheetFrame = f
@@ -254,7 +255,7 @@ function Sheet:SelectTab(index)
     activeTab = index
     local f = self:BuildFrame()
 
-    for i = 1, 6 do
+    for i = 1, 7 do
         if i == index then
             f.tabs[i]:SetBackdropColor(0.18, 0.18, 0.24, 1.0)
             f.tabs[i]:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
@@ -266,26 +267,30 @@ function Sheet:SelectTab(index)
         end
     end
 
-    f.panel1:Hide()
-    f.panel2:Hide()
-    f.panel3:Hide()
-    f.panel4:Hide()
-    f.panel5:Hide()
-    f.panel6:Hide()
+    if f.panel1 then f.panel1:Hide() end
+    if f.panel2 then f.panel2:Hide() end
+    if f.panel3 then f.panel3:Hide() end
+    if f.panel4 then f.panel4:Hide() end
+    if f.panel5 then f.panel5:Hide() end
+    if f.panel6 then f.panel6:Hide() end
+    if f.panel7 then f.panel7:Hide() end
 
-    if index == 1 then f.panel1:Show()
-    elseif index == 2 then f.panel2:Show()
-    elseif index == 3 then f.panel3:Show()
-    elseif index == 4 then f.panel4:Show()
-    elseif index == 5 then f.panel5:Show()
-    elseif index == 6 then f.panel6:Show()
+    if index == 1 and f.panel1 then f.panel1:Show()
+    elseif index == 2 and f.panel2 then f.panel2:Show()
+    elseif index == 3 and f.panel3 then f.panel3:Show()
+    elseif index == 4 and f.panel4 then f.panel4:Show()
+    elseif index == 5 and f.panel5 then f.panel5:Show()
+    elseif index == 6 and f.panel6 then f.panel6:Show()
+    elseif index == 7 and f.panel7 then f.panel7:Show()
     end
 end
 
 function Sheet:SelectLoreChapter(idx)
     Sheet.activeLoreChapter = idx
     local f = self:BuildFrame()
-    local p3 = f.panel3
+    local p4 = f.panel4
+    if not p4 then return end
+
     local chapterTitles = {
         "Chapter 1: Early Years / Origins",
         "Chapter 2: The First Trials",
@@ -294,25 +299,25 @@ function Sheet:SelectLoreChapter(idx)
         "Chapter 5: Personal Beliefs",
         "Chapter 6: Current Goals"
     }
-    p3.chTitleLabel:SetText("|cff00e5ff" .. (chapterTitles[idx] or ("Chapter " .. idx)) .. "|r")
+    p4.chTitleLabel:SetText("|cff00e5ff" .. (chapterTitles[idx] or ("Chapter " .. idx)) .. "|r")
 
     for i = 1, 6 do
         if i == idx then
-            p3.chBtns[i]:SetBackdropColor(0.0, 0.45, 0.7, 1.0)
-            p3.chBtns[i]:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
-            p3.chBtns[i].text:SetTextColor(1, 1, 1)
+            p4.chBtns[i]:SetBackdropColor(0.0, 0.45, 0.7, 1.0)
+            p4.chBtns[i]:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
+            p4.chBtns[i].text:SetTextColor(1, 1, 1)
         else
-            p3.chBtns[i]:SetBackdropColor(0.06, 0.06, 0.09, 0.95)
-            p3.chBtns[i]:SetBackdropBorderColor(0.25, 0.25, 0.32, 1.0)
-            p3.chBtns[i].text:SetTextColor(0.8, 0.8, 0.8)
+            p4.chBtns[i]:SetBackdropColor(0.06, 0.06, 0.09, 0.95)
+            p4.chBtns[i]:SetBackdropBorderColor(0.25, 0.25, 0.32, 1.0)
+            p4.chBtns[i].text:SetTextColor(0.8, 0.8, 0.8)
         end
     end
 
     local target = targetPlayerName or UnitName("player")
     local data = (target == UnitName("player")) and PUIRoleplay:GetMyProfile() or PUIRoleplay:GetCharacterData(target)
     local histText = (data and data.history and data.history["chapter" .. idx]) or ""
-    p3.chEB:SetText(histText)
-    p3.chCount:SetText(string.len(histText) .. " / 1000")
+    p4.chEB:SetText(histText)
+    p4.chCount:SetText(string.len(histText) .. " / 1000")
 end
 
 --------------------------------------------------------------------------------
@@ -382,97 +387,114 @@ function Sheet:Refresh()
 
     -- Tab 1: Identity
     local p1 = f.panel1
-    p1.fnEB:SetText(charData.first_name or "")
-    p1.mnEB:SetText(charData.middle_name or "")
-    p1.lnEB:SetText(charData.last_name or "")
-    p1.pfxEB:SetText(charData.prefix or "")
-    p1.nickEB:SetText(charData.nickname or "")
-    p1.houseEB:SetText(charData.house_name or "")
-    p1.ttlEB:SetText(charData.title or "")
-    p1.ageEB:SetText(charData.apparent_age or "")
-    p1.genderDropdown:SetSelected(charData.gender_identity or "Cisgender Male")
-    p1.icPrEB:SetText(charData.ic_pronouns or "")
-    p1.oocPrEB:SetText(charData.ooc_pronouns or "")
-    p1.lgbtqBox:SetChecked(charData.lgbtqia_friendly ~= false)
-    p1.oriDropdown:SetSelected(charData.orientation or "Heterosexual / Straight")
-    p1.showOriBox:SetChecked(charData.show_orientation ~= false)
+    if p1 then
+        p1.fnEB:SetText(charData.first_name or "")
+        p1.mnEB:SetText(charData.middle_name or "")
+        p1.lnEB:SetText(charData.last_name or "")
+        p1.pfxEB:SetText(charData.prefix or "")
+        p1.nickEB:SetText(charData.nickname or "")
+        p1.houseEB:SetText(charData.house_name or "")
+        p1.ttlEB:SetText(charData.title or "")
+        p1.ageEB:SetText(charData.apparent_age or "")
+        p1.genderDropdown:SetSelected(charData.gender_identity or "Cisgender Male")
+        p1.icPrEB:SetText(charData.ic_pronouns or "")
+        p1.oocPrEB:SetText(charData.ooc_pronouns or "")
+        p1.lgbtqBox:SetChecked(charData.lgbtqia_friendly ~= false)
+        p1.oriDropdown:SetSelected(charData.orientation or "Heterosexual / Straight")
+        p1.showOriBox:SetChecked(charData.show_orientation ~= false)
+    end
 
     -- Tab 2: Appearance & Glances
     local p2 = f.panel2
-    p2.eyeEB:SetText(charData.eye_color or "")
-    p2.hEB:SetText(charData.height or "")
-    p2.wEB:SetText(charData.weight or "")
-    p2.bEB:SetText(charData.body_build or "")
-    p2.emoEB:SetText(charData.current_emotion or "Calm")
-    local appDesc = charData.appearance_desc or charData.description or ""
-    p2.descEB:SetText(appDesc)
-    p2.descCount:SetText(string.len(appDesc) .. " / 1000")
+    if p2 then
+        p2.eyeEB:SetText(charData.eye_color or "")
+        p2.hEB:SetText(charData.height or "")
+        p2.wEB:SetText(charData.weight or "")
+        p2.bEB:SetText(charData.body_build or "")
+        p2.emoEB:SetText(charData.current_emotion or "Calm")
+        local appDesc = charData.appearance_desc or charData.description or ""
+        p2.descEB:SetText(appDesc)
+        p2.descCount:SetText(string.len(appDesc) .. " / 1000")
 
-    for i = 1, 5 do
-        local card = p2.glanceCards[i]
-        local glance = (charData.glances and charData.glances[i]) or {}
-        local gTitle = glance.title or charData["atAGlance" .. i .. "Title"] or ""
-        local gText = glance.text or charData["atAGlance" .. i] or ""
-        local gIcon = glance.icon or ""
-        local gIconIdx = tonumber(charData["atAGlance" .. i .. "Icon"]) or 0
+        for i = 1, 5 do
+            local card = p2.glanceCards[i]
+            local glance = (charData.glances and charData.glances[i]) or {}
+            local gTitle = glance.title or charData["atAGlance" .. i .. "Title"] or ""
+            local gText = glance.text or charData["atAGlance" .. i] or ""
+            local gIcon = glance.icon or ""
+            local gIconIdx = tonumber(charData["atAGlance" .. i .. "Icon"]) or 0
 
-        if gIcon ~= "" then
-            card.iconBtn.tex:SetTexture("Interface\\Icons\\" .. gIcon)
-        elseif gIconIdx > 0 and PUIRoleplay.Icons[gIconIdx] then
-            card.iconBtn.tex:SetTexture("Interface\\Icons\\" .. PUIRoleplay.Icons[gIconIdx])
-        else
-            card.iconBtn.tex:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+            if gIcon ~= "" then
+                card.iconBtn.tex:SetTexture("Interface\\Icons\\" .. gIcon)
+            elseif gIconIdx > 0 and PUIRoleplay.Icons[gIconIdx] then
+                card.iconBtn.tex:SetTexture("Interface\\Icons\\" .. PUIRoleplay.Icons[gIconIdx])
+            else
+                card.iconBtn.tex:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+            end
+
+            card.titleEB:SetText(gTitle)
+            card.descEB:SetText(gText)
+            card.activeCB:SetChecked(glance.active == true or (gTitle ~= "" and gTitle ~= nil))
         end
-
-        card.titleEB:SetText(gTitle)
-        card.descEB:SetText(gText)
-        card.activeCB:SetChecked(glance.active == true or (gTitle ~= "" and gTitle ~= nil))
     end
 
-    -- Tab 3: Lore & Origins
-    local p3 = f.panel3
-    p3.bCityEB:SetText(charData.birth_city or "")
-    p3.hCityEB:SetText(charData.home_city or "")
-    p3.mottoEB:SetText(charData.motto or "")
-    p3.facEB:SetText(charData.faction_clan or "")
-    Sheet:SelectLoreChapter(Sheet.activeLoreChapter or 1)
+    -- Tab 3: Personality Traits Spectrum
+    if Sheet.Tabs and Sheet.Tabs.RefreshPersonalityTab then
+        Sheet.Tabs:RefreshPersonalityTab(f)
+    end
 
-    -- Tab 4: RP Style
+    -- Tab 4: Lore & Origins
     local p4 = f.panel4
-    p4.dropdowns["experience_level"]:SetSelected(charData.experience_level or "Experienced")
-    p4.dropdowns["walkup_policy"]:SetSelected(charData.walkup_policy or "Walkups Welcome")
-    p4.dropdowns["combat_preference"]:SetSelected(charData.combat_preference or "D20 Rolls (DiceMaster)")
-    p4.dropdowns["injury_consent"]:SetSelected(charData.injury_consent or "Realistic / Negotiated")
-    p4.dropdowns["permadeath_consent"]:SetSelected(charData.permadeath_consent or "Negotiated Only")
+    if p4 then
+        p4.bCityEB:SetText(charData.birth_city or "")
+        p4.hCityEB:SetText(charData.home_city or "")
+        p4.mottoEB:SetText(charData.motto or "")
+        p4.facEB:SetText(charData.faction_clan or "")
+        Sheet:SelectLoreChapter(Sheet.activeLoreChapter or 1)
+    end
 
-    -- Tab 5: Dating & 18+
+    -- Tab 5: RP Style
     local p5 = f.panel5
-    p5.relDropdown:SetSelected(charData.relationship_status or "Single & Looking")
-    local lf = charData.looking_for or {}
-    for k, cb in pairs(p5.lfCheckboxes) do
-        cb:SetChecked(lf[k] == true)
+    if p5 then
+        p5.dropdowns["experience_level"]:SetSelected(charData.experience_level or "Experienced")
+        p5.dropdowns["walkup_policy"]:SetSelected(charData.walkup_policy or "Walkups Welcome")
+        p5.dropdowns["combat_preference"]:SetSelected(charData.combat_preference or "D20 Rolls (DiceMaster)")
+        p5.dropdowns["injury_consent"]:SetSelected(charData.injury_consent or "Realistic / Negotiated")
+        p5.dropdowns["permadeath_consent"]:SetSelected(charData.permadeath_consent or "Negotiated Only")
     end
-    p5.adultFlagCB:SetChecked(charData.adult_18plus_flag == true)
-    p5.erpDropdown:SetSelected(charData.erp_preference or "No Adult Content (Clean RP)")
-    p5.bndEB:SetText(charData.ooc_boundaries or "")
 
-    -- Tab 6: Profiles & Notes
+    -- Tab 6: Dating & 18+
     local p6 = f.panel6
-    local activeSlot = PUIRoleplay:GetActiveProfileSlot()
-    for i = 0, 3 do
-        local pBtn = p6.profBtns[i]
-        if tostring(i) == activeSlot then
-            pBtn:SetBackdropColor(0.0, 0.50, 0.80, 1.0)
-            pBtn:SetBackdropBorderColor(0.0, 0.90, 1.0, 1.0)
-            pBtn.text:SetTextColor(1.0, 1.0, 1.0)
-        else
-            pBtn:SetBackdropColor(0.08, 0.08, 0.12, 0.95)
-            pBtn:SetBackdropBorderColor(0.30, 0.35, 0.42, 1.0)
-            pBtn.text:SetTextColor(0.90, 0.90, 0.95)
+    if p6 then
+        p6.relDropdown:SetSelected(charData.relationship_status or "Single & Looking")
+        local lf = charData.looking_for or {}
+        for k, cb in pairs(p6.lfCheckboxes) do
+            cb:SetChecked(lf[k] == true)
         end
+        p6.adultFlagCB:SetChecked(charData.adult_18plus_flag == true)
+        p6.erpDropdown:SetSelected(charData.erp_preference or "No Adult Content (Clean RP)")
+        p6.bndEB:SetText(charData.ooc_boundaries or "")
     end
-    p6.oocEB:SetText(charData.ooc_notes or charData.ooc_info or "")
-    p6.notesEB:SetText(PUIRoleplay:GetCharacterNote(target) or "")
+
+    -- Tab 7: Profiles & Notes
+    local p7 = f.panel7
+    if p7 then
+        local activeSlot = PUIRoleplay:GetActiveProfileSlot()
+        for i = 0, 3 do
+            local pBtn = p7.profBtns[i]
+            if tostring(i) == activeSlot then
+                pBtn:SetBackdropColor(0.0, 0.50, 0.80, 1.0)
+                pBtn:SetBackdropBorderColor(0.0, 0.90, 1.0, 1.0)
+                pBtn.text:SetTextColor(1.0, 1.0, 1.0)
+            else
+                pBtn:SetBackdropColor(0.08, 0.08, 0.12, 0.95)
+                pBtn:SetBackdropBorderColor(0.30, 0.35, 0.42, 1.0)
+                pBtn.text:SetTextColor(0.90, 0.90, 0.95)
+            end
+        end
+        p7.oocEB:SetText(charData.ooc_notes or charData.ooc_info or "")
+        p7.notesEB:SetText(PUIRoleplay:GetCharacterNote(target) or "")
+    end
 
     f.isRefreshing = false
 end

@@ -1,5 +1,5 @@
 --[[
-    PrimusUI: PUIRoleplay Profile Tab 4 - Rules of Engagement (PUIRPTabRules.lua)
+    PrimusUI: PUIRoleplay Profile Tab 5 - Rules of Engagement (PUIRPTabRules.lua)
     Target: Vanilla WoW 1.12.1 / Turtle WoW (Combat, Injury, Death & Walkup Consent)
     Architecture: Strict TRUTH.md compliance (Zero Aliases, Zero Shims)
 --]]
@@ -18,13 +18,13 @@ local SheetTabs = Sheet.Tabs or {}
 Sheet.Tabs = SheetTabs
 
 --------------------------------------------------------------------------------
--- Build Tab Panel 4: Rules of Engagement & Preferences
+-- Build Tab Panel 5: Rules of Engagement & Preferences
 --------------------------------------------------------------------------------
-function SheetTabs:BuildPanel4(parent, f)
-    local p4 = CreateFrame("Frame", nil, parent)
-    p4:SetAllPoints(parent)
-    p4:Hide()
-    f.panel4 = p4
+function SheetTabs:BuildPanel5(parent, f)
+    local p5 = CreateFrame("Frame", nil, parent)
+    p5:SetAllPoints(parent)
+    p5:Hide()
+    f.panel5 = p5
 
     local styleSections = {
         { key = "experience_level", label = "Roleplay Experience Level:", opts = PUIRoleplay.DropdownOptions.experience },
@@ -34,13 +34,13 @@ function SheetTabs:BuildPanel4(parent, f)
         { key = "permadeath_consent", label = "Character Death Willingness (Permadeath):", opts = PUIRoleplay.DropdownOptions.death }
     }
 
-    p4.dropdowns = {}
+    p5.dropdowns = {}
     local curStyleY = -10
     for _, sec in ipairs(styleSections) do
-        local card = self:Create1PxBackdrop(p4, 0.05, 0.05, 0.07, 0.8, 0.20, 0.22, 0.26, 1.0)
+        local card = self:Create1PxBackdrop(p5, 0.05, 0.05, 0.07, 0.8, 0.20, 0.22, 0.26, 1.0)
         card:SetWidth(478)
         card:SetHeight(52)
-        card:SetPoint("TOPLEFT", p4, "TOPLEFT", 10, curStyleY)
+        card:SetPoint("TOPLEFT", p5, "TOPLEFT", 10, curStyleY)
 
         local sLbl = card:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         sLbl:SetPoint("TOPLEFT", card, "TOPLEFT", 8, -6)
@@ -53,7 +53,7 @@ function SheetTabs:BuildPanel4(parent, f)
             PUIRoleplay:SaveMyProfile(p)
         end)
         dd:SetPoint("TOPLEFT", sLbl, "BOTTOMLEFT", 0, -2)
-        p4.dropdowns[sec.key] = dd
+        p5.dropdowns[sec.key] = dd
 
         curStyleY = curStyleY - 58
     end

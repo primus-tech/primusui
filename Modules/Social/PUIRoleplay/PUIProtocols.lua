@@ -78,10 +78,30 @@ end
 -- Build Outbound Wire Payload
 --------------------------------------------------------------------------------
 function Protocols:BuildPayload(dataPrefix, profile)
+    local prof = profile or PUIRoleplay:GetMyProfile()
+
+    -- Special handling for Personality Packet "P"
+    if dataPrefix == "P" or dataPrefix == "PR" then
+        local payload = dataPrefix .. ":" .. (prof.keyP or PUIRoleplay:GenerateKey())
+        local traits = PUIRoleplay:GetPersonalityTraits(prof)
+        for _, t in ipairs(traits) do
+            local str = string.format("%s^%s^%s^%s^%s^%s^%s",
+                t.id or "custom",
+                t.leftName or "Left",
+                t.rightName or "Right",
+                t.leftIcon or "INV_Misc_QuestionMark",
+                t.rightIcon or "INV_Misc_QuestionMark",
+                tostring(t.value or 10),
+                t.isCustom and "1" or "0"
+            )
+            payload = payload .. "~" .. str
+        end
+        return payload
+    end
+
     local keys = dataKeys[dataPrefix]
     if not keys then return "" end
 
-    local prof = profile or PUIRoleplay:GetMyProfile()
     local payload = dataPrefix .. ":"
     local count = table.getn(keys)
 
@@ -125,8 +145,38 @@ end
 -- Parse Inbound Wire Payload
 --------------------------------------------------------------------------------
 function Protocols:ParsePayload(dataPrefix, chunks, playerName, targetChar)
+    if not targetChar then return end
+
+    -- Special handling for Personality Packet "P"
+    if dataPrefix == "P" or dataPrefix == "PR" then
+        targetChar.keyP = chunks[1] or ""
+        local traits = {}
+        local totalChunks = table.getn(chunks)
+        for i = 2, totalChunks do
+            local raw = chunks[i]
+            if raw and raw ~= "" then
+                local parts = self:SplitString(raw, "^", {})
+                if table.getn(parts) >= 6 then
+                    table.insert(traits, {
+                        id = parts[1],
+                        leftName = parts[2],
+                        rightName = parts[3],
+                        leftIcon = parts[4],
+                        rightIcon = parts[5],
+                        value = tonumber(parts[6]) or 10,
+                        isCustom = (parts[7] == "1")
+                    })
+                end
+            end
+        end
+        if table.getn(traits) > 0 then
+            targetChar.personality_traits = traits
+        end
+        return
+    end
+
     local keys = dataKeys[dataPrefix]
-    if not keys or not targetChar then return end
+    if not keys then return end
 
     local totalChunks = table.getn(chunks)
     for i = 1, totalChunks do

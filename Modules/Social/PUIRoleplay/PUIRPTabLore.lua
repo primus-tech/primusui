@@ -1,5 +1,5 @@
 --[[
-    PrimusUI: PUIRoleplay Profile Tab 3 - Lore & History (PUIRPTabLore.lua)
+    PrimusUI: PUIRoleplay Profile Tab 4 - Lore & History (PUIRPTabLore.lua)
     Target: Vanilla WoW 1.12.1 / Turtle WoW (Lore Origins & 6-Chapter History Log)
     Architecture: Strict TRUTH.md compliance (Zero Aliases, Zero Shims)
 --]]
@@ -18,18 +18,18 @@ local SheetTabs = Sheet.Tabs or {}
 Sheet.Tabs = SheetTabs
 
 --------------------------------------------------------------------------------
--- Build Tab Panel 3: Lore & Origins
+-- Build Tab Panel 4: Lore & Origins
 --------------------------------------------------------------------------------
-function SheetTabs:BuildPanel3(parent, f)
-    local p3 = CreateFrame("Frame", nil, parent)
-    p3:SetAllPoints(parent)
-    p3:Hide()
-    f.panel3 = p3
+function SheetTabs:BuildPanel4(parent, f)
+    local p4 = CreateFrame("Frame", nil, parent)
+    p4:SetAllPoints(parent)
+    p4:Hide()
+    f.panel4 = p4
 
-    local bCityLabel = p3:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    bCityLabel:SetPoint("TOPLEFT", p3, "TOPLEFT", 10, -8)
+    local bCityLabel = p4:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    bCityLabel:SetPoint("TOPLEFT", p4, "TOPLEFT", 10, -8)
     bCityLabel:SetText("|cff00e5ffBirth City / Origin:|r")
-    local bCityEB = self:CreateStyledEditBox(p3, 230, 20)
+    local bCityEB = self:CreateStyledEditBox(p4, 230, 20)
     bCityEB:SetPoint("TOPLEFT", bCityLabel, "BOTTOMLEFT", 0, -2)
     bCityEB:SetScript("OnTextChanged", function()
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
@@ -39,12 +39,12 @@ function SheetTabs:BuildPanel3(parent, f)
             PUIRoleplay:SaveMyProfile(p)
         end
     end)
-    p3.bCityEB = bCityEB
+    p4.bCityEB = bCityEB
 
-    local hCityLabel = p3:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local hCityLabel = p4:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     hCityLabel:SetPoint("TOPLEFT", bCityLabel, "TOPLEFT", 245, 0)
     hCityLabel:SetText("|cff00e5ffHome City / Residence:|r")
-    local hCityEB = self:CreateStyledEditBox(p3, 234, 20)
+    local hCityEB = self:CreateStyledEditBox(p4, 234, 20)
     hCityEB:SetPoint("TOPLEFT", hCityLabel, "BOTTOMLEFT", 0, -2)
     hCityEB:SetScript("OnTextChanged", function()
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
@@ -54,12 +54,12 @@ function SheetTabs:BuildPanel3(parent, f)
             PUIRoleplay:SaveMyProfile(p)
         end
     end)
-    p3.hCityEB = hCityEB
+    p4.hCityEB = hCityEB
 
-    local mottoLabel = p3:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local mottoLabel = p4:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     mottoLabel:SetPoint("TOPLEFT", bCityEB, "BOTTOMLEFT", 0, -6)
     mottoLabel:SetText("|cff00e5ffPersonal Motto / Creed / Battlecry:|r")
-    local mottoEB = self:CreateStyledEditBox(p3, 479, 20)
+    local mottoEB = self:CreateStyledEditBox(p4, 479, 20)
     mottoEB:SetPoint("TOPLEFT", mottoLabel, "BOTTOMLEFT", 0, -2)
     mottoEB:SetScript("OnTextChanged", function()
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
@@ -69,12 +69,12 @@ function SheetTabs:BuildPanel3(parent, f)
             PUIRoleplay:SaveMyProfile(p)
         end
     end)
-    p3.mottoEB = mottoEB
+    p4.mottoEB = mottoEB
 
-    local facLabel = p3:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local facLabel = p4:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     facLabel:SetPoint("TOPLEFT", mottoEB, "BOTTOMLEFT", 0, -6)
     facLabel:SetText("|cff00e5ffFaction / Clan / Order Allegiance:|r")
-    local facEB = self:CreateStyledEditBox(p3, 479, 20)
+    local facEB = self:CreateStyledEditBox(p4, 479, 20)
     facEB:SetPoint("TOPLEFT", facLabel, "BOTTOMLEFT", 0, -2)
     facEB:SetScript("OnTextChanged", function()
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
@@ -84,15 +84,15 @@ function SheetTabs:BuildPanel3(parent, f)
             PUIRoleplay:SaveMyProfile(p)
         end
     end)
-    p3.facEB = facEB
+    p4.facEB = facEB
 
-    local histHeader = p3:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local histHeader = p4:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     histHeader:SetPoint("TOPLEFT", facEB, "BOTTOMLEFT", 0, -10)
     histHeader:SetText("|cffffd100CHARACTER CHRONICLES & HISTORY (6 Chapters):|r")
 
     local chBtns = {}
     for i = 1, 6 do
-        local cBtn = CreateFrame("Button", nil, p3)
+        local cBtn = CreateFrame("Button", nil, p4)
         cBtn:SetWidth(76)
         cBtn:SetHeight(20)
         cBtn:SetPoint("TOPLEFT", histHeader, "BOTTOMLEFT", (i - 1) * 80, -4)
@@ -116,24 +116,24 @@ function SheetTabs:BuildPanel3(parent, f)
         end)
         chBtns[i] = cBtn
     end
-    p3.chBtns = chBtns
+    p4.chBtns = chBtns
 
-    local chTitleLabel = p3:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local chTitleLabel = p4:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     chTitleLabel:SetPoint("TOPLEFT", chBtns[1], "BOTTOMLEFT", 0, -8)
     chTitleLabel:SetText("|cff00e5ffChapter 1: Early Years / Origins|r")
-    p3.chTitleLabel = chTitleLabel
+    p4.chTitleLabel = chTitleLabel
 
-    local chCount = p3:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    chCount:SetPoint("TOPRIGHT", p3, "TOPRIGHT", -12, -210)
+    local chCount = p4:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    chCount:SetPoint("TOPRIGHT", p4, "TOPRIGHT", -12, -210)
     chCount:SetText("0 / 1000")
-    p3.chCount = chCount
+    p4.chCount = chCount
 
-    local chScrollBg = self:Create1PxBackdrop(p3, 0.04, 0.04, 0.07, 0.95, 0.28, 0.28, 0.35, 1.0)
+    local chScrollBg = self:Create1PxBackdrop(p4, 0.04, 0.04, 0.07, 0.95, 0.28, 0.28, 0.35, 1.0)
     chScrollBg:SetPoint("TOPLEFT", chTitleLabel, "BOTTOMLEFT", 0, -2)
     chScrollBg:SetWidth(479)
     chScrollBg:SetHeight(180)
 
-    local chScroll = CreateFrame("ScrollFrame", "Primus_PUIRPSheet_ChScroll", p3, "UIPanelScrollFrameTemplate")
+    local chScroll = CreateFrame("ScrollFrame", "Primus_PUIRPSheet_ChScroll", p4, "UIPanelScrollFrameTemplate")
     chScroll:SetPoint("TOPLEFT", chScrollBg, "TOPLEFT", 4, -4)
     chScroll:SetPoint("BOTTOMRIGHT", chScrollBg, "BOTTOMRIGHT", -22, 4)
 
@@ -147,13 +147,13 @@ function SheetTabs:BuildPanel3(parent, f)
     chEB:SetTextColor(1.0, 1.0, 1.0, 1.0)
     chEB:SetTextInsets(4, 4, 4, 4)
     chScroll:SetScrollChild(chEB)
-    p3.chEB = chEB
+    p4.chEB = chEB
 
     chScrollBg:SetScript("OnMouseDown", function() if Sheet:IsViewingSelf() then chEB:SetFocus() end end)
     chEB:SetScript("OnTextChanged", function()
         if ScrollingEdit_OnTextChanged then ScrollingEdit_OnTextChanged(chScroll) end
         local len = string.len(this:GetText() or "")
-        p3.chCount:SetText(len .. " / 1000")
+        p4.chCount:SetText(len .. " / 1000")
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
             local p = PUIRoleplay:GetMyProfile()
             if not p.history then p.history = {} end

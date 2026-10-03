@@ -1,5 +1,5 @@
 --[[
-    PrimusUI: PUIRoleplay Profile Tab 6 - Profiles & Settings (PUIRPTabSettings.lua)
+    PrimusUI: PUIRoleplay Profile Tab 7 - Profiles & Settings (PUIRPTabSettings.lua)
     Target: Vanilla WoW 1.12.1 / Turtle WoW (Profile Slots, OOC Notes & Private GM Notes)
     Architecture: Strict TRUTH.md compliance (Zero Aliases, Zero Shims)
 --]]
@@ -18,21 +18,21 @@ local SheetTabs = Sheet.Tabs or {}
 Sheet.Tabs = SheetTabs
 
 --------------------------------------------------------------------------------
--- Build Tab Panel 6: Character Profiles & Notes
+-- Build Tab Panel 7: Character Profiles & Notes
 --------------------------------------------------------------------------------
-function SheetTabs:BuildPanel6(parent, f)
-    local p6 = CreateFrame("Frame", nil, parent)
-    p6:SetAllPoints(parent)
-    p6:Hide()
-    f.panel6 = p6
+function SheetTabs:BuildPanel7(parent, f)
+    local p7 = CreateFrame("Frame", nil, parent)
+    p7:SetAllPoints(parent)
+    p7:Hide()
+    f.panel7 = p7
 
-    local profHeader = p6:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    profHeader:SetPoint("TOPLEFT", p6, "TOPLEFT", 10, -8)
+    local profHeader = p7:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    profHeader:SetPoint("TOPLEFT", p7, "TOPLEFT", 10, -8)
     profHeader:SetText("|cff00e5ffCharacter Profile Slots (Saved per Character):|r")
 
-    p6.profBtns = {}
+    p7.profBtns = {}
     for i = 0, 3 do
-        local pBtn = CreateFrame("Button", nil, p6)
+        local pBtn = CreateFrame("Button", nil, p7)
         pBtn:SetWidth(110)
         pBtn:SetHeight(24)
         pBtn:SetPoint("TOPLEFT", profHeader, "BOTTOMLEFT", i * 118, -6)
@@ -55,14 +55,14 @@ function SheetTabs:BuildPanel6(parent, f)
                 Sheet:Refresh()
             end
         end)
-        p6.profBtns[i] = pBtn
+        p7.profBtns[i] = pBtn
     end
 
-    local oocHeader = p6:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local oocHeader = p7:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     oocHeader:SetPoint("TOPLEFT", profHeader, "BOTTOMLEFT", 0, -42)
     oocHeader:SetText("|cff55ff88Public OOC Notes (Broadcasted over Wire):|r")
 
-    local oocEB = self:CreateStyledEditBox(p6, 478, 20)
+    local oocEB = self:CreateStyledEditBox(p7, 478, 20)
     oocEB:SetPoint("TOPLEFT", oocHeader, "BOTTOMLEFT", 0, -2)
     oocEB:SetScript("OnTextChanged", function()
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
@@ -72,17 +72,17 @@ function SheetTabs:BuildPanel6(parent, f)
             PUIRoleplay:SaveMyProfile(p)
         end
     end)
-    p6.oocEB = oocEB
+    p7.oocEB = oocEB
 
-    local notesHeader = p6:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local notesHeader = p7:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     notesHeader:SetPoint("TOPLEFT", oocEB, "BOTTOMLEFT", 0, -10)
     notesHeader:SetText("|cffffd100Private Character / GM Notes (Saved Locally):|r")
 
-    local notesScrollBg = self:Create1PxBackdrop(p6, 0.04, 0.04, 0.07, 0.95, 0.28, 0.28, 0.35, 1.0)
+    local notesScrollBg = self:Create1PxBackdrop(p7, 0.04, 0.04, 0.07, 0.95, 0.28, 0.28, 0.35, 1.0)
     notesScrollBg:SetPoint("TOPLEFT", notesHeader, "BOTTOMLEFT", 0, -4)
-    notesScrollBg:SetPoint("BOTTOMRIGHT", p6, "BOTTOMRIGHT", -10, 10)
+    notesScrollBg:SetPoint("BOTTOMRIGHT", p7, "BOTTOMRIGHT", -10, 10)
 
-    local notesScroll = CreateFrame("ScrollFrame", "Primus_PUIRPSheet_NotesScroll", p6, "UIPanelScrollFrameTemplate")
+    local notesScroll = CreateFrame("ScrollFrame", "Primus_PUIRPSheet_NotesScroll", p7, "UIPanelScrollFrameTemplate")
     notesScroll:SetPoint("TOPLEFT", notesScrollBg, "TOPLEFT", 4, -4)
     notesScroll:SetPoint("BOTTOMRIGHT", notesScrollBg, "BOTTOMRIGHT", -22, 4)
 
@@ -95,7 +95,7 @@ function SheetTabs:BuildPanel6(parent, f)
     notesEB:SetTextColor(1.0, 1.0, 1.0, 1.0)
     notesEB:SetTextInsets(4, 4, 4, 4)
     notesScroll:SetScrollChild(notesEB)
-    p6.notesEB = notesEB
+    p7.notesEB = notesEB
 
     notesScrollBg:SetScript("OnMouseDown", function() notesEB:SetFocus() end)
     notesEB:SetScript("OnTextChanged", function()

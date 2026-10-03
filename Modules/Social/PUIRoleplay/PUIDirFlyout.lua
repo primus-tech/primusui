@@ -14,6 +14,8 @@ Primus.PUIRoleplay = PUIRoleplay
 local Directory = PUIRoleplay.Directory or {}
 PUIRoleplay.Directory = Directory
 
+local flyoutTraitRows = {}
+
 --------------------------------------------------------------------------------
 -- Build Right-Hand Profile Discovery Flyout Sidecar
 --------------------------------------------------------------------------------
@@ -48,102 +50,123 @@ function Directory:BuildFlyout(parent)
 
     local titleText = titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     titleText:SetPoint("LEFT", titleBar, "LEFT", 10, 0)
-    titleText:SetText("|cff00ccffDISCOVERY CARD PREVIEW|r")
+    titleText:SetText("|cffffd100DISCOVERY PROFILE DETAIL|r")
 
     local closeBtn = CreateFrame("Button", nil, titleBar)
     closeBtn:SetWidth(18)
     closeBtn:SetHeight(18)
     closeBtn:SetPoint("RIGHT", titleBar, "RIGHT", -6, 0)
-    closeBtn:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
-    closeBtn:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
-    closeBtn:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight")
+    closeBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    closeBtn:SetBackdropColor(0.4, 0.1, 0.1, 0.9)
+    closeBtn:SetBackdropBorderColor(0.8, 0.2, 0.2, 1.0)
+    local cbText = closeBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    cbText:SetPoint("CENTER", closeBtn, "CENTER", 0, 0)
+    cbText:SetText("x")
     closeBtn:SetScript("OnClick", function()
         flyout:Hide()
         Directory.selectedPlayer = nil
         Directory:RefreshList()
     end)
 
-    -- Quick Action Buttons
-    local inspectBtn = CreateFrame("Button", nil, titleBar)
-    inspectBtn:SetWidth(76)
-    inspectBtn:SetHeight(18)
-    inspectBtn:SetPoint("RIGHT", closeBtn, "LEFT", -6, 0)
-    inspectBtn:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false, tileSize = 0, edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 }
-    })
-    inspectBtn:SetBackdropColor(0.10, 0.14, 0.20, 0.9)
-    inspectBtn:SetBackdropBorderColor(0.0, 0.6, 0.9, 0.8)
-    local iLbl = inspectBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    iLbl:SetPoint("CENTER", inspectBtn, "CENTER", 0, 0)
-    iLbl:SetText("|cff00ccff[Profile]|r")
-    inspectBtn:SetScript("OnClick", function()
-        if Directory.selectedPlayer then
-            PUIRoleplay:OpenProfile(Directory.selectedPlayer)
-        end
-    end)
-
+    -- Quick Action Buttons in Title Bar
     local whisperBtn = CreateFrame("Button", nil, titleBar)
-    whisperBtn:SetWidth(62)
+    whisperBtn:SetWidth(60)
     whisperBtn:SetHeight(18)
-    whisperBtn:SetPoint("RIGHT", inspectBtn, "LEFT", -4, 0)
+    whisperBtn:SetPoint("RIGHT", closeBtn, "LEFT", -6, 0)
     whisperBtn:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false, tileSize = 0, edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
-    whisperBtn:SetBackdropColor(0.10, 0.14, 0.20, 0.9)
-    whisperBtn:SetBackdropBorderColor(0.0, 0.6, 0.9, 0.8)
-    local wLbl = whisperBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    wLbl:SetPoint("CENTER", whisperBtn, "CENTER", 0, 0)
-    wLbl:SetText("|cff00ccffWhisper|r")
+    whisperBtn:SetBackdropColor(0.08, 0.18, 0.28, 0.95)
+    whisperBtn:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
+    local wbText = whisperBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    wbText:SetPoint("CENTER", whisperBtn, "CENTER", 0, 0)
+    wbText:SetText("Whisper")
     whisperBtn:SetScript("OnClick", function()
-        if Directory.selectedPlayer and ChatFrame_OpenChat then
+        if Directory.selectedPlayer then
             ChatFrame_OpenChat("/w " .. Directory.selectedPlayer .. " ")
         end
     end)
 
-    -- Header Profile Summary Card
+    local targetBtn = CreateFrame("Button", nil, titleBar)
+    targetBtn:SetWidth(50)
+    targetBtn:SetHeight(18)
+    targetBtn:SetPoint("RIGHT", whisperBtn, "LEFT", -4, 0)
+    targetBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    targetBtn:SetBackdropColor(0.08, 0.18, 0.28, 0.95)
+    targetBtn:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
+    local tbText = targetBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    tbText:SetPoint("CENTER", targetBtn, "CENTER", 0, 0)
+    tbText:SetText("Target")
+    targetBtn:SetScript("OnClick", function()
+        if Directory.selectedPlayer then
+            TargetByName(Directory.selectedPlayer, true)
+        end
+    end)
+
+    -- Header Info Box (Avatar, Full Name, Title, Demographics)
     local headerBox = CreateFrame("Frame", nil, flyout)
     headerBox:SetPoint("TOPLEFT", flyout, "TOPLEFT", 8, -32)
     headerBox:SetPoint("TOPRIGHT", flyout, "TOPRIGHT", -8, -32)
-    headerBox:SetHeight(84)
+    headerBox:SetHeight(82)
     headerBox:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false, tileSize = 0, edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
-    headerBox:SetBackdropColor(0.04, 0.04, 0.06, 0.9)
-    headerBox:SetBackdropBorderColor(0.18, 0.20, 0.24, 1.0)
+    headerBox:SetBackdropColor(0.08, 0.08, 0.11, 0.95)
+    headerBox:SetBackdropBorderColor(0.25, 0.25, 0.30, 1.0)
 
-    local avatarTex = headerBox:CreateTexture(nil, "ARTWORK")
-    avatarTex:SetWidth(52)
-    avatarTex:SetHeight(52)
-    avatarTex:SetPoint("TOPLEFT", headerBox, "TOPLEFT", 8, -8)
+    local avatarIcon = CreateFrame("Frame", nil, headerBox)
+    avatarIcon:SetWidth(56)
+    avatarIcon:SetHeight(56)
+    avatarIcon:SetPoint("TOPLEFT", headerBox, "TOPLEFT", 8, -8)
+    avatarIcon:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    avatarIcon:SetBackdropColor(0, 0, 0, 1)
+    avatarIcon:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
+
+    local avatarTex = avatarIcon:CreateTexture(nil, "ARTWORK")
+    avatarTex:SetPoint("TOPLEFT", avatarIcon, "TOPLEFT", 1, -1)
+    avatarTex:SetPoint("BOTTOMRIGHT", avatarIcon, "BOTTOMRIGHT", -1, 1)
     avatarTex:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
     flyout.avatarTex = avatarTex
 
-    local nameStr = headerBox:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    nameStr:SetPoint("TOPLEFT", avatarTex, "TOPRIGHT", 10, 0)
-    nameStr:SetText("Adventurer")
+    local nameStr = headerBox:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    nameStr:SetPoint("TOPLEFT", avatarIcon, "TOPRIGHT", 10, -2)
+    nameStr:SetText("Character Name")
     flyout.nameStr = nameStr
 
     local titleStr = headerBox:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     titleStr:SetPoint("TOPLEFT", nameStr, "BOTTOMLEFT", 0, -2)
-    titleStr:SetTextColor(0.0, 0.85, 1.0)
+    titleStr:SetText("<No Title>")
     flyout.titleStr = titleStr
 
     local demoTags = headerBox:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    demoTags:SetPoint("TOPLEFT", titleStr, "BOTTOMLEFT", 0, -2)
+    demoTags:SetPoint("TOPLEFT", titleStr, "BOTTOMLEFT", 0, -4)
+    demoTags:SetText("|cff00ccff[Age 25]|r |cffff80cc[Bisexual]|r |cffff0000[LGBTQIA+]|r")
     flyout.demoTags = demoTags
 
     local statusPill = CreateFrame("Frame", nil, headerBox)
     statusPill:SetWidth(100)
-    statusPill:SetHeight(20)
+    statusPill:SetHeight(18)
     statusPill:SetPoint("TOPRIGHT", headerBox, "TOPRIGHT", -8, -8)
     statusPill:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -156,14 +179,15 @@ function Directory:BuildFlyout(parent)
     statusPill.text = statusPillText
     flyout.statusPill = statusPill
 
-    -- Flyout Tabs: Appearance (1), Style & ERP (2), Lore (3), Notes (4)
-    local tabNames = { "Appearance", "Style / ERP", "Lore", "Notes" }
+    -- Flyout 5 Tabs: Appearance (1), Traits (2), Style & ERP (3), Lore (4), Notes (5)
+    local tabNames = { "Appearance", "Traits", "Style/ERP", "Lore", "Notes" }
     local tabs = {}
-    for i = 1, 4 do
+    local tabW = 82
+    for i = 1, 5 do
         local tBtn = CreateFrame("Button", nil, flyout)
-        tBtn:SetWidth(102)
+        tBtn:SetWidth(tabW)
         tBtn:SetHeight(22)
-        tBtn:SetPoint("TOPLEFT", flyout, "TOPLEFT", 8 + (i - 1) * 106, -120)
+        tBtn:SetPoint("TOPLEFT", flyout, "TOPLEFT", 8 + (i - 1) * (tabW + 3), -120)
         tBtn:SetBackdrop({
             bgFile = "Interface\\Buttons\\WHITE8X8",
             edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -248,104 +272,116 @@ function Directory:BuildFlyout(parent)
         p1.glanceCards[i] = gCard
     end
 
-    -- Panel 2: Style & ERP
+    -- Panel 2: Personality Spectrum Traits
     local p2 = CreateFrame("Frame", nil, contentBox)
     p2:SetAllPoints(contentBox)
     p2:Hide()
     flyout.p2 = p2
 
-    p2.styleRows = {}
+    local p2Scroll = CreateFrame("ScrollFrame", "Primus_PUIRoleplay_FlyoutTraitScroll", p2, "UIPanelScrollFrameTemplate")
+    p2Scroll:SetPoint("TOPLEFT", p2, "TOPLEFT", 4, -4)
+    p2Scroll:SetPoint("BOTTOMRIGHT", p2, "BOTTOMRIGHT", -22, 4)
+
+    local p2Child = CreateFrame("Frame", nil, p2Scroll)
+    p2Child:SetWidth(390)
+    p2Child:SetHeight(500)
+    p2Scroll:SetScrollChild(p2Child)
+    p2.scrollChild = p2Child
+
+    -- Panel 3: Style & ERP
+    local p3 = CreateFrame("Frame", nil, contentBox)
+    p3:SetAllPoints(contentBox)
+    p3:Hide()
+    flyout.p3 = p3
+
+    p3.styleRows = {}
     local styleMeta = {
         { key = "relationship_status", label = "Relationship Status" },
         { key = "walkup_policy", label = "Walk-Up Preferences" },
         { key = "combat_preference", label = "Combat & Conflict Resolution" },
-        { key = "injury_consent", label = "Combat Injury Tolerance" },
-        { key = "permadeath_consent", label = "Character Death Willingness" },
-        { key = "erp_preference", label = "ERP Preference & Tone" }
+        { key = "injury_consent", label = "Injury Tolerance" },
+        { key = "permadeath_consent", label = "Permadeath Willingness" },
+        { key = "experience_level", label = "RP Experience Level" },
+        { key = "erp_preference", label = "Adult / ERP Preference" },
+        { key = "ooc_boundaries", label = "OOC Safety & Boundaries" }
     }
 
-    for i, meta in ipairs(styleMeta) do
-        local sCard = CreateFrame("Frame", nil, p2)
+    for idx, item in ipairs(styleMeta) do
+        local sCard = CreateFrame("Frame", nil, p3)
         sCard:SetWidth(408)
-        sCard:SetHeight(42)
-        sCard:SetPoint("TOPLEFT", p2, "TOPLEFT", 8, -8 - (i - 1) * 46)
+        sCard:SetHeight(32)
+        sCard:SetPoint("TOPLEFT", p3, "TOPLEFT", 8, -6 - (idx - 1) * 36)
         sCard:SetBackdrop({
             bgFile = "Interface\\Buttons\\WHITE8X8",
             edgeFile = "Interface\\Buttons\\WHITE8X8",
             tile = false, tileSize = 0, edgeSize = 1,
             insets = { left = 1, right = 1, top = 1, bottom = 1 }
         })
-        sCard:SetBackdropColor(0.06, 0.06, 0.08, 0.9)
-        sCard:SetBackdropBorderColor(0.18, 0.20, 0.24, 1.0)
+        sCard:SetBackdropColor(0.06, 0.06, 0.08, 0.85)
+        sCard:SetBackdropBorderColor(0.20, 0.22, 0.26, 1.0)
 
-        local sLbl = sCard:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        sLbl:SetPoint("TOPLEFT", sCard, "TOPLEFT", 8, -4)
-        sLbl:SetText("|cff00e5ff" .. meta.label .. ":|r")
+        local lbl = sCard:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        lbl:SetPoint("LEFT", sCard, "LEFT", 8, 0)
+        lbl:SetText("|cff00e5ff" .. item.label .. ":|r")
 
-        local valTxt = sCard:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        valTxt:SetPoint("TOPLEFT", sLbl, "BOTTOMLEFT", 0, -2)
-        valTxt:SetText("Not Specified")
-        sCard.valTxt = valTxt
-        sCard.key = meta.key
+        local val = sCard:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        val:SetPoint("RIGHT", sCard, "RIGHT", -8, 0)
+        val:SetText("Unknown")
+        sCard.valTxt = val
+        sCard.key = item.key
 
-        p2.styleRows[i] = sCard
+        table.insert(p3.styleRows, sCard)
     end
 
-    -- Panel 3: Lore & History
-    local p3 = CreateFrame("Frame", nil, contentBox)
-    p3:SetAllPoints(contentBox)
-    p3:Hide()
-    flyout.p3 = p3
+    -- Panel 4: Lore & History
+    local p4 = CreateFrame("Frame", nil, contentBox)
+    p4:SetAllPoints(contentBox)
+    p4:Hide()
+    flyout.p4 = p4
 
-    local bioScroll = CreateFrame("ScrollFrame", "Primus_PUIRoleplay_FlyoutBioScroll", p3, "UIPanelScrollFrameTemplate")
-    bioScroll:SetPoint("TOPLEFT", p3, "TOPLEFT", 8, -8)
-    bioScroll:SetPoint("BOTTOMRIGHT", p3, "BOTTOMRIGHT", -26, 8)
+    local bioScroll = CreateFrame("ScrollFrame", "Primus_PUIRoleplay_FlyoutBioScroll", p4, "UIPanelScrollFrameTemplate")
+    bioScroll:SetPoint("TOPLEFT", p4, "TOPLEFT", 8, -8)
+    bioScroll:SetPoint("BOTTOMRIGHT", p4, "BOTTOMRIGHT", -24, 8)
 
     local bioChild = CreateFrame("Frame", nil, bioScroll)
     bioChild:SetWidth(380)
     bioChild:SetHeight(800)
     bioScroll:SetScrollChild(bioChild)
 
-    local bioText = bioChild:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    bioText:SetPoint("TOPLEFT", bioChild, "TOPLEFT", 4, -4)
-    bioText:SetWidth(370)
+    local bioText = bioChild:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    bioText:SetPoint("TOPLEFT", bioChild, "TOPLEFT", 0, 0)
+    bioText:SetWidth(380)
     bioText:SetJustifyH("LEFT")
-    bioText:SetJustifyV("TOP")
-    bioText:SetText("No history recorded.")
-    p3.bioText = bioText
-    p3.bioChild = bioChild
-    p3.bioScroll = bioScroll
+    bioText:SetText("Biography and history chronicles.")
+    p4.bioText = bioText
 
-    -- Panel 4: Notes
-    local p4 = CreateFrame("Frame", nil, contentBox)
-    p4:SetAllPoints(contentBox)
-    p4:Hide()
-    flyout.p4 = p4
+    -- Panel 5: Private GM / Player Notes
+    local p5 = CreateFrame("Frame", nil, contentBox)
+    p5:SetAllPoints(contentBox)
+    p5:Hide()
+    flyout.p5 = p5
 
-    local nHeader = p4:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    nHeader:SetPoint("TOPLEFT", p4, "TOPLEFT", 8, -8)
-    nHeader:SetText("|cffffd100Private Notes for this Adventurer (Saved Locally):|r")
+    local nHeader = p5:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    nHeader:SetPoint("TOPLEFT", p5, "TOPLEFT", 8, -8)
+    nHeader:SetText("|cffffd100YOUR PRIVATE NOTES ON THIS CHARACTER (Saved Locally):|r")
 
-    local notesScroll = CreateFrame("ScrollFrame", "Primus_PUIRoleplay_FlyoutNotesScroll", p4, "UIPanelScrollFrameTemplate")
-    notesScroll:SetPoint("TOPLEFT", p4, "TOPLEFT", 8, -26)
-    notesScroll:SetPoint("BOTTOMRIGHT", p4, "BOTTOMRIGHT", -26, 8)
-    notesScroll:EnableMouse(true)
+    local notesScroll = CreateFrame("ScrollFrame", "Primus_PUIRoleplay_FlyoutNotesScroll", p5, "UIPanelScrollFrameTemplate")
+    notesScroll:SetPoint("TOPLEFT", nHeader, "BOTTOMLEFT", 0, -6)
+    notesScroll:SetPoint("BOTTOMRIGHT", p5, "BOTTOMRIGHT", -24, 8)
 
     local notesEB = CreateFrame("EditBox", nil, notesScroll)
     notesEB:SetWidth(380)
-    notesEB:SetHeight(400)
+    notesEB:SetHeight(800)
     notesEB:SetMultiLine(true)
-    notesEB:EnableMouse(true)
     notesEB:SetAutoFocus(false)
     notesEB:SetFontObject(GameFontHighlightSmall)
     notesEB:SetTextColor(1.0, 1.0, 1.0, 1.0)
     notesEB:SetTextInsets(4, 4, 4, 4)
     notesScroll:SetScrollChild(notesEB)
-    p4.notesEB = notesEB
+    p5.notesEB = notesEB
 
-    notesScrollBg = p4
-    notesEB:SetScript("OnEscapePressed", function() this:ClearFocus() end)
     notesEB:SetScript("OnTextChanged", function()
+        if ScrollingEdit_OnTextChanged then ScrollingEdit_OnTextChanged(notesScroll) end
         if Directory.selectedPlayer and flyout.isRefreshing ~= true then
             PUIRoleplay:SetCharacterNote(Directory.selectedPlayer, this:GetText())
         end
@@ -358,28 +394,32 @@ function Directory:SelectFlyoutTab(index)
     local flyout = f.flyout
     if not flyout then return end
 
-    for i = 1, 4 do
+    for i = 1, 5 do
         local tab = flyout.tabs[i]
-        if i == index then
-            tab:SetBackdropColor(0.16, 0.18, 0.24, 1.0)
-            tab:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
-            tab.text:SetTextColor(0.0, 0.90, 1.0)
-        else
-            tab:SetBackdropColor(0.06, 0.06, 0.08, 0.9)
-            tab:SetBackdropBorderColor(0.20, 0.22, 0.26, 1.0)
-            tab.text:SetTextColor(0.70, 0.70, 0.75)
+        if tab then
+            if i == index then
+                tab:SetBackdropColor(0.16, 0.18, 0.24, 1.0)
+                tab:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
+                tab.text:SetTextColor(0.0, 0.90, 1.0)
+            else
+                tab:SetBackdropColor(0.06, 0.06, 0.08, 0.9)
+                tab:SetBackdropBorderColor(0.20, 0.22, 0.26, 1.0)
+                tab.text:SetTextColor(0.70, 0.70, 0.75)
+            end
         end
     end
 
-    flyout.p1:Hide()
-    flyout.p2:Hide()
-    flyout.p3:Hide()
-    flyout.p4:Hide()
+    if flyout.p1 then flyout.p1:Hide() end
+    if flyout.p2 then flyout.p2:Hide() end
+    if flyout.p3 then flyout.p3:Hide() end
+    if flyout.p4 then flyout.p4:Hide() end
+    if flyout.p5 then flyout.p5:Hide() end
 
-    if index == 1 then flyout.p1:Show()
-    elseif index == 2 then flyout.p2:Show()
-    elseif index == 3 then flyout.p3:Show()
-    elseif index == 4 then flyout.p4:Show()
+    if index == 1 and flyout.p1 then flyout.p1:Show()
+    elseif index == 2 and flyout.p2 then flyout.p2:Show()
+    elseif index == 3 and flyout.p3 then flyout.p3:Show()
+    elseif index == 4 and flyout.p4 then flyout.p4:Show()
+    elseif index == 5 and flyout.p5 then flyout.p5:Show()
     end
 end
 
@@ -394,6 +434,7 @@ function Directory:ShowPlayerFlyout(charName)
         PUIRoleplay.Comms:SendRequest("D", charName)
         PUIRoleplay.Comms:SendRequest("L", charName)
         PUIRoleplay.Comms:SendRequest("X", charName)
+        PUIRoleplay.Comms:SendRequest("P", charName)
     end
 
     Directory:RefreshFlyout()
@@ -445,6 +486,7 @@ function Directory:RefreshFlyout()
         flyout.statusPill.text:SetText("|cffffaa00OUT OF CHAR|r")
     end
 
+    -- Tab 1: Glances
     local lfStr = "Looking For:"
     local lf = data.looking_for or {}
     if lf.adventure then lfStr = lfStr .. " |cff00ff88[Adventure]|r" end
@@ -482,11 +524,131 @@ function Directory:RefreshFlyout()
         end
     end
 
-    for _, sCard in ipairs(flyout.p2.styleRows) do
+    -- Tab 2: Personality Spectrum Traits
+    local traits = PUIRoleplay:GetPersonalityTraits(data)
+    local p2Child = flyout.p2.scrollChild
+    for _, r in ipairs(flyoutTraitRows) do r:Hide() end
+
+    local trackW = 140
+    local rH = 38
+    p2Child:SetHeight(math.max(300, table.getn(traits) * rH + 10))
+
+    for idx, t in ipairs(traits) do
+        local r = flyoutTraitRows[idx]
+        if not r then
+            r = CreateFrame("Frame", nil, p2Child)
+            r:SetWidth(380)
+            r:SetHeight(rH - 4)
+            r:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false, tileSize = 0, edgeSize = 1,
+                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+            })
+            r:SetBackdropColor(0.06, 0.06, 0.08, 0.85)
+            r:SetBackdropBorderColor(0.18, 0.20, 0.24, 1.0)
+
+            local lIcon = r:CreateTexture(nil, "ARTWORK")
+            lIcon:SetWidth(22)
+            lIcon:SetHeight(22)
+            lIcon:SetPoint("LEFT", r, "LEFT", 4, 0)
+            r.lIcon = lIcon
+
+            local lTxt = r:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            lTxt:SetPoint("LEFT", lIcon, "RIGHT", 4, 0)
+            lTxt:SetWidth(75)
+            lTxt:SetJustifyH("LEFT")
+            r.lTxt = lTxt
+
+            local trk = CreateFrame("Frame", nil, r)
+            trk:SetWidth(trackW)
+            trk:SetHeight(12)
+            trk:SetPoint("LEFT", lTxt, "RIGHT", 4, 0)
+            trk:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false, tileSize = 0, edgeSize = 1,
+                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+            })
+            trk:SetBackdropColor(0.03, 0.03, 0.05, 1.0)
+            trk:SetBackdropBorderColor(0.28, 0.28, 0.35, 1.0)
+            r.trk = trk
+
+            local lFill = trk:CreateTexture(nil, "BORDER")
+            lFill:SetTexture(0.0, 0.75, 1.0, 0.65)
+            trk.lFill = lFill
+
+            local rFill = trk:CreateTexture(nil, "BORDER")
+            rFill:SetTexture(1.0, 0.65, 0.1, 0.65)
+            trk.rFill = rFill
+
+            local thumb = CreateFrame("Frame", nil, trk)
+            thumb:SetWidth(6)
+            thumb:SetHeight(16)
+            thumb:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false, tileSize = 0, edgeSize = 1,
+                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+            })
+            thumb:SetBackdropColor(1, 1, 1, 0.95)
+            thumb:SetBackdropBorderColor(0, 0.85, 1, 1)
+            trk.thumb = thumb
+
+            local rTxt = r:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            rTxt:SetPoint("LEFT", trk, "RIGHT", 4, 0)
+            rTxt:SetWidth(75)
+            rTxt:SetJustifyH("RIGHT")
+            r.rTxt = rTxt
+
+            local rIcon = r:CreateTexture(nil, "ARTWORK")
+            rIcon:SetWidth(22)
+            rIcon:SetHeight(22)
+            rIcon:SetPoint("LEFT", rTxt, "RIGHT", 4, 0)
+            r.rIcon = rIcon
+
+            flyoutTraitRows[idx] = r
+        end
+
+        r:SetPoint("TOPLEFT", p2Child, "TOPLEFT", 0, -((idx - 1) * rH))
+        r:Show()
+
+        r.lIcon:SetTexture("Interface\\Icons\\" .. (t.leftIcon or "INV_Misc_QuestionMark"))
+        r.rIcon:SetTexture("Interface\\Icons\\" .. (t.rightIcon or "INV_Misc_QuestionMark"))
+        r.lTxt:SetText(t.leftName or "Left")
+        r.rTxt:SetText(t.rightName or "Right")
+
+        local val = math.max(0, math.min(20, tonumber(t.value) or 10))
+        local frac = val / 20.0
+        local thumbX = math.floor(frac * trackW)
+        local midX = math.floor(trackW / 2)
+
+        r.trk.thumb:SetPoint("CENTER", r.trk, "LEFT", thumbX, 0)
+        if val < 10 then
+            r.trk.rFill:Hide()
+            r.trk.lFill:ClearAllPoints()
+            r.trk.lFill:SetPoint("TOPLEFT", r.trk, "LEFT", thumbX, 5)
+            r.trk.lFill:SetPoint("BOTTOMRIGHT", r.trk, "LEFT", midX, -5)
+            r.trk.lFill:Show()
+        elseif val > 10 then
+            r.trk.lFill:Hide()
+            r.trk.rFill:ClearAllPoints()
+            r.trk.rFill:SetPoint("TOPLEFT", r.trk, "LEFT", midX, 5)
+            r.trk.rFill:SetPoint("BOTTOMRIGHT", r.trk, "LEFT", thumbX, -5)
+            r.trk.rFill:Show()
+        else
+            r.trk.lFill:Hide()
+            r.trk.rFill:Hide()
+        end
+    end
+
+    -- Tab 3: Style
+    for _, sCard in ipairs(flyout.p3.styleRows) do
         local val = data[sCard.key] or "Not Specified"
         sCard.valTxt:SetText("|cffffffff" .. tostring(val) .. "|r")
     end
 
+    -- Tab 4: Lore
     local bioStr = ""
     if data.motto and data.motto ~= "" then
         bioStr = bioStr .. "|cffffd100Motto:|r \"" .. data.motto .. "\"\n\n"
@@ -505,10 +667,11 @@ function Directory:RefreshFlyout()
     if bioStr == "" then
         bioStr = data.description or "No detailed biography recorded."
     end
-    flyout.p3.bioText:SetText(bioStr)
+    flyout.p4.bioText:SetText(bioStr)
 
-    flyout.p4.notesEB:SetText(PUIRoleplay:GetCharacterNote(name) or "")
+    -- Tab 5: Notes
+    flyout.p5.notesEB:SetText(PUIRoleplay:GetCharacterNote(name) or "")
 
-    Directory:SelectFlyoutTab(Directory.activeFlyoutTab)
+    Directory:SelectFlyoutTab(Directory.activeFlyoutTab or 1)
     flyout.isRefreshing = false
 end

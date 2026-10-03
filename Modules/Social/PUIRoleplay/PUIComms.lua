@@ -234,7 +234,7 @@ function Comms:OnChatMessage(msg, sender)
             local targetName = string.sub(decoded, colonStart + 1, tildeStart - 1)
 
             if targetName == UnitName("player") then
-                if self:CanChat() and (dataPrefix == "M" or dataPrefix == "T" or dataPrefix == "D" or dataPrefix == "L" or dataPrefix == "X") then
+                if self:CanChat() and (dataPrefix == "M" or dataPrefix == "T" or dataPrefix == "D" or dataPrefix == "L" or dataPrefix == "X" or dataPrefix == "P") then
                     local myInfo = PUIRoleplay:GetMyProfile()
                     local keyFromMsg = string.sub(decoded, tildeStart + 1)
                     local myKey = myInfo["key" .. dataPrefix]
@@ -243,7 +243,7 @@ function Comms:OnChatMessage(msg, sender)
                         self:SendData(dataPrefix)
                     end
                 end
-            elseif (targetName == "p" or string.sub(dataPrefix, -1) == "R") and (dataPrefix == "MR" or dataPrefix == "TR" or dataPrefix == "DR" or dataPrefix == "LR" or dataPrefix == "XR") then
+            elseif (targetName == "p" or string.sub(dataPrefix, -1) == "R") and (dataPrefix == "MR" or dataPrefix == "TR" or dataPrefix == "DR" or dataPrefix == "LR" or dataPrefix == "XR" or dataPrefix == "PR") then
                 self:ProcessResponse(dataPrefix, sender, decoded)
             end
         end

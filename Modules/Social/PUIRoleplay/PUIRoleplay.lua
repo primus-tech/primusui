@@ -197,6 +197,25 @@ function PUIRoleplay:SaveMyProfile(prof)
     self:SyncGlobalBridges()
 end
 
+function PUIRoleplay:GetPersonalityTraits(profile)
+    local prof = profile or self:GetMyProfile()
+    if not prof.personality_traits or table.getn(prof.personality_traits) == 0 then
+        prof.personality_traits = {}
+        for _, t in ipairs(PUIRoleplay.DefaultPersonalityTraits or {}) do
+            table.insert(prof.personality_traits, {
+                id = t.id,
+                leftName = t.leftName,
+                rightName = t.rightName,
+                leftIcon = t.leftIcon,
+                rightIcon = t.rightIcon,
+                value = t.value or 10,
+                isCustom = false
+            })
+        end
+    end
+    return prof.personality_traits
+end
+
 function PUIRoleplay:GetCharacterData(name)
     if not name or name == "" then return nil end
     if name == UnitName("player") then return self:GetMyProfile() end

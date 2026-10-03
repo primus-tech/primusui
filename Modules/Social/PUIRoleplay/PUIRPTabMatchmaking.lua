@@ -1,5 +1,5 @@
 --[[
-    PrimusUI: PUIRoleplay Profile Tab 5 - Matchmaking & 18+ ERP (PUIRPTabMatchmaking.lua)
+    PrimusUI: PUIRoleplay Profile Tab 6 - Matchmaking & 18+ ERP (PUIRPTabMatchmaking.lua)
     Target: Vanilla WoW 1.12.1 / Turtle WoW (Relationship, Seeking Badges, 18+ Adult RP & Boundaries)
     Architecture: Strict TRUTH.md compliance (Zero Aliases, Zero Shims)
 --]]
@@ -18,27 +18,27 @@ local SheetTabs = Sheet.Tabs or {}
 Sheet.Tabs = SheetTabs
 
 --------------------------------------------------------------------------------
--- Build Tab Panel 5: Matchmaking, Dating & 18+ Adult RP
+-- Build Tab Panel 6: Matchmaking, Dating & 18+ Adult RP
 --------------------------------------------------------------------------------
-function SheetTabs:BuildPanel5(parent, f)
-    local p5 = CreateFrame("Frame", nil, parent)
-    p5:SetAllPoints(parent)
-    p5:Hide()
-    f.panel5 = p5
+function SheetTabs:BuildPanel6(parent, f)
+    local p6 = CreateFrame("Frame", nil, parent)
+    p6:SetAllPoints(parent)
+    p6:Hide()
+    f.panel6 = p6
 
-    local relLabel = p5:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    relLabel:SetPoint("TOPLEFT", p5, "TOPLEFT", 10, -8)
+    local relLabel = p6:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    relLabel:SetPoint("TOPLEFT", p6, "TOPLEFT", 10, -8)
     relLabel:SetText("|cff00e5ffIC Relationship Status:|r")
-    local relDropdown = self:CreateStyledDropdown(p5, 230, 22, PUIRoleplay.DropdownOptions.relationship or {}, function(optKey, optVal)
+    local relDropdown = self:CreateStyledDropdown(p6, 230, 22, PUIRoleplay.DropdownOptions.relationship or {}, function(optKey, optVal)
         local p = PUIRoleplay:GetMyProfile()
         p.relationship_status = optVal
         p.keyX = PUIRoleplay:GenerateKey()
         PUIRoleplay:SaveMyProfile(p)
     end)
     relDropdown:SetPoint("TOPLEFT", relLabel, "BOTTOMLEFT", 0, -2)
-    p5.relDropdown = relDropdown
+    p6.relDropdown = relDropdown
 
-    local lfLabel = p5:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local lfLabel = p6:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     lfLabel:SetPoint("TOPLEFT", relDropdown, "BOTTOMLEFT", 0, -10)
     lfLabel:SetText("|cffffd100Looking For / Open To (Directory Badges):|r")
 
@@ -51,11 +51,11 @@ function SheetTabs:BuildPanel5(parent, f)
         { key = "mentorship", label = "|cffb080ff[Mentorship / Student]|r" }
     }
 
-    p5.lfCheckboxes = {}
+    p6.lfCheckboxes = {}
     for idx, item in ipairs(lookingForList) do
         local col = math.mod(idx - 1, 2)
         local row = math.floor((idx - 1) / 2)
-        local cb = self:CreateStyledCheckbox(p5, item.label, function(checked)
+        local cb = self:CreateStyledCheckbox(p6, item.label, function(checked)
             local p = PUIRoleplay:GetMyProfile()
             if not p.looking_for then p.looking_for = {} end
             p.looking_for[item.key] = checked
@@ -63,10 +63,10 @@ function SheetTabs:BuildPanel5(parent, f)
             PUIRoleplay:SaveMyProfile(p)
         end)
         cb:SetPoint("TOPLEFT", lfLabel, "BOTTOMLEFT", col * 240, -4 - row * 22)
-        p5.lfCheckboxes[item.key] = cb
+        p6.lfCheckboxes[item.key] = cb
     end
 
-    local adultCard = self:Create1PxBackdrop(p5, 0.08, 0.04, 0.05, 0.95, 0.50, 0.18, 0.22, 1.0)
+    local adultCard = self:Create1PxBackdrop(p6, 0.08, 0.04, 0.05, 0.95, 0.50, 0.18, 0.22, 1.0)
     adultCard:SetWidth(478)
     adultCard:SetHeight(160)
     adultCard:SetPoint("TOPLEFT", lfLabel, "BOTTOMLEFT", 0, -80)
@@ -84,7 +84,7 @@ function SheetTabs:BuildPanel5(parent, f)
         PUIRoleplay:SaveMyProfile(p)
     end)
     adultFlagCB:SetPoint("TOPLEFT", adultTitle, "BOTTOMLEFT", 0, -4)
-    p5.adultFlagCB = adultFlagCB
+    p6.adultFlagCB = adultFlagCB
 
     local erpLabel = adultCard:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     erpLabel:SetPoint("TOPLEFT", adultFlagCB, "BOTTOMLEFT", 0, -6)
@@ -97,7 +97,7 @@ function SheetTabs:BuildPanel5(parent, f)
         PUIRoleplay:SaveMyProfile(p)
     end)
     erpDropdown:SetPoint("TOPLEFT", erpLabel, "BOTTOMLEFT", 0, -2)
-    p5.erpDropdown = erpDropdown
+    p6.erpDropdown = erpDropdown
 
     local bndLabel = adultCard:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     bndLabel:SetPoint("TOPLEFT", erpDropdown, "BOTTOMLEFT", 0, -6)
@@ -113,5 +113,5 @@ function SheetTabs:BuildPanel5(parent, f)
             PUIRoleplay:SaveMyProfile(p)
         end
     end)
-    p5.bndEB = bndEB
+    p6.bndEB = bndEB
 end

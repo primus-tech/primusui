@@ -175,6 +175,7 @@ Modules\Social\PUIRoleplay\PUICardPreview.lua
 Modules\Social\PUIRoleplay\PUIRPWidgets.lua
 Modules\Social\PUIRoleplay\PUIRPTabIdentity.lua
 Modules\Social\PUIRoleplay\PUIRPTabAppearance.lua
+Modules\Social\PUIRoleplay\PUIRPTabPersonality.lua
 Modules\Social\PUIRoleplay\PUIRPTabLore.lua
 Modules\Social\PUIRoleplay\PUIRPTabRules.lua
 Modules\Social\PUIRoleplay\PUIRPTabMatchmaking.lua
