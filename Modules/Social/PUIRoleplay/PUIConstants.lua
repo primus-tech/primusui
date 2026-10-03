@@ -88,6 +88,14 @@ PUIRoleplay.DropdownOptions = {
         ["d"] = "Storyteller / DM Decides",
         ["e"] = "No Combat"
     },
+    sex = {
+        ["a"] = "Male",
+        ["b"] = "Female",
+        ["c"] = "Intersex",
+        ["d"] = "Hermaphrodite / Gynandromorph",
+        ["e"] = "Asexual / Neuter",
+        ["f"] = "Other / Custom"
+    },
     gender = {
         ["a"] = "Cisgender Male",
         ["b"] = "Cisgender Female",
@@ -97,7 +105,9 @@ PUIRoleplay.DropdownOptions = {
         ["f"] = "Agender",
         ["g"] = "Genderfluid",
         ["h"] = "Two-Spirit",
-        ["i"] = "Other / Custom"
+        ["i"] = "Androgynous",
+        ["j"] = "Demiboy / Demigirl",
+        ["k"] = "Other / Custom"
     },
     orientation = {
         ["a"] = "Heterosexual / Straight",
@@ -144,8 +154,9 @@ PUIRoleplay.DefaultProfile = {
     house_name          = "",
     full_name           = "",
 
-    -- 2. Demographics & Identity
+    -- 2. Demographics, Sex, Gender & Identity
     apparent_age        = "",
+    biological_sex      = "Male",
     gender_identity     = "Cisgender Male",
     ic_pronouns         = "He/Him",
     ooc_pronouns        = "He/Him",

@@ -146,7 +146,7 @@ function SheetTabs:CreateStyledDropdown(parent, width, height, optionsList, onSe
     btn.arrow = arrow
 
     local menu = CreateFrame("Frame", nil, UIParent)
-    menu:SetFrameStrata("DIALOG")
+    menu:SetFrameStrata("TOOLTIP")
     menu:SetWidth(width or 180)
     menu:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -171,6 +171,7 @@ function SheetTabs:CreateStyledDropdown(parent, width, height, optionsList, onSe
         else
             menu:ClearAllPoints()
             menu:SetPoint("TOPLEFT", btn, "BOTTOMLEFT", 0, -2)
+            menu:SetFrameLevel(btn:GetFrameLevel() + 50)
             menu:Show()
             openDropdownMenu = menu
         end
@@ -179,8 +180,8 @@ function SheetTabs:CreateStyledDropdown(parent, width, height, optionsList, onSe
     function btn:SetOptions(opts, currentKey)
         self.options = opts or {}
         local count = 0
-        for _ in pairs(opts) do count = count + 1 end
-        menu:SetHeight(math.min(240, math.max(30, count * 20 + 6)))
+        for _ in pairs(self.options) do count = count + 1 end
+        menu:SetHeight(math.min(240, math.max(26, count * 20 + 6)))
 
         if menu.itemButtons then
             for _, b in ipairs(menu.itemButtons) do b:Hide() end
@@ -188,12 +189,12 @@ function SheetTabs:CreateStyledDropdown(parent, width, height, optionsList, onSe
         menu.itemButtons = {}
 
         local sortedKeys = {}
-        for k in pairs(opts) do table.insert(sortedKeys, k) end
+        for k in pairs(self.options) do table.insert(sortedKeys, k) end
         table.sort(sortedKeys)
 
         local rowIdx = 0
         for _, k in ipairs(sortedKeys) do
-            local valText = opts[k]
+            local valText = self.options[k]
             local itemBtn = CreateFrame("Button", nil, menu)
             itemBtn:SetWidth((width or 180) - 4)
             itemBtn:SetHeight(18)
@@ -220,23 +221,35 @@ function SheetTabs:CreateStyledDropdown(parent, width, height, optionsList, onSe
             rowIdx = rowIdx + 1
         end
 
-        if currentKey and opts[currentKey] then
-            self.selectedKey = currentKey
-            self.text:SetText(opts[currentKey])
-        elseif currentKey and type(currentKey) == "string" then
-            self.text:SetText(currentKey)
+        if currentKey then
+            self:SetSelected(currentKey)
         end
     end
 
-    function btn:SetSelected(key, fallbackText)
-        self.selectedKey = key
-        if self.options and self.options[key] then
-            self.text:SetText(self.options[key])
-        elseif fallbackText then
-            self.text:SetText(fallbackText)
-        else
-            self.text:SetText(tostring(key or "Select..."))
+    function btn:SetSelected(keyOrVal, fallbackText)
+        self.selectedKey = keyOrVal
+        if not self.options then
+            self.text:SetText(fallbackText or tostring(keyOrVal or "Select..."))
+            return
         end
+        -- Direct key match
+        if self.options[keyOrVal] then
+            self.text:SetText(self.options[keyOrVal])
+            return
+        end
+        -- Direct value match
+        for k, v in pairs(self.options) do
+            if v == keyOrVal or string.lower(tostring(v)) == string.lower(tostring(keyOrVal or "")) then
+                self.selectedKey = k
+                self.text:SetText(v)
+                return
+            end
+        end
+        self.text:SetText(fallbackText or tostring(keyOrVal or "Select..."))
+    end
+
+    if optionsList then
+        btn:SetOptions(optionsList)
     end
 
     return btn

@@ -396,11 +396,18 @@ function Sheet:Refresh()
         p1.houseEB:SetText(charData.house_name or "")
         p1.ttlEB:SetText(charData.title or "")
         p1.ageEB:SetText(charData.apparent_age or "")
-        p1.genderDropdown:SetSelected(charData.gender_identity or "Cisgender Male")
+        if p1.sexDropdown then
+            p1.sexDropdown:SetSelected(charData.biological_sex or "Male")
+        end
+        if p1.genderDropdown then
+            p1.genderDropdown:SetSelected(charData.gender_identity or "Cisgender Male")
+        end
         p1.icPrEB:SetText(charData.ic_pronouns or "")
         p1.oocPrEB:SetText(charData.ooc_pronouns or "")
         p1.lgbtqBox:SetChecked(charData.lgbtqia_friendly ~= false)
-        p1.oriDropdown:SetSelected(charData.orientation or "Heterosexual / Straight")
+        if p1.oriDropdown then
+            p1.oriDropdown:SetSelected(charData.orientation or "Heterosexual / Straight")
+        end
         p1.showOriBox:SetChecked(charData.show_orientation ~= false)
     end
 

@@ -464,11 +464,23 @@ function Directory:RefreshFlyout()
     local titleStr = (data.title and data.title ~= "") and ("<" .. data.title .. ">") or ("|cff888888" .. name .. "|r")
     flyout.titleStr:SetText(titleStr)
 
-    local age = data.apparent_age or "Unknown Age"
-    local ori = (data.show_orientation ~= false and data.orientation) or "Private"
+    local age = (data.apparent_age and data.apparent_age ~= "") and data.apparent_age or "Age ?"
+    local sex = (data.biological_sex and data.biological_sex ~= "") and data.biological_sex or nil
+    local gender = (data.gender_identity and data.gender_identity ~= "") and data.gender_identity or nil
+    local icPr = (data.ic_pronouns and data.ic_pronouns ~= "") and ("(" .. data.ic_pronouns .. ")") or ""
+    local ori = (data.show_orientation ~= false and data.orientation and data.orientation ~= "") and data.orientation or nil
     local lgbtq = (data.lgbtqia_friendly ~= false) and " |cffff0000[|cffff7f00LGBTQIA+|cff9400d3]|r" or ""
     local adult18 = (data.adult_18plus_flag == true) and " |cffff3355[18+]|r" or ""
-    flyout.demoTags:SetText(string.format("|cff00ccff[%s]|r |cffff80cc[%s]|r%s%s", age, ori, lgbtq, adult18))
+
+    local tagList = {}
+    table.insert(tagList, "|cff00ccff" .. age .. "|r")
+    if sex then table.insert(tagList, "|cffffd100" .. sex .. "|r") end
+    if gender then table.insert(tagList, "|cff00ffaa" .. gender .. "|r") end
+    if icPr ~= "" then table.insert(tagList, "|cffffffff" .. icPr .. "|r") end
+    if ori then table.insert(tagList, "|cffff80cc" .. ori .. "|r") end
+
+    local tagStr = table.concat(tagList, " | ") .. lgbtq .. adult18
+    flyout.demoTags:SetText(tagStr)
 
     local isOnline = isSelf or PUIRoleplay:IsPlayerOnline(name)
     local isIC = (data.currently_ic == "1")
