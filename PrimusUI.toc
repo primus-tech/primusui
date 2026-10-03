@@ -53,6 +53,7 @@ Modules\Utility\PUIMinimapOrbit\PUIMinimapOrbit.lua
 Modules\Utility\PUIMailbox\PUIMailbox.lua
 Modules\Utility\PUIMerchant\PUIMerchant.lua
 Modules\Utility\PUIInspect\PUIInspect.lua
+Modules\Utility\PUILogViewer\PUILogViewer.lua
 
 # =========================================================================
 # GATHERING & PROFESSIONS (Tier 3)

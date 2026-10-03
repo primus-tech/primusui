@@ -179,9 +179,22 @@ function Elephant:BuildFrame()
 end
 
 function Elephant:OpenLogs()
-    local f = self:BuildFrame()
-    f:Show()
-    self:Refresh("")
+    if Primus.PUILogViewer then
+        Primus.PUILogViewer:Open("RP")
+    else
+        local f = self:BuildFrame()
+        f:Show()
+        self:Refresh("")
+    end
+end
+
+function Elephant:Toggle()
+    if Primus.PUILogViewer then
+        Primus.PUILogViewer:Toggle()
+    else
+        local f = self:BuildFrame()
+        if f:IsShown() then f:Hide() else f:Show(); self:Refresh("") end
+    end
 end
 
 function Elephant:Refresh(filterText)
