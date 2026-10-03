@@ -121,9 +121,12 @@ function SheetTabs:CreateStyledCheckbox(parent, text, onClickCallback)
 end
 
 function SheetTabs:CreateStyledDropdown(parent, width, height, optionsList, onSelectCallback)
+    local ddWidth = width or 180
+    local ddHeight = height or 22
+
     local btn = CreateFrame("Button", nil, parent)
-    btn:SetWidth(width or 180)
-    btn:SetHeight(height or 22)
+    btn:SetWidth(ddWidth)
+    btn:SetHeight(ddHeight)
     btn:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -145,9 +148,26 @@ function SheetTabs:CreateStyledDropdown(parent, width, height, optionsList, onSe
     arrow:SetText("|cff00ccffv|r")
     btn.arrow = arrow
 
+    -- Ensure global screen click-catcher exists for closing dropdown on outside click
+    if not SheetTabs.dropdownCloser then
+        local closer = CreateFrame("Button", "Primus_PUIRoleplay_DropdownCloser", UIParent)
+        closer:SetFrameStrata("TOOLTIP")
+        closer:SetAllPoints(UIParent)
+        closer:EnableMouse(true)
+        closer:Hide()
+        closer:SetScript("OnClick", function()
+            if openDropdownMenu then
+                openDropdownMenu:Hide()
+                openDropdownMenu = nil
+            end
+            this:Hide()
+        end)
+        SheetTabs.dropdownCloser = closer
+    end
+
     local menu = CreateFrame("Frame", nil, UIParent)
     menu:SetFrameStrata("TOOLTIP")
-    menu:SetWidth(width or 180)
+    menu:SetWidth(ddWidth)
     menu:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -157,31 +177,52 @@ function SheetTabs:CreateStyledDropdown(parent, width, height, optionsList, onSe
     menu:SetBackdropColor(0.06, 0.06, 0.09, 0.98)
     menu:SetBackdropBorderColor(0.0, 0.75, 1.0, 1.0)
     menu:Hide()
-    menu:EnableMouse(true)
     btn.menu = menu
 
     btn:SetScript("OnClick", function()
         if not Sheet:IsViewingSelf() then return end
-        if openDropdownMenu and openDropdownMenu ~= menu then
-            openDropdownMenu:Hide()
-        end
-        if menu:IsShown() then
+        if openDropdownMenu and openDropdownMenu == menu then
             menu:Hide()
+            if SheetTabs.dropdownCloser then SheetTabs.dropdownCloser:Hide() end
             openDropdownMenu = nil
-        else
-            menu:ClearAllPoints()
-            menu:SetPoint("TOPLEFT", btn, "BOTTOMLEFT", 0, -2)
-            menu:SetFrameLevel(btn:GetFrameLevel() + 50)
-            menu:Show()
-            openDropdownMenu = menu
+            return
         end
+
+        if openDropdownMenu then
+            openDropdownMenu:Hide()
+            openDropdownMenu = nil
+        end
+
+        menu:ClearAllPoints()
+        local bottom = btn:GetBottom() or 0
+        local menuH = menu:GetHeight() or 100
+        if bottom - menuH < 40 then
+            menu:SetPoint("BOTTOMLEFT", btn, "TOPLEFT", 0, 2)
+        else
+            menu:SetPoint("TOPLEFT", btn, "BOTTOMLEFT", 0, -2)
+        end
+
+        menu:SetFrameLevel(100)
+        if SheetTabs.dropdownCloser then
+            SheetTabs.dropdownCloser:SetFrameLevel(98)
+            SheetTabs.dropdownCloser:Show()
+        end
+
+        if menu.itemButtons then
+            for _, b in ipairs(menu.itemButtons) do
+                b:SetFrameLevel(102)
+            end
+        end
+
+        menu:Show()
+        openDropdownMenu = menu
     end)
 
     function btn:SetOptions(opts, currentKey)
         self.options = opts or {}
         local count = 0
         for _ in pairs(self.options) do count = count + 1 end
-        menu:SetHeight(math.min(240, math.max(26, count * 20 + 6)))
+        menu:SetHeight(math.min(260, math.max(26, count * 20 + 6)))
 
         if menu.itemButtons then
             for _, b in ipairs(menu.itemButtons) do b:Hide() end
@@ -196,23 +237,44 @@ function SheetTabs:CreateStyledDropdown(parent, width, height, optionsList, onSe
         for _, k in ipairs(sortedKeys) do
             local valText = self.options[k]
             local itemBtn = CreateFrame("Button", nil, menu)
-            itemBtn:SetWidth((width or 180) - 4)
+            itemBtn:SetWidth(ddWidth - 4)
             itemBtn:SetHeight(18)
             itemBtn:SetPoint("TOPLEFT", menu, "TOPLEFT", 2, -(rowIdx * 19 + 3))
+            itemBtn:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false, tileSize = 0, edgeSize = 1,
+                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+            })
+            itemBtn:SetBackdropColor(0.06, 0.06, 0.09, 0.0)
+            itemBtn:SetBackdropBorderColor(0, 0, 0, 0)
+            itemBtn:EnableMouse(true)
+            itemBtn:RegisterForClicks("LeftButtonUp")
 
             local iTxt = itemBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
             iTxt:SetPoint("LEFT", itemBtn, "LEFT", 6, 0)
+            iTxt:SetPoint("RIGHT", itemBtn, "RIGHT", -6, 0)
+            iTxt:SetJustifyH("LEFT")
             iTxt:SetText(valText)
             itemBtn.text = iTxt
             itemBtn.optKey = k
             itemBtn.optVal = valText
 
-            itemBtn:SetScript("OnEnter", function() this.text:SetTextColor(0.0, 1.0, 1.0) end)
-            itemBtn:SetScript("OnLeave", function() this.text:SetTextColor(1.0, 1.0, 1.0) end)
+            itemBtn:SetScript("OnEnter", function()
+                this:SetBackdropColor(0.0, 0.45, 0.75, 0.95)
+                this:SetBackdropBorderColor(0.0, 0.85, 1.0, 1.0)
+                this.text:SetTextColor(1.0, 1.0, 1.0)
+            end)
+            itemBtn:SetScript("OnLeave", function()
+                this:SetBackdropColor(0.06, 0.06, 0.09, 0.0)
+                this:SetBackdropBorderColor(0, 0, 0, 0)
+                this.text:SetTextColor(0.85, 0.85, 0.90)
+            end)
             itemBtn:SetScript("OnClick", function()
                 btn.selectedKey = this.optKey
                 btn.text:SetText(this.optVal)
                 menu:Hide()
+                if SheetTabs.dropdownCloser then SheetTabs.dropdownCloser:Hide() end
                 openDropdownMenu = nil
                 if onSelectCallback then onSelectCallback(this.optKey, this.optVal) end
             end)

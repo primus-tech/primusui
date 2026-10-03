@@ -130,11 +130,27 @@ function Sheet:OpenCardPreviewModal(targetName)
     local titleStr = (data.title and data.title ~= "") and ("<" .. data.title .. ">") or ""
     p.titleText:SetText(titleStr)
 
-    local age = data.apparent_age or "Unknown Age"
-    local ori = (data.show_orientation ~= false and data.orientation) or "Private"
+    local tags = {}
+    if data.apparent_age and data.apparent_age ~= "" then
+        table.insert(tags, "|cff00ccff[" .. data.apparent_age .. "]|r")
+    end
+    if data.biological_sex and data.biological_sex ~= "" then
+        table.insert(tags, "|cffffd100[" .. data.biological_sex .. "]|r")
+    end
+    if data.gender_identity and data.gender_identity ~= "" and data.gender_identity ~= data.biological_sex then
+        table.insert(tags, "|cff00ffaa[" .. data.gender_identity .. "]|r")
+    end
+    local pr = (data.currently_ic == "1") and data.ic_pronouns or data.ooc_pronouns
+    if pr and pr ~= "" then
+        table.insert(tags, "|cffffcc80(" .. pr .. ")|r")
+    end
+    if data.show_orientation ~= false and data.orientation and data.orientation ~= "" then
+        table.insert(tags, "|cffff80cc[" .. data.orientation .. "]|r")
+    end
+
     local lgbtq = (data.lgbtqia_friendly ~= false) and " |cffff0000[|cffff7f00LGBTQIA+|cff9400d3]|r" or ""
     local adult18 = (data.adult_18plus_flag == true) and " |cffff3355[18+]|r" or ""
-    p.demoPill:SetText(string.format("|cff00ccff[%s]|r |cffff80cc[%s]|r%s%s", age, ori, lgbtq, adult18))
+    p.demoPill:SetText(table.concat(tags, " ") .. lgbtq .. adult18)
 
     p.relText:SetText("Status: |cffffffff" .. (data.relationship_status or "Single") .. "|r")
 

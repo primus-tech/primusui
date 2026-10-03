@@ -97,15 +97,29 @@ function Tooltip:EnhancePlayerTooltip(tooltip, unit, playerName)
         tooltip:AddLine("<" .. titleStr .. ">", 0.0, 0.85, 1.0)
     end
 
-    -- 3. Demographic Badges Pill (Age, Orientation, LGBTQIA+, 18+)
-    local ageStr = (charData.apparent_age and charData.apparent_age ~= "") and ("|cff00ccff[" .. charData.apparent_age .. "]|r") or ""
-    local oriStr = (charData.show_orientation ~= false and charData.orientation and charData.orientation ~= "") and (" |cffff80cc[" .. charData.orientation .. "]|r") or ""
-    local lgbtqStr = (charData.lgbtqia_friendly ~= false) and " |cffff0000[|cffff7f00LGBTQIA+|cff9400d3]|r" or ""
-    local adult18Str = (charData.adult_18plus_flag == true) and " |cffff3355[18+]|r" or ""
+    -- 3. Demographic Badges Pill (Age, Sex, Gender, Orientation, LGBTQIA+, 18+)
+    local demoPills = {}
+    if charData.apparent_age and charData.apparent_age ~= "" then
+        table.insert(demoPills, "|cff00ccff[" .. charData.apparent_age .. "]|r")
+    end
+    if charData.biological_sex and charData.biological_sex ~= "" then
+        table.insert(demoPills, "|cffffd100[" .. charData.biological_sex .. "]|r")
+    end
+    if charData.gender_identity and charData.gender_identity ~= "" and charData.gender_identity ~= charData.biological_sex then
+        table.insert(demoPills, "|cff00ffaa[" .. charData.gender_identity .. "]|r")
+    end
+    if charData.show_orientation ~= false and charData.orientation and charData.orientation ~= "" then
+        table.insert(demoPills, "|cffff80cc[" .. charData.orientation .. "]|r")
+    end
+    if charData.lgbtqia_friendly ~= false then
+        table.insert(demoPills, "|cffff0000[|cffff7f00LGBTQIA+|cff9400d3]|r")
+    end
+    if charData.adult_18plus_flag == true then
+        table.insert(demoPills, "|cffff3355[18+]|r")
+    end
 
-    local demoLine = ageStr .. oriStr .. lgbtqStr .. adult18Str
-    if demoLine ~= "" then
-        tooltip:AddLine(demoLine, 1, 1, 1)
+    if table.getn(demoPills) > 0 then
+        tooltip:AddLine(table.concat(demoPills, " "), 1, 1, 1)
     end
 
     -- 4. Current Emotion / Expression

@@ -140,13 +140,13 @@ function SheetTabs:BuildPanel1(parent, f)
     -- Demographics Header Divider
     local demoHeader = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     demoHeader:SetPoint("TOPLEFT", ttlEB, "BOTTOMLEFT", 0, -10)
-    demoHeader:SetText("|cffffd100DEMOGRAPHICS, SEX, GENDER & IDENTITY:|r")
+    demoHeader:SetText("|cffffd100DEMOGRAPHICS, SEX, GENDER & PRONOUNS:|r")
 
-    -- Row 5: Apparent Age, Biological Sex, Gender Identity
+    -- Row 5: Apparent Age, Biological Sex, Gender Identity, IC Pronouns
     local ageLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     ageLabel:SetPoint("TOPLEFT", demoHeader, "BOTTOMLEFT", 0, -4)
     ageLabel:SetText("|cff00e5ffApparent Age:|r")
-    local ageEB = self:CreateStyledEditBox(p1, 100, 20)
+    local ageEB = self:CreateStyledEditBox(p1, 75, 20)
     ageEB:SetPoint("TOPLEFT", ageLabel, "BOTTOMLEFT", 0, -2)
     ageEB:SetScript("OnTextChanged", function()
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
@@ -159,9 +159,9 @@ function SheetTabs:BuildPanel1(parent, f)
     p1.ageEB = ageEB
 
     local sexLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    sexLabel:SetPoint("TOPLEFT", ageLabel, "TOPLEFT", 112, 0)
+    sexLabel:SetPoint("TOPLEFT", ageLabel, "TOPLEFT", 85, 0)
     sexLabel:SetText("|cff00e5ffBiological Sex:|r")
-    local sexDropdown = self:CreateStyledDropdown(p1, 160, 22, PUIRoleplay.DropdownOptions.sex or {}, function(optKey, optVal)
+    local sexDropdown = self:CreateStyledDropdown(p1, 125, 22, PUIRoleplay.DropdownOptions.sex or {}, function(optKey, optVal)
         local p = PUIRoleplay:GetMyProfile()
         p.biological_sex = optVal
         p.keyM = PUIRoleplay:GenerateKey()
@@ -171,9 +171,9 @@ function SheetTabs:BuildPanel1(parent, f)
     p1.sexDropdown = sexDropdown
 
     local genderLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    genderLabel:SetPoint("TOPLEFT", sexLabel, "TOPLEFT", 172, 0)
+    genderLabel:SetPoint("TOPLEFT", sexLabel, "TOPLEFT", 135, 0)
     genderLabel:SetText("|cff00e5ffGender Identity:|r")
-    local genderDropdown = self:CreateStyledDropdown(p1, 194, 22, PUIRoleplay.DropdownOptions.gender or {}, function(optKey, optVal)
+    local genderDropdown = self:CreateStyledDropdown(p1, 150, 22, PUIRoleplay.DropdownOptions.gender or {}, function(optKey, optVal)
         local p = PUIRoleplay:GetMyProfile()
         p.gender_identity = optVal
         p.keyM = PUIRoleplay:GenerateKey()
@@ -182,11 +182,10 @@ function SheetTabs:BuildPanel1(parent, f)
     genderDropdown:SetPoint("TOPLEFT", genderLabel, "BOTTOMLEFT", 0, -2)
     p1.genderDropdown = genderDropdown
 
-    -- Row 6: IC Pronouns & OOC Pronouns
     local icPrLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    icPrLabel:SetPoint("TOPLEFT", ageEB, "BOTTOMLEFT", 0, -6)
-    icPrLabel:SetText("|cff00e5ffIC Pronouns (Character):|r")
-    local icPrEB = self:CreateStyledEditBox(p1, 230, 20)
+    icPrLabel:SetPoint("TOPLEFT", genderLabel, "TOPLEFT", 160, 0)
+    icPrLabel:SetText("|cff00e5ffIC Pronouns:|r")
+    local icPrEB = self:CreateStyledEditBox(p1, 95, 20)
     icPrEB:SetPoint("TOPLEFT", icPrLabel, "BOTTOMLEFT", 0, -2)
     icPrEB:SetScript("OnTextChanged", function()
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
@@ -198,10 +197,11 @@ function SheetTabs:BuildPanel1(parent, f)
     end)
     p1.icPrEB = icPrEB
 
+    -- Row 6: OOC Pronouns, Orientation, Show Orientation
     local oocPrLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    oocPrLabel:SetPoint("TOPLEFT", icPrLabel, "TOPLEFT", 245, 0)
+    oocPrLabel:SetPoint("TOPLEFT", ageEB, "BOTTOMLEFT", 0, -6)
     oocPrLabel:SetText("|cff00e5ffOOC Pronouns (Player):|r")
-    local oocPrEB = self:CreateStyledEditBox(p1, 234, 20)
+    local oocPrEB = self:CreateStyledEditBox(p1, 135, 20)
     oocPrEB:SetPoint("TOPLEFT", oocPrLabel, "BOTTOMLEFT", 0, -2)
     oocPrEB:SetScript("OnTextChanged", function()
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
@@ -213,21 +213,10 @@ function SheetTabs:BuildPanel1(parent, f)
     end)
     p1.oocPrEB = oocPrEB
 
-    -- Row 7: LGBTQIA+ Safe Space Friendly Checkbox
-    local lgbtqBox = self:CreateStyledCheckbox(p1, "|cffff0000[|cffff7f00LGBTQIA+|cff9400d3 Friendly / Ally Safe Space]|r", function(checked)
-        local p = PUIRoleplay:GetMyProfile()
-        p.lgbtqia_friendly = checked
-        p.keyM = PUIRoleplay:GenerateKey()
-        PUIRoleplay:SaveMyProfile(p)
-    end)
-    lgbtqBox:SetPoint("TOPLEFT", icPrEB, "BOTTOMLEFT", 0, -10)
-    p1.lgbtqBox = lgbtqBox
-
-    -- Row 8: Romantic & Sexual Orientation
     local oriLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    oriLabel:SetPoint("TOPLEFT", lgbtqBox, "BOTTOMLEFT", 0, -8)
+    oriLabel:SetPoint("TOPLEFT", oocPrLabel, "TOPLEFT", 145, 0)
     oriLabel:SetText("|cff00e5ffOrientation / Attraction Preference:|r")
-    local oriDropdown = self:CreateStyledDropdown(p1, 280, 22, PUIRoleplay.DropdownOptions.orientation or {}, function(optKey, optVal)
+    local oriDropdown = self:CreateStyledDropdown(p1, 200, 22, PUIRoleplay.DropdownOptions.orientation or {}, function(optKey, optVal)
         local p = PUIRoleplay:GetMyProfile()
         p.orientation = optVal
         p.keyM = PUIRoleplay:GenerateKey()
@@ -236,12 +225,22 @@ function SheetTabs:BuildPanel1(parent, f)
     oriDropdown:SetPoint("TOPLEFT", oriLabel, "BOTTOMLEFT", 0, -2)
     p1.oriDropdown = oriDropdown
 
-    local showOriBox = self:CreateStyledCheckbox(p1, "Show on Public Tooltip & Card", function(checked)
+    local showOriBox = self:CreateStyledCheckbox(p1, "Show on Public Card", function(checked)
         local p = PUIRoleplay:GetMyProfile()
         p.show_orientation = checked
         p.keyM = PUIRoleplay:GenerateKey()
         PUIRoleplay:SaveMyProfile(p)
     end)
-    showOriBox:SetPoint("LEFT", oriDropdown, "RIGHT", 14, 0)
+    showOriBox:SetPoint("LEFT", oriDropdown, "RIGHT", 8, 0)
     p1.showOriBox = showOriBox
+
+    -- Row 7: LGBTQIA+ Safe Space Friendly Checkbox
+    local lgbtqBox = self:CreateStyledCheckbox(p1, "|cffff0000[|cffff7f00LGBTQIA+|cff9400d3 Friendly / Ally Safe Space]|r", function(checked)
+        local p = PUIRoleplay:GetMyProfile()
+        p.lgbtqia_friendly = checked
+        p.keyM = PUIRoleplay:GenerateKey()
+        PUIRoleplay:SaveMyProfile(p)
+    end)
+    lgbtqBox:SetPoint("TOPLEFT", oocPrEB, "BOTTOMLEFT", 0, -10)
+    p1.lgbtqBox = lgbtqBox
 end

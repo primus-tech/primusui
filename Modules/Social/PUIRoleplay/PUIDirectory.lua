@@ -334,6 +334,16 @@ function Directory:BuildFrame()
                     if data.apparent_age and data.apparent_age ~= "" then
                         GameTooltip:AddLine("Age: |cffffffff" .. data.apparent_age .. "|r", 0.8, 0.8, 0.8)
                     end
+                    if data.biological_sex and data.biological_sex ~= "" then
+                        GameTooltip:AddLine("Sex: |cffffffff" .. data.biological_sex .. "|r", 0.8, 0.8, 0.8)
+                    end
+                    if data.gender_identity and data.gender_identity ~= "" then
+                        GameTooltip:AddLine("Gender: |cffffffff" .. data.gender_identity .. "|r", 0.8, 0.8, 0.8)
+                    end
+                    local pr = (data.currently_ic == "1") and data.ic_pronouns or data.ooc_pronouns
+                    if pr and pr ~= "" then
+                        GameTooltip:AddLine("Pronouns: |cffffffff" .. pr .. "|r", 0.8, 0.8, 0.8)
+                    end
                     if data.lgbtqia_friendly ~= false then
                         GameTooltip:AddLine("|cffff0000[|cffff7f00LGBTQIA+|cff9400d3 Friendly Safe Space]|r", 1, 1, 1)
                     end

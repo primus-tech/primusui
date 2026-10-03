@@ -18,7 +18,7 @@ PUIRoleplay.Protocols = Protocols
 -- Multi-Protocol Wire Data Schemas
 --------------------------------------------------------------------------------
 local dataKeys = {
-    ["M"] = { "keyM", "icon", "full_name", "race", "class", "class_color", "ooc_info", "ic_info", "currently_ic", "ooc_pronouns", "ic_pronouns", "nsfw", "title", "prefix", "nickname", "house_name", "apparent_age", "gender_identity", "lgbtqia_friendly", "orientation", "show_orientation" },
+    ["M"] = { "keyM", "icon", "full_name", "race", "class", "class_color", "ooc_info", "ic_info", "currently_ic", "ooc_pronouns", "ic_pronouns", "nsfw", "title", "prefix", "nickname", "house_name", "apparent_age", "biological_sex", "gender_identity", "lgbtqia_friendly", "orientation", "show_orientation" },
     ["T"] = { "keyT", "atAGlance1", "atAGlance1Title", "atAGlance1Icon", "atAGlance2", "atAGlance2Title", "atAGlance2Icon", "atAGlance3", "atAGlance3Title", "atAGlance3Icon", "atAGlance4", "atAGlance4Title", "atAGlance4Icon", "atAGlance5", "atAGlance5Title", "atAGlance5Icon", "experience", "walkups", "injury", "romance", "death", "combat_preference" },
     ["D"] = { "keyD", "description", "eye_color", "height", "weight", "body_build", "current_emotion" },
     ["L"] = { "keyL", "birth_city", "home_city", "motto", "faction_clan", "history1", "history2", "history3", "history4", "history5", "history6" },
