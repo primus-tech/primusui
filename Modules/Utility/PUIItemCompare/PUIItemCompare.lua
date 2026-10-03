@@ -62,9 +62,14 @@ local compareTip2 = CreateFrame("GameTooltip", "Primus_CompareTooltip2", UIParen
 
 local function StyleTooltip(tip)
     if not tip then return end
-    tip:SetBackdrop(Media:Fetch("border", "1Pixel"))
-    tip:SetBackdropColor(0.08, 0.08, 0.10, 0.95)
-    tip:SetBackdropBorderColor(0.25, 0.25, 0.30, 1.0)
+    local Tooltip = Primus.PUITooltip
+    if Tooltip and Tooltip.Skin and Tooltip.Skin.ApplySkin then
+        Tooltip.Skin:ApplySkin(tip)
+    else
+        tip:SetBackdrop(Media:Fetch("border", "1Pixel"))
+        tip:SetBackdropColor(0.08, 0.08, 0.10, 0.95)
+        tip:SetBackdropBorderColor(0.25, 0.25, 0.30, 1.0)
+    end
 end
 
 local function HideComparisonTooltips()
@@ -89,18 +94,6 @@ local function GetTooltipOwner(tip)
         return this
     end
     return nil
-end
-
--- Hook Blizzard's native Merchant comparison tooltips for consistent Primus styling
-local function SkinBlizzardShoppingTooltips()
-    if ShoppingTooltip1 then
-        StyleTooltip(ShoppingTooltip1)
-        ShoppingTooltip1:SetFrameStrata("TOOLTIP")
-    end
-    if ShoppingTooltip2 then
-        StyleTooltip(ShoppingTooltip2)
-        ShoppingTooltip2:SetFrameStrata("TOOLTIP")
-    end
 end
 
 local function GetItemID(link)
@@ -268,235 +261,24 @@ local function ShowComparison(parentTooltip, itemLink)
     isComparing = false
 end
 
--- Hook standard 1.12 Tooltip Item Setters & Non-Item Suppressors
-local function HookTooltipMethods(tip)
-    if not tip then return end
-
-    -- Track owner safely on SetOwner
-    if tip.SetOwner then
-        local origSetOwner = tip.SetOwner
-        tip.SetOwner = function(self, owner, anchor, a1, a2, a3)
-            self._owner = owner
-            return origSetOwner(self, owner, anchor, a1, a2, a3)
-        end
-    end
-
-    -- Item setters that trigger comparison
-    Events:Hook(tip, "SetBagItem", function(self, bag, slot)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetContainerItemLink(bag, slot)
-        ShowComparison(self, link)
-    end)
-
-    Events:Hook(tip, "SetInventoryItem", function(self, unit, slot)
-        if self == compareTip1 or self == compareTip2 then return end
-        local numSlot = tonumber(slot)
-        if (unit ~= "player") or (numSlot and numSlot > 19) then
-            local link = (numSlot and numSlot >= 1) and GetInventoryItemLink(unit, slot) or nil
-            if link then
-                ShowComparison(self, link)
-            else
-                HideComparisonTooltips()
-            end
-        else
-            HideComparisonTooltips()
-        end
-    end)
-
-    Events:Hook(tip, "SetQuestItem", function(self, qtype, slot)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetQuestItemLink(qtype, slot)
-        ShowComparison(self, link)
-    end)
-
-    Events:Hook(tip, "SetQuestLogItem", function(self, qtype, slot)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetQuestLogItemLink(qtype, slot)
-        ShowComparison(self, link)
-    end)
-
-    Events:Hook(tip, "SetLootItem", function(self, slot)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetLootSlotLink(slot)
-        ShowComparison(self, link)
-    end)
-
-    Events:Hook(tip, "SetLootRollItem", function(self, slot)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetLootRollItemLink(slot)
-        ShowComparison(self, link)
-    end)
-
-    Events:Hook(tip, "SetInboxItem", function(self, index, attachIndex)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetInboxItemLink and GetInboxItemLink(index, attachIndex)
-        if link then ShowComparison(self, link) else HideComparisonTooltips() end
-    end)
-
-    Events:Hook(tip, "SetSendMailItem", function(self, index)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetSendMailItemLink and GetSendMailItemLink(index)
-        if link then ShowComparison(self, link) else HideComparisonTooltips() end
-    end)
-
-    Events:Hook(tip, "SetTradePlayerItem", function(self, index)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetTradePlayerItemLink and GetTradePlayerItemLink(index)
-        if link then ShowComparison(self, link) else HideComparisonTooltips() end
-    end)
-
-    Events:Hook(tip, "SetTradeTargetItem", function(self, index)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetTradeTargetItemLink and GetTradeTargetItemLink(index)
-        if link then ShowComparison(self, link) else HideComparisonTooltips() end
-    end)
-
-    Events:Hook(tip, "SetAuctionItem", function(self, atype, index)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetAuctionItemLink and GetAuctionItemLink(atype, index)
-        if link then ShowComparison(self, link) else HideComparisonTooltips() end
-    end)
-
-    Events:Hook(tip, "SetAuctionSellItem", function(self)
-        if self == compareTip1 or self == compareTip2 then return end
-        local link = GetAuctionSellItemInfo and GetAuctionSellItemInfo()
-        if link then ShowComparison(self, link) else HideComparisonTooltips() end
-    end)
-
-    -- TradeSkill Crafted Items (TradeSkillFrame)
-    Events:Hook(tip, "SetTradeSkillItem", function(self, skillIndex, reagentIndex)
-        if self == compareTip1 or self == compareTip2 then return end
-        if reagentIndex then
-            HideComparisonTooltips()
-            return
-        end
-        local link = GetTradeSkillItemLink and GetTradeSkillItemLink(skillIndex)
-        local skillName = nil
-        if not link and GetTradeSkillInfo then
-            skillName = GetTradeSkillInfo(skillIndex)
-            if skillName then
-                local _, l = GetItemInfo(skillName)
-                link = l
-            end
-        end
-        if not link then
-            local textLeft1 = _G[self:GetName() .. "TextLeft1"]
-            if textLeft1 and textLeft1:GetText() then
-                local tName = textLeft1:GetText()
-                local _, l = GetItemInfo(tName)
-                link = l or tName
-            end
-        end
-        local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
-        if link and not string.find(tostring(link), "item:") and baseDB and baseDB.GetItemID then
-            local id = baseDB:GetItemID(link)
-            if id then link = "item:" .. id .. ":0:0:0" end
-        end
-        if link then
-            ShowComparison(self, link)
-        else
-            HideComparisonTooltips()
-        end
-    end)
-
-    -- Craft Items (CraftFrame)
-    Events:Hook(tip, "SetCraftItem", function(self, skillIndex, reagentIndex)
-        if self == compareTip1 or self == compareTip2 then return end
-        if reagentIndex then
-            HideComparisonTooltips()
-            return
-        end
-        local link = GetCraftItemLink and GetCraftItemLink(skillIndex)
-        local craftName = nil
-        if not link and GetCraftInfo then
-            craftName = GetCraftInfo(skillIndex)
-            if craftName then
-                local _, l = GetItemInfo(craftName)
-                link = l
-            end
-        end
-        if not link then
-            local textLeft1 = _G[self:GetName() .. "TextLeft1"]
-            if textLeft1 and textLeft1:GetText() then
-                local tName = textLeft1:GetText()
-                local _, l = GetItemInfo(tName)
-                link = l or tName
-            end
-        end
-        local baseDB = Primus.PUIBasePriceDB or _G.PUIBasePriceDB
-        if link and not string.find(tostring(link), "item:") and baseDB and baseDB.GetItemID then
-            local id = baseDB:GetItemID(link)
-            if id then link = "item:" .. id .. ":0:0:0" end
-        end
-        if link then
-            ShowComparison(self, link)
-        else
-            HideComparisonTooltips()
-        end
-    end)
-
-    Events:Hook(tip, "SetHyperlink", function(self, link)
-        if self == compareTip1 or self == compareTip2 then return end
-        local cleanLink = Utils.ExtractLink(link) or link
-        ShowComparison(self, cleanLink)
-    end)
-
-    -- Non-item setters that MUST suppress/hide comparison tooltips
-    Events:Hook(tip, "SetAction", function(self, slot)
-        HideComparisonTooltips()
-    end)
-
-    Events:Hook(tip, "SetPetAction", function(self, slot)
-        HideComparisonTooltips()
-    end)
-
-    Events:Hook(tip, "SetShapeshift", function(self, slot)
-        HideComparisonTooltips()
-    end)
-
-    Events:Hook(tip, "SetSpell", function(self, spellId, bookType)
-        HideComparisonTooltips()
-    end)
-
-    Events:Hook(tip, "SetUnit", function(self, unit)
-        HideComparisonTooltips()
-    end)
-
-    Events:Hook(tip, "SetPlayerBuff", function(self, buffIndex)
-        HideComparisonTooltips()
-    end)
-
-    Events:Hook(tip, "SetUnitBuff", function(self, unit, buffIndex)
-        HideComparisonTooltips()
-    end)
-
-    Events:Hook(tip, "SetUnitDebuff", function(self, unit, buffIndex)
-        HideComparisonTooltips()
-    end)
-
-    Events:Hook(tip, "SetTrackingSpell", function(self)
-        HideComparisonTooltips()
-    end)
-
-    Events:Hook(tip, "ClearLines", function(self)
-        HideComparisonTooltips()
-    end)
-
-    Events:HookScript(tip, "OnHide", function(self)
-        if self == GameTooltip or self == ItemRefTooltip then
-            HideComparisonTooltips()
-        end
-    end)
-end
-
 function PUIItemCompare:RegisterOptionsFlare()
     if not Primus.Options or not Primus.Options.RegisterModuleOptions then return end
-    Primus.Options:RegisterModuleOptions("PUIItemCompare", {
-        name = "PUIItemCompare",
-        category = "Utility",
-        label = "Item Comparison",
-        icon = "Interface\\Icons\\INV_Sword_04",
-        desc = "Side-by-side equipment comparison tooltips across merchant, bags, bank, loot, and chat.",
+    Primus.Options:RegisterModuleOptions("PUIItemCompare", "Utility", {
+        title = "PUIItemCompare: Equipment Comparison",
+        description = "Side-by-side equipment comparison tooltips across merchant, bags, bank, loot, and chat.",
+        fields = {
+            {
+                key = "enabled",
+                label = "Enable Equipment Comparison Tooltips",
+                type = "checkbox",
+                default = true,
+                get = function() return compareDB:Get("enabled", true) end,
+                set = function(val)
+                    compareDB:Set("enabled", val)
+                    if not val then HideComparisonTooltips() end
+                end,
+            },
+        },
     })
 end
 
@@ -504,12 +286,28 @@ function PUIItemCompare:OnInitialize()
     self:RegisterOptionsFlare()
     StyleTooltip(compareTip1)
     StyleTooltip(compareTip2)
-    SkinBlizzardShoppingTooltips()
-    HookTooltipMethods(GameTooltip)
-    HookTooltipMethods(ItemRefTooltip)
 
-    -- Re-skin ShoppingTooltips whenever MerchantFrame opens
-    Events:Register("MERCHANT_SHOW", "PUIItemCompare", function()
-        SkinBlizzardShoppingTooltips()
-    end)
+    Events:HookScript(GameTooltip, "OnHide", HideComparisonTooltips)
+    Events:HookScript(ItemRefTooltip, "OnHide", HideComparisonTooltips)
+end
+
+function PUIItemCompare:OnEnable()
+    local Tooltip = Primus.PUITooltip
+    if Tooltip and Tooltip.RegisterItemProvider then
+        Tooltip:RegisterItemProvider("PUIItemCompare", 100, function(tt, itemData)
+            if itemData and itemData.link then
+                ShowComparison(tt, itemData.link)
+            else
+                HideComparisonTooltips()
+            end
+        end)
+    end
+end
+
+function PUIItemCompare:OnDisable()
+    local Tooltip = Primus.PUITooltip
+    if Tooltip and Tooltip.UnregisterItemProvider then
+        Tooltip:UnregisterItemProvider("PUIItemCompare")
+    end
+    HideComparisonTooltips()
 end

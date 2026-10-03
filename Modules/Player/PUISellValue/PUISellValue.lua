@@ -456,350 +456,11 @@ function PUISellValue:InjectTooltipPrice(tooltip, itemID, count)
     tooltip:Show()
 end
 
-local function ClearTooltipFlag(tooltip)
-    if tooltip then
-        tooltip._primusSellValueInjected = nil
-    end
-end
-
--- Extract itemID and item count from various Blizzard frame contexts
-local function HookTooltip(tooltip)
-    if not tooltip or tooltip._primusSellHooked then return end
-    tooltip._primusSellHooked = true
-
-    -- 1. Bag Items
-    local origSetBagItem = tooltip.SetBagItem
-    tooltip.SetBagItem = function(self, bag, slot)
-        ClearTooltipFlag(self)
-        local r1, r2, r3, r4 = origSetBagItem(self, bag, slot)
-        local link = GetContainerItemLink(bag, slot)
-        if link then
-            local itemID = PUISellValue:ExtractItemID(link)
-            local _, count = GetContainerItemInfo(bag, slot)
-            PUISellValue:InjectTooltipPrice(self, itemID, count)
-        end
-        return r1, r2, r3, r4
-    end
-
-    -- 2. Inventory Items
-    local origSetInventoryItem = tooltip.SetInventoryItem
-    tooltip.SetInventoryItem = function(self, unit, slot)
-        ClearTooltipFlag(self)
-        local r1, r2, r3, r4 = origSetInventoryItem(self, unit, slot)
-        local link = nil
-        if slot and tonumber(slot) and tonumber(slot) >= 1 and tonumber(slot) <= 23 then
-            link = GetInventoryItemLink(unit, slot)
-        end
-        if link then
-            local itemID = PUISellValue:ExtractItemID(link)
-            local count = GetInventoryItemCount(unit, slot) or 1
-            PUISellValue:InjectTooltipPrice(self, itemID, count)
-        end
-        return r1, r2, r3, r4
-    end
-
-    -- 3. Hyperlinks
-    local origSetHyperlink = tooltip.SetHyperlink
-    tooltip.SetHyperlink = function(self, link)
-        ClearTooltipFlag(self)
-        local r1, r2, r3, r4 = origSetHyperlink(self, link)
-        if link then
-            local cleanLink = Utils.ExtractLink(link) or link
-            local itemID = PUISellValue:ExtractItemID(cleanLink)
-            PUISellValue:InjectTooltipPrice(self, itemID, 1)
-        end
-        return r1, r2, r3, r4
-    end
-
-    -- 4. Action Bar Items
-    if tooltip.SetAction then
-        local origSetAction = tooltip.SetAction
-        tooltip.SetAction = function(self, slot)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetAction(self, slot)
-            local count = GetActionCount(slot) or 1
-            local textLeft1 = _G[self:GetName() .. "TextLeft1"]
-            if textLeft1 and textLeft1:GetText() then
-                local name = textLeft1:GetText()
-                -- Check if item exists with this name via GetItemInfo
-                local _, link = GetItemInfo(name)
-                if link then
-                    local itemID = PUISellValue:ExtractItemID(link)
-                    PUISellValue:InjectTooltipPrice(self, itemID, count)
-                end
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- 5. Crafting Reagents & Craft Items (CraftFrame)
-    if tooltip.SetCraftItem then
-        local origSetCraftItem = tooltip.SetCraftItem
-        tooltip.SetCraftItem = function(self, skillIndex, reagentIndex)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetCraftItem(self, skillIndex, reagentIndex)
-            if reagentIndex then
-                local link = GetCraftReagentItemLink and GetCraftReagentItemLink(skillIndex, reagentIndex)
-                local count = 1
-                if GetCraftReagentInfo then
-                    local reagentName, _, reagentCount = GetCraftReagentInfo(skillIndex, reagentIndex)
-                    count = reagentCount or 1
-                    if not link and reagentName then
-                        local _, l = GetItemInfo(reagentName)
-                        link = l or reagentName
-                    end
-                end
-                if not link then
-                    local textLeft1 = _G[self:GetName() .. "TextLeft1"]
-                    if textLeft1 and textLeft1:GetText() then link = textLeft1:GetText() end
-                end
-                if link then
-                    local itemID = PUISellValue:ExtractItemID(link)
-                    PUISellValue:InjectTooltipPrice(self, itemID or link, count or 1)
-                end
-            else
-                local link = GetCraftItemLink and GetCraftItemLink(skillIndex)
-                if not link and GetCraftInfo then
-                    local craftName = GetCraftInfo(skillIndex)
-                    if craftName then
-                        local _, l = GetItemInfo(craftName)
-                        link = l or craftName
-                    end
-                end
-                if not link then
-                    local textLeft1 = _G[self:GetName() .. "TextLeft1"]
-                    if textLeft1 and textLeft1:GetText() then link = textLeft1:GetText() end
-                end
-                if link then
-                    local itemID = PUISellValue:ExtractItemID(link)
-                    PUISellValue:InjectTooltipPrice(self, itemID or link, 1)
-                end
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- 6. TradeSkill Items & Reagents (TradeSkillFrame)
-    if tooltip.SetTradeSkillItem then
-        local origSetTradeSkillItem = tooltip.SetTradeSkillItem
-        tooltip.SetTradeSkillItem = function(self, skillIndex, reagentIndex)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetTradeSkillItem(self, skillIndex, reagentIndex)
-            if reagentIndex then
-                local link = GetTradeSkillReagentItemLink and GetTradeSkillReagentItemLink(skillIndex, reagentIndex)
-                local count = 1
-                if GetTradeSkillReagentInfo then
-                    local reagentName, _, reagentCount = GetTradeSkillReagentInfo(skillIndex, reagentIndex)
-                    count = reagentCount or 1
-                    if not link and reagentName then
-                        local _, l = GetItemInfo(reagentName)
-                        link = l or reagentName
-                    end
-                end
-                if not link then
-                    local textLeft1 = _G[self:GetName() .. "TextLeft1"]
-                    if textLeft1 and textLeft1:GetText() then link = textLeft1:GetText() end
-                end
-                if link then
-                    local itemID = PUISellValue:ExtractItemID(link)
-                    PUISellValue:InjectTooltipPrice(self, itemID or link, count or 1)
-                end
-            else
-                local link = GetTradeSkillItemLink and GetTradeSkillItemLink(skillIndex)
-                local count = 1
-                if GetTradeSkillNumMade then
-                    local minMade, maxMade = GetTradeSkillNumMade(skillIndex)
-                    count = minMade or 1
-                end
-                if not link and GetTradeSkillInfo then
-                    local skillName = GetTradeSkillInfo(skillIndex)
-                    if skillName then
-                        local _, l = GetItemInfo(skillName)
-                        link = l or skillName
-                    end
-                end
-                if not link then
-                    local textLeft1 = _G[self:GetName() .. "TextLeft1"]
-                    if textLeft1 and textLeft1:GetText() then link = textLeft1:GetText() end
-                end
-                if link then
-                    local itemID = PUISellValue:ExtractItemID(link)
-                    PUISellValue:InjectTooltipPrice(self, itemID or link, count or 1)
-                end
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- 7. Loot Slots
-    if tooltip.SetLootItem then
-        local origSetLootItem = tooltip.SetLootItem
-        tooltip.SetLootItem = function(self, slot)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetLootItem(self, slot)
-            local link = GetLootSlotLink(slot)
-            if link then
-                local itemID = PUISellValue:ExtractItemID(link)
-                local _, _, count = GetLootSlotInfo(slot)
-                PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- 8. Loot Roll Items
-    if tooltip.SetLootRollItem then
-        local origSetLootRollItem = tooltip.SetLootRollItem
-        tooltip.SetLootRollItem = function(self, slot)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetLootRollItem(self, slot)
-            local link = GetLootRollItemLink(slot)
-            if link then
-                local itemID = PUISellValue:ExtractItemID(link)
-                PUISellValue:InjectTooltipPrice(self, itemID, 1)
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- 9. Quest Rewards & Choices
-    if tooltip.SetQuestItem then
-        local origSetQuestItem = tooltip.SetQuestItem
-        tooltip.SetQuestItem = function(self, qtype, slot)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetQuestItem(self, qtype, slot)
-            local link = GetQuestItemLink(qtype, slot)
-            if link then
-                local itemID = PUISellValue:ExtractItemID(link)
-                local _, _, count = GetQuestItemInfo(qtype, slot)
-                PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- 10. Quest Log Rewards
-    if tooltip.SetQuestLogItem then
-        local origSetQuestLogItem = tooltip.SetQuestLogItem
-        tooltip.SetQuestLogItem = function(self, qtype, slot)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetQuestLogItem(self, qtype, slot)
-            if GetQuestLogItemLink then
-                local link = GetQuestLogItemLink(qtype, slot)
-                if link then
-                    local itemID = PUISellValue:ExtractItemID(link)
-                    local count = 1
-                    if qtype == "choice" and GetQuestLogChoiceInfo then
-                        local _, _, num = GetQuestLogChoiceInfo(slot)
-                        count = num or 1
-                    elseif qtype == "reward" and GetQuestLogRewardInfo then
-                        local _, _, num = GetQuestLogRewardInfo(slot)
-                        count = num or 1
-                    elseif GetQuestLogItemInfo then
-                        local _, _, num = GetQuestLogItemInfo(qtype, slot)
-                        count = num or 1
-                    end
-                    PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
-                end
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- 11. Mail Inbox & Send Items
-    if tooltip.SetInboxItem then
-        local origSetInboxItem = tooltip.SetInboxItem
-        tooltip.SetInboxItem = function(self, index, attachIndex)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetInboxItem(self, index, attachIndex)
-            if GetInboxItemLink then
-                local link = GetInboxItemLink(index, attachIndex or 1)
-                if link then
-                    local itemID = PUISellValue:ExtractItemID(link)
-                    local _, _, _, count = GetInboxItem(index, attachIndex or 1)
-                    PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
-                end
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    if tooltip.SetSendMailItem then
-        local origSetSendMailItem = tooltip.SetSendMailItem
-        tooltip.SetSendMailItem = function(self, index)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetSendMailItem(self, index)
-            if GetSendMailItemLink then
-                local link = GetSendMailItemLink(index)
-                if link then
-                    local itemID = PUISellValue:ExtractItemID(link)
-                    local _, _, _, count = GetSendMailItem(index)
-                    PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
-                end
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- 12. Auction House Items
-    if tooltip.SetAuctionItem then
-        local origSetAuctionItem = tooltip.SetAuctionItem
-        tooltip.SetAuctionItem = function(self, atype, index)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetAuctionItem(self, atype, index)
-            local link = GetAuctionItemLink(atype, index)
-            if link then
-                local itemID = PUISellValue:ExtractItemID(link)
-                local _, _, count = GetAuctionItemInfo(atype, index)
-                PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- 13. Trade Window
-    if tooltip.SetTradePlayerItem then
-        local origSetTradePlayerItem = tooltip.SetTradePlayerItem
-        tooltip.SetTradePlayerItem = function(self, slot)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetTradePlayerItem(self, slot)
-            local link = GetTradePlayerItemLink(slot)
-            if link then
-                local itemID = PUISellValue:ExtractItemID(link)
-                local _, _, count = GetTradePlayerItemInfo(slot)
-                PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    if tooltip.SetTradeTargetItem then
-        local origSetTradeTargetItem = tooltip.SetTradeTargetItem
-        tooltip.SetTradeTargetItem = function(self, slot)
-            ClearTooltipFlag(self)
-            local r1, r2, r3, r4 = origSetTradeTargetItem(self, slot)
-            local link = GetTradeTargetItemLink(slot)
-            if link then
-                local itemID = PUISellValue:ExtractItemID(link)
-                local _, _, count = GetTradeTargetItemInfo(slot)
-                PUISellValue:InjectTooltipPrice(self, itemID, count or 1)
-            end
-            return r1, r2, r3, r4
-        end
-    end
-
-    -- Clear state on hide or tooltip clear
-    local origOnHide = tooltip:GetScript("OnHide")
-    tooltip:SetScript("OnHide", function()
-        ClearTooltipFlag(this)
-        if origOnHide then origOnHide() end
-    end)
-
-    local origOnTooltipCleared = tooltip:GetScript("OnTooltipCleared")
-    tooltip:SetScript("OnTooltipCleared", function()
-        ClearTooltipFlag(this)
-        if origOnTooltipCleared then origOnTooltipCleared() end
-    end)
+function PUISellValue:OnTooltipProcess(tooltip, itemData)
+    if not tooltip or not itemData or not sellDB:Get("enabled", true) then return end
+    local itemID = itemData.itemID or self:ExtractItemID(itemData.link)
+    local count = itemData.count or 1
+    self:InjectTooltipPrice(tooltip, itemID or itemData.link, count)
 end
 
 -- =========================================================================
@@ -896,12 +557,6 @@ function PUISellValue:OnInitialize()
             PUISellValue:HandleSlashCommand(args)
         end, "Vendor pricing & realm auction diagnostics (/pui sell)")
     end
-
-    -- Hook Tooltips
-    HookTooltip(GameTooltip)
-    HookTooltip(ItemRefTooltip)
-    if ShoppingTooltip1 then HookTooltip(ShoppingTooltip1) end
-    if ShoppingTooltip2 then HookTooltip(ShoppingTooltip2) end
 end
 
 local function HookTradeSkillButtons()
@@ -955,6 +610,14 @@ local function HookTradeSkillButtons()
 end
 
 function PUISellValue:OnEnable()
+    -- Register as PUITooltip Item Provider
+    local PUITooltip = Primus.PUITooltip
+    if PUITooltip and PUITooltip.RegisterItemProvider then
+        PUITooltip:RegisterItemProvider("PUISellValue", 10, function(tt, data)
+            PUISellValue:OnTooltipProcess(tt, data)
+        end)
+    end
+
     -- Merchant Interaction Auto-Learning (Sell & Buy Prices)
     Events:Register("MERCHANT_SHOW", "PUISellValue", function()
         local newSell, newBuy = PUISellValue:ScanMerchantGoods()
@@ -986,6 +649,10 @@ function PUISellValue:OnEnable()
 end
 
 function PUISellValue:OnDisable()
+    local PUITooltip = Primus.PUITooltip
+    if PUITooltip and PUITooltip.UnregisterItemProvider then
+        PUITooltip:UnregisterItemProvider("PUISellValue")
+    end
     Events:UnregisterOwner("PUISellValue")
 end
 

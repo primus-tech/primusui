@@ -34,6 +34,13 @@ Core\Config\Options.lua
 # =========================================================================
 Modules\Utility\PUIMover\PUIMover.lua
 Modules\Utility\PUIDock\PUIDock.lua
+Modules\Utility\PUITooltip\PUITooltipConstants.lua
+Modules\Utility\PUITooltip\PUITooltipSkin.lua
+Modules\Utility\PUITooltip\PUITooltipAnchor.lua
+Modules\Utility\PUITooltip\PUITooltipUnit.lua
+Modules\Utility\PUITooltip\PUITooltipItem.lua
+Modules\Utility\PUITooltip\PUITooltipScanner.lua
+Modules\Utility\PUITooltip\PUITooltip.lua
 Modules\Utility\PUIFastLoot\PUIFastLoot.lua
 Modules\Utility\PUIAutoMechanics\PUIAutoMechanics.lua
 Modules\Utility\PUIItemCompare\PUIItemCompare.lua

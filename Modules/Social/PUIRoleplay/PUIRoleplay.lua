@@ -490,6 +490,7 @@ function PUIRoleplay:OnDisable()
     Primus.Events:UnregisterOwner(self)
     Primus.Time:CancelAll(self)
     
+    if self.Tooltip and self.Tooltip.Disable then self.Tooltip:Disable() end
     if Primus_PUIRoleplay_Sheet then Primus_PUIRoleplay_Sheet:Hide() end
     if Primus_PUIRoleplay_GlanceBar then Primus_PUIRoleplay_GlanceBar:Hide() end
     if Primus_PUIRoleplay_Directory then Primus_PUIRoleplay_Directory:Hide() end

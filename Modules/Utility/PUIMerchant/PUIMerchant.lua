@@ -196,16 +196,23 @@ function PUIMerchant:FinishScan()
 end
 
 -- =========================================================================
--- TOOLTIP MARKET PRICE INJECTION
+-- TOOLTIP MARKET PRICE INJECTION (PUITooltip Provider)
 -- =========================================================================
 
-local function InjectTooltipPrice(tooltip)
-    if not merchantDB.showTooltipPrices then return end
+local function InjectTooltipPrice(tooltip, itemData)
+    if not merchantDB:Get("showTooltipPrices", true) then return end
 
-    local name = _G[tooltip:GetName() .. "TextLeft1"]
-    if not name or not name:GetText() then return end
+    local itemName = nil
+    if itemData and itemData.name then
+        itemName = itemData.name
+    else
+        local name = _G[tooltip:GetName() .. "TextLeft1"]
+        if name and name:GetText() then
+            itemName = name:GetText()
+        end
+    end
+    if not itemName then return end
 
-    local itemName = name:GetText()
     local minBuyout, avgBuyout, seenCount = PUIMerchant:GetItemPriceInfo(itemName)
 
     if minBuyout and avgBuyout then
@@ -377,29 +384,12 @@ function PUIMerchant:OnEnable()
         end
     end)
 
-    -- Tooltip Hooks for Price Display
-    if not self._hookedTooltips then
-        local origSetBagItem = GameTooltip.SetBagItem
-        GameTooltip.SetBagItem = function(self, bag, slot)
-            local r1, r2, r3, r4 = origSetBagItem(self, bag, slot)
-            InjectTooltipPrice(self)
-            return r1, r2, r3, r4
-        end
-
-        local origSetInventoryItem = GameTooltip.SetInventoryItem
-        GameTooltip.SetInventoryItem = function(self, unit, slot)
-            local r1, r2, r3, r4 = origSetInventoryItem(self, unit, slot)
-            InjectTooltipPrice(self)
-            return r1, r2, r3, r4
-        end
-
-        local origSetHyperlink = GameTooltip.SetHyperlink
-        GameTooltip.SetHyperlink = function(self, link)
-            local r1, r2, r3, r4 = origSetHyperlink(self, link)
-            InjectTooltipPrice(self)
-            return r1, r2, r3, r4
-        end
-        self._hookedTooltips = true
+    -- Register as PUITooltip Item Provider (Priority 20: runs after base vendor sell values)
+    local Tooltip = Primus.PUITooltip
+    if Tooltip and Tooltip.RegisterItemProvider then
+        Tooltip:RegisterItemProvider("PUIMerchant", 20, function(tt, data)
+            InjectTooltipPrice(tt, data)
+        end)
     end
 end
 
@@ -407,4 +397,10 @@ function PUIMerchant:OnDisable()
     Events:UnregisterOwner("PUIMerchant")
     if scanBtn then scanBtn:Hide() end
     if scanStatusText then scanStatusText:Hide() end
+
+    local Tooltip = Primus.PUITooltip
+    if Tooltip and Tooltip.UnregisterItemProvider then
+        Tooltip:UnregisterItemProvider("PUIMerchant")
+    end
 end
+

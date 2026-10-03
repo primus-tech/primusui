@@ -474,6 +474,11 @@ end
 
 function Utils.GetInventoryItemDurability(slotID)
     if not slotID then return nil, nil end
+    local Tooltip = Primus.PUITooltip
+    if Tooltip and Tooltip.Scanner and Tooltip.Scanner.GetInventoryDurability then
+        return Tooltip.Scanner:GetInventoryDurability(slotID)
+    end
+
     local tt = GetScanTooltip()
     tt:ClearLines()
     local hasItem = tt:SetInventoryItem("player", slotID)
@@ -498,6 +503,11 @@ end
 
 function Utils.GetContainerItemDurability(bagID, slotID)
     if not bagID or not slotID then return nil, nil end
+    local Tooltip = Primus.PUITooltip
+    if Tooltip and Tooltip.Scanner and Tooltip.Scanner.GetBagDurability then
+        return Tooltip.Scanner:GetBagDurability(bagID, slotID)
+    end
+
     local tt = GetScanTooltip()
     tt:ClearLines()
     local hasItem = tt:SetBagItem(bagID, slotID)
