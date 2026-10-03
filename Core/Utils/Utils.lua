@@ -33,13 +33,21 @@ function Utils.Copy(src, dest)
     return dest
 end
 
--- Deep Copy
-function Utils.DeepCopy(src)
+-- Deep Copy (Protected against cyclic references & deep recursion)
+function Utils.DeepCopy(src, seen, depth)
     if type(src) ~= "table" then return src end
+    depth = depth or 0
+    if depth > 30 then return src end
+
+    seen = seen or {}
+    if seen[src] then return seen[src] end
+
     local copy = {}
+    seen[src] = copy
+
     for k, v in pairs(src) do
         if type(v) == "table" then
-            copy[k] = Utils.DeepCopy(v)
+            copy[k] = Utils.DeepCopy(v, seen, depth + 1)
         else
             copy[k] = v
         end
@@ -47,15 +55,22 @@ function Utils.DeepCopy(src)
     return copy
 end
 
--- Deep Merge (dest gets values from src if not already present or if table)
-function Utils.DeepMerge(dest, src)
+-- Deep Merge (Protected against cyclic references & deep recursion)
+function Utils.DeepMerge(dest, src, seen, depth)
     if type(dest) ~= "table" or type(src) ~= "table" then return dest end
+    depth = depth or 0
+    if depth > 30 then return dest end
+
+    seen = seen or {}
+    if seen[src] then return dest end
+    seen[src] = true
+
     for k, v in pairs(src) do
         if type(v) == "table" then
             if type(dest[k]) ~= "table" then
                 dest[k] = {}
             end
-            Utils.DeepMerge(dest[k], v)
+            Utils.DeepMerge(dest[k], v, seen, depth + 1)
         elseif dest[k] == nil then
             dest[k] = v
         end

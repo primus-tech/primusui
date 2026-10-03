@@ -342,13 +342,15 @@ function Importer:ExportToString(profile)
         p.appearance_desc or ""
     }
 
-    local serialized = table.concat(tokens, "§")
+    local serialized = table.concat(tokens, "^")
     return serialized
 end
 
 function Importer:ImportFromString(codeStr)
     if not codeStr or codeStr == "" then return nil, "Empty string" end
-    local parts = PUIRoleplay.Protocols and PUIRoleplay.Protocols:SplitString(codeStr, "§", {}) or {}
+    local delim = "^"
+    if string.find(codeStr, "§") then delim = "§" end
+    local parts = PUIRoleplay.Protocols and PUIRoleplay.Protocols:SplitString(codeStr, delim, {}) or {}
     if table.getn(parts) < 10 or parts[1] ~= "PUIv1" then
         return nil, "Invalid or unrecognized Primus RP profile code format"
     end

@@ -39,13 +39,15 @@ local DrunkSuffix = string.gsub(SLURRED_SPEECH or "...hic!", "%%s(.+)", "%1$")
 
 function Protocols:DrunkEncode(text)
     if not text then return "" end
-    text = string.gsub(text, "s", "°")
-    text = string.gsub(text, "S", "§")
+    text = string.gsub(text, "s", "\176")
+    text = string.gsub(text, "S", "\167")
     return text
 end
 
 function Protocols:DrunkDecode(text)
     if not text then return "" end
+    text = string.gsub(text, "\176", "s")
+    text = string.gsub(text, "\167", "S")
     text = string.gsub(text, "°", "s")
     text = string.gsub(text, "§", "S")
     text = string.gsub(text, DrunkSuffix, "")
@@ -53,23 +55,48 @@ function Protocols:DrunkDecode(text)
 end
 
 --------------------------------------------------------------------------------
--- String Splitting Utility (Safe for Lua 5.0.2)
+-- String Splitting Utility (Safe for Lua 5.0.2 / Vanilla WoW 1.12.1)
 --------------------------------------------------------------------------------
 function Protocols:SplitString(str, delimiter, targetTable)
     local result = targetTable or {}
     for k in pairs(result) do result[k] = nil end
-    if not str or str == "" then return result end
+    if not str or str == "" then
+        table.setn(result, 0)
+        return result
+    end
+    if not delimiter or delimiter == "" then
+        result[1] = str
+        table.setn(result, 1)
+        return result
+    end
 
+    local strLen = string.len(str)
     local from = 1
     local delim_from, delim_to = string.find(str, delimiter, from, true)
     local i = 1
-    while delim_from do
+    local maxLoops = 2000
+    local loopCount = 0
+
+    while delim_from and loopCount < maxLoops do
+        loopCount = loopCount + 1
         result[i] = string.sub(str, from, delim_from - 1)
         i = i + 1
-        from = delim_to + 1
+        if delim_to < from then
+            from = from + 1
+        else
+            from = delim_to + 1
+        end
+        if from > strLen then
+            break
+        end
         delim_from, delim_to = string.find(str, delimiter, from, true)
     end
-    result[i] = string.sub(str, from)
+
+    if from <= strLen then
+        result[i] = string.sub(str, from)
+    else
+        result[i] = ""
+    end
     table.setn(result, i)
     return result
 end
