@@ -219,15 +219,25 @@ function Protocols:ParsePayload(dataPrefix, chunks, playerName, targetChar)
                 local chNum = string.sub(key, 8)
                 if not targetChar.history then targetChar.history = {} end
                 targetChar.history["chapter" .. chNum] = val
-            elseif string.find(key, "^atAGlance(%d)Title$") then
-                local gIdx = tonumber(string.match(key, "%d"))
+            elseif string.find(key, "^atAGlance%dTitle$") then
+                local _, _, gIdxStr = string.find(key, "^atAGlance(%d)Title$")
+                local gIdx = tonumber(gIdxStr)
                 if gIdx then
                     if not targetChar.glances then targetChar.glances = {} end
                     if not targetChar.glances[gIdx] then targetChar.glances[gIdx] = {} end
                     targetChar.glances[gIdx].title = val
                 end
-            elseif string.find(key, "^atAGlance(%d)$") then
-                local gIdx = tonumber(string.match(key, "%d"))
+            elseif string.find(key, "^atAGlance%dIcon$") then
+                local _, _, gIdxStr = string.find(key, "^atAGlance(%d)Icon$")
+                local gIdx = tonumber(gIdxStr)
+                if gIdx then
+                    if not targetChar.glances then targetChar.glances = {} end
+                    if not targetChar.glances[gIdx] then targetChar.glances[gIdx] = {} end
+                    targetChar.glances[gIdx].icon = val
+                end
+            elseif string.find(key, "^atAGlance%d$") then
+                local _, _, gIdxStr = string.find(key, "^atAGlance(%d)$")
+                local gIdx = tonumber(gIdxStr)
                 if gIdx then
                     if not targetChar.glances then targetChar.glances = {} end
                     if not targetChar.glances[gIdx] then targetChar.glances[gIdx] = {} end
