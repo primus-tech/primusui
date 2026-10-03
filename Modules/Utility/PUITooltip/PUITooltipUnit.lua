@@ -159,23 +159,21 @@ function UnitHandler:Initialize()
     if not UnitHandler.hooked then
         local origSetUnit = GameTooltip.SetUnit
         GameTooltip.SetUnit = function(self, unit)
-            if origSetUnit then origSetUnit(self, unit) end
+            local ret = origSetUnit and origSetUnit(self, unit)
             if PUITooltip:IsEnabled() then
                 UnitHandler:FormatUnit(self, unit)
             end
+            return ret
         end
         
-        -- Also hook OnTooltipSetUnit script if available
-        local origOnTooltipSetUnit = GameTooltip:GetScript("OnTooltipSetUnit")
-        GameTooltip:SetScript("OnTooltipSetUnit", function()
-            if origOnTooltipSetUnit then origOnTooltipSetUnit() end
-            if PUITooltip:IsEnabled() then
-                local _, unit = GameTooltip:GetUnit()
-                if unit then
-                    UnitHandler:FormatUnit(GameTooltip, unit)
+        -- In Vanilla WoW 1.12.1, 3D world unit mouseover triggers UPDATE_MOUSEOVER_UNIT
+        if Primus.Events and Primus.Events.Register then
+            Primus.Events:Register("UPDATE_MOUSEOVER_UNIT", "PUITooltip_Unit", function()
+                if PUITooltip:IsEnabled() and UnitExists("mouseover") and GameTooltip:IsShown() then
+                    UnitHandler:FormatUnit(GameTooltip, "mouseover")
                 end
-            end
-        end)
+            end)
+        end
         
         UnitHandler.hooked = true
     end
