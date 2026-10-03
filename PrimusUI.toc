@@ -172,7 +172,13 @@ Modules\Social\PUIRoleplay\PUIProtocols.lua
 Modules\Social\PUIRoleplay\PUIComms.lua
 Modules\Social\PUIRoleplay\PUIIconPicker.lua
 Modules\Social\PUIRoleplay\PUICardPreview.lua
-Modules\Social\PUIRoleplay\PUIRPSheetTabs.lua
+Modules\Social\PUIRoleplay\PUIRPWidgets.lua
+Modules\Social\PUIRoleplay\PUIRPTabIdentity.lua
+Modules\Social\PUIRoleplay\PUIRPTabAppearance.lua
+Modules\Social\PUIRoleplay\PUIRPTabLore.lua
+Modules\Social\PUIRoleplay\PUIRPTabRules.lua
+Modules\Social\PUIRoleplay\PUIRPTabMatchmaking.lua
+Modules\Social\PUIRoleplay\PUIRPTabSettings.lua
 Modules\Social\PUIRoleplay\PUIRPSheet.lua
 Modules\Social\PUIRoleplay\PUIGlance.lua
 Modules\Social\PUIRoleplay\PUITooltip.lua
