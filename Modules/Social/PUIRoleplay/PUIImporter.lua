@@ -240,7 +240,7 @@ function Importer:ConvertToPrimusProfile(raw)
     prof.birth_city   = CleanStr(raw.birth_city or raw.BirthCity or raw.ville_naissance or raw.HB or "")
     prof.home_city    = CleanStr(raw.home_city or raw.HomeCity or raw.ville_residence or raw.HO or "")
     prof.motto        = CleanStr(raw.motto or raw.Motto or raw.devise or raw.MO or "")
-    prof.faction_clan = CleanStr(raw.faction_clan or raw.Faction or raw.faction or raw.allégeance or "")
+    prof.faction_clan = CleanStr(raw.faction_clan or raw.Faction or raw.faction or raw["all\195\169geance"] or raw["allegeance"] or "")
 
     if not prof.history then prof.history = {} end
     for ch = 1, 6 do
@@ -563,7 +563,7 @@ function Importer:BuildFrame()
     importBtn:SetBackdropBorderColor(0.20, 0.85, 0.35, 1.0)
     local iTxt = importBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     iTxt:SetPoint("CENTER", importBtn, "CENTER", 0, 0)
-    iTxt:SetText("|cff55ff88✓ Import Profile|r")
+    iTxt:SetText("|cff55ff88Import Profile|r")
     importBtn:SetScript("OnClick", function()
         Importer:ExecuteImport()
     end)
