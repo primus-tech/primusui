@@ -457,6 +457,7 @@ function Directory:RefreshFlyout()
     local iconIdx = tonumber(data.icon) or 1
     flyout.avatarTex:SetTexture("Interface\\Icons\\" .. (PUIRoleplay.Icons[iconIdx] or "INV_Misc_QuestionMark"))
 
+    local colorHex = data.class_color or (PUIRoleplay.ClassData and data.class and PUIRoleplay.ClassData[data.class] and PUIRoleplay.ClassData[data.class][4]) or "00ccff"
     local fullName = PUIRoleplay:ComposeFullName(data)
     if fullName == "" then fullName = name end
     flyout.nameStr:SetText("|cff" .. colorHex .. fullName .. "|r")
