@@ -81,18 +81,8 @@ function Tooltip:EnhancePlayerTooltip(tooltip, unit, playerName)
         line1:SetText(displayName)
     end
 
-    -- 2. Prefix, Title, and House Name
-    local titleStr = ""
-    if charData.prefix and charData.prefix ~= "" then
-        titleStr = charData.prefix .. " "
-    end
-    if charData.title and charData.title ~= "" then
-        titleStr = titleStr .. charData.title
-    end
-    if charData.house_name and charData.house_name ~= "" then
-        titleStr = titleStr .. " of " .. charData.house_name
-    end
-
+    -- 2. Prefix, Title, Epithet, and House Name
+    local titleStr = PUIRoleplay:ComposeTitle(charData)
     if titleStr ~= "" then
         tooltip:AddLine("<" .. titleStr .. ">", 0.0, 0.85, 1.0)
     end

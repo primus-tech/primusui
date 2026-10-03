@@ -393,16 +393,7 @@ function Sheet:Refresh()
     end
     f.headerName:SetText("|cffffffff" .. nameComposite .. "|r")
 
-    local titleStr = ""
-    if charData.prefix and charData.prefix ~= "" then
-        titleStr = charData.prefix .. " "
-    end
-    if charData.title and charData.title ~= "" then
-        titleStr = titleStr .. charData.title
-    end
-    if charData.house_name and charData.house_name ~= "" then
-        titleStr = titleStr .. " of " .. charData.house_name
-    end
+    local titleStr = PUIRoleplay:ComposeTitle(charData)
     f.headerTitle:SetText((titleStr ~= "") and ("<" .. titleStr .. ">") or "|cff666677<No Title Recorded>|r")
 
     -- Race & Class
@@ -431,10 +422,11 @@ function Sheet:Refresh()
         p1.fnEB:SetText(charData.first_name or "")
         p1.mnEB:SetText(charData.middle_name or "")
         p1.lnEB:SetText(charData.last_name or "")
-        p1.pfxEB:SetText(charData.prefix or "")
         p1.nickEB:SetText(charData.nickname or "")
-        p1.houseEB:SetText(charData.house_name or "")
+        p1.pfxEB:SetText(charData.prefix or "")
         p1.ttlEB:SetText(charData.title or "")
+        if p1.epEB then p1.epEB:SetText(charData.epithet or charData.suffix or "") end
+        p1.houseEB:SetText(charData.house_name or charData.bloodline or charData.tribe or charData.clan or "")
         p1.ageEB:SetText(charData.apparent_age or "")
         if p1.sexDropdown then
             p1.sexDropdown:SetSelected(charData.biological_sex or "Male")

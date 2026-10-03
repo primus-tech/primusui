@@ -90,7 +90,7 @@ function SheetTabs:BuildPanel1(parent, f)
     end)
     p1.nickEB = nickEB
 
-    -- Row 3: Prefix & House / Clan Name
+    -- Row 3: Prefix & Title / Office / Role
     local pfxLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     pfxLabel:SetPoint("TOPLEFT", lnEB, "BOTTOMLEFT", 0, -6)
     pfxLabel:SetText("|cff00e5ffPrefix (e.g. Sir, Lady, Captain):|r")
@@ -106,26 +106,10 @@ function SheetTabs:BuildPanel1(parent, f)
     end)
     p1.pfxEB = pfxEB
 
-    local houseLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    houseLabel:SetPoint("TOPLEFT", pfxLabel, "TOPLEFT", 245, 0)
-    houseLabel:SetText("|cff00e5ffHouse / Bloodline / Tribe:|r")
-    local houseEB = self:CreateStyledEditBox(p1, 234, 20)
-    houseEB:SetPoint("TOPLEFT", houseLabel, "BOTTOMLEFT", 0, -2)
-    houseEB:SetScript("OnTextChanged", function()
-        if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
-            local p = PUIRoleplay:GetMyProfile()
-            p.house_name = this:GetText()
-            p.keyM = PUIRoleplay:GenerateKey()
-            PUIRoleplay:SaveMyProfile(p)
-        end
-    end)
-    p1.houseEB = houseEB
-
-    -- Row 4: Suffix / Title
     local ttlLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    ttlLabel:SetPoint("TOPLEFT", pfxEB, "BOTTOMLEFT", 0, -6)
-    ttlLabel:SetText("|cff00e5ffTitle / Epithet (e.g. the Dragonslayer):|r")
-    local ttlEB = self:CreateStyledEditBox(p1, 479, 20)
+    ttlLabel:SetPoint("TOPLEFT", pfxLabel, "TOPLEFT", 245, 0)
+    ttlLabel:SetText("|cff00e5ffTitle / Office (e.g. Archmage, Knight):|r")
+    local ttlEB = self:CreateStyledEditBox(p1, 234, 20)
     ttlEB:SetPoint("TOPLEFT", ttlLabel, "BOTTOMLEFT", 0, -2)
     ttlEB:SetScript("OnTextChanged", function()
         if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
@@ -137,9 +121,44 @@ function SheetTabs:BuildPanel1(parent, f)
     end)
     p1.ttlEB = ttlEB
 
+    -- Row 4: Suffix / Epithet & House / Bloodline / Tribe / Clan
+    local epLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    epLabel:SetPoint("TOPLEFT", pfxEB, "BOTTOMLEFT", 0, -6)
+    epLabel:SetText("|cff00e5ffSuffix / Epithet (e.g. the Dragonslayer):|r")
+    local epEB = self:CreateStyledEditBox(p1, 230, 20)
+    epEB:SetPoint("TOPLEFT", epLabel, "BOTTOMLEFT", 0, -2)
+    epEB:SetScript("OnTextChanged", function()
+        if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
+            local p = PUIRoleplay:GetMyProfile()
+            p.epithet = this:GetText()
+            p.suffix = this:GetText()
+            p.keyM = PUIRoleplay:GenerateKey()
+            PUIRoleplay:SaveMyProfile(p)
+        end
+    end)
+    p1.epEB = epEB
+
+    local houseLabel = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    houseLabel:SetPoint("TOPLEFT", epLabel, "TOPLEFT", 245, 0)
+    houseLabel:SetText("|cff00e5ffHouse / Bloodline / Tribe / Clan:|r")
+    local houseEB = self:CreateStyledEditBox(p1, 234, 20)
+    houseEB:SetPoint("TOPLEFT", houseLabel, "BOTTOMLEFT", 0, -2)
+    houseEB:SetScript("OnTextChanged", function()
+        if Sheet:IsViewingSelf() and f.isRefreshing ~= true then
+            local p = PUIRoleplay:GetMyProfile()
+            p.house_name = this:GetText()
+            p.bloodline = this:GetText()
+            p.tribe = this:GetText()
+            p.clan = this:GetText()
+            p.keyM = PUIRoleplay:GenerateKey()
+            PUIRoleplay:SaveMyProfile(p)
+        end
+    end)
+    p1.houseEB = houseEB
+
     -- Demographics Header Divider
     local demoHeader = p1:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    demoHeader:SetPoint("TOPLEFT", ttlEB, "BOTTOMLEFT", 0, -10)
+    demoHeader:SetPoint("TOPLEFT", epEB, "BOTTOMLEFT", 0, -10)
     demoHeader:SetText("|cffffd100DEMOGRAPHICS, SEX, GENDER & PRONOUNS:|r")
 
     -- Row 5: Apparent Age, Biological Sex, Gender Identity, IC Pronouns

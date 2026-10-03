@@ -28,7 +28,7 @@ PUIRoleplay.ChannelList = {
 }
 
 --------------------------------------------------------------------------------
--- Helper: Compose Full Character Name
+-- Helper: Compose Full Character Name & Full Character Title
 --------------------------------------------------------------------------------
 function PUIRoleplay:ComposeFullName(p)
     if not p then return "" end
@@ -47,6 +47,51 @@ function PUIRoleplay:ComposeFullName(p)
         nameComposite = UnitName("player") or ""
     end
     return nameComposite
+end
+
+function PUIRoleplay:ComposeTitle(charData)
+    if not charData then return "" end
+    local pfx = charData.prefix or ""
+    local ttl = charData.title or ""
+    local ep = charData.epithet or charData.suffix or ""
+    local house = charData.house_name or charData.house or charData.tribe or charData.clan or charData.bloodline or ""
+
+    local parts = {}
+    local rankTitle = ""
+    if pfx ~= "" then
+        rankTitle = pfx
+    end
+    if ttl ~= "" then
+        if rankTitle ~= "" then
+            rankTitle = rankTitle .. " " .. ttl
+        else
+            rankTitle = ttl
+        end
+    end
+
+    if rankTitle ~= "" then
+        table.insert(parts, rankTitle)
+    end
+
+    if ep ~= "" and ep ~= ttl then
+        table.insert(parts, ep)
+    end
+
+    if house ~= "" then
+        if table.getn(parts) > 0 then
+            local lHouse = string.lower(house)
+            if string.find(lHouse, "^house") or string.find(lHouse, "^clan") or string.find(lHouse, "^tribe") or string.find(lHouse, "^the ") then
+                table.insert(parts, house)
+            else
+                table.insert(parts, "of " .. house)
+            end
+        else
+            table.insert(parts, house)
+        end
+    end
+
+    if table.getn(parts) == 0 then return "" end
+    return table.concat(parts, ", ")
 end
 
 --------------------------------------------------------------------------------
@@ -150,8 +195,13 @@ PUIRoleplay.DefaultProfile = {
     last_name           = "",
     prefix              = "",
     title               = "",
+    epithet             = "",
+    suffix              = "",
     nickname            = "",
     house_name          = "",
+    bloodline           = "",
+    tribe               = "",
+    clan                = "",
     full_name           = "",
 
     -- 2. Demographics, Sex, Gender & Identity

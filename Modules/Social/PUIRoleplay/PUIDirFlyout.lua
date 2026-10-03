@@ -457,12 +457,16 @@ function Directory:RefreshFlyout()
     local iconIdx = tonumber(data.icon) or 1
     flyout.avatarTex:SetTexture("Interface\\Icons\\" .. (PUIRoleplay.Icons[iconIdx] or "INV_Misc_QuestionMark"))
 
-    local colorHex = data.class_color or "00ccff"
-    local fullName = (data.full_name and data.full_name ~= "") and data.full_name or name
+    local fullName = PUIRoleplay:ComposeFullName(data)
+    if fullName == "" then fullName = name end
     flyout.nameStr:SetText("|cff" .. colorHex .. fullName .. "|r")
 
-    local titleStr = (data.title and data.title ~= "") and ("<" .. data.title .. ">") or ("|cff888888" .. name .. "|r")
-    flyout.titleStr:SetText(titleStr)
+    local titleStr = PUIRoleplay:ComposeTitle(data)
+    if titleStr ~= "" then
+        flyout.titleStr:SetText("<" .. titleStr .. ">")
+    else
+        flyout.titleStr:SetText("|cff888888" .. name .. "|r")
+    end
 
     local age = (data.apparent_age and data.apparent_age ~= "") and data.apparent_age or "Age ?"
     local sex = (data.biological_sex and data.biological_sex ~= "") and data.biological_sex or nil

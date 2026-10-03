@@ -464,7 +464,8 @@ function Directory:RefreshList(filterText)
             local isOnline = isSelf or PUIRoleplay:IsPlayerOnline(name)
             if isOnline then onlineCount = onlineCount + 1 end
 
-            local fullName = (data.full_name and data.full_name ~= "") and data.full_name or name
+            local fullName = PUIRoleplay:ComposeFullName(data)
+            if fullName == "" then fullName = name end
             local zone = isSelf and ((myZone ~= "") and myZone or (data.zone or "")) or (data.zone or "")
             local class = (data.class and data.class ~= "") and data.class or (isSelf and UnitClass("player") or "")
             local classColor = data.class_color or (isSelf and PUIRoleplay.ClassData and PUIRoleplay.ClassData[UnitClass("player")] and PUIRoleplay.ClassData[UnitClass("player")][4]) or "FFFFFF"
@@ -501,7 +502,8 @@ function Directory:RefreshList(filterText)
         local myProf = PUIRoleplay:GetMyProfile() or {}
         local _, pClass = UnitClass("player")
         local colorHex = (PUIRoleplay.ClassData and PUIRoleplay.ClassData[pClass] and PUIRoleplay.ClassData[pClass][4]) or "FFFFFF"
-        local myFullName = (myProf.full_name and myProf.full_name ~= "") and myProf.full_name or playerName
+        local myFullName = PUIRoleplay:ComposeFullName(myProf)
+        if myFullName == "" then myFullName = playerName end
         local isIC = (myProf.currently_ic == "1")
         local currentZone = (myZone ~= "") and myZone or "Unknown"
 

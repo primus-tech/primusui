@@ -121,14 +121,12 @@ function Sheet:OpenCardPreviewModal(targetName)
     local iconIdx = tonumber(data.icon) or 1
     p.avTex:SetTexture("Interface\\Icons\\" .. (PUIRoleplay.Icons[iconIdx] or "INV_Misc_QuestionMark"))
 
-    local fullRPName = data.full_name or target
-    if data.first_name and data.first_name ~= "" then
-        fullRPName = data.first_name .. (data.last_name and (" " .. data.last_name) or "")
-    end
+    local fullRPName = PUIRoleplay:ComposeFullName(data)
+    if fullRPName == "" then fullRPName = target end
     p.nameText:SetText("|cffffffff" .. fullRPName .. "|r")
 
-    local titleStr = (data.title and data.title ~= "") and ("<" .. data.title .. ">") or ""
-    p.titleText:SetText(titleStr)
+    local titleStr = PUIRoleplay:ComposeTitle(data)
+    p.titleText:SetText((titleStr ~= "") and ("<" .. titleStr .. ">") or "")
 
     local tags = {}
     if data.apparent_age and data.apparent_age ~= "" then
