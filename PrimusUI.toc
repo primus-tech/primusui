@@ -167,10 +167,17 @@ Modules\Social\PUITalk\PUITalkOptions.lua
 Modules\Social\PUITalk\PUITalk.lua
 Modules\Social\PUIMasterLoot\PUIMasterLoot.lua
 Modules\Social\PUIRoleplay\PUIConstants.lua
+Modules\Social\PUIRoleplay\PUIIcons.lua
+Modules\Social\PUIRoleplay\PUIProtocols.lua
 Modules\Social\PUIRoleplay\PUIComms.lua
+Modules\Social\PUIRoleplay\PUIIconPicker.lua
+Modules\Social\PUIRoleplay\PUICardPreview.lua
+Modules\Social\PUIRoleplay\PUIRPSheetTabs.lua
 Modules\Social\PUIRoleplay\PUIRPSheet.lua
 Modules\Social\PUIRoleplay\PUIGlance.lua
 Modules\Social\PUIRoleplay\PUITooltip.lua
+Modules\Social\PUIRoleplay\PUIDirFlyout.lua
+Modules\Social\PUIRoleplay\PUIMapPins.lua
 Modules\Social\PUIRoleplay\PUIDirectory.lua
 Modules\Social\PUIRoleplay\PUIEmotes.lua
 Modules\Social\PUIRoleplay\PUIListener.lua
