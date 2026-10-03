@@ -77,7 +77,7 @@ function Tray:BuildFrame()
     if trayFrame then return trayFrame end
 
     local f = CreateFrame("Frame", "Primus_PUIRoleplay_Tray", UIParent)
-    f:SetWidth(364)
+    f:SetWidth(338)
     f:SetHeight(28)
     f:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -220, -180)
     f:SetFrameStrata("MEDIUM")
@@ -279,18 +279,6 @@ function Tray:BuildFrame()
         end
     end)
     f.namesBtn = namesBtn
-    xOffset = xOffset + 22 + btnSpacing
-
-    -- 13. Walk / Run Speed Toggle
-    local walkBtn = CreateTrayButton(f, 22, 22, "Interface\\Icons\\INV_Boots_01")
-    walkBtn:SetPoint("LEFT", f, "LEFT", xOffset, 0)
-    walkBtn.tooltipTitle = "Toggle Walk / Run"
-    walkBtn.tooltipText = "Toggle between walking and running speed for realistic RP movement."
-    walkBtn.tooltipSubText = "|cff69ccf0Left-Click:|r Toggle Speed"
-    walkBtn:SetScript("OnClick", function()
-        ToggleRun()
-    end)
-    f.walkBtn = walkBtn
 
     trayFrame = f
     self:UpdateICButton()
