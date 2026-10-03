@@ -63,7 +63,7 @@ TIER 2: WORLD, COMBAT & NAVIGATION ENGINES (Modules/Combat, HUD, Units, Bars, Na
 • PUIRange                  : Distance calculation via interaction check distances
 • PUITactical               : 4-layer aggro discrimination & 2-click Claim & Execute engine
 • PUIMinimapper             : Minimap shaping, zoom, and coordinate HUD
-• PUIMMButtons              : Addon button collector dock
+• PUIMinimapOrbit           : Minimap button consolidation dock
 
 ========================================================================================
 TIER 3: PLAYER & CHARACTER SUB-MODULES (Modules/Player, Professions, Gathering, Classes)
@@ -88,6 +88,8 @@ TIER 4: INTERACTION, SOCIAL & CONTENT SUB-MODULES (Modules/Social, Utility)
 ========================================================================================
 • PUIMover                  : Categorized frame dragger, floating control dock, magnetic grid overlay (/pui move)
 • PUIDock                   : Comprehensive Blizzard art stripper and dock organizer
+• PUITooltip                : Single-owner tooltip engine (7-file suite), provider pipeline, scanner, and styling
+• PUILogViewer              : Standalone universal Chat, RP, Rolls & URL link log engine (/puilog, /puiurl)
 • PUIMerchant               : Full Auction House scanner, statistical market pricing, and tooltip price injection
 • PUIFastLoot               : Zero-delay instant auto-looting
 • PUIAutoMechanics          : Auto-dismount on action and auto-stand on spell cast
@@ -97,6 +99,7 @@ TIER 4: INTERACTION, SOCIAL & CONTENT SUB-MODULES (Modules/Social, Utility)
 • PUIInspect                : Throttled inspect queue and gear overview cache
 • PUITalk                   : Unified chat streams, isolated DM tabs, and live friends/guild roster
 • PUIMasterLoot             : Need/Greed popups, master looter roll tracking, and loot logs
+• PUIRoleplay               : Next-gen 28-file RP suite (Sheet, Glances, Directory, Pins, Dice, Bag/Letter Forge, Importer, Tray)
 ========================================================================================
 ```
 

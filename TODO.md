@@ -253,8 +253,9 @@
   - [x] **Free Slot Breakdown & Special Bag Tinting:**
     - [x] Header counter showing total free slots + special bag badges (e.g., `18 Free (4 Ammo, 2 Soul)`).
     - [x] Color-coded backdrop tints for special container slots (Quivers = Orange, Soul Bags = Purple, Herb = Green, Mining = Grey).
-  - [ ] **Bank Frame Integration (`PUIBank`):**
-    - [ ] Unified Bank window with matching search, sort, bag tray, and purchase slot controls.
+  - [x] **Bank Frame Integration (`PUIBank`):**
+    - [x] Unified Bank window with matching search, sort, bag tray, and purchase slot controls.
+    - [x] Offline persistent caching for Bank container (`PrimusCharDB.PUIBankCache`).
 - [x] **`Reputation` Module / Multi-Faction Watchbar (`Modules/Bars/PUIHotbars/PUIXPBar.lua`):**
   - [x] Add a dedicated reputation watchbar with smooth XP-style fill transitions.
   - [x] Standing level text formatting (`Revered 12,450 / 21,000 [59%]`).
@@ -269,15 +270,34 @@
 
 ## 🎯 Tier 4: Interaction, Social & Content Sub-Modules
 
-- [x] **`PUIRoleplay` Roleplaying Suite (`Modules/Social/PUIRoleplay/`):**
+- [x] **`PUITooltip` Universal Subsystem & Provider Pipeline (`Modules/Utility/PUITooltip/`):**
+  - [x] Modular 7-subfile suite (`PUITooltipConstants.lua`, `PUITooltipSkin.lua`, `PUITooltipAnchor.lua`, `PUITooltipUnit.lua`, `PUITooltipItem.lua`, `PUITooltipScanner.lua`, `PUITooltip.lua`).
+  - [x] Strict Single Resource Ownership: centralized hooks for GameTooltip, ItemRefTooltip, ShoppingTooltip1/2, WorldMapTooltip, and GameTooltipStatusBar.
+  - [x] Decoupled provider registration API (`RegisterUnitProvider`, `RegisterItemProvider`, `RegisterSpellProvider`).
+  - [x] Zero-allocation recycled background scanner frame `Primus_PUITooltip_ScanTooltip`.
+  - [x] Smart corner, cursor, and `PUIMover` anchoring modes.
+- [x] **`PUILogViewer` Universal Chat, RP, Rolls & URL Log Engine (`Modules/Utility/PUILogViewer/`):**
+  - [x] Standalone multi-tab log window (`All`, `Say/Yell/Emote`, `Party/Raid/Guild`, `Whispers`, `URLs & Links`).
+  - [x] Dynamic URL regular expression scanner detecting web links (`http`, `https`, `discord.gg`, `carrd.co`, `toyhou.se`, `youtube.com`, `spotify.com`, etc.).
+  - [x] 1-click interactive URL Copy Dialog with auto-highlighted edit box (`/puiurl`).
+  - [x] Search filter, pause buffer toggle, copy all text button, and log memory wiper.
+- [x] **`PUIRoleplay` Next-Generation Roleplaying Suite (`Modules/Social/PUIRoleplay/`):**
   - [x] 100% two-way wire-protocol compatibility with TurtleRP over the `TTRP` channel (DrunkEncode/Decode, M/T/D packet parser, 30s pings).
   - [x] Standalone operation without requiring the TurtleRP addon.
   - [x] High-definition PrimusUI dark glassmorphic UI design (1-pixel borders, status pills).
-  - [x] Target At-A-Glance HUD Pill with 3 glance buttons & `[Bio]` button registered with `PUIMover` under `SOCIAL`.
-  - [x] Character Profile Sheet & Editor (General, RP Style, Glances, Bio, Notes, Profile switcher, Icon browser).
-  - [x] GameTooltip RP metadata injection (RP name, title, pronouns, IC/OOC badges).
-  - [x] Searchable RP Player Directory (`/rp dir`) & World Map RP player location pins.
-  - [x] Long-form RP chat/emote composer (`/rp chat`) with multi-chunk sending & quote highlighting.
+  - [x] Universal Nomenclature: separated `prefix`, `title`, `epithet` (`suffix`), and `house_name` (`bloodline`/`tribe`/`clan`) with dynamic composition (`ComposeFullName`, `ComposeTitle`).
+  - [x] Target At-A-Glance HUD Pill with 5 categorized glance buttons, custom icons, border tints, and `PUIMover` registration.
+  - [x] 7-Tab Character Profile Sheet & Editor (Identity, Appearance, Personality, Lore, Rules, Matchmaking, Settings) with live Character Card preview (`PUICardPreview.lua`), 4 profile slots (0..3), and searchable Icon Picker (`PUIIconPicker.lua`).
+  - [x] GameTooltip RP metadata injection via `PUITooltip:RegisterUnitProvider`.
+  - [x] Searchable RP Player Directory (`/rp dir`) with Dating/Matchmaking Card Feed, Tactical Grid mode, multi-tag filtering, 5-Tab remote dossier flyout (`PUIDirFlyout.lua`), and World Map RP player location pins (`PUIMapPins.lua`).
+  - [x] Long-form RP chat/emote composer (`/rp chat`, `PUIEmotes.lua`) with sentence-boundary chunking over 255-character limit.
+  - [x] Proximity Mention Radar & Focus Tracker (`PUIListener.lua`) with audio notifications.
+  - [x] Elephant Story & Scene Archiver (`PUIElephant.lua`) with Markdown / Discord export.
+  - [x] DiceMaster D20 Tabletop & Combat Engine (`PUIDice.lua`) with custom RP stats, resource bars, modifiers, and rolls.
+  - [x] Extended RP Inventory Pouch & Document/Letter Forge (`PUIExtended.lua`) with parchment styling and wax seals.
+  - [x] Multi-Addon Importer & String Backup (`PUIImporter.lua`) supporting Total RP 2/3, MyRolePlay, FlagRSP, and string code backup.
+  - [x] RP Quick Action Tray & Immersion Bar (`PUITray.lua`) with IC/OOC toggle, Sheet, Directory, Dice, Bag, Letter, and Walk/Run mode.
+  - [x] DrunkCodec multi-byte ANSI/UTF-8 decoding fixes and loop-safe `SplitString` (2000-iteration hard stop).
 - [ ] **`Guild & Roster` Module (`Modules/Social/Guild/`):**
   - [ ] Enhanced guild roster with sortable columns (Level, Class, Rank, Zone, Public Note, Officer Note).
   - [ ] Offline member tracking and last-online timestamps.

@@ -54,12 +54,14 @@ To achieve total architectural consistency, all modular components in PrimusUI a
 
 ---
 
-### 4. Utility & Meta-UI Suite (10 Modules)
+### 4. Utility & Meta-UI Suite (12 Modules)
 
 | Current Name | Target Standard Name | File Path | Status |
 | :--- | :--- | :--- | :--- |
 | `PUIMover` | `PUIMover` | `Modules/Utility/PUIMover/PUIMover.lua` | ✅ **DONE** |
 | `PUIDock` | `PUIDock` | `Modules/Utility/PUIDock/PUIDock.lua` | ✅ **DONE** |
+| `PUITooltip` | `PUITooltip` | `Modules/Utility/PUITooltip/`<br>• `PUITooltipConstants.lua`<br>• `PUITooltipSkin.lua`<br>• `PUITooltipAnchor.lua`<br>• `PUITooltipUnit.lua`<br>• `PUITooltipItem.lua`<br>• `PUITooltipScanner.lua`<br>• `PUITooltip.lua` | ✅ **DONE** |
+| `PUILogViewer` | `PUILogViewer` | `Modules/Utility/PUILogViewer/PUILogViewer.lua` (Universal Chat, RP, Rolls & URL Engine) | ✅ **DONE** |
 | `PUIMerchant` | `PUIMerchant` | `Modules/Utility/PUIMerchant/PUIMerchant.lua` | ✅ **DONE** |
 | `PUIFastLoot` | `PUIFastLoot` | `Modules/Utility/PUIFastLoot/PUIFastLoot.lua` | ✅ **DONE** |
 | `PUIAutoMechanics` | `PUIAutoMechanics` | `Modules/Utility/PUIAutoMechanics/PUIAutoMechanics.lua` | ✅ **DONE** |
@@ -95,7 +97,7 @@ To achieve total architectural consistency, all modular components in PrimusUI a
 | :--- | :--- | :--- | :--- |
 | `PUITalk` | `PUITalk` | `Modules/Social/PUITalk/`<br>• `PUITalkCore.lua`<br>• `PUITalkChat.lua`<br>• `PUITalkMessages.lua`<br>• `PUITalkSocial.lua`<br>• `PUITalk.lua` | ✅ **DONE** |
 | `PUIMasterLoot` | `PUIMasterLoot` | `Modules/Social/PUIMasterLoot/PUIMasterLoot.lua` | ✅ **DONE** |
-| `PUIRoleplay` | `PUIRoleplay` | `Modules/Social/PUIRoleplay/`<br>• `PUIConstants.lua`<br>• `PUIComms.lua`<br>• `PUIRPSheet.lua`<br>• `PUIGlance.lua`<br>• `PUITooltip.lua`<br>• `PUIDirectory.lua`<br>• `PUIEmotes.lua`<br>• `PUIRoleplay.lua` | ✅ **DONE** |
+| `PUIRoleplay` | `PUIRoleplay` | `Modules/Social/PUIRoleplay/`<br>• `PUIConstants.lua` (Data Model & Nomenclature Composition)<br>• `PUIIcons.lua` (Icon Index Library)<br>• `PUIProtocols.lua` (Wire Serialization, DrunkCodec & Hardened SplitString)<br>• `PUIComms.lua` (Multi-Channel Dispatcher & Ping Ingestion)<br>• `PUIIconPicker.lua` (Visual Searchable Icon Browser)<br>• `PUICardPreview.lua` (Live Character Card Preview)<br>• `PUIRPWidgets.lua` (Glassmorphic Widget Factory)<br>• `PUIRPTabIdentity.lua` (Identity, Prefix, Title, Epithet, House)<br>• `PUIRPTabAppearance.lua` (Physical Metrics & Demographics)<br>• `PUIRPTabPersonality.lua` (Psychological Trait Sliders)<br>• `PUIRPTabLore.lua` (Origins, Motto, Faction & 6 History Chapters)<br>• `PUIRPTabRules.lua` (RP Preferences, Consent & ERP Boundaries)<br>• `PUIRPTabMatchmaking.lua` (Social Discovery & Matchmaking Tags)<br>• `PUIRPTabSettings.lua` (Profile Slots 0..3 & Private GM Notes)<br>• `PUIRPSheet.lua` (Master 7-Tab Roleplay Character Sheet)<br>• `PUIGlance.lua` (5-Slot Target At-A-Glance HUD Pill)<br>• `PUITooltip.lua` (Target Tooltip RP Metadata Injection)<br>• `PUIDirFlyout.lua` (5-Tab Player Dossier Flyout Window)<br>• `PUIMapPins.lua` (World Map RP Player Location Pins)<br>• `PUIDirectory.lua` (Searchable Directory & Discovery Matrix)<br>• `PUIEmotes.lua` (Long-Form Emote Auto-Splitter)<br>• `PUIListener.lua` (Proximity Mention Radar & Focus Tracker)<br>• `PUIElephant.lua` (Story & Scene Archiver)<br>• `PUIDice.lua` (DiceMaster D20 Tabletop & Combat Engine)<br>• `PUIExtended.lua` (RP Inventory Pouch & Document/Letter Forge)<br>• `PUIImporter.lua` (Legacy Addon Importer & String Code Backup)<br>• `PUITray.lua` (RP Quick Action Bar & Immersion Toggle)<br>• `PUIRoleplay.lua` (Master Coordinator & Options Flare) | ✅ **DONE** |
 
 ---
 

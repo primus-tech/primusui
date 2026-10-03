@@ -214,6 +214,10 @@
   - Added default dimension constants for `PUIMinimapper` ($160 \times 160$), `PUIMinimapOrbit` ($24 \times 24$), and `QuestWatchFrame` ($220 \times 150$) in `DEFAULT_DIMS`.
   - Implemented `PUIMover:GetPosition(key)` and `PUIMover:HasCustomPosition(key)` public query APIs.
   - Stabilized Blizzard frame anchors on `UIParent_ManageFramePositions` preventing Blizzard from resetting custom positions for `QuestWatchFrame`, `DurabilityFrame`, and `WorldStateAlwaysUpFrame`.
+- [x] **PUIBank All-In-One Unified Bank Container (`Modules/Player/PUIBank/`):**
+  - Unified Bank container consolidating the 24 main bank slots and up to 6 bank bags (slots 5–10) into a single cohesive, searchable interface.
+  - Offline persistent caching (`PrimusCharDB.PUIBankCache`) enabling full bank item inspection from anywhere in the world.
+  - Live item search, quality-colored slot borders, bag bar tray with bank bag slot purchase controls, and free slot breakdown telemetry.
 - [x] **PUISpellbook: Traditional 2-Page Spellbook Spread (`Modules/Player/PUISpellbook/`):**
   - Classic 2-column, 2-page spread (6 spells left + 6 spells right = 12 per view) with central spine divider.
   - Multi-rank flyout dropdown per spell card enabling 1-click downranking and `PickupSpell` drag-to-bar assignment.
@@ -263,6 +267,38 @@
   - Seamless Shift-Click hyperlink insertion from bags, spellbook, trade skills, and quest log.
   - System and social event routing: Skill-up announcements, loot alerts, combat feedback, and error suppression.
   - Integrated Whisper Diversion suppressing whispers from main chat log and routing to Tab 2.
+- [x] **PUITooltip Universal Subsystem & Provider Pipeline (`Modules/Utility/PUITooltip/`):**
+  - Deconstructed into 7 dedicated sub-files (`PUITooltipConstants.lua`, `PUITooltipSkin.lua`, `PUITooltipAnchor.lua`, `PUITooltipUnit.lua`, `PUITooltipItem.lua`, `PUITooltipScanner.lua`, `PUITooltip.lua`).
+  - Strict Single Resource Ownership: Master hook manager for `GameTooltip`, `ItemRefTooltip`, `ShoppingTooltip1/2`, `WorldMapTooltip`, and `GameTooltipStatusBar`.
+  - Decoupled Provider Registration API (`RegisterUnitProvider`, `RegisterItemProvider`, `RegisterSpellProvider`) with priority ordering.
+  - Zero-allocation background scanner frame `Primus_PUITooltip_ScanTooltip` eliminating temporary table churn during stat and durability inspection.
+  - Modern dark glass styling with item quality border coloring, class/reaction colored status bars, and Smart Corner / Cursor / `PUIMover` anchoring.
+- [x] **PUILogViewer: Universal Chat, RP, Rolls & URL Log Engine (`Modules/Utility/PUILogViewer/`):**
+  - Standalone utility module and high-performance log viewer window accessible via `/puilog`, `/puilogs`, `/puirplog`, `/puiurl`, or `/pui config`.
+  - 5 Categorical Filter Tabs: `All`, `Say/Yell/Emote`, `Party/Raid/Guild`, `Whispers`, and `URLs & Links`.
+  - Dynamic regular expression URL extractor detecting web protocols and domains (`http://`, `https://`, `www.`, `discord.gg`, `carrd.co`, `toyhou.se`, `youtube.com`, `twitch.tv`, `spotify.com`, etc.).
+  - 1-Click Interactive URL Copy Dialog (`/puiurl` or clicking URLs in chat/logs) with an auto-highlighted edit box.
+  - Real-time search filter, pause log buffer toggle, copy all text box, and clear log memory tool.
+- [x] **PUIRoleplay (PUIRP) Next-Generation Roleplaying Suite (`Modules/Social/PUIRoleplay/`):**
+  - Complete 28-file modular architecture spanning Core Constants, Protocols, UI Widgets, Tab Controllers, Tabletop Engines, and Importers.
+  - **Universal Nomenclature Composition:** Cleanly splits `prefix`, `title`, `epithet` (`suffix`), and `house_name` (`bloodline`/`clan`/`tribe`) with intelligent prepositioning ("of House ...") via `ComposeFullName` and `ComposeTitle`.
+  - **7-Tab Master Character Sheet (`PUIRPSheet.lua`):**
+    - *Identity:* Full name composition, prefix, title, epithet, house affiliation, nickname, pronouns, IC/OOC status.
+    - *Appearance:* Apparent vs actual age, eye color, height, weight, body build, complexion, scars/tattoos, and physical description.
+    - *Personality:* 5 psychological spectrum sliders (Chaotic/Lawful, Cruel/Merciful, Pious/Pragmatic, Cautious/Reckless, Introverted/Extroverted).
+    - *Lore:* Birthplace, homeland, faction, motto, and 6 history chapters (Early Years, Adulthood, Turning Point, Recent Past, Current Focus, Legend).
+    - *Rules:* RP style, injury consent, romance preferences, ERP boundaries, and 18+ privacy validation toggles.
+    - *Matchmaking:* Social discovery tags, romance intent, walkup openness, and dating hooks.
+    - *Settings:* 4 persistent profile slots (0..3), private GM notes, export string generation, and import triggers.
+  - **Live Character Card Preview (`PUICardPreview.lua`) & Searchable Icon Browser (`PUIIconPicker.lua`).**
+  - **5-Slot Target At-A-Glance HUD Pill (`PUIGlance.lua`):** Categorized glance badges with custom icons, border tints, markdown tooltips, and `PUIMover` integration.
+  - **Searchable RP Directory & Discovery Matrix (`PUIDirectory.lua`):** Dual browsing modes (Matchmaking Card Feed & Tactical Grid), multi-tag filtering, and 5-Tab remote player dossier flyout window (`PUIDirFlyout.lua`).
+  - **World Map RP Player Location Pins (`PUIMapPins.lua`):** Interactive map pins with cluster tooltips and zone filtering.
+  - **DiceMaster D20 Tabletop & Combat Engine (`PUIDice.lua`):** Custom RP stats, resource bars, status effects, and contextual D20 rolls.
+  - **Extended RP Inventory Pouch & Document/Letter Forge (`PUIExtended.lua`):** Written letters with parchment backgrounds and wax seals, RP bag items, and coordinate stashes.
+  - **Multi-Addon Importer & String Backup (`PUIImporter.lua`):** 1-click import from Total RP 2/3, MyRolePlay, FlagRSP, and single-byte `^` string code export/import.
+  - **Chat Suite & Immersion Tools:** Long-form Emote Auto-Splitter (`PUIEmotes.lua`), Proximity Mention Radar & Focus Tracker (`PUIListener.lua`), Elephant Story/Scene Archiver (`PUIElephant.lua`), and RP Quick Action Tray (`PUITray.lua`).
+  - **Wire Protocol & Encoding Hardening:** 100% two-way wire-protocol compatibility with TurtleRP over `TTRP` channel. DrunkCodec multi-byte ANSI/UTF-8 decoding fixes restoring missing "S" in zone names ("Stormwind City", "Stranglethorn Vale"). Loop-safe `SplitString` with 2000-iteration hard stop and cycle-safe `Utils.DeepCopy`/`DeepMerge`.
 - [x] **Inspect Suite (`Modules/Utility/Inspect/`):**
   - Throttled inspect queue preventing client lockups, with target gear and talent tree caching.
 - [x] **Master Loot Assistant (`Modules/Social/MasterLoot/`):**
@@ -275,27 +311,17 @@
   - Instant single-frame auto-looting, auto-dismount on action, and auto-stand on spell cast.
 - [x] **PUIDock Frame (`Modules/Utility/PUIDock/`):**
   - Dockable sliding sidebar panels for quick utility access.
-- [x] **PUIRoleplay Roleplaying Suite (`Modules/Social/PUIRoleplay/`):**
-  - Modular 8-subfile architecture (`PUIConstants.lua`, `PUIComms.lua`, `PUIRPSheet.lua`, `PUIGlance.lua`, `PUITooltip.lua`, `PUIDirectory.lua`, `PUIEmotes.lua`, `PUIRoleplay.lua`).
-  - 100% two-way wire-protocol compatibility with TurtleRP (`TTRP` channel, DrunkEncode/Decode codec, M/T/D packet parser, 30s telemetry pings).
-  - Standalone operation with zero dependency on the TurtleRP addon.
-  - High-definition PrimusUI dark glassmorphic UI design (1-pixel borders, class-colored headers, status pills).
-  - Target At-A-Glance HUD Pill with 3 interactive glance widgets and `[Bio]` button registered with `PUIMover` (`"PUIRPGlance"` under `SOCIAL`).
-  - Character Profile Sheet & Editor (General, RP Style Preferences, Glances, Bio ScrollBox, Notes, 4 profile slots, icon picker).
-  - Non-intrusive GameTooltip RP metadata styling (RP Name, Title, Pronouns, IC/OOC badges, IC/OOC notes).
-  - Searchable RP Player Directory with live filter and World Map RP player location pins.
-  - Long-form RP chat/emote composer overcoming 255-char limit with automatic multi-chunk transmission and quote formatting.
 
 ---
 
-## 🏆 Sprint 1 Complete Architectural Milestone (All 7 Components Verified)
+## 🏆 Sprint 1 Complete Architectural Milestone (All 8 Components Verified)
 
 - [x] **Component 1 (Core Lifecycle Runtime & DB Profiles):** Dynamic module enable/disable, event & timer isolation, profile deep-copy, save/load/delete, and profile switching.
 - [x] **Component 2 (Distributed Options Flare Hub & Master GUI Redesign):** 25% Left Command Center / 75% Right dynamic LoD canvas, category dropdown filter, profile IO controls, frame caching, and live `[x]` sidebar toggles.
 - [x] **Component 3 (PUIHotbars Virtualization & 120-Slot Paging Tunnels):** Modular 4-file deconstruction (`Buttons.lua`, `XPBar.lua`, `MicroBags.lua`, `PUIHotbars.lua`), Rows/Cols matrix math (1..12), pure scaling without texture cropping, and stance/form condition gateway.
 - [x] **Component 4 (PUIHud 6-File Modular Deconstruction & Bar 10 Mini-Bars):** Deconstructed into `Wings.lua`, `MiniBars.lua` (Slots 109..116), `ActiveAssist.lua`, `Timers.lua`, `Triage.lua`, and `PUIHud.lua` (0.04s situational easing).
 - [x] **Component 5 (Click-Casting & Decursive Engine Integration):** Universal click-to-heal dispatcher with spellbook/rank awareness, class-aware debuff highlight borders, and 1-click `/pui cleanse` emergency trigger.
-- [x] **Component 6 (Distributed Options Flare Decentralization across all 35 Modules):** Standardized Options Flare handshake and strict `OnEnable()`/`OnDisable()` lifecycle across all Player, Utility, Gathering, Professions, Social, Combat, and Class modules.
-- [x] **Component 7 (TOC Audit, Technical Debt Cleanup & Lua 5.0.2 Verification):** `Modules\Combat\Range\Range.lua` restored to TOC, orphaned `AuctionHouse.lua` removed, and 100% pass on repository-wide Lua 5.0.2 static AST validation across all 68 files.
-- [x] **Component 8 (Universal Flare Protocol & Table Identity Invariance):** Standardized module headers (`local PUI<Name> = Primus.PUI<Name> or {}`), eliminated top-level cross-module upvalues in Core (`Console.lua`, `Options.lua`, `Bootstrap.lua`), and achieved 100% Flare registration coverage across all 45 modules with zero upvalue/load-order bugs.
+- [x] **Component 6 (Distributed Options Flare Decentralization across all Modules):** Standardized Options Flare handshake and strict `OnEnable()`/`OnDisable()` lifecycle across all Player, Utility, Gathering, Professions, Social, Combat, and Class modules.
+- [x] **Component 7 (TOC Audit, Technical Debt Cleanup & Lua 5.0.2 Verification):** `Modules\Combat\Range\Range.lua` restored to TOC, orphaned `AuctionHouse.lua` removed, and 100% pass on repository-wide Lua 5.0.2 static AST validation across all files.
+- [x] **Component 8 (Universal Flare Protocol & Table Identity Invariance):** Standardized module headers (`local PUI<Name> = Primus.PUI<Name> or {}`), eliminated top-level cross-module upvalues in Core (`Console.lua`, `Options.lua`, `Bootstrap.lua`), and achieved 100% Flare registration coverage across all modules with zero upvalue/load-order bugs.
 

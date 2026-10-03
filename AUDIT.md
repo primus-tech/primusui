@@ -92,6 +92,7 @@ PRIMUS UI AUDIT SCORECARD & HEALTH MATRIX
 | **PUISpellbook** | [`Modules/Player/PUISpellbook/PUISpellbook.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Player/PUISpellbook/PUISpellbook.lua) | Authentic 2-column, 2-page book spread (12 cards per view), multi-rank dropdown flyout, live search header, side discipline tabs, 5 customizable RGBA color themes, and authentic page-turn audio triggers. | **PASS** |
 | **PUIVendor** | [`Modules/Player/PUIVendor/PUIVendor.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Player/PUIVendor/PUIVendor.lua) | Sells non-wearable grey junk with strict wearability protection (weapons, armor, accessories), embedded `[Sell Greys]` and `[x] Auto-Sell` controls on `MerchantFrame`, automated gear repairs, and `/pui vendor debug`. | **PASS** |
 | **PUIBags** | [`Modules/Player/PUIBags/PUIBags.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Player/PUIBags/PUIBags.lua) | Unified single-window inventory for bags 0–4 with search filtering, quality borders, dynamic resizing, interactive bag bar tray, plain-click bag highlighting, shift-click bag pickup, and native 1.12.1 coin icons. | **PASS** |
+| **PUIBank** | [`Modules/Player/PUIBank/PUIBank.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Player/PUIBank/PUIBank.lua) | All-in-one unified bank container consolidating 24 main bank slots + 6 bank bags with offline persistent caching (`PrimusCharDB.PUIBankCache`), search, quality borders, and slot purchase controls. | **PASS** |
 | **PUISellValue** | [`Modules/Player/PUISellValue/PUISellValue.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Player/PUISellValue/PUISellValue.lua) | Hybrid vendor sell value engine with 2-tier resolution (static baseline + live realm cache in `PrimusGlobalDB.PUISellValue`), 16+ universal tooltip hooks, and merchant suppression. | **PASS** |
 | **PUIQuest** | [`Modules/Player/PUIQuest/PUIQuest.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Player/PUIQuest/PUIQuest.lua) | Cannibalized standalone quest engine & zero-shim database (Vanilla 1.12.1 + Turtle WoW extensions) with dynamic delta patching (`Patchtable.lua`), query engine (`Database.lua`), World Map POI pins (`Map.lua`), minimap radar & 3D HUD arrow (`Tracker.lua`), QuestLog buttons (`Quest.lua`), and themed DB browser (`Browser.lua`, `/pui db`). | **PASS** |
 | **PUIQuestWatch** | [`Modules/Player/PUIQuestWatch/PUIQuestWatch.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Player/PUIQuestWatch/PUIQuestWatch.lua) | Advanced quest tracker with 5-minute auto-expiry fix, array corruption fix, difficulty-colored level headers, persistent SavedVariables, and PUIMover anchoring. | **PASS** |
@@ -105,21 +106,23 @@ PRIMUS UI AUDIT SCORECARD & HEALTH MATRIX
 
 ---
 
-### 💬 Tier 4: Interaction, Social & Content Modules (`Modules/`) — **PASS (92%)**
+### 💬 Tier 4: Interaction, Social & Content Modules (`Modules/`) — **PASS (98%)**
 
 | Subsystem | Source File | Audit Finding | Status |
 | :--- | :--- | :--- | :---: |
 | **PUITalk** | [`Modules/Social/PUITalk/PUITalk.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Social/PUITalk/PUITalk.lua) | Unified communication suite merging chat streams, isolated DM sub-tabs, and live friends/guild roster into a 3-tab hub with whisper diversion, class coloring, and URL links. | **PASS** |
+| **PUITooltip** | [`Modules/Utility/PUITooltip/PUITooltip.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUITooltip/PUITooltip.lua) | 7-file single-owner tooltip suite (`PUITooltipConstants.lua`, `Skin.lua`, `Anchor.lua`, `Unit.lua`, `Item.lua`, `Scanner.lua`, `PUITooltip.lua`) with provider pipeline and zero-allocation scanner. | **PASS** |
+| **PUILogViewer** | [`Modules/Utility/PUILogViewer/PUILogViewer.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUILogViewer/PUILogViewer.lua) | Standalone universal chat, RP, rolls, and URL link log engine (`/puilog`, `/puiurl`) with 5 tabs, URL regex scanner, and 1-click copy dialog. | **PASS** |
 | **PUIMasterLoot** | [`Modules/Social/PUIMasterLoot/PUIMasterLoot.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Social/PUIMasterLoot/PUIMasterLoot.lua) | Raid roll tracking, countdown timer, and master loot distribution helper. | **PASS** |
 | **PUIMerchant** | [`Modules/Utility/PUIMerchant/PUIMerchant.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUIMerchant/PUIMerchant.lua) | Full Auction House scanning engine, statistical market pricing (Min Buyout, Market Average), tooltip price injection, unit price display, and Shift+Click Quick Buyout. | **PASS** |
 | **PUIDock** | [`Modules/Utility/PUIDock/PUIDock.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUIDock/PUIDock.lua) | Curated UI mover and comprehensive Blizzard art element stripper (Griffons, page arrows, micro menu, bag bar, bar art, XP bar, default castbar). | **PASS** |
 | **PUIMailbox** | [`Modules/Utility/PUIMailbox/PUIMailbox.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUIMailbox/PUIMailbox.lua) | Mass mail collection ("Open All") and recipient auto-fill. | **PASS** |
 | **PUIFastLoot** | [`Modules/Utility/PUIFastLoot/PUIFastLoot.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUIFastLoot/PUIFastLoot.lua) | Single-frame auto-looting upon loot window open. | **PASS** |
 | **PUIAutoMechanics** | [`Modules/Utility/PUIAutoMechanics/PUIAutoMechanics.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUIAutoMechanics/PUIAutoMechanics.lua) | Auto-dismount on action/flight master and auto-stand on spell cast. | **PASS** |
-| **PUIItemCompare** | [`Modules/Utility/PUIItemCompare/PUIItemCompare.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUIItemCompare/PUIItemCompare.lua) | Side-by-side equipment comparison tooltips. | **PASS** |
+| **PUIItemCompare** | [`Modules/Utility/PUIItemCompare/PUIItemCompare.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUIItemCompare/PUIItemCompare.lua) | Side-by-side equipment comparison tooltips with dynamic screen-edge positioning. | **PASS** |
 | **PUIMinimapOrbit** | [`Modules/Utility/PUIMinimapOrbit/PUIMinimapOrbit.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUIMinimapOrbit/PUIMinimapOrbit.lua) | Minimap button collector consolidating addon icons into a collapsible dock. | **PASS** |
 | **PUIInspect** | [`Modules/Utility/PUIInspect/PUIInspect.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Utility/PUIInspect/PUIInspect.lua) | Throttled inspect queue preventing client lockups with gear overview caching. | **PASS** |
-| **PUIRoleplay** | [`Modules/Social/PUIRoleplay/PUIRoleplay.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Social/PUIRoleplay/PUIRoleplay.lua) | 8-file roleplaying suite with 100% two-way TurtleRP wire protocol compatibility, target at-a-glance pill, character sheet, and directory. | **PASS** |
+| **PUIRoleplay** | [`Modules/Social/PUIRoleplay/PUIRoleplay.lua`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/Modules/Social/PUIRoleplay/PUIRoleplay.lua) | Next-gen 28-file roleplaying suite: 7-Tab character sheet, Universal Nomenclature composition, 5-slot glance HUD pill, Matchmaking Directory, Dossier flyout, World Map pins, DiceMaster D20, RP Inventory/Letters, Multi-Addon Importer, and RP action tray. | **PASS** |
 
 ---
 
@@ -131,7 +134,8 @@ PRIMUS UI AUDIT SCORECARD & HEALTH MATRIX
 ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
 │ 1. [DONE] PUISellValue: Hybrid item pricing engine (Tier 1 built-in + Tier 2 realm-learning).    │
 │ 2. [DONE] PUIQuest: Standalone zero-shim quest engine & DB (Vanilla & Turtle modes, Map & HUD).  │
-│ 3. [FEATURE] PUIBags: Automated bag defragmentation & auto-sort algorithm ([SORT]).              │
-│ 4. [FEATURE] PUIWorldMap: Windowed/scalable WorldMap with coordinates & quest POI overlays.      │
+│ 3. [DONE] PUIBags & PUIBank: Bag sorting ([SORT]) & unified offline bank container.              │
+│ 4. [DONE] PUITooltip & PUILogViewer: Modular provider tooltip suite & standalone URL log viewer. │
+│ 5. [DONE] PUIRoleplay: 28-file complete RP suite, D20 dice, letter forge & legacy importer.      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```

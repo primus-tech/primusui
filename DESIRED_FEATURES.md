@@ -637,3 +637,97 @@ A fully integrated, zero-shim quest navigation and database engine cannibalized 
 6. **Cross-Module Handshakes:**
    - Seamless synergy with `PUIQuestWatch` (Alt-Click header / Left-Click auto-focus) and `PUISellValue` (supplying offline vendor baseline prices for 25,000+ items).
 
+---
+
+## 15. PUITooltip: Universal Tooltip Subsystem & Single-Owner Provider Architecture
+
+### Conceptual Vision
+In traditional Vanilla UI architectures, multiple addons and sub-modules independently hook `GameTooltip`, competing for script handlers, causing tooltip stutter, overlapping lines, and frame anchor fighting. **PUITooltip** establishes absolute Single Domain Ownership over all client tooltips (`GameTooltip`, `ItemRefTooltip`, `ShoppingTooltip1/2`, `WorldMapTooltip`, `GameTooltipStatusBar`), exposing an extensible, priority-sorted **Provider Pipeline**.
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   PUITOOLTIP PIPELINE                  │
+├────────────────────────────────────────────────────────┤
+│ • Master Hook Manager (Single Resource Ownership)      │
+│ • Skinning Engine (1px borders, item quality tinting)  │
+│ • Unit Provider Pipeline (Level, Class, Guild, Target) │
+│ • Item Provider Pipeline (SellValue, Merchant, RP)     │
+│ • Zero-Allocation Background Scanner                   │
+└────────────────────────────────────────────────────────┘
+```
+
+### Core Specifications:
+1. **Single Resource Ownership:**
+   - Centralizes all hooks on `GameTooltip`, `ItemRefTooltip`, `ShoppingTooltip1/2`, and `WorldMapTooltip`.
+   - Replaces redundant hook scripts across foreign modules with decoupled provider registrations (`PUITooltip:RegisterUnitProvider`, `RegisterItemProvider`, `RegisterSpellProvider`).
+2. **Zero-Allocation Background Scanner (`PUITooltipScanner.lua`):**
+   - Recycled hidden scanning frame `Primus_PUITooltip_ScanTooltip` providing bag, inventory, and hyperlink inspection without temporary frame allocations.
+3. **Flexible Dynamic Anchoring:**
+   - Supports 3 user-selectable anchoring modes: `SMART_CORNER` (bottom-right with dynamic edge flip), `CURSOR` (anchored to mouse pointer), and `MOVER` (custom draggable anchor frame `Primus_PUITooltip_Anchor` registered with `PUIMover`).
+
+---
+
+## 16. PUILogViewer: Standalone Universal Chat, RP, Rolls & URL Link Engine
+
+### Conceptual Vision
+Players in dense social, roleplay, and raiding environments require a dedicated, non-intrusive way to review past dialogue, inspect combat rolls, and extract web links without scrolling through cluttered chat windows. **PUILogViewer** is a high-performance standalone log viewer offering 5 categorical filter tabs, live regex search, and an interactive 1-click web URL extraction dialog.
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    PRIMUS UI: UNIVERSAL LOG VIEWER                       │
+├──────────────────────────────────────────────────────────────────────────┤
+│  [ All ]  [ Say/Yell/Emote ]  [ Party/Raid/Guild ]  [ Whispers ]  [ URLs ]│
+├──────────────────────────────────────────────────────────────────────────┤
+│  Filter: [____________________]  [x] Auto-Scroll  [ Pause ]  [ Copy All ]│
+├──────────────────────────────────────────────────────────────────────────┤
+│  • [20:14] [Say] <Aurelia>: "Translating the ancient Highborne script."  │
+│  • [20:15] [Link] https://carrd.co/aurelia-sunstrider                    │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Core Specifications:
+1. **Dynamic URL Regular Expression Engine:**
+   - Automatically scans chat streams for web URLs (`http://`, `https://`, `www.`, `discord.gg`, `carrd.co`, `toyhou.se`, `youtube.com`, `spotify.com`, `twitch.tv`, etc.).
+   - Interactive 1-click URL Copy Dialog (`/puiurl` or clicking URLs in chat/log) with an auto-highlighted edit box for easy `Ctrl+C` copying.
+2. **5 Categorical Filter Tabs:**
+   - `All`, `Say/Yell/Emote`, `Party/Raid/Guild`, `Whispers`, and `URLs & Links`.
+3. **Session Memory Controls:**
+   - Live query search filtering, pause logging buffer toggle, full log copy text frame, and log clear memory wiper.
+
+---
+
+## 17. PUIBank: All-In-One Unified Bank Container with Offline Caching
+
+### Conceptual Vision
+Replaces the fragmented default bank interface with a unified, searchable all-in-one container that consolidates the 24 main bank slots and up to 6 bank bags (slots 5–10). Integrates seamless offline persistent caching, allowing players to check their banked gear, trade goods, and consumables anywhere in the world.
+
+### Core Specifications:
+1. **Unified Multi-Container Layout:**
+   - Consolidates bank slots into a continuous, customizable grid matching the design and layout presets of `PUIBags`.
+2. **Offline Persistent Caching (`PrimusCharDB.PUIBankCache`):**
+   - Automatically caches item IDs, counts, and links whenever visiting a bank NPC.
+   - Allows opening and searching bank inventory while out in the field.
+3. **Integrated Bank Bag Tray & Purchasing:**
+   - Interactive bag tray displaying equipped bank bags with 1-click bank slot purchase and cost confirmation.
+
+---
+
+## 18. PUIRoleplay: Next-Generation 28-File Roleplaying & Tabletop Suite
+
+### Conceptual Vision
+The complete consolidation of Total RP 3, MyRolePlay, Listener, Elephant, DiceMaster, and TRP3 Extended into a unified, 28-file modular roleplaying framework for Vanilla WoW 1.12.1 and OctoWoW.
+
+### Core Specifications:
+1. **Universal Nomenclature Composition (`PUIConstants.lua`):**
+   - Cleanly separates `prefix`, `title`, `epithet` (`suffix`), and `house_name` (`bloodline`/`tribe`/`clan`) with dynamic composition (`ComposeFullName`, `ComposeTitle`) and intelligent prepositioning ("of House ...").
+2. **7-Tab Master Character Sheet (`PUIRPSheet.lua`):**
+   - Identity, Physical Demographics & Appearance, 5 Psychological Sliders, Lore & 6 History Chapters, RP Style & ERP Boundaries, Matchmaking Tags, and 4 Profile Slots (0..3).
+   - Real-time Character Card Preview (`PUICardPreview.lua`) and Searchable Icon Picker (`PUIIconPicker.lua`).
+3. **Social Discovery Directory & 5-Tab Player Dossier (`PUIDirectory.lua` & `PUIDirFlyout.lua`):**
+   - Matchmaking Card Feed & Tactical Grid modes, multi-tag filters (Orientation, LGBTQIA+, 18+ Mature, Walkups), and World Map player pins (`PUIMapPins.lua`).
+4. **Tabletop & Immersion Suite:**
+   - DiceMaster D20 Tabletop Engine (`PUIDice.lua`), RP Inventory & Letter Forge (`PUIExtended.lua`), Proximity Mention Radar (`PUIListener.lua`), Elephant Story Archiver (`PUIElephant.lua`), and RP Quick Action Tray (`PUITray.lua`).
+5. **Multi-Addon Importer & Wire Hardening (`PUIImporter.lua` & `PUIProtocols.lua`):**
+   - 1-click import from TRP2/3, MRP, FlagRSP, and character string codes.
+   - DrunkCodec multi-byte ANSI/UTF-8 decoding fixes and loop-safe `SplitString` (2000-iteration hard stop).
+
