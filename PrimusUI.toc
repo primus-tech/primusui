@@ -173,6 +173,8 @@ Modules\Social\PUIRoleplay\PUIGlance.lua
 Modules\Social\PUIRoleplay\PUITooltip.lua
 Modules\Social\PUIRoleplay\PUIDirectory.lua
 Modules\Social\PUIRoleplay\PUIEmotes.lua
+Modules\Social\PUIRoleplay\PUIListener.lua
+Modules\Social\PUIRoleplay\PUIElephant.lua
 Modules\Social\PUIRoleplay\PUITray.lua
 Modules\Social\PUIRoleplay\PUIRoleplay.lua
 

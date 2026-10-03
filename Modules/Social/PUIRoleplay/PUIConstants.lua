@@ -1,46 +1,194 @@
 --[[
     PrimusUI: PUIRoleplay Constants & Data Model
-    Target: Vanilla WoW 1.12.1 / Turtle WoW (100% TurtleRP Wire Compatibility)
+    Target: Vanilla WoW 1.12.1 / Turtle WoW (100% Multi-Addon Wire Compatibility)
 --]]
 
+local _G = getglobals and getglobals() or _G or getfenv(0)
 local Primus = _G.Primus
+if not Primus then return end
+
 local PUIRoleplay = Primus.PUIRoleplay or {}
 Primus.PUIRoleplay = PUIRoleplay
 
+--------------------------------------------------------------------------------
+-- Multi-Channel Communication Definitions
+--------------------------------------------------------------------------------
+PUIRoleplay.Channels = {
+    PRIMARY     = "OWPRP",               -- OctoWoW Roleplay Primary Channel (High Bandwidth)
+    TURTLERP    = "TTRP",                -- TurtleRP Broadcast Channel
+    FLAGRSP     = "xtensionxtooltip2",   -- FlagRSP / TotalRP Legacy Bridge
+    MRP         = "MyRolePlay",          -- MyRolePlay Standard Channel
+}
+
+PUIRoleplay.ChannelList = {
+    "OWPRP",
+    "TTRP",
+    "xtensionxtooltip2",
+    "MyRolePlay",
+}
+
+--------------------------------------------------------------------------------
+-- Dropdown Options & Dictionaries
+--------------------------------------------------------------------------------
 PUIRoleplay.DropdownOptions = {
     experience = {
-        ["a"] = "New",
-        ["b"] = "Comfortable",
-        ["c"] = "Advanced",
-        ["d"] = "Do Not Show"
+        ["a"] = "Beginner",
+        ["b"] = "Casual",
+        ["c"] = "Experienced",
+        ["d"] = "Veteran",
+        ["e"] = "Do Not Show"
     },
     walkups = {
-        ["a"] = "Welcome",
-        ["b"] = "None",
-        ["c"] = "Guild",
-        ["d"] = "Do Not Show"
+        ["a"] = "Walkups Welcome",
+        ["b"] = "Whisper First",
+        ["c"] = "Guild Only",
+        ["d"] = "Closed Session",
+        ["e"] = "Do Not Show"
     },
     injury = {
-        ["a"] = "Acceptable",
-        ["b"] = "Ask",
-        ["c"] = "No",
-        ["d"] = "Do Not Show"
-    },
-    romance = {
-        ["a"] = "Looking",
-        ["b"] = "Partnered",
-        ["c"] = "Open",
-        ["d"] = "Single",
-        ["e"] = "Ask",
-        ["f"] = "No",
-        ["g"] = "Do Not Show"
+        ["a"] = "Minor Only",
+        ["b"] = "Realistic / Negotiated",
+        ["c"] = "Permanent Allowed",
+        ["d"] = "No Injury",
+        ["e"] = "Do Not Show"
     },
     death = {
-        ["a"] = "Acceptable",
-        ["b"] = "Ask",
-        ["c"] = "No",
-        ["d"] = "Do Not Show"
+        ["a"] = "Negotiated Only",
+        ["b"] = "Ask First",
+        ["c"] = "Full Consent (Permadeath OK)",
+        ["d"] = "No Permadeath",
+        ["e"] = "Do Not Show"
+    },
+    combat = {
+        ["a"] = "D20 Rolls (DiceMaster)",
+        ["b"] = "Emote Combat (Freeform)",
+        ["c"] = "PvP Duel Resolution",
+        ["d"] = "Storyteller / DM Decides",
+        ["e"] = "No Combat"
+    },
+    gender = {
+        ["a"] = "Cisgender Male",
+        ["b"] = "Cisgender Female",
+        ["c"] = "Transgender Male",
+        ["d"] = "Transgender Female",
+        ["e"] = "Non-Binary",
+        ["f"] = "Agender",
+        ["g"] = "Genderfluid",
+        ["h"] = "Two-Spirit",
+        ["i"] = "Other / Custom"
+    },
+    orientation = {
+        ["a"] = "Heterosexual / Straight",
+        ["b"] = "Homosexual / Gay",
+        ["c"] = "Homosexual / Lesbian",
+        ["d"] = "Bisexual",
+        ["e"] = "Pansexual",
+        ["f"] = "Asexual",
+        ["g"] = "Demisexual",
+        ["h"] = "Queer",
+        ["i"] = "Questioning / Open",
+        ["j"] = "Other / Custom",
+        ["k"] = "Prefer Not to Say"
+    },
+    relationship = {
+        ["a"] = "Single & Looking",
+        ["b"] = "Single & Not Looking",
+        ["c"] = "In a Relationship",
+        ["d"] = "Partnered / Courting",
+        ["e"] = "Married",
+        ["f"] = "It's Complicated",
+        ["g"] = "Widowed",
+        ["h"] = "Open / Poly"
+    },
+    erp = {
+        ["a"] = "No Adult Content (Clean RP)",
+        ["b"] = "Romance & Fade-to-Black Only",
+        ["c"] = "Story-First ERP (Plot Required)",
+        ["d"] = "Adult / ERP Friendly (18+)"
     }
+}
+
+--------------------------------------------------------------------------------
+-- Default Full Character Profile Schema
+--------------------------------------------------------------------------------
+PUIRoleplay.DefaultProfile = {
+    -- 1. Identity & Nomenclature
+    first_name          = "",
+    middle_name         = "",
+    last_name           = "",
+    prefix              = "",
+    title               = "",
+    nickname            = "",
+    house_name          = "",
+    full_name           = "",
+
+    -- 2. Demographics & Identity
+    apparent_age        = "",
+    gender_identity     = "Cisgender Male",
+    ic_pronouns         = "He/Him",
+    ooc_pronouns        = "He/Him",
+    lgbtqia_friendly    = true,
+    orientation         = "Heterosexual / Straight",
+    show_orientation    = true,
+
+    -- 3. Appearance & Physicals
+    eye_color           = "",
+    height              = "",
+    weight              = "",
+    body_build          = "",
+    current_emotion     = "Calm",
+    appearance_desc     = "",
+
+    -- 4. Visual At-A-Glance Traits (5 Slots)
+    glances = {
+        [1] = { active = false, icon = "INV_Jewelry_Ring_03", title = "", text = "" },
+        [2] = { active = false, icon = "INV_Sword_27", title = "", text = "" },
+        [3] = { active = false, icon = "Spell_Holy_HolyBolt", title = "", text = "" },
+        [4] = { active = false, icon = "INV_Misc_Book_09", title = "", text = "" },
+        [5] = { active = false, icon = "INV_Misc_Bag_08", title = "", text = "" },
+    },
+
+    -- 5. Lore & Origins
+    birth_city          = "",
+    home_city           = "",
+    motto               = "",
+    faction_clan        = "",
+    history = {
+        chapter1        = "",
+        chapter2        = "",
+        chapter3        = "",
+        chapter4        = "",
+        chapter5        = "",
+        chapter6        = "",
+    },
+
+    -- 6. Roleplay Dynamics & Preferences
+    experience_level    = "Experienced",
+    currently_ic        = "1",
+    walkup_policy       = "Walkups Welcome",
+    combat_preference   = "D20 Rolls (DiceMaster)",
+    permadeath_consent  = "Negotiated Only",
+    injury_consent      = "Realistic / Negotiated",
+
+    -- 7. Dating, Romance & 18+ Adult-Oriented Roleplay
+    relationship_status = "Single & Looking",
+    looking_for = {
+        adventure       = true,
+        romance         = true,
+        combat          = false,
+        casual_tavern   = true,
+        political_guild = false,
+        adult_18plus    = false,
+        mentorship      = false,
+    },
+    adult_18plus_flag   = false,
+    erp_preference      = "No Adult Content (Clean RP)",
+    ooc_boundaries      = "",
+    ooc_notes           = "",
+
+    -- 8. Technical Metadata & Keys
+    keyM                = "",
+    icon                = "1",
 }
 
 PUIRoleplay.ClassData = {

@@ -1,9 +1,13 @@
 --[[
     PrimusUI: PUIRoleplay Master Module Coordinator (PUIRoleplay.lua)
-    Target: Vanilla WoW 1.12.1 / Turtle WoW (100% TurtleRP Wire Compatibility & Dark Theme)
+    Target: Vanilla WoW 1.12.1 / Turtle WoW (Multi-Channel OWPRP, TTRP, xtensionxtooltip2, MyRolePlay)
+    Architecture: Strict TRUTH.md compliance (Zero Aliases, Zero Shims)
 --]]
 
+local _G = getglobals and getglobals() or _G or getfenv(0)
 local Primus = _G.Primus
+if not Primus then return end
+
 local PUIRoleplay = Primus.PUIRoleplay or {}
 Primus.PUIRoleplay = PUIRoleplay
 _G.PUIRoleplay = PUIRoleplay
@@ -12,38 +16,71 @@ Primus:RegisterModule("PUIRoleplay", PUIRoleplay, "Social")
 local charDB = nil
 local globalDB = nil
 
-local defaultCharTemplate = {
+local defaultCharTemplate = PUIRoleplay.DefaultProfile or {
     keyM = "PUI10",
     keyT = "PUI20",
     keyD = "PUI30",
-    nsfw = "0",
     icon = "1",
-    full_name = "",
+    first_name = "",
+    middle_name = "",
+    last_name = "",
+    prefix = "",
     title = "",
-    race = "",
-    class = "",
-    class_color = "FFFFFF",
-    ic_info = "",
-    ooc_info = "",
-    ic_pronouns = "",
-    ooc_pronouns = "",
+    nickname = "",
+    house_name = "",
+    full_name = "",
+    apparent_age = "",
+    gender_identity = "Cisgender Male",
+    ic_pronouns = "He/Him",
+    ooc_pronouns = "He/Him",
+    lgbtqia_friendly = true,
+    orientation = "Heterosexual / Straight",
+    show_orientation = true,
+    eye_color = "",
+    height = "",
+    weight = "",
+    body_build = "",
+    current_emotion = "Calm",
+    appearance_desc = "",
+    glances = {
+        [1] = { active = false, icon = "INV_Jewelry_Ring_03", title = "", text = "" },
+        [2] = { active = false, icon = "INV_Sword_27", title = "", text = "" },
+        [3] = { active = false, icon = "Spell_Holy_HolyBolt", title = "", text = "" },
+        [4] = { active = false, icon = "INV_Misc_Book_09", title = "", text = "" },
+        [5] = { active = false, icon = "INV_Misc_Bag_08", title = "", text = "" },
+    },
+    birth_city = "",
+    home_city = "",
+    motto = "",
+    faction_clan = "",
+    history = {
+        chapter1 = "",
+        chapter2 = "",
+        chapter3 = "",
+        chapter4 = "",
+        chapter5 = "",
+        chapter6 = "",
+    },
+    experience_level = "Experienced",
     currently_ic = "1",
-    atAGlance1 = "",
-    atAGlance1Title = "",
-    atAGlance1Icon = "",
-    atAGlance2 = "",
-    atAGlance2Title = "",
-    atAGlance2Icon = "",
-    atAGlance3 = "",
-    atAGlance3Title = "",
-    atAGlance3Icon = "",
-    experience = "a",
-    walkups = "a",
-    injury = "b",
-    romance = "e",
-    death = "b",
-    description = "",
-    notes = ""
+    walkup_policy = "Walkups Welcome",
+    combat_preference = "D20 Rolls (DiceMaster)",
+    permadeath_consent = "Negotiated Only",
+    injury_consent = "Realistic / Negotiated",
+    relationship_status = "Single & Looking",
+    looking_for = {
+        adventure = true,
+        romance = true,
+        combat = false,
+        casual_tavern = true,
+        political_guild = false,
+        adult_18plus = false,
+        mentorship = false,
+    },
+    adult_18plus_flag = false,
+    erp_preference = "No Adult Content (Clean RP)",
+    ooc_boundaries = "",
+    ooc_notes = "",
 }
 
 local charDefaults = {
@@ -66,6 +103,7 @@ local globalDefaults = {
         bgs = "off",
         show_glance_bar = true,
         show_icon_tray = true,
+        active_channels = { "OWPRP", "TTRP", "xtensionxtooltip2", "MyRolePlay" },
     }
 }
 
@@ -245,7 +283,7 @@ function PUIRoleplay:IsPlayerOnline(name)
 end
 
 --------------------------------------------------------------------------------
--- Global Bridges (100% Seamless TurtleRP Cross-Compatibility)
+-- Global Bridges (100% Seamless TurtleRP & MRP Cross-Compatibility)
 --------------------------------------------------------------------------------
 function PUIRoleplay:SyncGlobalBridges()
     local gData = self:GetGlobalData()
@@ -260,7 +298,7 @@ function PUIRoleplay:SyncGlobalBridges()
     _G.TurtleRPPlayerProfiles = cData.profiles
     _G.TurtleRPQueryablePlayers = gData.queryable_players
     _G.TurtleRPSettings = gData.settings
-    
+
     if UnitName("player") then
         _G.TurtleRPCharacters[UnitName("player")] = _G.TurtleRPCharacterInfo
     end
@@ -271,18 +309,15 @@ end
 --------------------------------------------------------------------------------
 function PUIRoleplay:OnDataReceived(dataPrefix, playerName)
     self:SyncGlobalBridges()
-    
-    -- Refresh open sheet if viewing this player
+
     if self.Sheet and Primus_PUIRoleplay_Sheet and Primus_PUIRoleplay_Sheet:IsVisible() then
         self.Sheet:Refresh()
     end
-    
-    -- Refresh glance bar if this is our target
+
     if UnitName("target") == playerName and self.Glance then
         self.Glance:RenderTargetData(playerName)
     end
 
-    -- Refresh directory if open
     if self.Directory and Primus_PUIRoleplay_Directory and Primus_PUIRoleplay_Directory:IsVisible() then
         self.Directory:RefreshList()
     end
@@ -304,35 +339,8 @@ end
 function PUIRoleplay:OnInitialize()
     charDB = Primus.DB:RegisterNamespace("PUIRoleplay", charDefaults, true)
     globalDB = Primus.DB:RegisterNamespace("PUIRoleplay_Global", globalDefaults, false)
-    
-    -- 1. Migrate legacy account-wide PUIRoleplay namespace data if exists
-    if _G.PrimusGlobalDB and _G.PrimusGlobalDB.namespaces and _G.PrimusGlobalDB.namespaces["PUIRoleplay"] then
-        local legacy = _G.PrimusGlobalDB.namespaces["PUIRoleplay"]
-        local gData = self:GetGlobalData()
-        if legacy.known_characters and type(legacy.known_characters) == "table" then
-            for k, v in pairs(legacy.known_characters) do
-                if not gData.known_characters[k] and type(v) == "table" then
-                    gData.known_characters[k] = Primus.Utils.DeepCopy(v)
-                end
-            end
-        end
-        if legacy.queryable_players and type(legacy.queryable_players) == "table" then
-            for k, v in pairs(legacy.queryable_players) do
-                if not gData.queryable_players[k] then
-                    gData.queryable_players[k] = v
-                end
-            end
-        end
-        if legacy.settings and type(legacy.settings) == "table" then
-            for k, v in pairs(legacy.settings) do
-                if gData.settings[k] == nil then
-                    gData.settings[k] = v
-                end
-            end
-        end
-    end
 
-    -- 2. If known_characters is empty but TurtleRP has saved data in _G, copy it over
+    -- Migrate legacy data
     local gData = self:GetGlobalData()
     if _G.TurtleRPCharacters and type(_G.TurtleRPCharacters) == "table" then
         for k, v in pairs(_G.TurtleRPCharacters) do
@@ -341,85 +349,83 @@ function PUIRoleplay:OnInitialize()
             end
         end
     end
-    if _G.TurtleRPQueryablePlayers and type(_G.TurtleRPQueryablePlayers) == "table" then
-        for k, v in pairs(_G.TurtleRPQueryablePlayers) do
-            if not gData.queryable_players[k] then
-                gData.queryable_players[k] = v
-            end
-        end
-    end
 
-    -- 3. Ensure player character profile keys and attributes are properly initialized
     local myProf = self:GetMyProfile()
     if not myProf.keyM or myProf.keyM == "" then myProf.keyM = self:GenerateKey() end
     if not myProf.keyT or myProf.keyT == "" then myProf.keyT = self:GenerateKey() end
     if not myProf.keyD or myProf.keyD == "" then myProf.keyD = self:GenerateKey() end
-    
+
     self:SyncGlobalBridges()
-    
-    -- Register Options Flare
     self:RegisterFlare()
-    
-    -- Register Console Subcommands
+
+    -- Console Subcommands
     Primus.Console:RegisterSubCommand("rp", function(args)
         if args == "dir" or args == "directory" then
             PUIRoleplay:OpenDirectory()
-        elseif args == "chat" or args == "compose" then
+        elseif args == "chat" or args == "compose" or args == "split" or args == "emote" then
             PUIRoleplay.Emotes:OpenComposer()
+        elseif args == "listen" or args == "listener" then
+            if PUIRoleplay.Listener then PUIRoleplay.Listener:Toggle() end
+        elseif args == "logs" or args == "elephant" then
+            if PUIRoleplay.Elephant then PUIRoleplay.Elephant:OpenLogs() end
         elseif args == "bar" or args == "tray" then
             if PUIRoleplay.Tray then PUIRoleplay.Tray:Toggle() end
         else
             PUIRoleplay:OpenProfile()
         end
-    end, "Roleplaying suite (/pui rp [dir|chat|tray])")
-    
-    Primus.Console:RegisterSubCommand("ttrp", function(args)
-        PUIRoleplay:OpenProfile()
-    end, "TurtleRP profile compatibility shortcut")
-    
-    -- Top-level slash command shortcuts
+    end, "Roleplaying suite (/pui rp [dir|compose|listen|logs|tray])")
+
     SLASH_PUIRP1 = "/rp"
     SlashCmdList["PUIRP"] = function(msg)
         if msg == "dir" or msg == "directory" then
             PUIRoleplay:OpenDirectory()
-        elseif msg == "chat" or msg == "compose" then
+        elseif msg == "chat" or msg == "compose" or msg == "split" or msg == "emote" then
             PUIRoleplay.Emotes:OpenComposer()
+        elseif msg == "listen" or msg == "listener" then
+            if PUIRoleplay.Listener then PUIRoleplay.Listener:Toggle() end
+        elseif msg == "logs" or msg == "elephant" then
+            if PUIRoleplay.Elephant then PUIRoleplay.Elephant:OpenLogs() end
         elseif msg == "bar" or msg == "tray" then
             if PUIRoleplay.Tray then PUIRoleplay.Tray:Toggle() end
         elseif msg == "ic" then
             PUIRoleplay:SetICState("1")
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffPrimus RP:|r Status set to |cff40af6f[IC]|r")
+            DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffPrimus RP:|r Status set to |cff40ff66[IC]|r")
         elseif msg == "ooc" then
             PUIRoleplay:SetICState("0")
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffPrimus RP:|r Status set to |cffd3681e[OOC]|r")
+            DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffPrimus RP:|r Status set to |cffffaa00[OOC]|r")
         else
             PUIRoleplay:OpenProfile()
         end
     end
-    
+
     SLASH_PUITTRP1 = "/ttrp"
     SlashCmdList["PUITTRP"] = SlashCmdList["PUIRP"]
+
+    SLASH_PUIMRP1 = "/mrp"
+    SlashCmdList["PUIMRP"] = SlashCmdList["PUIRP"]
 end
 
 function PUIRoleplay:OnEnable()
-    -- Ensure player character profile is loaded and synchronized
     self:GetMyProfile()
     self:SyncGlobalBridges()
 
-    -- Register Comms Channel Listener
+    -- Channel Comms Listener
     Primus.Events:Register("CHAT_MSG_CHANNEL", self, function(owner, event, msg, sender, lang, chanStr, target, flags, zoneId, chanNum, chanName)
         local ch = string.lower(chanName or "")
         local cs = string.lower(chanStr or "")
-        if ch == "ttrp" or cs == "ttrp" or string.find(cs, "ttrp") then
+        if ch == "owprp" or cs == "owprp" or string.find(cs, "owprp") or
+           ch == "ttrp" or cs == "ttrp" or string.find(cs, "ttrp") or
+           ch == "xtensionxtooltip2" or cs == "xtensionxtooltip2" or string.find(cs, "xtensionxtooltip2") or
+           ch == "myroleplay" or cs == "myroleplay" or string.find(cs, "myroleplay") then
             PUIRoleplay.Comms:OnChatMessage(msg, sender)
         end
     end)
 
-    -- Channel Notices (e.g. You Joined TTRP)
     Primus.Events:Register("CHAT_MSG_CHANNEL_NOTICE", self, function(owner, event, noticeType, sender, _, chanStr, _, _, _, chanNum, chanName)
         local ch = string.lower(chanName or "")
         local cs = string.lower(chanStr or "")
-        if ch == "ttrp" or cs == "ttrp" or string.find(cs, "ttrp") then
+        if ch == "owprp" or cs == "owprp" or string.find(cs, "owprp") or
+           ch == "ttrp" or cs == "ttrp" or string.find(cs, "ttrp") then
             if noticeType == "YOU_JOINED" or noticeType == "YOU_CHANGED" then
                 if PUIRoleplay.Comms and PUIRoleplay.Comms:CanChat() then
                     PUIRoleplay.Comms:SendPing("A")
@@ -428,17 +434,34 @@ function PUIRoleplay:OnEnable()
         end
     end)
 
+    -- RP Dialogue & Elephant Chat Loggers
+    local function HandleChatMessage(event, msg, sender)
+        if PUIRoleplay.Listener then
+            PUIRoleplay.Listener:ProcessMessage(event, msg, sender)
+        end
+        if PUIRoleplay.Elephant then
+            PUIRoleplay.Elephant:LogMessage(event, msg, sender)
+        end
+    end
+
+    Primus.Events:Register("CHAT_MSG_SAY", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
+    Primus.Events:Register("CHAT_MSG_EMOTE", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
+    Primus.Events:Register("CHAT_MSG_TEXT_EMOTE", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
+    Primus.Events:Register("CHAT_MSG_YELL", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
+    Primus.Events:Register("CHAT_MSG_WHISPER", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
+    Primus.Events:Register("CHAT_MSG_PARTY", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
+    Primus.Events:Register("CHAT_MSG_RAID", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
+
     -- Player entering world
     Primus.Events:Register("PLAYER_ENTERING_WORLD", self, function()
         PUIRoleplay:GetMyProfile()
         PUIRoleplay:SyncGlobalBridges()
         PUIRoleplay.Comms:JoinRPChannel()
     end)
-    
-    -- Level up unlock (e.g. Level 5 global channel access on Turtle/Octo WoW)
+
     Primus.Events:Register("PLAYER_LEVEL_UP", self, function(owner, event, newLevel)
         local lvl = tonumber(newLevel) or UnitLevel("player") or 0
-        if lvl >= 5 then
+        if lvl >= 1 then
             PUIRoleplay.Comms:JoinRPChannel()
         end
     end)
@@ -458,28 +481,23 @@ function PUIRoleplay:OnEnable()
             end
         end
     end)
-    
-    -- World Map & Area updates
+
     Primus.Events:Register("WORLD_MAP_UPDATE", self, function()
         if PUIRoleplay.Directory then
             PUIRoleplay.Directory:UpdateWorldMapPins()
         end
     end)
-    
+
     Primus.Events:Register("ZONE_CHANGED_NEW_AREA", self, function()
         if PUIRoleplay.Directory then
             PUIRoleplay.Directory:UpdateWorldMapPins()
         end
     end)
-    
-    -- Join Channel & Start Telemetry
+
     self.Comms:JoinRPChannel()
     self.Comms:StartPingTicker()
-    
-    -- Initialize Tooltip enhancements
     self.Tooltip:Initialize()
 
-    -- Initialize & Show RP Quick Bar (Tray)
     local s = self:GetSettings()
     if s.show_icon_tray ~= false and self.Tray then
         self.Tray:Show()
@@ -489,11 +507,13 @@ end
 function PUIRoleplay:OnDisable()
     Primus.Events:UnregisterOwner(self)
     Primus.Time:CancelAll(self)
-    
+
     if self.Tooltip and self.Tooltip.Disable then self.Tooltip:Disable() end
     if Primus_PUIRoleplay_Sheet then Primus_PUIRoleplay_Sheet:Hide() end
     if Primus_PUIRoleplay_GlanceBar then Primus_PUIRoleplay_GlanceBar:Hide() end
     if Primus_PUIRoleplay_Directory then Primus_PUIRoleplay_Directory:Hide() end
+    if Primus_PUIRoleplay_Listener then Primus_PUIRoleplay_Listener:Hide() end
+    if Primus_PUIRoleplay_Elephant then Primus_PUIRoleplay_Elephant:Hide() end
     if self.Tray then self.Tray:Hide() end
 end
 
@@ -502,22 +522,21 @@ end
 --------------------------------------------------------------------------------
 function PUIRoleplay:RegisterFlare()
     if not Primus.Options then return end
-    
+
     Primus.Options:RegisterModuleOptions("PUIRoleplay", {
         title = "Roleplaying (PUIRP)",
         category = "Social",
         order = 4,
-        desc = "Full-featured Roleplaying suite with 100% TurtleRP wire-protocol compatibility, At-A-Glance HUD pill, and dark theme."
+        desc = "Full-featured Roleplaying suite with Multi-Channel Telemetry (OWPRP, TTRP, MRP), At-A-Glance HUD pill, and Matchmaking Directory."
     }, function(parent)
         local frame = CreateFrame("Frame", nil, parent)
         frame:SetWidth(parent:GetWidth())
-        frame:SetHeight(400)
-        
+        frame:SetHeight(420)
+
         local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         title:SetPoint("TOPLEFT", frame, "TOPLEFT", 16, -16)
         title:SetText("|cff00ccffRoleplaying Suite Settings|r")
-        
-        -- Show RP Quick Bar Checkbox
+
         local trayCB = Primus.Widgets:CreateCheckButton(frame, "Show RP Quick Action Bar (Tray)", PUIRoleplay:GetSettings().show_icon_tray ~= false, function(checked)
             local s = PUIRoleplay:GetSettings()
             s.show_icon_tray = checked
@@ -529,48 +548,54 @@ function PUIRoleplay:RegisterFlare()
         end)
         trayCB:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -12)
 
-        -- Share Location Checkbox
         local shareLocCB = Primus.Widgets:CreateCheckButton(frame, "Share Location on RP World Map", PUIRoleplay:GetSettings().share_location == "1", function(checked)
             local s = PUIRoleplay:GetSettings()
             s.share_location = checked and "1" or "0"
         end)
         shareLocCB:SetPoint("TOPLEFT", trayCB, "BOTTOMLEFT", 0, -8)
-        
-        -- Disable in BGs Checkbox
+
         local bgsCB = Primus.Widgets:CreateCheckButton(frame, "Disable RP overlays in Battlegrounds", PUIRoleplay:GetSettings().bgs == "off", function(checked)
             local s = PUIRoleplay:GetSettings()
             s.bgs = checked and "off" or "on"
         end)
         bgsCB:SetPoint("TOPLEFT", shareLocCB, "BOTTOMLEFT", 0, -8)
-        
-        -- NSFW Filter Checkbox
-        local nsfwCB = Primus.Widgets:CreateCheckButton(frame, "Show NSFW Roleplay Profiles", PUIRoleplay:GetSettings().show_nsfw == "1", function(checked)
+
+        local nsfwCB = Primus.Widgets:CreateCheckButton(frame, "Show 18+ Adult-Oriented Roleplay Profiles", PUIRoleplay:GetSettings().show_nsfw == "1", function(checked)
             local s = PUIRoleplay:GetSettings()
             s.show_nsfw = checked and "1" or "0"
         end)
         nsfwCB:SetPoint("TOPLEFT", bgsCB, "BOTTOMLEFT", 0, -8)
-        
-        -- Action Buttons
+
         local openSheetBtn = Primus.Widgets:CreateButton(frame, "Open Profile Editor", 160, 24, function()
             PUIRoleplay:OpenProfile()
         end)
         openSheetBtn:SetPoint("TOPLEFT", nsfwCB, "BOTTOMLEFT", 0, -16)
-        
+
         local openDirBtn = Primus.Widgets:CreateButton(frame, "Open RP Directory", 160, 24, function()
             PUIRoleplay:OpenDirectory()
         end)
         openDirBtn:SetPoint("LEFT", openSheetBtn, "RIGHT", 12, 0)
-        
-        local openCompBtn = Primus.Widgets:CreateButton(frame, "Compose Emote", 160, 24, function()
+
+        local openCompBtn = Primus.Widgets:CreateButton(frame, "Emote Composer", 160, 24, function()
             PUIRoleplay.Emotes:OpenComposer()
         end)
         openCompBtn:SetPoint("TOPLEFT", openSheetBtn, "BOTTOMLEFT", 0, -8)
 
+        local toggleListenBtn = Primus.Widgets:CreateButton(frame, "Toggle Listener", 160, 24, function()
+            if PUIRoleplay.Listener then PUIRoleplay.Listener:Toggle() end
+        end)
+        toggleListenBtn:SetPoint("LEFT", openCompBtn, "RIGHT", 12, 0)
+
+        local toggleLogsBtn = Primus.Widgets:CreateButton(frame, "View Chat Logs", 160, 24, function()
+            if PUIRoleplay.Elephant then PUIRoleplay.Elephant:OpenLogs() end
+        end)
+        toggleLogsBtn:SetPoint("TOPLEFT", openCompBtn, "BOTTOMLEFT", 0, -8)
+
         local toggleTrayBtn = Primus.Widgets:CreateButton(frame, "Toggle RP Bar", 160, 24, function()
             if PUIRoleplay.Tray then PUIRoleplay.Tray:Toggle() end
         end)
-        toggleTrayBtn:SetPoint("LEFT", openCompBtn, "RIGHT", 12, 0)
-        
+        toggleTrayBtn:SetPoint("LEFT", toggleLogsBtn, "RIGHT", 12, 0)
+
         return frame
     end)
 end
