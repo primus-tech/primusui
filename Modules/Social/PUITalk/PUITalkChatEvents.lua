@@ -267,20 +267,29 @@ function PUITalk:RegisterChatEvents()
     Events:Register("CHAT_MSG_CHANNEL", "PUITalk_Chat", function(owner, event, msg, sender, lang, channelName, target, afk, zoneID, channelNumber, channelNameBase)
         local cNum = tonumber(channelNumber) or 0
         local cName = channelNameBase or channelName or "Channel"
-        local lowerName = string.lower(cName .. " " .. (channelName or ""))
-        local filterKey = "WORLD"
+        local cleanBaseName = cName
+        local dashPos = string.find(cleanBaseName, " %- ")
+        if dashPos then cleanBaseName = string.sub(cleanBaseName, 1, dashPos - 1) end
+        local lowerBase = string.lower(cleanBaseName)
+        local lowerFull = string.lower(cName .. " " .. (channelName or ""))
 
-        if cNum == 1 or string.find(lowerName, "general") then
+        local filterKey = nil
+        if cNum == 1 or string.find(lowerFull, "general") then
             filterKey = "GENERAL"
-        elseif cNum == 2 or string.find(lowerName, "trade") then
+        elseif cNum == 2 or string.find(lowerFull, "trade") then
             filterKey = "TRADE"
-        elseif cNum == 3 or string.find(lowerName, "defense") or string.find(lowerName, "localdefense") then
+        elseif cNum == 3 or string.find(lowerFull, "defense") or string.find(lowerFull, "localdefense") then
             filterKey = "LOCALDEFENSE"
-        elseif cNum == 4 or string.find(lowerName, "lookingforgroup") or string.find(lowerName, "lfg") then
+        elseif cNum == 4 or string.find(lowerFull, "lookingforgroup") or string.find(lowerFull, "lfg") then
             filterKey = "LFG"
+        else
+            -- Non-basic / Custom Channel (e.g. World, Hardcore, TurtleRP, etc.)
+            PUITalk:RegisterJoinedChannel(cleanBaseName)
+            if not PUITalk:IsChannelEnabled("WORLD") then return end
+            if not PUITalk:IsChannelEnabled("CUSTOM_" .. lowerBase) then return end
         end
 
-        if not PUITalk:IsChannelEnabled(filterKey) then return end
+        if filterKey and not PUITalk:IsChannelEnabled(filterKey) then return end
 
         local colored = PUITalk:GetColoredName(sender)
         local chanBadge = string.format("[%s. %s]", tostring(cNum > 0 and cNum or ""), cName)
@@ -297,6 +306,12 @@ function PUITalk:RegisterChatEvents()
     end)
 
     Events:Register("CHAT_MSG_CHANNEL_NOTICE", "PUITalk_Chat", function(owner, event, action, _, _, channelName)
+        if action == "YOU_JOINED" and channelName then
+            PUITalk:RegisterJoinedChannel(channelName)
+        elseif action == "YOU_LEFT" and channelName then
+            PUITalk:UnregisterLeftChannel(channelName)
+        end
+        if not PUITalk:IsChannelEnabled("SYSTEM") then return end
         local formatted = string.format("%s |cff888888[%s]: %s|r", PUITalk:GetTimestamp(), channelName or "Channel", action or "")
         PUITalk:AddChatMessage(formatted, 0.6, 0.6, 0.6)
     end)

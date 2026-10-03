@@ -19,6 +19,7 @@ local Media   = Primus.Media
 local Utils   = Primus.Utils
 
 local activeChannelType = "SAY"
+local activeChannelNumber = 0
 local channelSelectMenu = nil
 
 -- =========================================================================
@@ -28,8 +29,8 @@ local channelSelectMenu = nil
 local function OpenChannelSelectMenu(anchor)
     if not channelSelectMenu then
         local m = CreateFrame("Frame", "Primus_PUITalkChannelSelectMenu", UIParent)
-        m:SetWidth(100)
-        m:SetHeight(130)
+        m:SetWidth(120)
+        m:SetHeight(200)
         m:SetFrameStrata("DIALOG")
         m:SetFrameLevel(110)
         m:SetBackdrop(Media:Fetch("border", "1Pixel"))
@@ -39,32 +40,65 @@ local function OpenChannelSelectMenu(anchor)
         m:SetClampedToScreen(true)
         tinsert(UISpecialFrames, "Primus_PUITalkChannelSelectMenu")
 
-        local chList = {
-            { tag = "#Say",     chan = "SAY" },
-            { tag = "#Yell",    chan = "YELL" },
-            { tag = "#Party",   chan = "PARTY" },
-            { tag = "#Raid",    chan = "RAID" },
-            { tag = "#Guild",   chan = "GUILD" },
-            { tag = "#Officer", chan = "OFFICER" },
-        }
+        m.buttons = {}
+        channelSelectMenu = m
+    end
 
-        local yOff = -4
-        for _, c in ipairs(chList) do
-            local b = CreateFrame("Button", nil, m)
-            b:SetWidth(92)
+    local m = channelSelectMenu
+
+    -- Build channel list dynamically
+    local chList = {
+        { tag = "#Say",     chan = "SAY",     num = 0 },
+        { tag = "#Yell",    chan = "YELL",    num = 0 },
+        { tag = "#Party",   chan = "PARTY",   num = 0 },
+        { tag = "#Raid",    chan = "RAID",    num = 0 },
+        { tag = "#Guild",   chan = "GUILD",   num = 0 },
+        { tag = "#Officer", chan = "OFFICER", num = 0 },
+    }
+
+    -- Add currently joined numbered & custom channels
+    local chanList = { GetChannelList() }
+    if chanList and table.getn(chanList) > 0 then
+        for i = 1, table.getn(chanList), 2 do
+            local num = tonumber(chanList[i]) or 0
+            local rawName = tostring(chanList[i+1] or "")
+            local cleanName = rawName
+            local dashPos = string.find(rawName, " %- ")
+            if dashPos then cleanName = string.sub(rawName, 1, dashPos - 1) end
+
+            if num > 0 and cleanName ~= "" then
+                local shortTag = string.len(cleanName) > 8 and (string.sub(cleanName, 1, 7) .. "..") or cleanName
+                table.insert(chList, {
+                    tag = string.format("#%d %s", num, shortTag),
+                    chan = "CHANNEL",
+                    num = num,
+                    fullName = cleanName,
+                })
+            end
+        end
+    end
+
+    -- Hide existing buttons
+    for _, btn in ipairs(m.buttons) do
+        btn:Hide()
+    end
+
+    local yOff = -4
+    for i, c in ipairs(chList) do
+        local b = m.buttons[i]
+        if not b then
+            b = CreateFrame("Button", nil, m)
+            b:SetWidth(112)
             b:SetHeight(18)
-            b:SetPoint("TOPLEFT", m, "TOPLEFT", 4, yOff)
             b:SetBackdrop(Media:Fetch("border", "1Pixel"))
             b:SetBackdropColor(0.08, 0.10, 0.14, 0.6)
             b:SetBackdropBorderColor(0.15, 0.20, 0.30, 0.6)
 
             local bt = b:CreateFontString(nil, "OVERLAY")
             bt:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
-            bt:SetPoint("CENTER", 0, 0)
-            bt:SetText(c.tag)
+            bt:SetPoint("LEFT", b, "LEFT", 6, 0)
+            b.text = bt
 
-            b.chan = c.chan
-            b.tag = c.tag
             b:SetScript("OnEnter", function()
                 this:SetBackdropColor(0.18, 0.26, 0.40, 1.0)
                 this:SetBackdropBorderColor(0.40, 0.75, 1.0, 1.0)
@@ -75,23 +109,35 @@ local function OpenChannelSelectMenu(anchor)
             end)
             b:SetScript("OnClick", function()
                 activeChannelType = this.chan
+                activeChannelNumber = this.chanNum or 0
                 if PUITalk.masterFrame and PUITalk.masterFrame.contextPill then
                     PUITalk.masterFrame.contextPill.text:SetText(this.tag)
                 end
                 m:Hide()
             end)
-            yOff = yOff - 20
+
+            m.buttons[i] = b
         end
-        channelSelectMenu = m
+
+        b:SetPoint("TOPLEFT", m, "TOPLEFT", 4, yOff)
+        b.chan = c.chan
+        b.chanNum = c.num
+        b.tag = c.tag
+        b.text:SetText(c.tag)
+        b:Show()
+
+        yOff = yOff - 20
     end
 
-    if channelSelectMenu:IsShown() then
-        channelSelectMenu:Hide()
+    m:SetHeight(math.abs(yOff) + 4)
+
+    if m:IsShown() then
+        m:Hide()
     else
-        channelSelectMenu:ClearAllPoints()
-        channelSelectMenu:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", 0, 4)
-        channelSelectMenu:Show()
-        channelSelectMenu:Raise()
+        m:ClearAllPoints()
+        m:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", 0, 4)
+        m:Show()
+        m:Raise()
     end
 end
 
@@ -272,6 +318,19 @@ function PUITalk:HandleInputSubmit(text)
             return
         end
 
+        local numCmd = tonumber(cmd)
+        if numCmd and numCmd >= 1 and numCmd <= 10 then
+            activeChannelType = "CHANNEL"
+            activeChannelNumber = numCmd
+            if self.masterFrame and self.masterFrame.contextPill then
+                self.masterFrame.contextPill.text:SetText("#" .. numCmd)
+            end
+            if rest ~= "" then
+                SendChatMessage(rest, "CHANNEL", nil, numCmd)
+            end
+            return
+        end
+
         -- Fallback to default Blizzard ChatEdit_SendText for all game/addon slash commands (/pui, /dance, /who, /played, /macro, etc.)
         if ChatFrameEditBox then
             ChatFrameEditBox:SetText(text)
@@ -286,6 +345,11 @@ function PUITalk:HandleInputSubmit(text)
     if currentTab == 2 and self.activeDMKey and self.dmTabs[self.activeDMKey] then
         local targetName = self.dmTabs[self.activeDMKey].name or self.activeDMKey
         SendChatMessage(text, "WHISPER", nil, targetName)
+        return
+    end
+
+    if activeChannelType == "CHANNEL" and activeChannelNumber and activeChannelNumber > 0 then
+        SendChatMessage(text, "CHANNEL", nil, activeChannelNumber)
         return
     end
 

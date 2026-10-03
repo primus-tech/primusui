@@ -54,19 +54,132 @@ PUITalk.db = DB:RegisterNamespace("PUITalk", {
         MONSTER      = true,
         LOOT         = true,
     },
+    customChannelList = { "World" },
 })
 
 function PUITalk:IsChannelEnabled(chanKey)
     local ch = self.db:Get("channels")
     if not ch then return true end
-    if ch[chanKey] == nil then return true end
-    return ch[chanKey]
+    if ch[chanKey] ~= nil then
+        return ch[chanKey]
+    end
+    -- For custom channels, inherit master WORLD setting if not individually set
+    if string.sub(chanKey, 1, 7) == "CUSTOM_" then
+        if ch.WORLD ~= nil then return ch.WORLD end
+        return true
+    end
+    return true
 end
 
 function PUITalk:SetChannelEnabled(chanKey, enabled)
     local ch = self.db:Get("channels") or {}
     ch[chanKey] = enabled
     self.db:Set("channels", ch)
+end
+
+function PUITalk:RegisterJoinedChannel(channelName)
+    if not channelName or channelName == "" then return end
+    local cleanName = channelName
+    local dashPos = string.find(channelName, " %- ")
+    if dashPos then
+        cleanName = string.sub(channelName, 1, dashPos - 1)
+    end
+    local lower = string.lower(cleanName)
+    if lower == "general" or lower == "trade" or lower == "localdefense" or lower == "lookingforgroup" or lower == "guildrecruitment" then
+        return
+    end
+
+    local list = self.db:Get("customChannelList") or {}
+    local found = false
+    for _, name in ipairs(list) do
+        if string.lower(name) == lower then
+            found = true
+            break
+        end
+    end
+    if not found then
+        table.insert(list, cleanName)
+        self.db:Set("customChannelList", list)
+    end
+
+    if self.RefreshCustomChannelMenu then
+        self:RefreshCustomChannelMenu()
+    end
+end
+
+function PUITalk:UnregisterLeftChannel(channelName)
+    if not channelName or channelName == "" then return end
+    if self.RefreshCustomChannelMenu then
+        self:RefreshCustomChannelMenu()
+    end
+end
+
+function PUITalk:GetNonBasicChannels()
+    local result = {}
+    local seen = {}
+    local chanList = { GetChannelList() }
+
+    if chanList and table.getn(chanList) > 0 then
+        for i = 1, table.getn(chanList), 2 do
+            local num = tonumber(chanList[i]) or 0
+            local rawName = tostring(chanList[i+1] or "")
+            local cleanName = rawName
+            local dashPos = string.find(rawName, " %- ")
+            if dashPos then
+                cleanName = string.sub(rawName, 1, dashPos - 1)
+            end
+            local lowerClean = string.lower(cleanName)
+
+            local isBasic = false
+            if num == 1 or num == 2 or num == 3 or num == 4 then
+                isBasic = true
+            elseif lowerClean == "general" or lowerClean == "trade" or lowerClean == "localdefense" or lowerClean == "lookingforgroup" or lowerClean == "guildrecruitment" then
+                isBasic = true
+            end
+
+            if not isBasic and cleanName ~= "" and not seen[lowerClean] then
+                seen[lowerClean] = true
+                table.insert(result, {
+                    num = num,
+                    name = cleanName,
+                    rawName = rawName,
+                    key = "CUSTOM_" .. lowerClean,
+                    isJoined = true,
+                })
+            end
+        end
+    end
+
+    local savedChannels = self.db:Get("customChannelList") or {}
+    for _, chName in ipairs(savedChannels) do
+        local lower = string.lower(chName)
+        if not seen[lower] then
+            seen[lower] = true
+            local num = GetChannelName(chName)
+            local isJoined = (num and num > 0)
+            table.insert(result, {
+                num = isJoined and num or 0,
+                name = chName,
+                rawName = chName,
+                key = "CUSTOM_" .. lower,
+                isJoined = isJoined,
+            })
+        end
+    end
+
+    if not seen["world"] then
+        local num = GetChannelName("world")
+        local isJoined = (num and num > 0)
+        table.insert(result, {
+            num = isJoined and num or 0,
+            name = "World",
+            rawName = "World",
+            key = "CUSTOM_world",
+            isJoined = isJoined,
+        })
+    end
+
+    return result
 end
 
 -- Shared State
