@@ -46,11 +46,16 @@ end
 
 function Protocols:DrunkDecode(text)
     if not text then return "" end
+    text = string.gsub(text, "\194\176", "s")
+    text = string.gsub(text, "\194\167", "S")
+    text = string.gsub(text, "\195\167", "S")
     text = string.gsub(text, "\176", "s")
     text = string.gsub(text, "\167", "S")
     text = string.gsub(text, "°", "s")
     text = string.gsub(text, "§", "S")
-    text = string.gsub(text, DrunkSuffix, "")
+    if DrunkSuffix and DrunkSuffix ~= "" then
+        text = string.gsub(text, DrunkSuffix, "")
+    end
     return text
 end
 

@@ -466,7 +466,8 @@ function Directory:RefreshList(filterText)
 
             local fullName = PUIRoleplay:ComposeFullName(data)
             if fullName == "" then fullName = name end
-            local zone = isSelf and ((myZone ~= "") and myZone or (data.zone or "")) or (data.zone or "")
+            local rawZone = isSelf and ((myZone ~= "") and myZone or (data.zone or "")) or (data.zone or "")
+            local zone = PUIRoleplay.Protocols and PUIRoleplay.Protocols.DrunkDecode and PUIRoleplay.Protocols:DrunkDecode(rawZone) or rawZone
             local class = (data.class and data.class ~= "") and data.class or (isSelf and UnitClass("player") or "")
             local classColor = data.class_color or (isSelf and PUIRoleplay.ClassData and PUIRoleplay.ClassData[UnitClass("player")] and PUIRoleplay.ClassData[UnitClass("player")][4]) or "FFFFFF"
             local isIC = (data.currently_ic == "1")
@@ -649,7 +650,7 @@ function Directory:UpdateScroll(offset)
             end
             row.nameTxt:SetText(displayName)
 
-            local displayZone = item.zone
+            local displayZone = PUIRoleplay.Protocols and PUIRoleplay.Protocols.DrunkDecode and PUIRoleplay.Protocols:DrunkDecode(item.zone or "") or (item.zone or "")
             if item.rawName == playerName and (not displayZone or displayZone == "" or displayZone == "Unknown") then
                 displayZone = myZone
             end

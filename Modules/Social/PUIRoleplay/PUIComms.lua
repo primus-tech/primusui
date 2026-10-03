@@ -295,6 +295,10 @@ function Comms:ProcessPing(sender, msg)
     if not sender or sender == "" or sender == UnitName("player") then return end
 
     local zoneText = string.sub(msg, 2)
+    if PUIRoleplay.Protocols and PUIRoleplay.Protocols.DrunkDecode then
+        zoneText = PUIRoleplay.Protocols:DrunkDecode(zoneText)
+    end
+
     PUIRoleplay:RecordQueryablePlayer(sender)
 
     local charData = PUIRoleplay:GetOrCreateCharacterData(sender)

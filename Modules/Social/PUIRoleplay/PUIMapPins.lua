@@ -41,7 +41,8 @@ function Directory:UpdateWorldMapPins()
             local zX = tonumber(data.zoneX)
             local zY = tonumber(data.zoneY)
 
-            if zX and zY and (data.zone == currentZoneName or currentZoneName == "" or not currentZoneName) then
+            local dZone = PUIRoleplay.Protocols and PUIRoleplay.Protocols.DrunkDecode and PUIRoleplay.Protocols:DrunkDecode(data.zone or "") or (data.zone or "")
+            if zX and zY and (dZone == currentZoneName or currentZoneName == "" or not currentZoneName) then
                 local pin = mapPins[pinCount]
                 if not pin then
                     pin = CreateFrame("Button", nil, WorldMapDetailFrame)
