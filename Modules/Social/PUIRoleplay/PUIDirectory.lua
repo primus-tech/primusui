@@ -522,27 +522,57 @@ function Directory:RefreshList(filterText)
     end
 
     table.sort(matched, function(a, b)
+        local rawA = a.rawName or ""
+        local rawB = b.rawName or ""
+        local nameA = string.lower((a.fullName and a.fullName ~= "") and a.fullName or rawA)
+        local nameB = string.lower((b.fullName and b.fullName ~= "") and b.fullName or rawB)
+        local rankA = a.statusRank or 99
+        local rankB = b.statusRank or 99
+        local zoneA = string.lower(a.zone or "")
+        local zoneB = string.lower(b.zone or "")
+
         if Directory.sortField == "status" then
-            if a.statusRank ~= b.statusRank then
-                return Directory.sortAsc and (a.statusRank < b.statusRank) or (a.statusRank > b.statusRank)
+            if rankA ~= rankB then
+                if Directory.sortAsc then
+                    return rankA < rankB
+                else
+                    return rankA > rankB
+                end
             end
-            return string.lower(a.fullName ~= "" and a.fullName or a.rawName) < string.lower(b.fullName ~= "" and b.fullName or b.rawName)
-        elseif Directory.sortField == "name" then
-            local nameA = string.lower(a.fullName ~= "" and a.fullName or a.rawName)
-            local nameB = string.lower(b.fullName ~= "" and b.fullName or b.rawName)
             if nameA ~= nameB then
-                return Directory.sortAsc and (nameA < nameB) or (nameA > nameB)
+                return nameA < nameB
             end
-            return a.statusRank < b.statusRank
+            return rawA < rawB
+        elseif Directory.sortField == "name" then
+            if nameA ~= nameB then
+                if Directory.sortAsc then
+                    return nameA < nameB
+                else
+                    return nameA > nameB
+                end
+            end
+            if rankA ~= rankB then
+                return rankA < rankB
+            end
+            return rawA < rawB
         elseif Directory.sortField == "zone" then
-            local zoneA = string.lower(a.zone or "")
-            local zoneB = string.lower(b.zone or "")
             if zoneA ~= zoneB then
-                return Directory.sortAsc and (zoneA < zoneB) or (zoneA > zoneB)
+                if Directory.sortAsc then
+                    return zoneA < zoneB
+                else
+                    return zoneA > zoneB
+                end
             end
-            return string.lower(a.fullName ~= "" and a.fullName or a.rawName) < string.lower(b.fullName ~= "" and b.fullName or b.rawName)
+            if nameA ~= nameB then
+                return nameA < nameB
+            end
+            return rawA < rawB
         end
-        return a.statusRank < b.statusRank
+
+        if rankA ~= rankB then
+            return rankA < rankB
+        end
+        return rawA < rawB
     end)
 
     f.matchedItems = matched
