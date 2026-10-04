@@ -282,9 +282,13 @@
   - [x] 1-click interactive URL Copy Dialog with auto-highlighted edit box (`/puiurl`).
   - [x] Search filter, pause buffer toggle, copy all text button, and log memory wiper.
 - [x] **`PUIRoleplay` Next-Generation Roleplaying Suite (`Modules/Social/PUIRoleplay/`):**
-  - [x] 100% two-way wire-protocol compatibility with TurtleRP over the `TTRP` channel (DrunkEncode/Decode, M/T/D packet parser, 30s pings).
+  - [x] 100% two-way wire-protocol compatibility with TurtleRP and MyRolePlay over `OWPRP` and `TTRP` channels (DrunkEncode/Decode, M/T/D/L/X/P packet parser, 30s pings).
   - [x] Standalone operation without requiring the TurtleRP addon.
   - [x] High-definition PrimusUI dark glassmorphic UI design (1-pixel borders, status pills).
+  - [x] Centralized **RP Text Codec Pipeline** (`PUIRoleplay:UnescapeRPText` / `EscapeRPText`) converting `@N`/`@n` and `@J`/`@j` escape tokens to real `\n` line breaks, `@T`/`@t` to 4-space tab indentation, and `@@` to literal `@` across all UI layers, tooltips, character sheet tabs, card previews, and the legacy importer.
+  - [x] Dynamic Lore & Biography scroll frame height calculation (`GetStringHeight()`) supporting arbitrarily long player histories and backstories.
+  - [x] Fixed chat message object routing (`Primus.Chat` &rarr; `PUIRoleplay.Comms`) preserving incoming presence pings and real-time online status detection (`IsPlayerOnline` 180s heartbeat window).
+  - [x] Resolved directory `ComposeFullName` fallback behavior ensuring remote characters without complete profiles display their character name instead of defaulting to the local player's name.
   - [x] Universal Nomenclature: separated `prefix`, `title`, `epithet` (`suffix`), and `house_name` (`bloodline`/`tribe`/`clan`) with dynamic composition (`ComposeFullName`, `ComposeTitle`).
   - [x] Target At-A-Glance HUD Pill with 5 categorized glance buttons, custom icons, border tints, and `PUIMover` registration.
   - [x] 7-Tab Character Profile Sheet & Editor (Identity, Appearance, Personality, Lore, Rules, Matchmaking, Settings) with live Character Card preview (`PUICardPreview.lua`), 4 profile slots (0..3), and searchable Icon Picker (`PUIIconPicker.lua`).
