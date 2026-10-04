@@ -302,12 +302,14 @@ Anchored to the center of the screen with customizable center negative space:
 - Persistent offline Bank inventory caching (`PrimusCharDB.PUIBankCache`).
 
 ### 4. PUIMerchant: Advanced Economy & Valuation Engine (Auctioneer + TSM Fusion)
-- **15-Second Patient AH Scanner:** Strictly respects private server DDoS rate limiters (15.0s inter-page cooldown) with live 1-second countdown display (`Next query in 14s...`), watchdog timeout recovery, and category scope selectors.
+- **10-Second Patient AH Scanner & Persistent Checkpoints:** Strictly respects private server DDoS rate limiters (10.0s inter-page cooldown) with streaming per-page ingestion (zero memory backlog or finish lag), dynamic real-time ETA calculation (`2m 40s`, `1h 15m`), and persistent SavedVariables checkpoints featuring 2-page safety overlap rewind and dedicated **Resume / New Scan** controls.
+- **3-Way Economy Partitioning:** Automatically segments historical price and volume metrics across three distinct market economies: Alliance Capitals (Stormwind, Ironforge, Darnassus - 5% cut), Horde Capitals (Orgrimmar, Undercity, Thunder Bluff - 5% cut), and Neutral Steamwheedle Auction Houses (Booty Bay, Gadgetzan, Everlook - 15% cut).
 - **Statistical Quantile Engine:** Calculates daily Mean, Total Volume ($N$), 50th percentile Median, Core Fair Market Cluster ($\pm 15\%$), Low Tier (cheapest 35% sniping floor), High Tier (top 35% ceiling), and volume-weighted 7-Day / 14-Day Running Averages with automated 14-day history pruning.
 - **Auction House Dark Glass Skin & Flyout Drawer:** Replaces default parchment UI with 1-pixel dark glass borders, flat tabs with active cyan underlines, and a dockable control drawer switchable to either the Left or Right side.
+- **Docked Deal Finder & Sniper Drawer:** Integrated side-flyout listing real-time underpriced auctions ($\le 70\%$ MV, $\le 50\%$ MV) and guaranteed vendor arbitrage flips with 1-click search and snipe execution.
 - **Native FrameXML Market Cluster Bar Graphs:** 3-tier box-plot bars (Green = Low 35%, Gold/Cyan = Core Median, Red = High 35%) with Running Average horizontal reference lines and interactive column hover breakdowns.
-- **Offline Market Explorer & TSM Deal Finder (`/pui market`):** Standalone modal to browse cached AH prices anywhere in the world, filter by quality/category, and identify deals ($\le 70\%$ MV) or guaranteed vendor arbitrage opportunities.
-- **1-Click Seller Assistance:** Automatically calculates optimal undercut prices from 7-day medians and prefills buyout and bid inputs when dropping items into the Auctions tab.
+- **Offline Market Explorer (`/pui market`):** Standalone modal to browse cached AH prices anywhere in the world, filter by quality/category, and inspect 14-day historical valuation graphs.
+- **1-Click Seller Assistance & Browse Badges:** Automatically calculates optimal undercut prices from 7-day medians and prefills buyout and bid inputs on item drop, alongside inline per-unit pricing badges on browse rows.
 
 ---
 
