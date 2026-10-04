@@ -690,9 +690,4 @@ function PUIMerchant:UpdateFlyoutScannerUI()
         scanStatusLabel:SetText(state.statusText or "Ready to scan")
         scanProgressBar:SetValue(0)
     end
-
-    -- Refresh Deal Flyout if open
-    if dealFlyoutFrame and dealFlyoutFrame:IsShown() then
-        self:RefreshDealFlyoutData()
-    end
 end

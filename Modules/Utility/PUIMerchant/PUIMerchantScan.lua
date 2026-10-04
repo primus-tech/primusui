@@ -188,6 +188,7 @@ end
 -- Process Returned Auction Batch (Streaming Ingestion - Instant per-page processing)
 function PUIMerchant:ProcessScanResults()
     if not isScanning or isPaused then return end
+    if isWaitingForNextPage then return end
 
     local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 
