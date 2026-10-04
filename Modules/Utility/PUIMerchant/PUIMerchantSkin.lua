@@ -251,15 +251,15 @@ function PUIMerchant:CreateFlyoutDrawer()
     sep1:SetPoint("TOPLEFT", flyoutFrame, "TOPLEFT", 8, -32)
     sep1:SetPoint("TOPRIGHT", flyoutFrame, "TOPRIGHT", -8, -32)
 
-    -- Section: 15s Patient Scanner
+    -- Section: 10s Patient Scanner
     local scanSectionLabel = flyoutFrame:CreateFontString(nil, "OVERLAY")
     scanSectionLabel:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
     scanSectionLabel:SetPoint("TOPLEFT", flyoutFrame, "TOPLEFT", 10, -38)
     scanSectionLabel:SetTextColor(0.9, 0.8, 0.4)
-    scanSectionLabel:SetText("15s Patient AH Scanner")
+    scanSectionLabel:SetText("10s Patient AH Scanner")
 
     -- Scan Action Button (Start / Pause / Resume / Stop)
-    scanActionButton = Widgets:CreateButton(flyoutFrame, "Scan AH (15s)", 176, 24, function()
+    scanActionButton = Widgets:CreateButton(flyoutFrame, "Scan AH (10s)", 176, 24, function()
         PUIMerchant:StartScan(0)
     end)
     scanActionButton:SetPoint("TOPLEFT", flyoutFrame, "TOPLEFT", 9, -54)
@@ -684,7 +684,7 @@ function PUIMerchant:UpdateFlyoutScannerUI()
         scanProgressBar:SetValue(pct)
         scanStatusLabel:SetText(string.format("Page %d/%d (%d items)", state.scanPage, state.totalPages, state.totalCataloged))
     else
-        scanActionButton:SetText("Scan AH (15s)")
+        scanActionButton:SetText("Scan AH (10s)")
         scanActionButton:SetBackdropBorderColor(1.0, 0.84, 0.0, 1.0)
         scanCountdownLabel:SetText("")
         scanStatusLabel:SetText(state.statusText or "Ready to scan")

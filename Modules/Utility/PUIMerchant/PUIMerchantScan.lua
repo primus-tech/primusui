@@ -36,7 +36,7 @@ local pageRetries = 0
 local maxRetries = 3
 local currentScope = 0 -- 0 = All, 6 = Trade Goods, 4 = Consumables, 1 = Weapons, 2 = Armor
 
-local PAGE_COOLDOWN = 15.0  -- 15-second inter-page delay to guarantee safety on DDoS-limited servers
+local PAGE_COOLDOWN = 10.0  -- 10-second inter-page delay to guarantee safety on DDoS-limited servers
 local SCAN_TIMEOUT  = 25.0  -- 25-second watchdog for slow server responses
 
 PUIMerchant.scannerState = {
@@ -116,7 +116,7 @@ function PUIMerchant:StartScan(scopeCategory)
     elseif currentScope == 2 then scopeName = "Armor" end
 
     UpdateScannerState(string.format("Requesting Page 1 (%s - %s)...", scopeName, ahType))
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Starting 15s-Paced Scan [%s AH - %s]...", ahType, scopeName), "69ccf0"))
+    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Starting 10s-Paced Scan [%s AH - %s]...", ahType, scopeName), "69ccf0"))
 
     QueryAuctionItems("", nil, nil, 0, currentScope, 0, 0, 0, 0, 0)
 end
@@ -218,7 +218,7 @@ function PUIMerchant:ProcessScanResults()
         isWaitingForNextPage = true
         lastQueryTime = GetTime()
         pageCooldownEnd = lastQueryTime + PAGE_COOLDOWN
-        UpdateScannerState(string.format("Page %d/%d (%d items) - Cooldown 15s...", scanPage, totalPages, totalAuctionsCataloged))
+        UpdateScannerState(string.format("Page %d/%d (%d items) - Cooldown 10s...", scanPage, totalPages, totalAuctionsCataloged))
     end
 end
 
