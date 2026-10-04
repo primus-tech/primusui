@@ -41,6 +41,7 @@ local isWaitingForNextPage = false
 local lastQueryTime = 0
 local pageRetries = 0
 local maxRetries = 3
+local SCAN_TIMEOUT = 11.0
 local scanBtn = nil
 local scanStatusText = nil
 local unitPriceLabels = {}
@@ -481,8 +482,8 @@ function PUIMerchant:OnEnable()
                 QueryAuctionItems("", nil, nil, 0, 0, 0, scanPage, 0, 0, 0)
             end
         else
-            -- Watchdog: detect dropped packets or stuck queries (> 7 seconds)
-            if (now - lastQueryTime) > 7.0 then
+            -- Watchdog: detect dropped packets or stuck queries (> SCAN_TIMEOUT seconds)
+            if (now - lastQueryTime) > SCAN_TIMEOUT then
                 if pageRetries < maxRetries then
                     pageRetries = pageRetries + 1
                     lastQueryTime = now
