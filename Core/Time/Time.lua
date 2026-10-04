@@ -245,6 +245,9 @@ end
 
 -- Format seconds into clean shorthand text (e.g. 45s, 3m 20s, 1h 15m, 2d)
 function Time:FormatShort(seconds)
+    if type(self) ~= "table" then
+        seconds = self
+    end
     seconds = tonumber(seconds) or 0
     if seconds <= 0 then return "0s" end
     if seconds < 60 then
@@ -270,16 +273,9 @@ function Time:FormatShort(seconds)
         return string.format("%dd", d)
     end
 end
-Time.FormatShort = function(selfOrSec, maybeSec)
-    local s = (type(selfOrSec) == "table" and maybeSec) or selfOrSec
-    return Time:FormatShort(s)
-end
 
 -- Get server / system epoch timestamp
 function Time:GetServerTimestamp()
     return (time and time()) or math.floor(GetTime())
-end
-Time.GetServerTimestamp = function(self)
-    return Time:GetServerTimestamp()
 end
 

@@ -119,22 +119,13 @@ function PUIMerchant:StartScan(scopeCategory)
         return
     end
 
-    if not CanSendAuctionQuery() then
-        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: AH query is temporarily on cooldown. Please wait a moment.", "ffbb33"))
-        return
-    end
-
+    currentScope = scopeCategory or 0
     isScanning = true
     isPaused = false
     scanPage = 0
     totalPages = 1
     totalAuctionsCataloged = 0
-    isWaitingForNextPage = false
     pageRetries = 0
-    currentScope = scopeCategory or 0
-
-    lastQueryTime = GetTime()
-    pageCooldownEnd = lastQueryTime + PAGE_COOLDOWN
 
     local ahType = self:GetCurrentAHType()
     local scopeName = "All Categories"
@@ -143,10 +134,19 @@ function PUIMerchant:StartScan(scopeCategory)
     elseif currentScope == 1 then scopeName = "Weapons"
     elseif currentScope == 2 then scopeName = "Armor" end
 
-    UpdateScannerState(string.format("Requesting Page 1 (%s - %s)...", scopeName, ahType))
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Starting 10s-Paced Scan [%s AH - %s]...", ahType, scopeName), "69ccf0"))
+    lastQueryTime = GetTime()
+    pageCooldownEnd = lastQueryTime + PAGE_COOLDOWN
 
-    QueryAuctionItems("", nil, nil, 0, currentScope, 0, 0, 0, 0, 0)
+    if CanSendAuctionQuery() then
+        isWaitingForNextPage = false
+        UpdateScannerState(string.format("Requesting Page 1 (%s - %s)...", scopeName, ahType))
+        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Starting 10s-Paced Scan [%s AH - %s]...", ahType, scopeName), "69ccf0"))
+        QueryAuctionItems("", 0, 0, 0, (currentScope and currentScope > 0) and currentScope or 0, 0, 0, 0, 0)
+    else
+        isWaitingForNextPage = true
+        UpdateScannerState(string.format("Queueing Scan [%s AH] (Waiting on server cooldown)...", ahType))
+        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH query busy. Queued page 1 to send as soon as cooldown clears...", ahType), "ffbb33"))
+    end
 end
 
 -- Pause Active Scan
@@ -326,7 +326,7 @@ function PUIMerchant:InitScannerTicker()
                 lastQueryTime = now
                 pageCooldownEnd = now + PAGE_COOLDOWN
                 UpdateScannerState(string.format("Querying Page %d/%d (%d items)...", scanPage + 1, totalPages, totalAuctionsCataloged))
-                QueryAuctionItems("", nil, nil, 0, currentScope, 0, scanPage, 0, 0, 0)
+                QueryAuctionItems("", 0, 0, 0, (currentScope and currentScope > 0) and currentScope or 0, 0, scanPage, 0, 0)
             end
         else
             -- Watchdog: detect dropped packets or server lag (> SCAN_TIMEOUT seconds)
@@ -337,7 +337,7 @@ function PUIMerchant:InitScannerTicker()
                     pageCooldownEnd = now + PAGE_COOLDOWN
                     if CanSendAuctionQuery() then
                         UpdateScannerState(string.format("Retrying Page %d/%d (attempt %d)...", scanPage + 1, totalPages, pageRetries))
-                        QueryAuctionItems("", nil, nil, 0, currentScope, 0, scanPage, 0, 0, 0)
+                        QueryAuctionItems("", 0, 0, 0, (currentScope and currentScope > 0) and currentScope or 0, 0, scanPage, 0, 0)
                     else
                         isWaitingForNextPage = true
                     end
