@@ -19,6 +19,7 @@ Primus.PUIMerchant = PUIMerchant
 local Widgets = Primus.Widgets
 local Media   = Primus.Media
 local Utils   = Primus.Utils
+local Items   = Primus.Items
 
 local flyoutFrame = nil
 local flyoutToggleBtn = nil
