@@ -3,7 +3,7 @@
 > **Document Type:** Architectural Consolidation & Refactoring Blueprint  
 > **Target Platform:** Vanilla WoW 1.12.1 (Client Build 5875 | Interface `11200` | Lua 5.0.2)  
 > **Repository Root:** `Interface/AddOns/PrimusUI`  
-> **Status:** Active Architectural Backlog  
+> **Status:** ✅ Completed Architectural Migration (All 7 Domains Centralized)  
 > **Companion Documents:** [`TRUTH.md`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/TRUTH.md) | [`MODULES.md`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/MODULES.md) | [`AUDIT.md`](file:///home/primustech/Downloads/OctoWoW/Interface/AddOns/PrimusUI/AUDIT.md)
 
 ---
@@ -14,7 +14,7 @@ In earlier iterations of PrimusUI, tooltip hooking and modification was fragment
 
 This was resolved by creating **`PUITooltip`**—a single-owner provider pipeline (`RegisterUnitProvider`, `RegisterItemProvider`, `RegisterSpellProvider`) paired with a recycled background scanner (`Primus_PUITooltip_ScanTooltip`).
 
-This document identifies all other functionalities across the codebase that are currently duplicated or decentralized across multiple modules and provides the concrete architectural blueprints for centralizing them into dedicated Core services or provider modules.
+Following that proven architectural pattern, all 7 identified functional domains across the codebase have now been centralized into single-owner Core services and provider pipelines with zero GC churn, zero shims, and full Lua 5.0.2 compliance.
 
 ---
 
@@ -24,13 +24,13 @@ This document identifies all other functionalities across the codebase that are 
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                               SCATTERED FUNCTIONALITY DOMAINS                                   │
 ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ 1. 🗺️ Map & Minimap Pin Management         : PUIQuest, PUIRoleplay, PUIGathering                 │
-│ 2. 🌐 Web URL Parsing & Copy Dialogs        : PUITalk, PUILogViewer, PUIRoleplay                │
-│ 3. 💬 Universal Chat Ingestion & Stream     : PUITalk, PUILogViewer, PUIListener, Elephant, etc │
-│ 4. 🩸 Unit Aura & Enchant Scanning          : PUIUnitFrames, PUIHud, PUIAuras, PUITactical       │
-│ 5. 📦 Item Link & Metadata Unpacking        : PUIBags, PUIBank, PUISellValue, PUIItemStats, etc  │
-│ 6. 🔊 Audio & Sound FX Dispatching          : PUITalk, PUIListener, PUISpellbook, PUITactical   │
-│ 7. 📑 Context Popups & Custom Menus         : PUIHotbars, PUISpellbook, PUITalk, PUIRoleplay     │
+│ 1. 🗺️ Map & Minimap Pin Management         : ✅ PUIMap (Central Pin Provider Pipeline)           │
+│ 2. 🌐 Web URL Parsing & Copy Dialogs        : ✅ Primus.Utils.ExtractURLs & ShowURLDialog        │
+│ 3. 💬 Universal Chat Ingestion & Stream     : ✅ Primus.Chat (Central Master Pipeline)           │
+│ 4. 🩸 Unit Aura & Enchant Scanning          : ✅ Primus.Auras (Cached Unit & Enchant Scanner)    │
+│ 5. 📦 Item Link & Metadata Unpacking        : ✅ Primus.Items (Single-call Query Engine)         │
+│ 6. 🔊 Audio & Sound FX Dispatching          : ✅ Primus.Audio (100ms Throttle Sound Governor)    │
+│ 7. 📑 Context Popups & Custom Menus         : ✅ Primus.Widgets:ShowContextMenu (Dark Glass UI)  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 

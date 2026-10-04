@@ -132,15 +132,15 @@ function PUIAuras:UpdateAuras()
         end
     end
 
+    local CoreAuras = Primus.Auras
     local size = aurasDB:Get("iconSize", 30) or 30
     local spacing = aurasDB:Get("spacing", 4) or 4
     local perRow = aurasDB:Get("buffsPerRow", 8) or 8
     local activeSlot = 0
 
-    -- 1. Check Temporary Weapon Enchants (Main Hand & Off Hand)
-    local hasMainHand, mainHandExp, _, hasOffHand, offHandExp = GetWeaponEnchantInfo()
-
-    if hasMainHand then
+    -- 1. Check Temporary Weapon Enchants via Central Primus.Auras Service
+    local enchants = CoreAuras and CoreAuras:GetWeaponEnchants()
+    if enchants and enchants.hasMainHand then
         activeSlot = activeSlot + 1
         local btn = auraButtons[activeSlot] or CreateAuraButton(activeSlot, containerFrame)
         btn.buffIndex = nil
@@ -148,7 +148,7 @@ function PUIAuras:UpdateAuras()
         btn.isWeaponEnchant = true
         btn.weaponSlot = 16
         btn.icon:SetTexture(GetInventoryItemTexture("player", 16) or "Interface\\Icons\\INV_Sword_04")
-        local durSec = (mainHandExp or 0) / 1000
+        local durSec = enchants.mainHandExp or 0
         btn.duration:SetText(Utils.FormatAuraDuration(durSec))
         local dr, dg, db = Utils.GetAuraDurationColor(durSec)
         btn.duration:SetTextColor(dr, dg, db)
@@ -157,7 +157,7 @@ function PUIAuras:UpdateAuras()
         btn:Show()
     end
 
-    if hasOffHand then
+    if enchants and enchants.hasOffHand then
         activeSlot = activeSlot + 1
         local btn = auraButtons[activeSlot] or CreateAuraButton(activeSlot, containerFrame)
         btn.buffIndex = nil
@@ -165,7 +165,7 @@ function PUIAuras:UpdateAuras()
         btn.isWeaponEnchant = true
         btn.weaponSlot = 17
         btn.icon:SetTexture(GetInventoryItemTexture("player", 17) or "Interface\\Icons\\INV_Sword_04")
-        local durSec = (offHandExp or 0) / 1000
+        local durSec = enchants.offHandExp or 0
         btn.duration:SetText(Utils.FormatAuraDuration(durSec))
         local dr, dg, db = Utils.GetAuraDurationColor(durSec)
         btn.duration:SetTextColor(dr, dg, db)
@@ -174,54 +174,51 @@ function PUIAuras:UpdateAuras()
         btn:Show()
     end
 
-    -- 2. Check Player Buffs
-    for i = 0, 31 do
-        local buffIndex, untilCancelled = GetPlayerBuff(i, "HELPFUL")
-        if buffIndex > -1 then
-            activeSlot = activeSlot + 1
-            local btn = auraButtons[activeSlot] or CreateAuraButton(activeSlot, containerFrame)
-            btn.buffIndex = buffIndex
-            btn.isDebuff = false
-            btn.isWeaponEnchant = false
+    -- 2. Query Cached Player Buffs & Debuffs from Primus.Auras
+    local playerAuras = CoreAuras and CoreAuras:GetUnitAuras("player")
+    if playerAuras then
+        if playerAuras.totalBuffs and playerAuras.totalBuffs > 0 then
+            for i = 1, playerAuras.totalBuffs do
+                local buff = playerAuras.buffs[i]
+                if buff and buff.texture then
+                    activeSlot = activeSlot + 1
+                    local btn = auraButtons[activeSlot] or CreateAuraButton(activeSlot, containerFrame)
+                    btn.buffIndex = buff.buffIndex
+                    btn.isDebuff = false
+                    btn.isWeaponEnchant = false
 
-            local texture = GetPlayerBuffTexture(buffIndex)
-            local timeLeft = GetPlayerBuffTimeLeft(buffIndex)
-            local stacks = GetPlayerBuffApplications(buffIndex)
-
-            btn.icon:SetTexture(texture)
-            btn.duration:SetText(Utils.FormatAuraDuration(timeLeft))
-            local dr, dg, db = Utils.GetAuraDurationColor(timeLeft)
-            btn.duration:SetTextColor(dr, dg, db)
-            btn.count:SetText((stacks and stacks > 1) and tostring(stacks) or "")
-            btn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
-            btn:Show()
+                    btn.icon:SetTexture(buff.texture)
+                    btn.duration:SetText(Utils.FormatAuraDuration(buff.timeLeft))
+                    local dr, dg, db = Utils.GetAuraDurationColor(buff.timeLeft)
+                    btn.duration:SetTextColor(dr, dg, db)
+                    btn.count:SetText((buff.stacks and buff.stacks > 1) and tostring(buff.stacks) or "")
+                    btn:SetBackdropBorderColor(0.2, 0.2, 0.25, 1)
+                    btn:Show()
+                end
+            end
         end
-    end
 
-    -- 3. Check Player Debuffs
-    for i = 0, 15 do
-        local debuffIndex = GetPlayerBuff(i, "HARMFUL")
-        if debuffIndex > -1 then
-            activeSlot = activeSlot + 1
-            local btn = auraButtons[activeSlot] or CreateAuraButton(activeSlot, containerFrame)
-            btn.buffIndex = debuffIndex
-            btn.isDebuff = true
-            btn.isWeaponEnchant = false
+        if playerAuras.totalDebuffs and playerAuras.totalDebuffs > 0 then
+            for i = 1, playerAuras.totalDebuffs do
+                local debuff = playerAuras.debuffs[i]
+                if debuff and debuff.texture then
+                    activeSlot = activeSlot + 1
+                    local btn = auraButtons[activeSlot] or CreateAuraButton(activeSlot, containerFrame)
+                    btn.buffIndex = debuff.buffIndex
+                    btn.isDebuff = true
+                    btn.isWeaponEnchant = false
 
-            local texture = GetPlayerBuffTexture(debuffIndex)
-            local timeLeft = GetPlayerBuffTimeLeft(debuffIndex)
-            local stacks = GetPlayerBuffApplications(debuffIndex)
-            local debuffType = GetPlayerBuffDispelType(debuffIndex) or "None"
+                    btn.icon:SetTexture(debuff.texture)
+                    btn.duration:SetText(Utils.FormatAuraDuration(debuff.timeLeft))
+                    local dr, dg, db = Utils.GetAuraDurationColor(debuff.timeLeft)
+                    btn.duration:SetTextColor(dr, dg, db)
+                    btn.count:SetText((debuff.stacks and debuff.stacks > 1) and tostring(debuff.stacks) or "")
 
-            btn.icon:SetTexture(texture)
-            btn.duration:SetText(Utils.FormatAuraDuration(timeLeft))
-            local dr, dg, db = Utils.GetAuraDurationColor(timeLeft)
-            btn.duration:SetTextColor(dr, dg, db)
-            btn.count:SetText((stacks and stacks > 1) and tostring(stacks) or "")
-
-            local color = Auras and Auras.DispelColors and (Auras.DispelColors[debuffType] or Auras.DispelColors["None"]) or { r = 0.8, g = 0.2, b = 0.2 }
-            btn:SetBackdropBorderColor(color.r, color.g, color.b, 1)
-            btn:Show()
+                    local dc = CoreAuras:GetDispelColor(debuff.dispelType)
+                    btn:SetBackdropBorderColor(dc.r, dc.g, dc.b, 1)
+                    btn:Show()
+                end
+            end
         end
     end
 

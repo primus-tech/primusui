@@ -497,17 +497,35 @@ function PUIRoleplay:OnEnable()
     self:GetMyProfile()
     self:SyncGlobalBridges()
 
-    -- Channel Comms Listener
-    Primus.Events:Register("CHAT_MSG_CHANNEL", self, function(owner, event, msg, sender, lang, chanStr, target, flags, zoneId, chanNum, chanName)
-        local ch = string.lower(chanName or "")
-        local cs = string.lower(chanStr or "")
-        if ch == "owprp" or cs == "owprp" or string.find(cs, "owprp") or
-           ch == "ttrp" or cs == "ttrp" or string.find(cs, "ttrp") or
-           ch == "xtensionxtooltip2" or cs == "xtensionxtooltip2" or string.find(cs, "xtensionxtooltip2") or
-           ch == "myroleplay" or cs == "myroleplay" or string.find(cs, "myroleplay") then
-            PUIRoleplay.Comms:OnChatMessage(msg, sender)
-        end
-    end)
+    -- Channel Comms & Dialogue Pipeline
+    if Primus.Chat then
+        Primus.Chat:RegisterConsumer("PUIRoleplayComms", 5, function(msgObj)
+            if msgObj.event == "CHAT_MSG_CHANNEL" then
+                local ch = string.lower(msgObj.channelName or "")
+                local cs = string.lower(msgObj.target or "")
+                if ch == "owprp" or string.find(ch, "owprp") or
+                   ch == "ttrp" or string.find(ch, "ttrp") or
+                   ch == "xtensionxtooltip2" or string.find(ch, "xtensionxtooltip2") or
+                   ch == "myroleplay" or string.find(ch, "myroleplay") then
+                    PUIRoleplay.Comms:OnChatMessage(msgObj.message, msgObj.sender)
+                end
+            end
+        end)
+
+        Primus.Chat:RegisterConsumer("PUIRoleplayDialogue", 20, function(msgObj)
+            local event = msgObj.event
+            if event == "CHAT_MSG_SAY" or event == "CHAT_MSG_EMOTE" or event == "CHAT_MSG_TEXT_EMOTE" or
+               event == "CHAT_MSG_YELL" or event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_PARTY" or
+               event == "CHAT_MSG_RAID" then
+                if PUIRoleplay.Listener then
+                    PUIRoleplay.Listener:ProcessMessage(event, msgObj.message, msgObj.sender)
+                end
+                if PUIRoleplay.Elephant then
+                    PUIRoleplay.Elephant:LogMessage(event, msgObj.message, msgObj.sender)
+                end
+            end
+        end)
+    end
 
     Primus.Events:Register("CHAT_MSG_CHANNEL_NOTICE", self, function(owner, event, noticeType, sender, _, chanStr, _, _, _, chanNum, chanName)
         local ch = string.lower(chanName or "")
@@ -521,24 +539,6 @@ function PUIRoleplay:OnEnable()
             end
         end
     end)
-
-    -- RP Dialogue & Elephant Chat Loggers
-    local function HandleChatMessage(event, msg, sender)
-        if PUIRoleplay.Listener then
-            PUIRoleplay.Listener:ProcessMessage(event, msg, sender)
-        end
-        if PUIRoleplay.Elephant then
-            PUIRoleplay.Elephant:LogMessage(event, msg, sender)
-        end
-    end
-
-    Primus.Events:Register("CHAT_MSG_SAY", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
-    Primus.Events:Register("CHAT_MSG_EMOTE", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
-    Primus.Events:Register("CHAT_MSG_TEXT_EMOTE", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
-    Primus.Events:Register("CHAT_MSG_YELL", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
-    Primus.Events:Register("CHAT_MSG_WHISPER", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
-    Primus.Events:Register("CHAT_MSG_PARTY", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
-    Primus.Events:Register("CHAT_MSG_RAID", self, function(owner, event, msg, sender) HandleChatMessage(event, msg, sender) end)
 
     -- Player entering world
     Primus.Events:Register("PLAYER_ENTERING_WORLD", self, function()
@@ -570,17 +570,6 @@ function PUIRoleplay:OnEnable()
         end
     end)
 
-    Primus.Events:Register("WORLD_MAP_UPDATE", self, function()
-        if PUIRoleplay.Directory then
-            PUIRoleplay.Directory:UpdateWorldMapPins()
-        end
-    end)
-
-    Primus.Events:Register("ZONE_CHANGED_NEW_AREA", self, function()
-        if PUIRoleplay.Directory then
-            PUIRoleplay.Directory:UpdateWorldMapPins()
-        end
-    end)
 
     self.Comms:JoinRPChannel()
     self.Comms:StartPingTicker()

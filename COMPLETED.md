@@ -325,3 +325,31 @@
 - [x] **Component 7 (TOC Audit, Technical Debt Cleanup & Lua 5.0.2 Verification):** `Modules\Combat\Range\Range.lua` restored to TOC, orphaned `AuctionHouse.lua` removed, and 100% pass on repository-wide Lua 5.0.2 static AST validation across all files.
 - [x] **Component 8 (Universal Flare Protocol & Table Identity Invariance):** Standardized module headers (`local PUI<Name> = Primus.PUI<Name> or {}`), eliminated top-level cross-module upvalues in Core (`Console.lua`, `Options.lua`, `Bootstrap.lua`), and achieved 100% Flare registration coverage across all modules with zero upvalue/load-order bugs.
 
+---
+
+## 🚀 Architectural Milestone: Repository-Wide Functionality Centralization (All 7 Domains Completed)
+
+- [x] **Domain 1: Centralized World Map & Minimap Pin Framework (`PUIMap`):**
+  - Implemented `Modules/Utility/PUIMap/PUIMap.lua` as the single owner of `WORLD_MAP_UPDATE` with reusable button and route dot pools.
+  - Automatic radial cluster fanning and spiral coordinate offsets for co-located objectives, gathering nodes, and players.
+  - Migrated `PUIQuest` (`Map.lua`), `PUIRoleplay` (`PUIMapPins.lua`), and `PUIGathering` to the `PUIMap` provider pipeline.
+- [x] **Domain 2: Centralized Web URL Link Parsing & Interactive Copy Modal (`Primus.Utils`):**
+  - Unified URL patterns (`URL_PATTERNS`) and regex extractor (`Utils.ExtractURLs`) in `Core/Utils/Utils.lua`.
+  - Standardized interactive 1-pixel dark glass copy popup (`Utils.ShowURLDialog`) across `PUITalkCopy` and `PUILogViewer`.
+- [x] **Domain 3: Universal Chat Ingestion & Stream Pipeline (`Primus.Chat`):**
+  - Implemented `Core/Chat/Chat.lua` as the master listener frame for all 38 `CHAT_MSG_*` events.
+  - Zero GC churn via reusable `msgObj` table pooling and ordered consumer priority dispatch.
+  - Migrated `PUITalk` (`PUITalkChatEvents.lua`), `PUILogViewer.lua`, `PUIRoleplay.lua`, `PUIListener.lua`, and `PUIElephant.lua`.
+- [x] **Domain 4: Unit Aura & Weapon Enchant Scanner (`Primus.Auras`):**
+  - Implemented `Core/Auras/Auras.lua` providing 100ms cached unit buff/debuff queries (`GetUnitAuras`), temporary weapon enchant queries (`GetWeaponEnchants`), group cleansables (`GetGroupCleansableDebuffs`), and dispel colors.
+  - Migrated `PUIAuras.lua`, `PUIWings.lua`, `PUIUnitBase.lua`, and `Utils.CleanseNextMember`.
+- [x] **Domain 5: Centralized Item Link / ID / Stat Resolver (`Primus.Items`):**
+  - Implemented `Core/Utils/Items.lua` single-call query pipeline (`Items:Get(linkOrID)`), quality color resolver, currency formatters, and static/live vendor price lookups.
+- [x] **Domain 6: Sound Playback Governor (`Primus.Audio`):**
+  - Implemented `Core/Media/Audio.lua` with a 100ms throttle per sound token to prevent ear-rape audio stacking during AoE/batch events.
+  - Migrated `PUISpellbook.lua` page turns and `PUIListener.lua` whisper/mention chimes.
+- [x] **Domain 7: Context Menu Framework (`Primus.Widgets:ShowContextMenu`):**
+  - Implemented `Core/Widgets/ContextMenu.lua` offering a dark glass 1-pixel border popup menu with headers, icons, checkmarks, separators, right-aligned subtitles, and outside-click auto-dismissal.
+  - Migrated `PUIXPBar.lua` faction menu, `PUISpellbook.lua` rank flyout, and added right-click player action menus in `PUIDirectory.lua`.
+
+

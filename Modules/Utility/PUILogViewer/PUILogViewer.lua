@@ -71,29 +71,17 @@ end
 -- Chat Event Listeners
 --------------------------------------------------------------------------------
 function PUILogViewer:OnInitialize()
-    -- Register Chat Events
-    local chatEvents = {
-        "CHAT_MSG_SAY",
-        "CHAT_MSG_EMOTE",
-        "CHAT_MSG_TEXT_EMOTE",
-        "CHAT_MSG_YELL",
-        "CHAT_MSG_WHISPER",
-        "CHAT_MSG_WHISPER_INFORM",
-        "CHAT_MSG_PARTY",
-        "CHAT_MSG_RAID",
-        "CHAT_MSG_RAID_LEADER",
-        "CHAT_MSG_GUILD",
-        "CHAT_MSG_OFFICER",
-        "CHAT_MSG_CHANNEL",
-        "CHAT_MSG_SYSTEM"
-    }
-
-    for _, evt in ipairs(chatEvents) do
-        Events:Register(evt, self, function(owner, event, msg, sender, lang, channelName, target, flags, zoneID, channelNumber)
+    if Primus.Chat then
+        Primus.Chat:RegisterConsumer("PUILogViewer", 50, function(msgObj)
+            local msg = msgObj.message
             if not msg or msg == "" then return end
 
+            local event = msgObj.event
+            local sender = msgObj.sender
+            local channelName = msgObj.channelName
+
             local cat = "CHAT"
-            local ch = string.gsub(event, "^CHAT_MSG_", "")
+            local ch = msgObj.type or string.gsub(event, "^CHAT_MSG_", "")
 
             -- Category classification
             if event == "CHAT_MSG_SAY" or event == "CHAT_MSG_EMOTE" or event == "CHAT_MSG_TEXT_EMOTE" or event == "CHAT_MSG_YELL" then
@@ -130,36 +118,10 @@ end
 -- URL Link Extractor Helper (Vanilla WoW 1.12.1 / Lua 5.0.2)
 --------------------------------------------------------------------------------
 function PUILogViewer:ExtractURLs(text)
-    if not text or text == "" then return {} end
-    local urls = {}
-    local clean = string.gsub(text, "|c%x%x%x%x%x%x%x%x", "")
-    clean = string.gsub(clean, "|r", "")
-    clean = string.gsub(clean, "|H.-|h(.-)|h", "%1")
-
-    local patterns = {
-        "https?://%S+",
-        "www%.%S+",
-        "discord%.gg/%S+",
-        "discord%.com/%S+",
-        "twitch%.tv/%S+",
-        "youtube%.com/%S+",
-        "youtu%.be/%S+",
-        "imgur%.com/%S+",
-        "carrd%.co/%S+",
-        "toyhou%.se/%S+",
-        "github%.com/%S+",
-        "spotify%.com/%S+",
-        "soundcloud%.com/%S+",
-        "deviantart%.com/%S+",
-        "artstation%.com/%S+"
-    }
-    for _, pat in ipairs(patterns) do
-        for url in string.gfind(clean, pat) do
-            url = string.gsub(url, "[%.,!%?)%]\"]+$", "")
-            table.insert(urls, url)
-        end
+    if Utils and Utils.ExtractURLs then
+        return Utils.ExtractURLs(text)
     end
-    return urls
+    return {}
 end
 
 --------------------------------------------------------------------------------

@@ -11,6 +11,7 @@
 # =========================================================================
 Core\Bootstrap\Bootstrap.lua
 Core\Utils\Utils.lua
+Core\Utils\Items.lua
 Core\Memory\Memory.lua
 Core\Debug\Debug.lua
 Core\Time\Time.lua
@@ -19,12 +20,16 @@ Core\DB\DB.lua
 Core\DB\VanillaItemPrices.lua
 Core\DB\PUIBasePriceDB.lua
 Core\Media\Media.lua
+Core\Media\Audio.lua
 Core\Anim\Anim.lua
 Core\Widgets\Widgets.lua
+Core\Widgets\ContextMenu.lua
 Core\Keybind\Keybind.lua
 Core\Console\Console.lua
 Core\Comm\ChatThrottleLib.lua
 Core\Comm\Comm.lua
+Core\Auras\Auras.lua
+Core\Chat\Chat.lua
 Core\State\State.lua
 Core\Hider\Hider.lua
 Core\Config\Options.lua
@@ -54,6 +59,7 @@ Modules\Utility\PUIMailbox\PUIMailbox.lua
 Modules\Utility\PUIMerchant\PUIMerchant.lua
 Modules\Utility\PUIInspect\PUIInspect.lua
 Modules\Utility\PUILogViewer\PUILogViewer.lua
+Modules\Utility\PUIMap\PUIMap.lua
 
 # =========================================================================
 # GATHERING & PROFESSIONS (Tier 3)

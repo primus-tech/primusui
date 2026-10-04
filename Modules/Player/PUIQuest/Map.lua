@@ -1,15 +1,14 @@
 --[[
     PrimusUI Module: PUIQuest (World Map POI Overlay & Route Line Engine)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
-    
+    Architecture: Strict TRUTH.md compliance (Centralized PUIMap Provider)
+
     Features:
-    1. High-Performance Pooled POI Pins: Available (!), Turn-in (?), and Objective (1, 2, 3) markers on WorldMapButton.
-    2. Real-Time Dynamic Route Connection Lines: Glowing dotted GPS trails connecting player -> active quest targets.
-    3. Multi-Zone & Turtle WoW Support: Accurate mapping for standard zones, subzones, and custom regions.
-    4. Sub-Objective Progress Awareness: Dynamically hides pins for sub-objectives already completed in the quest log.
-    5. Pin Clustering & Overlap Separation: Offsets overlapping pins at identical coordinates so all pins remain accessible.
-    6. Interactive Tooltips & Navigation Lock: Click any map pin to immediately focus HUD navigation & GPS route trail.
-    7. Zero Memory Churn: Reusable object pools for all pins and route dots.
+    1. Pooled POI Pins: Available (!), Turn-in (?), and Objective (1, 2, 3) markers.
+    2. Dynamic Route Connection Lines: Dotted trails connecting player -> active quest targets.
+    3. Multi-Zone & Turtle WoW Support: Database resolution for standard zones and custom regions.
+    4. Sub-Objective Progress Awareness: Dynamically hides pins for completed sub-objectives.
+    5. Interactive Tooltips & Navigation Lock: Click any map pin to focus HUD navigation.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -26,16 +25,6 @@ PUIQuest.Map = Map
 local Utils  = Primus.Utils
 local Media  = Primus.Media
 local Events = Primus.Events
-
--- Pin Pool & Active Pins
-local pinPool = {}
-local activePins = {}
-local pinIndex = 0
-
--- Route Dot Pool & Active Dots
-local routeDotPool = {}
-local activeRouteDots = {}
-local routeDotIndex = 0
 
 -- Difficulty Colors
 local DIFFICULTY_COLORS = {
@@ -63,28 +52,7 @@ local function GetDifficultyColor(level)
     end
 end
 
--- =========================================================================
--- PIN POOL ENGINE
--- =========================================================================
-
-local function CreatePin()
-    pinIndex = pinIndex + 1
-    local pin = CreateFrame("Button", "PUIQuest_MapPin_" .. pinIndex, WorldMapButton)
-    pin:SetWidth(18)
-    pin:SetHeight(18)
-    pin:SetFrameLevel(WorldMapButton:GetFrameLevel() + 6)
-
-    local icon = pin:CreateTexture(nil, "ARTWORK")
-    icon:SetAllPoints(pin)
-    pin.icon = icon
-
-    local text = pin:CreateFontString(nil, "OVERLAY")
-    local font = (Media and Media.Fetch and Media:Fetch("font", "Default")) or "Fonts\\FRIZQT__.TTF"
-    text:SetFont(font, 11, "OUTLINE")
-    text:SetPoint("CENTER", pin, "CENTER", 0, 0)
-    pin.label = text
-
-    -- Tooltip Handlers
+local function SetupPinScripts(pin)
     pin:SetScript("OnEnter", function()
         if not this.data then return end
         WorldMapTooltip:SetOwner(this, "ANCHOR_RIGHT")
@@ -128,101 +96,11 @@ local function CreatePin()
             PUIQuest:FocusQuest(this.data.title)
         end
     end)
-
-    return pin
 end
 
-local function AcquirePin()
-    if table.getn(pinPool) > 0 then
-        local pin = table.remove(pinPool)
-        pin:Show()
-        return pin
-    end
-    return CreatePin()
-end
-
-function Map:ClearPins()
-    for i = 1, table.getn(activePins) do
-        local pin = activePins[i]
-        pin:Hide()
-        pin.data = nil
-        table.insert(pinPool, pin)
-    end
-    activePins = {}
-end
-
--- =========================================================================
--- ROUTE LINE POOL ENGINE
--- =========================================================================
-
-local function CreateRouteDot()
-    routeDotIndex = routeDotIndex + 1
-    local dot = WorldMapButton:CreateTexture("PUIQuest_RouteDot_" .. routeDotIndex, "OVERLAY")
-    dot:SetTexture("Interface\\Buttons\\WHITE8X8")
-    dot:SetWidth(4)
-    dot:SetHeight(4)
-    dot:SetVertexColor(0.25, 0.85, 1.0, 0.75)
-    return dot
-end
-
-local function AcquireRouteDot()
-    if table.getn(routeDotPool) > 0 then
-        local dot = table.remove(routeDotPool)
-        dot:Show()
-        return dot
-    end
-    return CreateRouteDot()
-end
-
-function Map:ClearRoute()
-    for i = 1, table.getn(activeRouteDots) do
-        local dot = activeRouteDots[i]
-        dot:Hide()
-        table.insert(routeDotPool, dot)
-    end
-    activeRouteDots = {}
-end
-
--- Draw a dotted route line on WorldMapButton between (x1, y1) and (x2, y2) in percent coords (0..100)
-function Map:DrawRouteLine(x1, y1, x2, y2, r, g, b, a)
-    local w = WorldMapButton:GetWidth()
-    local h = WorldMapButton:GetHeight()
-    if not w or w <= 0 or not h or h <= 0 then return end
-
-    local px1 = (x1 / 100) * w
-    local py1 = -(y1 / 100) * h
-    local px2 = (x2 / 100) * w
-    local py2 = -(y2 / 100) * h
-
-    local pdx = px2 - px1
-    local pdy = py2 - py1
-    local dist = math.sqrt(pdx * pdx + pdy * pdy)
-    if dist < 8 then return end
-
-    local stepSize = 11
-    local numDots = math.min(math.floor(dist / stepSize), 80)
-
-    r = r or 0.25
-    g = g or 0.85
-    b = b or 1.0
-    a = a or 0.75
-
-    for i = 1, numDots do
-        local t = i / (numDots + 1)
-        local cx = px1 + pdx * t
-        local cy = py1 + pdy * t
-        local dot = AcquireRouteDot()
-        dot:ClearAllPoints()
-        dot:SetPoint("CENTER", WorldMapButton, "TOPLEFT", cx, cy)
-        dot:SetVertexColor(r, g, b, a)
-        table.insert(activeRouteDots, dot)
-    end
-end
-
--- =========================================================================
--- ZONE COORDINATES EXTRACTOR
--- =========================================================================
-
+--------------------------------------------------------------------------------
+-- Zone Coordinates Extractor
+--------------------------------------------------------------------------------
 local function GetZoneCoords(spawnsTbl, currentZoneName, currentZoneID)
     if not spawnsTbl or not spawnsTbl.coords then return {} end
     local DB = PUIQuest.DB
@@ -248,13 +126,10 @@ local function GetZoneCoords(spawnsTbl, currentZoneName, currentZoneID)
                 table.insert(results, { x = x, y = y, zoneID = zID })
             elseif zonesData and zonesData[zID] then
                 local pID, w, h, ox, oy = unpack(zonesData[zID])
-                local pName = zonesLoc[pID]
-                local pLower = pName and string.lower(pName) or ""
-
-                if (targetLower ~= "" and pLower == targetLower) or (currentZoneID and pID == currentZoneID) then
-                    local px = (x * (w or 100) / 100) + (ox or 0)
-                    local py = (y * (h or 100) / 100) + (oy or 0)
-                    table.insert(results, { x = px, y = py, zoneID = pID })
+                if pID and zonesLoc[pID] and string.lower(zonesLoc[pID]) == targetLower then
+                    local parentX = ox + (x * (w / 100))
+                    local parentY = oy + (y * (h / 100))
+                    table.insert(results, { x = parentX, y = parentY, zoneID = pID })
                 end
             end
         end
@@ -262,106 +137,59 @@ local function GetZoneCoords(spawnsTbl, currentZoneName, currentZoneID)
     return results
 end
 
--- Scan quest log leaderboards to build a completion map for sub-objectives
+--------------------------------------------------------------------------------
+-- Quest Log Progress Helper
+--------------------------------------------------------------------------------
 local function GetQuestLogProgress(questTitle)
-    local numEntries = GetNumQuestLogEntries() or 0
-    local qlogid = nil
-    local isComplete = false
-
+    local numEntries = GetNumQuestLogEntries()
     for i = 1, numEntries do
-        local title, _, _, isHeader, _, comp = GetQuestLogTitle(i)
-        if not isHeader and title and string.lower(title) == string.lower(questTitle) then
-            qlogid = i
-            isComplete = (comp == 1 or comp == true)
-            break
-        end
-    end
+        local title, level, questTag, isHeader, isCollapsed, isComplete = GetQuestLogTitle(i)
+        if not isHeader and title == questTitle then
+            SelectQuestLogEntry(i)
+            local numLeaderboards = GetNumQuestLeaderBoards()
+            local finished = {}
+            local allDone = (isComplete == 1 or (numLeaderboards > 0 and true))
 
-    local finishedObjs = {}
-    if qlogid then
-        local numObjectives = GetNumQuestLeaderBoards(qlogid) or 0
-        if numObjectives == 0 and isComplete then
-            return true, finishedObjs, qlogid
-        end
-
-        local allDone = (numObjectives > 0)
-        for i = 1, numObjectives do
-            local text, objType, finished = GetQuestLogLeaderBoard(i, qlogid)
-            if finished then
-                if text then
-                    finishedObjs[string.lower(text)] = true
-                    local _, _, name = string.find(text, "^(.-):")
-                    if name then
-                        finishedObjs[string.lower(Utils.Trim(name))] = true
+            if numLeaderboards == 0 then
+                allDone = (isComplete == 1)
+            else
+                for j = 1, numLeaderboards do
+                    local desc, qType, isDone = GetQuestLogLeaderBoard(j)
+                    if isDone then
+                        if desc then
+                            local itemName = string.gsub(desc, ":%s*%d+/%d+", "")
+                            itemName = string.gsub(itemName, "^%s*", "")
+                            itemName = string.gsub(itemName, "%s*$", "")
+                            finished[string.lower(itemName)] = true
+                        end
+                    else
+                        allDone = false
                     end
                 end
-            else
-                allDone = false
             end
-        end
-
-        if allDone and numObjectives > 0 then
-            isComplete = true
+            return allDone, finished
         end
     end
-
-    return isComplete, finishedObjs, qlogid
+    return false, {}
 end
 
--- Prevent pin occlusion by applying minor radial offset if coordinates overlap
-local function PlacePinWithOffset(pin, rawX, rawY, mapW, mapH, placedLocations)
-    local locKey = string.format("%d:%d", math.floor(rawX * 10 + 0.5), math.floor(rawY * 10 + 0.5))
-    local count = placedLocations[locKey] or 0
-    placedLocations[locKey] = count + 1
-
-    local offsetX = 0
-    local offsetY = 0
-
-    if count > 0 then
-        local angle = count * 1.05 -- Golden angle spread
-        local radiusPx = math.min(count * 6, 18)
-        offsetX = math.cos(angle) * (radiusPx / mapW) * 100
-        offsetY = math.sin(angle) * (radiusPx / mapH) * 100
-    end
-
-    local finalX = (rawX + offsetX) / 100 * mapW
-    local finalY = -(rawY + offsetY) / 100 * mapH
-
-    pin:ClearAllPoints()
-    pin:SetPoint("CENTER", WorldMapButton, "TOPLEFT", finalX, finalY)
-end
-
--- =========================================================================
--- WORLD MAP UPDATE RENDERER
--- =========================================================================
-
-function Map:Update()
-    if not WorldMapFrame or not WorldMapFrame:IsVisible() then return end
+--------------------------------------------------------------------------------
+-- Render Quest Pins onto PUIMap Context
+--------------------------------------------------------------------------------
+function Map:RenderQuestPins(mapContext)
+    if not mapContext then return end
     if not PUIQuest.db or not PUIQuest.db:Get("showWorldMapPins", true) or not PUIQuest.db:Get("enabled", true) then
-        self:ClearPins()
-        self:ClearRoute()
         return
     end
 
-    self:ClearPins()
-    self:ClearRoute()
-
-    local mapContinent = GetCurrentMapContinent()
-    local mapZone = GetCurrentMapZone()
-    if mapContinent <= 0 or mapZone <= 0 then return end
-
-    local zoneNames = { GetMapZones(mapContinent) }
-    local currentZoneName = zoneNames[mapZone]
-    if not currentZoneName then return end
-
-    local w = WorldMapButton:GetWidth()
-    local h = WorldMapButton:GetHeight()
-    if not w or w <= 0 or not h or h <= 0 then return end
+    local mapContinent = mapContext.continent
+    local mapZone = mapContext.zone
+    local currentZoneName = mapContext.zoneName
+    if not mapContinent or mapContinent <= 0 or not mapZone or mapZone <= 0 then return end
+    if not currentZoneName or currentZoneName == "" then return end
 
     local DB = PUIQuest.DB
     if not DB then return end
-
-    local placedLocations = {}
 
     -- 1. Scan Active Quests in Log
     local numEntries = GetNumQuestLogEntries()
@@ -381,8 +209,7 @@ function Map:Update()
                             if unit and unit.spawns then
                                 local coords = GetZoneCoords(unit.spawns, currentZoneName, mapZone)
                                 for _, coord in pairs(coords) do
-                                    local pin = AcquirePin()
-                                    PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
+                                    local pin = mapContext.AcquirePin()
                                     pin.icon:SetTexture(nil)
                                     pin.label:SetText("?")
                                     pin.label:SetTextColor(1.0, 0.82, 0.0)
@@ -394,7 +221,8 @@ function Map:Update()
                                         x = coord.x,
                                         y = coord.y,
                                     }
-                                    table.insert(activePins, pin)
+                                    SetupPinScripts(pin)
+                                    mapContext:PlacePin(pin, coord.x, coord.y)
                                 end
                             end
                         end
@@ -406,8 +234,7 @@ function Map:Update()
                             if obj and obj.spawns then
                                 local coords = GetZoneCoords(obj.spawns, currentZoneName, mapZone)
                                 for _, coord in pairs(coords) do
-                                    local pin = AcquirePin()
-                                    PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
+                                    local pin = mapContext.AcquirePin()
                                     pin.icon:SetTexture(nil)
                                     pin.label:SetText("?")
                                     pin.label:SetTextColor(1.0, 0.82, 0.0)
@@ -419,12 +246,13 @@ function Map:Update()
                                         x = coord.x,
                                         y = coord.y,
                                     }
-                                    table.insert(activePins, pin)
+                                    SetupPinScripts(pin)
+                                    mapContext:PlacePin(pin, coord.x, coord.y)
                                 end
                             end
                         end
                     end
-                elseif not questDone and PUIQuest.db:Get("showObjectives", true) then
+                elseif not questDone then
                     -- In-progress Unit Objectives
                     local objUnits = q.data["obj"] and q.data["obj"]["U"]
                     if objUnits then
@@ -434,8 +262,7 @@ function Map:Update()
                                 local coords = GetZoneCoords(unit.spawns, currentZoneName, mapZone)
                                 local numCoords = table.getn(coords)
                                 for _, coord in pairs(coords) do
-                                    local pin = AcquirePin()
-                                    PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
+                                    local pin = mapContext.AcquirePin()
                                     pin.icon:SetTexture(nil)
                                     pin.label:SetText(tostring(oIdx))
                                     pin.label:SetTextColor(0.4, 0.85, 1.0)
@@ -449,7 +276,8 @@ function Map:Update()
                                         x = coord.x,
                                         y = coord.y,
                                     }
-                                    table.insert(activePins, pin)
+                                    SetupPinScripts(pin)
+                                    mapContext:PlacePin(pin, coord.x, coord.y)
                                 end
                             end
                         end
@@ -464,8 +292,7 @@ function Map:Update()
                                 local coords = GetZoneCoords(obj.spawns, currentZoneName, mapZone)
                                 local numCoords = table.getn(coords)
                                 for _, coord in pairs(coords) do
-                                    local pin = AcquirePin()
-                                    PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
+                                    local pin = mapContext.AcquirePin()
                                     pin.icon:SetTexture(nil)
                                     pin.label:SetText(tostring(oIdx))
                                     pin.label:SetTextColor(0.4, 0.85, 1.0)
@@ -479,7 +306,8 @@ function Map:Update()
                                         x = coord.x,
                                         y = coord.y,
                                     }
-                                    table.insert(activePins, pin)
+                                    SetupPinScripts(pin)
+                                    mapContext:PlacePin(pin, coord.x, coord.y)
                                 end
                             end
                         end
@@ -498,8 +326,7 @@ function Map:Update()
                                             local coords = GetZoneCoords(unit.spawns, currentZoneName, mapZone)
                                             local numCoords = table.getn(coords)
                                             for _, coord in pairs(coords) do
-                                                local pin = AcquirePin()
-                                                PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
+                                                local pin = mapContext.AcquirePin()
                                                 pin.icon:SetTexture(nil)
                                                 pin.label:SetText(tostring(oIdx))
                                                 pin.label:SetTextColor(0.4, 0.85, 1.0)
@@ -513,7 +340,8 @@ function Map:Update()
                                                     x = coord.x,
                                                     y = coord.y,
                                                 }
-                                                table.insert(activePins, pin)
+                                                SetupPinScripts(pin)
+                                                mapContext:PlacePin(pin, coord.x, coord.y)
                                             end
                                         end
                                     end
@@ -525,8 +353,7 @@ function Map:Update()
                                             local coords = GetZoneCoords(obj.spawns, currentZoneName, mapZone)
                                             local numCoords = table.getn(coords)
                                             for _, coord in pairs(coords) do
-                                                local pin = AcquirePin()
-                                                PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
+                                                local pin = mapContext.AcquirePin()
                                                 pin.icon:SetTexture(nil)
                                                 pin.label:SetText(tostring(oIdx))
                                                 pin.label:SetTextColor(0.4, 0.85, 1.0)
@@ -540,7 +367,8 @@ function Map:Update()
                                                     x = coord.x,
                                                     y = coord.y,
                                                 }
-                                                table.insert(activePins, pin)
+                                                SetupPinScripts(pin)
+                                                mapContext:PlacePin(pin, coord.x, coord.y)
                                             end
                                         end
                                     end
@@ -580,8 +408,7 @@ function Map:Update()
                                 if unit and unit.spawns then
                                     local coords = GetZoneCoords(unit.spawns, currentZoneName, mapZone)
                                     for _, coord in pairs(coords) do
-                                        local pin = AcquirePin()
-                                        PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
+                                        local pin = mapContext.AcquirePin()
                                         pin.icon:SetTexture(nil)
                                         local col = GetDifficultyColor(qLvl)
                                         pin.label:SetText("!")
@@ -595,21 +422,21 @@ function Map:Update()
                                             x = coord.x,
                                             y = coord.y,
                                         }
-                                        table.insert(activePins, pin)
+                                        SetupPinScripts(pin)
+                                        mapContext:PlacePin(pin, coord.x, coord.y)
                                     end
                                 end
                             end
                         end
 
-                        -- Check Object Quest Givers (Posters, Items in world, Triggers)
+                        -- Check Object Quest Givers
                         if qInfo["start"] and qInfo["start"]["O"] then
                             for _, oID in pairs(qInfo["start"]["O"]) do
                                 local obj = PUIQuest.Database:FindObject(oID)
                                 if obj and obj.spawns then
                                     local coords = GetZoneCoords(obj.spawns, currentZoneName, mapZone)
                                     for _, coord in pairs(coords) do
-                                        local pin = AcquirePin()
-                                        PlacePinWithOffset(pin, coord.x, coord.y, w, h, placedLocations)
+                                        local pin = mapContext.AcquirePin()
                                         pin.icon:SetTexture(nil)
                                         local col = GetDifficultyColor(qLvl)
                                         pin.label:SetText("!")
@@ -623,7 +450,8 @@ function Map:Update()
                                             x = coord.x,
                                             y = coord.y,
                                         }
-                                        table.insert(activePins, pin)
+                                        SetupPinScripts(pin)
+                                        mapContext:PlacePin(pin, coord.x, coord.y)
                                     end
                                 end
                             end
@@ -635,13 +463,44 @@ function Map:Update()
     end
 
     -- 3. Draw Route Connection Line from Player to Active Target
-    if PUIQuest.db:Get("showRouteLines", true) then
+    if PUIQuest.db:Get("showRouteLines", true) and mapContext.DrawRouteLine then
         local px, py = GetPlayerMapPosition("player")
         if px and py and (px > 0 or py > 0) then
             local target = PUIQuest.Tracker and PUIQuest.Tracker.GetActiveTarget and PUIQuest.Tracker:GetActiveTarget()
             if target and target.x and target.y and not target.isDifferentZone then
-                self:DrawRouteLine(px * 100, py * 100, target.x * 100, target.y * 100, 0.25, 0.85, 1.0, 0.85)
+                mapContext.DrawRouteLine(px * 100, py * 100, target.x * 100, target.y * 100, 0.25, 0.85, 1.0, 0.85)
             end
         end
     end
+end
+
+--------------------------------------------------------------------------------
+-- Public API & Provider Registration
+--------------------------------------------------------------------------------
+if Primus.PUIMap then
+    Primus.PUIMap:RegisterPinProvider("PUIQuest", 10, function(mapContext)
+        Map:RenderQuestPins(mapContext)
+    end)
+end
+
+function Map:Update()
+    if Primus.PUIMap then
+        Primus.PUIMap:Refresh()
+    end
+end
+
+function Map:ClearPins()
+    if Primus.PUIMap then
+        Primus.PUIMap:Refresh()
+    end
+end
+
+function Map:ClearRoute()
+    if Primus.PUIMap then
+        Primus.PUIMap:Refresh()
+    end
+end
+
+function Map:DrawRouteLine(x1, y1, x2, y2, r, g, b, a)
+    -- Deprecated direct call; automatically handled by PUIMap provider
 end

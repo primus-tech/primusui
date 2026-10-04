@@ -176,6 +176,10 @@ function Listener:ProcessMessage(event, message, sender)
             table.remove(listenerLogs, 1)
         end
 
+        if Primus.Audio then
+            Primus.Audio:PlaySound("Tell", 0.5)
+        end
+
         local f = self:BuildFrame()
         if f:IsShown() then
             f.msgFrame:AddMessage(formatted)

@@ -176,284 +176,284 @@ function PUITalk:SuppressBlizzardChat()
 end
 
 -- =========================================================================
--- 2. GAME CHAT EVENT DISPATCHERS
+-- 2. GAME CHAT EVENT DISPATCHER (CENTRALIZED PRIMUS.CHAT CONSUMER)
 -- =========================================================================
 
 function PUITalk:RegisterChatEvents()
-    -- Say & Yell
-    Events:Register("CHAT_MSG_SAY", "PUITalk_Chat", function(owner, event, msg, sender, lang)
-        if not PUITalk:IsChannelEnabled("SAY") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cffffffff[Say]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("SAY")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+    local Chat = Primus.Chat
 
-    Events:Register("CHAT_MSG_YELL", "PUITalk_Chat", function(owner, event, msg, sender, lang)
-        if not PUITalk:IsChannelEnabled("YELL") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cffff4040[Yell]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("YELL")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+    -- 1. Register with Master Primus.Chat Pipeline
+    if Chat and Chat.RegisterConsumer then
+        Chat:RegisterConsumer("PUITalk", 10, function(msgObj)
+            if not msgObj or not msgObj.event then return end
+            local event = msgObj.event
+            local msg = msgObj.text
+            local sender = msgObj.sender
+            local lang = msgObj.lang
 
-    -- Emotes
-    Events:Register("CHAT_MSG_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("EMOTE") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cffff8040[Emote]|r %s %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("EMOTE")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            -- Say & Yell
+            if event == "CHAT_MSG_SAY" then
+                if not PUITalk:IsChannelEnabled("SAY") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cffffffff[Say]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("SAY")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    Events:Register("CHAT_MSG_TEXT_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("EMOTE") then return end
-        local formatted = string.format("%s |cffff8040%s|r", PUITalk:GetTimestamp(), msg)
-        local r, g, b = PUITalk:GetChannelColor("EMOTE")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            elseif event == "CHAT_MSG_YELL" then
+                if not PUITalk:IsChannelEnabled("YELL") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cffff4040[Yell]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("YELL")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    -- Party & Raid
-    Events:Register("CHAT_MSG_PARTY", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("PARTY") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cffaaaaee[Party]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("PARTY")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            -- Emotes
+            elseif event == "CHAT_MSG_EMOTE" then
+                if not PUITalk:IsChannelEnabled("EMOTE") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cffff8040[Emote]|r %s %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("EMOTE")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    Events:Register("CHAT_MSG_RAID", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("RAID") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cffff7f00[Raid]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("RAID")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            elseif event == "CHAT_MSG_TEXT_EMOTE" then
+                if not PUITalk:IsChannelEnabled("EMOTE") then return end
+                local formatted = string.format("%s |cffff8040%s|r", PUITalk:GetTimestamp(), msg)
+                local r, g, b = PUITalk:GetChannelColor("EMOTE")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    Events:Register("CHAT_MSG_RAID_LEADER", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("RAID") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cffff4800[Raid Leader]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            -- Party & Raid
+            elseif event == "CHAT_MSG_PARTY" then
+                if not PUITalk:IsChannelEnabled("PARTY") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cffaaaaee[Party]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("PARTY")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    Events:Register("CHAT_MSG_RAID_WARNING", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("RAID") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cffff4800[Raid Warning]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            elseif event == "CHAT_MSG_RAID" then
+                if not PUITalk:IsChannelEnabled("RAID") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cffff7f00[Raid]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("RAID")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    -- Guild & Officer
-    Events:Register("CHAT_MSG_GUILD", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("GUILD") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cff40ff40[Guild]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("GUILD")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            elseif event == "CHAT_MSG_RAID_LEADER" then
+                if not PUITalk:IsChannelEnabled("RAID") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cffff4800[Raid Leader]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    Events:Register("CHAT_MSG_OFFICER", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("OFFICER") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cff40c040[Officer]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("OFFICER")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            elseif event == "CHAT_MSG_RAID_WARNING" then
+                if not PUITalk:IsChannelEnabled("RAID") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cffff4800[Raid Warning]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    -- Standard & Custom Channels
-    Events:Register("CHAT_MSG_CHANNEL", "PUITalk_Chat", function(owner, event, msg, sender, lang, channelName, target, afk, zoneID, channelNumber, channelNameBase)
-        local cNum = tonumber(channelNumber) or 0
-        local cName = channelNameBase or channelName or "Channel"
-        local cleanBaseName = cName
-        local dashPos = string.find(cleanBaseName, " %- ")
-        if dashPos then cleanBaseName = string.sub(cleanBaseName, 1, dashPos - 1) end
-        local lowerBase = string.lower(cleanBaseName)
-        local lowerFull = string.lower(cName .. " " .. (channelName or ""))
+            -- Guild & Officer
+            elseif event == "CHAT_MSG_GUILD" then
+                if not PUITalk:IsChannelEnabled("GUILD") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cff40ff40[Guild]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("GUILD")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-        local filterKey = nil
-        if cNum == 1 or string.find(lowerFull, "general") then
-            filterKey = "GENERAL"
-        elseif cNum == 2 or string.find(lowerFull, "trade") then
-            filterKey = "TRADE"
-        elseif cNum == 3 or string.find(lowerFull, "defense") or string.find(lowerFull, "localdefense") then
-            filterKey = "LOCALDEFENSE"
-        elseif cNum == 4 or string.find(lowerFull, "lookingforgroup") or string.find(lowerFull, "lfg") then
-            filterKey = "LFG"
-        else
-            -- Non-basic / Custom Channel (e.g. World, Hardcore, TurtleRP, etc.)
-            PUITalk:RegisterJoinedChannel(cleanBaseName)
-            if not PUITalk:IsChannelEnabled("WORLD") then return end
-            if not PUITalk:IsChannelEnabled("CUSTOM_" .. lowerBase) then return end
-        end
+            elseif event == "CHAT_MSG_OFFICER" then
+                if not PUITalk:IsChannelEnabled("OFFICER") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cff40c040[Officer]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("OFFICER")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-        if filterKey and not PUITalk:IsChannelEnabled(filterKey) then return end
+            -- Standard & Custom Channels
+            elseif event == "CHAT_MSG_CHANNEL" then
+                local cNum = tonumber(msgObj.channelNumber) or 0
+                local cName = msgObj.channelNameBase or msgObj.channelName or "Channel"
+                local cleanBaseName = cName
+                local dashPos = string.find(cleanBaseName, " %- ")
+                if dashPos then cleanBaseName = string.sub(cleanBaseName, 1, dashPos - 1) end
+                local lowerBase = string.lower(cleanBaseName)
+                local lowerFull = string.lower(cName .. " " .. (msgObj.channelName or ""))
 
-        local colored = PUITalk:GetColoredName(sender)
-        local chanBadge = string.format("[%s. %s]", tostring(cNum > 0 and cNum or ""), cName)
-        local formatted = string.format("%s |cffe6c099%s|r [%s]: %s", PUITalk:GetTimestamp(), chanBadge, colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("CHANNEL")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+                local filterKey = nil
+                if cNum == 1 or string.find(lowerFull, "general") then
+                    filterKey = "GENERAL"
+                elseif cNum == 2 or string.find(lowerFull, "trade") then
+                    filterKey = "TRADE"
+                elseif cNum == 3 or string.find(lowerFull, "defense") or string.find(lowerFull, "localdefense") then
+                    filterKey = "LOCALDEFENSE"
+                elseif cNum == 4 or string.find(lowerFull, "lookingforgroup") or string.find(lowerFull, "lfg") then
+                    filterKey = "LFG"
+                else
+                    PUITalk:RegisterJoinedChannel(cleanBaseName)
+                    if not PUITalk:IsChannelEnabled("WORLD") then return end
+                    if not PUITalk:IsChannelEnabled("CUSTOM_" .. lowerBase) then return end
+                end
 
-    -- System & Notices
-    Events:Register("CHAT_MSG_SYSTEM", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("SYSTEM") then return end
-        local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
-    end)
+                if filterKey and not PUITalk:IsChannelEnabled(filterKey) then return end
 
-    Events:Register("CHAT_MSG_CHANNEL_NOTICE", "PUITalk_Chat", function(owner, event, action, _, _, channelName)
-        if action == "YOU_JOINED" and channelName then
-            PUITalk:RegisterJoinedChannel(channelName)
-        elseif action == "YOU_LEFT" and channelName then
-            PUITalk:UnregisterLeftChannel(channelName)
-        end
-        if not PUITalk:IsChannelEnabled("SYSTEM") then return end
-        local formatted = string.format("%s |cff888888[%s]: %s|r", PUITalk:GetTimestamp(), channelName or "Channel", action or "")
-        PUITalk:AddChatMessage(formatted, 0.6, 0.6, 0.6)
-    end)
+                local colored = PUITalk:GetColoredName(sender)
+                local chanBadge = string.format("[%s. %s]", tostring(cNum > 0 and cNum or ""), cName)
+                local formatted = string.format("%s |cffe6c099%s|r [%s]: %s", PUITalk:GetTimestamp(), chanBadge, colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("CHANNEL")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    -- Monster Emotes / Say / Yell
-    Events:Register("CHAT_MSG_MONSTER_SAY", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("MONSTER") then return end
-        local formatted = string.format("%s |cffffd100[%s]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 0.85, 0.4)
-    end)
+            -- System & Notices
+            elseif event == "CHAT_MSG_SYSTEM" then
+                if not PUITalk:IsChannelEnabled("SYSTEM") then return end
+                local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
 
-    Events:Register("CHAT_MSG_MONSTER_YELL", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("MONSTER") then return end
-        local formatted = string.format("%s |cffff4040[%s yells]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 0.35, 0.35)
-    end)
+            elseif event == "CHAT_MSG_CHANNEL_NOTICE" then
+                local action = msg
+                local channelName = msgObj.channelName
+                if action == "YOU_JOINED" and channelName then
+                    PUITalk:RegisterJoinedChannel(channelName)
+                elseif action == "YOU_LEFT" and channelName then
+                    PUITalk:UnregisterLeftChannel(channelName)
+                end
+                if not PUITalk:IsChannelEnabled("SYSTEM") then return end
+                local formatted = string.format("%s |cff888888[%s]: %s|r", PUITalk:GetTimestamp(), channelName or "Channel", action or "")
+                PUITalk:AddChatMessage(formatted, 0.6, 0.6, 0.6)
 
-    Events:Register("CHAT_MSG_MONSTER_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("MONSTER") then return end
-        local formatted = string.format("%s |cffff8040%s %s|r", PUITalk:GetTimestamp(), sender or "", msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 0.5, 0.25)
-    end)
+            -- Monster Messages
+            elseif event == "CHAT_MSG_MONSTER_SAY" then
+                if not PUITalk:IsChannelEnabled("MONSTER") then return end
+                local formatted = string.format("%s |cffffd100[%s]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 0.85, 0.4)
 
-    -- Skills & Tradeskills
-    Events:Register("CHAT_MSG_SKILL", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("SKILL") then return end
-        local formatted = string.format("%s |cff70b0ff%s|r", PUITalk:GetTimestamp(), msg)
-        local r, g, b = PUITalk:GetChannelColor("SKILL")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            elseif event == "CHAT_MSG_MONSTER_YELL" then
+                if not PUITalk:IsChannelEnabled("MONSTER") then return end
+                local formatted = string.format("%s |cffff4040[%s yells]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 0.35, 0.35)
 
-    Events:Register("CHAT_MSG_SPELL_TRADESKILLS", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("SKILL") then return end
-        local formatted = string.format("%s |cff70b0ff%s|r", PUITalk:GetTimestamp(), msg)
-        local r, g, b = PUITalk:GetChannelColor("SKILL")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            elseif event == "CHAT_MSG_MONSTER_EMOTE" then
+                if not PUITalk:IsChannelEnabled("MONSTER") then return end
+                local formatted = string.format("%s |cffff8040%s %s|r", PUITalk:GetTimestamp(), sender or "", msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 0.5, 0.25)
 
-    -- Combat Info: XP, Honor, Rep, Misc
-    Events:Register("CHAT_MSG_COMBAT_XP_GAIN", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("COMBAT_INFO") then return end
-        local formatted = string.format("%s |cff70b0ff%s|r", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 0.45, 0.70, 1.0)
-    end)
+            -- Skills & Tradeskills
+            elseif event == "CHAT_MSG_SKILL" or event == "CHAT_MSG_SPELL_TRADESKILLS" then
+                if not PUITalk:IsChannelEnabled("SKILL") then return end
+                local formatted = string.format("%s |cff70b0ff%s|r", PUITalk:GetTimestamp(), msg)
+                local r, g, b = PUITalk:GetChannelColor("SKILL")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    Events:Register("CHAT_MSG_COMBAT_HONOR_GAIN", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("COMBAT_INFO") then return end
-        local formatted = string.format("%s |cffdfb8ff%s|r", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 0.87, 0.72, 1.0)
-    end)
+            -- Combat Info
+            elseif event == "CHAT_MSG_COMBAT_XP_GAIN" then
+                if not PUITalk:IsChannelEnabled("COMBAT_INFO") then return end
+                local formatted = string.format("%s |cff70b0ff%s|r", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 0.45, 0.70, 1.0)
 
-    Events:Register("CHAT_MSG_COMBAT_FACTION_CHANGE", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("COMBAT_INFO") then return end
-        local formatted = string.format("%s |cff80d0ff%s|r", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 0.50, 0.80, 1.0)
-    end)
+            elseif event == "CHAT_MSG_COMBAT_HONOR_GAIN" then
+                if not PUITalk:IsChannelEnabled("COMBAT_INFO") then return end
+                local formatted = string.format("%s |cffdfb8ff%s|r", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 0.87, 0.72, 1.0)
 
-    Events:Register("CHAT_MSG_COMBAT_MISC_INFO", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("COMBAT_INFO") then return end
-        local formatted = string.format("%s |cffaaaaaa%s|r", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 0.65, 0.65, 0.65)
-    end)
+            elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
+                if not PUITalk:IsChannelEnabled("COMBAT_INFO") then return end
+                local formatted = string.format("%s |cff80d0ff%s|r", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 0.50, 0.80, 1.0)
 
-    -- Opening & Pet Notices
-    Events:Register("CHAT_MSG_OPENING", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("SYSTEM") then return end
-        local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
-    end)
+            elseif event == "CHAT_MSG_COMBAT_MISC_INFO" then
+                if not PUITalk:IsChannelEnabled("COMBAT_INFO") then return end
+                local formatted = string.format("%s |cffaaaaaa%s|r", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 0.65, 0.65, 0.65)
 
-    Events:Register("CHAT_MSG_PET_INFO", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("SYSTEM") then return end
-        local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
-    end)
+            -- Opening & Pet Notices
+            elseif event == "CHAT_MSG_OPENING" or event == "CHAT_MSG_PET_INFO" then
+                if not PUITalk:IsChannelEnabled("SYSTEM") then return end
+                local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
 
-    -- Battlegrounds
-    Events:Register("CHAT_MSG_BATTLEGROUND", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("RAID") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cffff7f00[BG]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("RAID")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            -- Battlegrounds
+            elseif event == "CHAT_MSG_BATTLEGROUND" then
+                if not PUITalk:IsChannelEnabled("RAID") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cffff7f00[BG]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("RAID")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    Events:Register("CHAT_MSG_BATTLEGROUND_LEADER", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("RAID") then return end
-        local colored = PUITalk:GetColoredName(sender)
-        local formatted = string.format("%s |cffff4800[BG Leader]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
-        local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
-        PUITalk:AddChatMessage(formatted, r, g, b)
-    end)
+            elseif event == "CHAT_MSG_BATTLEGROUND_LEADER" then
+                if not PUITalk:IsChannelEnabled("RAID") then return end
+                local colored = PUITalk:GetColoredName(sender)
+                local formatted = string.format("%s |cffff4800[BG Leader]|r [%s]: %s", PUITalk:GetTimestamp(), colored, msg)
+                local r, g, b = PUITalk:GetChannelColor("RAID_WARNING")
+                PUITalk:AddChatMessage(formatted, r, g, b)
 
-    Events:Register("CHAT_MSG_BG_SYSTEM_NEUTRAL", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("SYSTEM") then return end
-        local formatted = string.format("%s |cffffd100[BG]:|r %s", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 0.85, 0.0)
-    end)
+            elseif event == "CHAT_MSG_BG_SYSTEM_NEUTRAL" then
+                if not PUITalk:IsChannelEnabled("SYSTEM") then return end
+                local formatted = string.format("%s |cffffd100[BG]:|r %s", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 0.85, 0.0)
 
-    Events:Register("CHAT_MSG_BG_SYSTEM_ALLIANCE", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("SYSTEM") then return end
-        local formatted = string.format("%s |cff0070dd[Alliance]:|r %s", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 0.0, 0.44, 0.87)
-    end)
+            elseif event == "CHAT_MSG_BG_SYSTEM_ALLIANCE" then
+                if not PUITalk:IsChannelEnabled("SYSTEM") then return end
+                local formatted = string.format("%s |cff0070dd[Alliance]:|r %s", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 0.0, 0.44, 0.87)
 
-    Events:Register("CHAT_MSG_BG_SYSTEM_HORDE", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("SYSTEM") then return end
-        local formatted = string.format("%s |cffff2020[Horde]:|r %s", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 0.13, 0.13)
-    end)
+            elseif event == "CHAT_MSG_BG_SYSTEM_HORDE" then
+                if not PUITalk:IsChannelEnabled("SYSTEM") then return end
+                local formatted = string.format("%s |cffff2020[Horde]:|r %s", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 0.13, 0.13)
 
-    -- Raid Boss & Monster Whispers
-    Events:Register("CHAT_MSG_RAID_BOSS_EMOTE", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("MONSTER") then return end
-        local formatted = string.format("%s |cffff4800[%s]:|r %s", PUITalk:GetTimestamp(), sender or "Boss", msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 0.28, 0.0)
-    end)
+            -- Boss & Whispers
+            elseif event == "CHAT_MSG_RAID_BOSS_EMOTE" then
+                if not PUITalk:IsChannelEnabled("MONSTER") then return end
+                local formatted = string.format("%s |cffff4800[%s]:|r %s", PUITalk:GetTimestamp(), sender or "Boss", msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 0.28, 0.0)
 
-    Events:Register("CHAT_MSG_RAID_BOSS_WHISPER", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("MONSTER") then return end
-        local formatted = string.format("%s |cffff4800[%s whispers]:|r %s", PUITalk:GetTimestamp(), sender or "Boss", msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 0.28, 0.0)
-    end)
+            elseif event == "CHAT_MSG_RAID_BOSS_WHISPER" then
+                if not PUITalk:IsChannelEnabled("MONSTER") then return end
+                local formatted = string.format("%s |cffff4800[%s whispers]:|r %s", PUITalk:GetTimestamp(), sender or "Boss", msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 0.28, 0.0)
 
-    Events:Register("CHAT_MSG_MONSTER_WHISPER", "PUITalk_Chat", function(owner, event, msg, sender)
-        if not PUITalk:IsChannelEnabled("MONSTER") then return end
-        local formatted = string.format("%s |cffffd100[%s whispers]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 0.85, 0.4)
-    end)
+            elseif event == "CHAT_MSG_MONSTER_WHISPER" then
+                if not PUITalk:IsChannelEnabled("MONSTER") then return end
+                local formatted = string.format("%s |cffffd100[%s whispers]:|r %s", PUITalk:GetTimestamp(), sender or "Monster", msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 0.85, 0.4)
 
-    -- Ignored & Filtered
-    Events:Register("CHAT_MSG_IGNORED", "PUITalk_Chat", function(owner, event, msg, sender)
-        local formatted = string.format("%s |cffff4444%s is ignoring you.|r", PUITalk:GetTimestamp(), sender or "Player")
-        PUITalk:AddChatMessage(formatted, 1.0, 0.27, 0.27)
-    end)
+            -- Ignored & Filtered
+            elseif event == "CHAT_MSG_IGNORED" then
+                local formatted = string.format("%s |cffff4444%s is ignoring you.|r", PUITalk:GetTimestamp(), sender or "Player")
+                PUITalk:AddChatMessage(formatted, 1.0, 0.27, 0.27)
 
-    Events:Register("CHAT_MSG_FILTERED", "PUITalk_Chat", function(owner, event, msg, sender)
-        local formatted = string.format("%s |cffff4444%s is not receiving whispers.|r", PUITalk:GetTimestamp(), sender or "Player")
-        PUITalk:AddChatMessage(formatted, 1.0, 0.27, 0.27)
-    end)
+            elseif event == "CHAT_MSG_FILTERED" then
+                local formatted = string.format("%s |cffff4444%s is not receiving whispers.|r", PUITalk:GetTimestamp(), sender or "Player")
+                PUITalk:AddChatMessage(formatted, 1.0, 0.27, 0.27)
 
-    -- Level Up & Character Points
+            -- Loot & Money
+            elseif event == "CHAT_MSG_LOOT" then
+                if not PUITalk:IsChannelEnabled("LOOT") then return end
+                local formatted = string.format("%s |cff00cc00%s|r", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 0.0, 0.8, 0.0)
+
+            elseif event == "CHAT_MSG_MONEY" then
+                if not PUITalk:IsChannelEnabled("LOOT") then return end
+                local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
+                PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
+
+            -- Direct Messages (Whispers)
+            elseif event == "CHAT_MSG_WHISPER" then
+                PUITalk.lastWhisperSender = sender
+                local key = string.lower(sender)
+                if PUITalk.AddDMMessage then
+                    PUITalk:AddDMMessage(key, sender, msg, false)
+                end
+                if PUITalk.db:Get("autoPopDMs") then
+                    if PUITalk.OpenDMConversation then PUITalk:OpenDMConversation(sender) end
+                else
+                    if PUITalk.RefreshDMTabs then PUITalk:RefreshDMTabs() end
+                end
+
+            elseif event == "CHAT_MSG_WHISPER_INFORM" then
+                local key = string.lower(sender or msgObj.target or "")
+                if PUITalk.AddDMMessage then
+                    PUITalk:AddDMMessage(key, UnitName("player"), msg, true)
+                end
+            end
+        end)
+    end
+
+    -- 2. Register Player Level Up & Points
     Events:Register("PLAYER_LEVEL_UP", "PUITalk_Chat", function(owner, event, level, hp, mp, talentPoints)
         local formatted = string.format("%s |cffffff00You have reached level %d!|r", PUITalk:GetTimestamp(), tonumber(level) or 1)
         PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
@@ -469,40 +469,6 @@ function PUITalk:RegisterChatEvents()
                 local formatted = string.format("%s |cffffff00You now have %d unspent talent points.|r", PUITalk:GetTimestamp(), cp2)
                 PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
             end
-        end
-    end)
-
-    -- Loot & Money
-    Events:Register("CHAT_MSG_LOOT", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("LOOT") then return end
-        local formatted = string.format("%s |cff00cc00%s|r", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 0.0, 0.8, 0.0)
-    end)
-
-    Events:Register("CHAT_MSG_MONEY", "PUITalk_Chat", function(owner, event, msg)
-        if not PUITalk:IsChannelEnabled("LOOT") then return end
-        local formatted = string.format("%s |cffffff00%s|r", PUITalk:GetTimestamp(), msg)
-        PUITalk:AddChatMessage(formatted, 1.0, 1.0, 0.0)
-    end)
-
-    -- Whispers
-    Events:Register("CHAT_MSG_WHISPER", "PUITalk_Chat", function(owner, event, msg, sender)
-        PUITalk.lastWhisperSender = sender
-        local key = string.lower(sender)
-        if PUITalk.AddDMMessage then
-            PUITalk:AddDMMessage(key, sender, msg, false)
-        end
-        if PUITalk.db:Get("autoPopDMs") then
-            if PUITalk.OpenDMConversation then PUITalk:OpenDMConversation(sender) end
-        else
-            if PUITalk.RefreshDMTabs then PUITalk:RefreshDMTabs() end
-        end
-    end)
-
-    Events:Register("CHAT_MSG_WHISPER_INFORM", "PUITalk_Chat", function(owner, event, msg, recipient)
-        local key = string.lower(recipient)
-        if PUITalk.AddDMMessage then
-            PUITalk:AddDMMessage(key, UnitName("player"), msg, true)
         end
     end)
 end

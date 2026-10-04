@@ -433,12 +433,8 @@ function PUIQuest:OnInitialize()
 end
 
 function PUIQuest:OnEnable()
-    Events:Register("WORLD_MAP_UPDATE", "PUIQuest", function()
-        if PUIQuest.Map then PUIQuest.Map:Update() end
-    end)
-
     Events:Register("QUEST_LOG_UPDATE", "PUIQuest", function()
-        if PUIQuest.Map then PUIQuest.Map:Update() end
+        if Primus.PUIMap then Primus.PUIMap:Refresh() elseif PUIQuest.Map then PUIQuest.Map:Update() end
         if PUIQuest.Tracker then PUIQuest.Tracker:Update() end
     end)
 

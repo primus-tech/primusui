@@ -164,107 +164,42 @@ end
 -- MULTI-RANK SELECTION FLYOUT
 -- =========================================================================
 
-local function CreateRankFlyout(parent)
-    local f = CreateFrame("Frame", "Primus_PUISpellbook_RankFlyout", parent)
-    f:SetWidth(170)
-    f:SetHeight(140)
-    f:SetBackdrop(Media:Fetch("border", "1Pixel"))
-    f:SetBackdropColor(0.08, 0.08, 0.10, 0.98)
-    f:SetBackdropBorderColor(0.40, 0.70, 1.00, 1.0)
-    f:SetFrameStrata("TOOLTIP")
-    f:EnableMouse(true)
-    f:Hide()
-
-    f.buttons = {}
-    for i = 1, 10 do
-        local btn = CreateFrame("Button", "Primus_PUISpellbook_FlyoutBtn_" .. i, f)
-        btn:SetWidth(162)
-        btn:SetHeight(22)
-        btn:SetPoint("TOPLEFT", f, "TOPLEFT", 4, -4 - (i - 1) * 24)
-        btn:SetBackdrop(Media:Fetch("border", "1Pixel"))
-        btn:SetBackdropColor(0.12, 0.12, 0.16, 0.8)
-        btn:SetBackdropBorderColor(0.25, 0.25, 0.30, 0.8)
-        btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-        btn:RegisterForDrag("LeftButton")
-
-        local bText = btn:CreateFontString(nil, "OVERLAY")
-        bText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
-        bText:SetPoint("LEFT", btn, "LEFT", 6, 0)
-        bText:SetTextColor(0.9, 0.9, 0.9)
-        btn.text = bText
-
-        btn:SetScript("OnEnter", function()
-            this:SetBackdropColor(0.20, 0.35, 0.55, 1.0)
-            this:SetBackdropBorderColor(0.40, 0.80, 1.00, 1.0)
-            if this.spellId then
-                GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
-                GameTooltip:SetSpell(this.spellId, BOOKTYPE_SPELL)
-                GameTooltip:Show()
-            end
-        end)
-
-        btn:SetScript("OnLeave", function()
-            this:SetBackdropColor(0.12, 0.12, 0.16, 0.8)
-            this:SetBackdropBorderColor(0.25, 0.25, 0.30, 0.8)
-            GameTooltip:Hide()
-        end)
-
-        btn:SetScript("OnClick", function()
-            if this.spellId then
-                CastSpell(this.spellId, BOOKTYPE_SPELL)
-            end
-            f:Hide()
-        end)
-
-        btn:SetScript("OnDragStart", function()
-            if this.spellId then
-                PickupSpell(this.spellId, BOOKTYPE_SPELL)
-            end
-            f:Hide()
-        end)
-
-        f.buttons[i] = btn
-    end
-
-    f:SetScript("OnLeave", function()
-        if not MouseIsOver(f) then f:Hide() end
-    end)
-
-    return f
-end
-
 local function ShowRankFlyout(anchorBtn, spellGroup)
-    if not rankFlyout then
-        rankFlyout = CreateRankFlyout(mainFrame)
-    end
-
-    if rankFlyout:IsShown() and rankFlyout.anchorBtn == anchorBtn then
-        rankFlyout:Hide()
+    if not spellGroup or not spellGroup.ranks then return end
+    if Widgets and Widgets.IsContextMenuShown and Widgets:IsContextMenuShown() then
+        Widgets:HideContextMenu()
         return
     end
 
-    rankFlyout.anchorBtn = anchorBtn
-    rankFlyout:ClearAllPoints()
-    rankFlyout:SetPoint("BOTTOMLEFT", anchorBtn, "TOPLEFT", 0, 4)
+    local items = {}
+    table.insert(items, { text = spellGroup.name or "Spell Ranks", isTitle = true })
+    table.insert(items, { isSeparator = true })
 
     local count = table.getn(spellGroup.ranks)
-    local maxDisplay = math.min(count, 10)
-    rankFlyout:SetHeight(maxDisplay * 24 + 8)
-
-    for i = 1, 10 do
-        local btn = rankFlyout.buttons[i]
-        if i <= count then
-            local rData = spellGroup.ranks[i]
-            btn.spellId = rData.spellId
-            local rankLabel = rData.subName ~= "" and rData.subName or ("Rank " .. rData.rankNum)
-            btn.text:SetText(Utils.ColorText(rankLabel, "69ccf0"))
-            btn:Show()
-        else
-            btn:Hide()
-        end
+    for i = 1, count do
+        local rData = spellGroup.ranks[i]
+        local sId = rData.spellId
+        local rankLabel = (rData.subName and rData.subName ~= "") and rData.subName or ("Rank " .. rData.rankNum)
+        table.insert(items, {
+            text = rankLabel,
+            icon = spellGroup.icon,
+            color = "69ccf0",
+            func = function()
+                if sId then
+                    CastSpell(sId, BOOKTYPE_SPELL)
+                end
+            end,
+        })
     end
 
-    rankFlyout:Show()
+    if Widgets and Widgets.ShowContextMenu then
+        Widgets:ShowContextMenu(anchorBtn, items, {
+            point = "BOTTOMLEFT",
+            relPoint = "TOPLEFT",
+            yOffset = 4,
+            minWidth = 140,
+        })
+    end
 end
 
 -- =========================================================================
@@ -839,11 +774,11 @@ function PUISpellbook:Toggle()
     if frame:IsShown() then
         frame:Hide()
         if rankFlyout then rankFlyout:Hide() end
-        PlaySound("igSpellBookClose")
+        if Primus.Audio then Primus.Audio:PlaySound("igSpellBookClose") else PlaySound("igSpellBookClose") end
     else
         self:ScanSpellbook()
         frame:Show()
-        PlaySound("igSpellBookOpen")
+        if Primus.Audio then Primus.Audio:PlaySound("igSpellBookOpen") else PlaySound("igSpellBookOpen") end
         self:RefreshUI()
     end
 end

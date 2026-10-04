@@ -196,6 +196,41 @@ function PUIGathering:UpdateMinimapPins()
 end
 
 -- =========================================================================
+-- WORLD MAP PIN PROVIDER (PUIMap Integration)
+-- =========================================================================
+local function RenderGatheringWorldMapPins(mapContext)
+    if not mapContext or not gatheringDB.showWorldMap then return end
+    local zone = mapContext.zoneName
+    if not zone or zone == "" or not gatheringDB.nodes[zone] then return end
+
+    for key, node in pairs(gatheringDB.nodes[zone]) do
+        if node.x and node.y then
+            local pin = mapContext.AcquirePin()
+            pin.icon:SetTexture(node.icon or NODE_ICONS[node.type] or NODE_ICONS["Herb"])
+            pin.nodeData = node
+            pin:SetScript("OnEnter", function()
+                if this.nodeData then
+                    WorldMapTooltip:SetOwner(this, "ANCHOR_RIGHT")
+                    WorldMapTooltip:ClearLines()
+                    WorldMapTooltip:AddLine(this.nodeData.name or "Gathering Node", 1, 0.82, 0)
+                    WorldMapTooltip:AddLine("Type: |cffffffff" .. (this.nodeData.type or "Resource") .. "|r", 0.8, 0.8, 0.8)
+                    WorldMapTooltip:AddLine("Recorded Harvests: |cff00ff00" .. tostring(this.nodeData.count or 1) .. "|r", 0.7, 0.7, 0.7)
+                    WorldMapTooltip:Show()
+                end
+            end)
+            pin:SetScript("OnLeave", function()
+                WorldMapTooltip:Hide()
+            end)
+            mapContext:PlacePin(pin, node.x, node.y)
+        end
+    end
+end
+
+if Primus.PUIMap then
+    Primus.PUIMap:RegisterPinProvider("PUIGathering", 30, RenderGatheringWorldMapPins)
+end
+
+-- =========================================================================
 -- OPTIONS FLARE REGISTRATION
 -- =========================================================================
 

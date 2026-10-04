@@ -443,6 +443,23 @@ function Utils.CleanseNextMember(cleanseSpell, targetDebuffType)
     local _, playerClass = UnitClass("player")
     targetDebuffType = targetDebuffType or "ALL"
 
+    local CoreAuras = Primus.Auras
+    if CoreAuras and CoreAuras.GetGroupCleansableDebuffs then
+        local cleansables = CoreAuras:GetGroupCleansableDebuffs(playerClass)
+        local cCount = table.getn(cleansables)
+        for i = 1, cCount do
+            local item = cleansables[i]
+            if item and (targetDebuffType == "ALL" or item.dispelType == targetDebuffType) then
+                local spellToCast = cleanseSpell or Utils.GetKnownCleanseSpell(playerClass, item.dispelType)
+                if spellToCast and Utils.IsSpellKnown(spellToCast) then
+                    Utils.CastOnUnit(item.unit, spellToCast)
+                    return true, item.unit, item.dispelType, spellToCast
+                end
+            end
+        end
+        return false
+    end
+
     local numRaid = GetNumRaidMembers()
     local numParty = GetNumPartyMembers()
     local count = numRaid > 0 and numRaid or numParty
@@ -572,4 +589,146 @@ function Utils.GetAuraDurationColor(seconds)
     else
         return 1.0, 1.0, 0.40  -- Yellow (minutes remaining)
     end
+end
+
+-- =========================================================================
+-- CENTRALIZED WEB URL PATTERNS & DIALOG MODAL
+-- =========================================================================
+
+Utils.URL_PATTERNS = {
+    "https?://%S+",
+    "www%.%S+",
+    "discord%.gg/%S+",
+    "discord%.com/%S+",
+    "twitch%.tv/%S+",
+    "youtube%.com/%S+",
+    "youtu%.be/%S+",
+    "imgur%.com/%S+",
+    "carrd%.co/%S+",
+    "toyhou%.se/%S+",
+    "github%.com/%S+",
+    "spotify%.com/%S+",
+    "soundcloud%.com/%S+",
+    "deviantart%.com/%S+",
+    "artstation%.com/%S+"
+}
+
+function Utils.ExtractURLs(text)
+    if not text or text == "" then return {} end
+    local urls = {}
+    local clean = string.gsub(text, "|c%x%x%x%x%x%x%x%x", "")
+    clean = string.gsub(clean, "|r", "")
+    clean = string.gsub(clean, "|H.-|h(.-)|h", "%1")
+
+    for _, pat in ipairs(Utils.URL_PATTERNS) do
+        for url in string.gfind(clean, pat) do
+            url = string.gsub(url, "[%.,!%?)%]\"]+$", "")
+            table.insert(urls, url)
+        end
+    end
+    return urls
+end
+
+local urlCopyModal = nil
+
+function Utils.ShowURLDialog(url, titleText)
+    if not urlCopyModal then
+        local f = CreateFrame("Frame", "Primus_URLCopyModal", UIParent)
+        f:SetWidth(440)
+        f:SetHeight(105)
+        f:SetPoint("CENTER", UIParent, "CENTER", 0, 120)
+        f:SetFrameStrata("DIALOG")
+        f:SetFrameLevel(160)
+        f:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false, tileSize = 0, edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        f:SetBackdropColor(0.06, 0.08, 0.12, 0.98)
+        f:SetBackdropBorderColor(0.20, 0.50, 0.90, 1.0)
+        f:SetMovable(true)
+        f:EnableMouse(true)
+        f:RegisterForDrag("LeftButton")
+        f:SetScript("OnDragStart", function() this:StartMoving() end)
+        f:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
+        table.insert(UISpecialFrames, "Primus_URLCopyModal")
+
+        local title = f:CreateFontString(nil, "OVERLAY")
+        local font = (Primus.Media and Primus.Media.Fetch and Primus.Media:Fetch("font", "Default")) or "Fonts\\FRIZQT__.TTF"
+        title:SetFont(font, 10, "OUTLINE")
+        title:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -10)
+        title:SetText(Utils.ColorText("Web Link Copy", "69ccf0") .. " |cffaaaaaa(Press Ctrl+C to copy)|r")
+        f.title = title
+
+        local eb = CreateFrame("EditBox", "Primus_URLCopyModal_EditBox", f)
+        eb:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -32)
+        eb:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 36)
+        eb:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false, tileSize = 0, edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        eb:SetBackdropColor(0.03, 0.04, 0.06, 1.0)
+        eb:SetBackdropBorderColor(0.25, 0.35, 0.50, 1.0)
+        eb:SetFont(font, 11, "")
+        eb:SetTextColor(1, 1, 0.4)
+        eb:SetAutoFocus(true)
+        eb:SetScript("OnEscapePressed", function() f:Hide() end)
+        f.editBox = eb
+
+        local copyBtn = CreateFrame("Button", nil, f)
+        copyBtn:SetWidth(95)
+        copyBtn:SetHeight(20)
+        copyBtn:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 12, 8)
+        copyBtn:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false, tileSize = 0, edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        copyBtn:SetBackdropColor(0.12, 0.25, 0.15, 1.0)
+        copyBtn:SetBackdropBorderColor(0.30, 0.80, 0.30, 1.0)
+        local cTxt = copyBtn:CreateFontString(nil, "OVERLAY")
+        cTxt:SetFont(font, 9, "OUTLINE")
+        cTxt:SetPoint("CENTER", 0, 0)
+        cTxt:SetText("Select All")
+        copyBtn:SetScript("OnClick", function()
+            eb:SetFocus()
+            eb:HighlightText(0)
+        end)
+
+        local closeBtn = CreateFrame("Button", nil, f)
+        closeBtn:SetWidth(70)
+        closeBtn:SetHeight(20)
+        closeBtn:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -12, 8)
+        closeBtn:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false, tileSize = 0, edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        closeBtn:SetBackdropColor(0.15, 0.15, 0.18, 1.0)
+        closeBtn:SetBackdropBorderColor(0.35, 0.35, 0.40, 1.0)
+        local clTxt = closeBtn:CreateFontString(nil, "OVERLAY")
+        clTxt:SetFont(font, 9, "OUTLINE")
+        clTxt:SetPoint("CENTER", 0, 0)
+        clTxt:SetText("Done")
+        closeBtn:SetScript("OnClick", function() f:Hide() end)
+
+        urlCopyModal = f
+    end
+
+    if titleText and titleText ~= "" then
+        urlCopyModal.title:SetText(Utils.ColorText(titleText, "69ccf0") .. " |cffaaaaaa(Press Ctrl+C to copy)|r")
+    else
+        urlCopyModal.title:SetText(Utils.ColorText("Web Link Copy", "69ccf0") .. " |cffaaaaaa(Press Ctrl+C to copy)|r")
+    end
+
+    urlCopyModal.editBox:SetText(url or "")
+    urlCopyModal:Show()
+    urlCopyModal:Raise()
+    urlCopyModal.editBox:SetFocus()
+    urlCopyModal.editBox:HighlightText(0)
 end

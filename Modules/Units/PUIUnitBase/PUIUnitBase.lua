@@ -305,28 +305,31 @@ function PUIUnitBase:CreateUnitFrame(parent, unit, width, height, customName)
             end
         end
 
-        -- Class-Aware Debuff Highlight Border Engine
+        -- Class-Aware Debuff Highlight Border Engine via Central Primus.Auras
         local foundDebuffType = nil
         local _, playerClass = UnitClass("player")
         playerClass = playerClass or "WARRIOR"
         local priorityList = CLASS_DEBUFF_PRIORITY[playerClass] or { "Magic", "Curse", "Poison", "Disease" }
 
-        -- Scan active debuffs on unit
-        local activeDebuffs = {}
-        for d = 1, 16 do
-            local _, _, debuffType = UnitDebuff(u, d)
-            if debuffType then
-                activeDebuffs[debuffType] = true
+        local CoreAuras = Primus.Auras
+        local unitAuras = CoreAuras and CoreAuras:GetUnitAuras(u)
+        if unitAuras and unitAuras.totalDebuffs and unitAuras.totalDebuffs > 0 then
+            local activeDebuffs = {}
+            for d = 1, unitAuras.totalDebuffs do
+                local deb = unitAuras.debuffs[d]
+                if deb and deb.dispelType and deb.dispelType ~= "None" and deb.dispelType ~= "none" then
+                    activeDebuffs[deb.dispelType] = true
+                end
             end
-        end
 
-        -- Pick highest priority debuff based on class
-        local pCount = table.getn(priorityList)
-        for p = 1, pCount do
-            local dType = priorityList[p]
-            if activeDebuffs[dType] then
-                foundDebuffType = dType
-                break
+            -- Pick highest priority debuff based on class
+            local pCount = table.getn(priorityList)
+            for p = 1, pCount do
+                local dType = priorityList[p]
+                if activeDebuffs[dType] then
+                    foundDebuffType = dType
+                    break
+                end
             end
         end
 

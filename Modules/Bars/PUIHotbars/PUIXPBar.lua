@@ -634,126 +634,66 @@ function PUIHotbars:AnnounceProgress()
 end
 
 -- =========================================================================
--- INTERACTIVE RIGHT-CLICK QUICK FACTION PICKER MENU
+-- INTERACTIVE RIGHT-CLICK QUICK FACTION PICKER MENU (Widgets:ShowContextMenu)
 -- =========================================================================
 
-local function BuildQuickMenu()
-    if quickMenuFrame then return quickMenuFrame end
-
-    local f = CreateFrame("Frame", "Primus_PUIHotbars_RepMenu", UIParent)
-    f:SetWidth(260)
-    f:SetHeight(320)
-    f:SetFrameStrata("DIALOG")
-    f:SetBackdrop(Media:Fetch("border", "1Pixel"))
-    f:SetBackdropColor(0.08, 0.08, 0.10, 0.98)
-    f:SetBackdropBorderColor(0.30, 0.30, 0.35, 1.0)
-    f:EnableMouse(true)
-    f:Hide()
-
-    local title = f:CreateFontString(nil, "OVERLAY")
-    title:SetFont(Media:Fetch("font", "Default"), 11, "OUTLINE")
-    title:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -8)
-    title:SetText(Utils.ColorText("Tracked Factions (Quick Select)", "ffd100"))
-
-    local closeBtn = CreateFrame("Button", nil, f)
-    closeBtn:SetWidth(16)
-    closeBtn:SetHeight(16)
-    closeBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -6, -6)
-    local closeTxt = closeBtn:CreateFontString(nil, "OVERLAY")
-    closeTxt:SetFont(Media:Fetch("font", "Default"), 10, "OUTLINE")
-    closeTxt:SetPoint("CENTER", 0, 0)
-    closeTxt:SetText("x")
-    closeBtn:SetScript("OnClick", function() f:Hide() end)
-
-    -- Scroll Frame & Content Container
-    local scroll = CreateFrame("ScrollFrame", "Primus_PUIHotbars_RepMenuScroll", f, "FauxScrollFrameTemplate")
-    scroll:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -28)
-    scroll:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -26, 8)
-
-    local rows = {}
-    for i = 1, 10 do
-        local row = CreateFrame("Button", nil, f)
-        row:SetWidth(220)
-        row:SetHeight(24)
-        row:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -28 - (i - 1) * 26)
-
-        local cb = CreateFrame("CheckButton", nil, row, "UICheckButtonTemplate")
-        cb:SetWidth(18)
-        cb:SetHeight(18)
-        cb:SetPoint("LEFT", row, "LEFT", 0, 0)
-        row.cb = cb
-
-        local nameText = row:CreateFontString(nil, "OVERLAY")
-        nameText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
-        nameText:SetPoint("LEFT", cb, "RIGHT", 4, 0)
-        nameText:SetPoint("RIGHT", row, "RIGHT", -4, 0)
-        nameText:SetJustifyH("LEFT")
-        row.nameText = nameText
-
-        row:SetScript("OnClick", function()
-            if this.factionName then
-                PUIHotbars:ToggleTrackedFaction(this.factionName)
-            end
-        end)
-        cb:SetScript("OnClick", function()
-            if this:GetParent().factionName then
-                PUIHotbars:ToggleTrackedFaction(this:GetParent().factionName)
-            end
-        end)
-
-        table.insert(rows, row)
+function PUIHotbars:ToggleQuickMenu(anchorFrame)
+    if Widgets and Widgets.IsContextMenuShown and Widgets:IsContextMenuShown() then
+        Widgets:HideContextMenu()
+        return
     end
 
-    f.rows = rows
-    f.scroll = scroll
-
-    scroll:SetScript("OnVerticalScroll", function()
-        FauxScrollFrame_OnVerticalScroll(26, function() PUIHotbars:RefreshQuickMenu() end)
-    end)
-
-    quickMenuFrame = f
-    return quickMenuFrame
-end
-
-function PUIHotbars:RefreshQuickMenu()
-    if not quickMenuFrame or not quickMenuFrame:IsShown() then return end
     self:ScanFactions()
+    local items = {}
+    table.insert(items, { text = "TRACKED FACTIONS", isTitle = true })
+    table.insert(items, { isSeparator = true })
 
     local total = table.getn(orderedFactions)
-    FauxScrollFrame_Update(quickMenuFrame.scroll, total, 10, 26)
-    local offset = FauxScrollFrame_GetOffset(quickMenuFrame.scroll) or 0
-
-    for i = 1, 10 do
-        local row = quickMenuFrame.rows[i]
-        local idx = offset + i
-        if idx <= total then
-            local fName = orderedFactions[idx]
+    if total == 0 then
+        table.insert(items, { text = "No Factions Discovered", disabled = true })
+    else
+        for i = 1, total do
+            local fName = orderedFactions[i]
             local fData = knownFactions[fName]
             if fData then
-                row.factionName = fName
-                local col = STANDING_COLORS[fData.standingID] or STANDING_COLORS[4]
                 local isChecked = self:IsFactionTracked(fName)
-                row.cb:SetChecked(isChecked and 1 or 0)
-                row.nameText:SetText(string.format("|cff%s%s|r (|cffffffff%s - %.0f%%|r)", col.hex, fName, fData.standingText, fData.pct))
-                row:Show()
-            else
-                row:Hide()
+                local col = STANDING_COLORS[fData.standingID] or STANDING_COLORS[4]
+                table.insert(items, {
+                    text = fName,
+                    rightText = string.format("%s (%.0f%%)", fData.standingText, fData.pct),
+                    checked = isChecked,
+                    keepShown = true,
+                    func = function()
+                        PUIHotbars:ToggleTrackedFaction(fName)
+                        PUIHotbars:ToggleQuickMenu(anchorFrame)
+                    end,
+                })
             end
-        else
-            row:Hide()
         end
     end
-end
 
-function PUIHotbars:ToggleQuickMenu(anchorFrame)
-    local menu = BuildQuickMenu()
-    if menu:IsShown() then
-        menu:Hide()
-    else
-        menu:ClearAllPoints()
-        menu:SetPoint("BOTTOM", anchorFrame or xpBarContainer, "TOP", 0, 8)
-        menu:Show()
-        self:RefreshQuickMenu()
+    table.insert(items, { isSeparator = true })
+    local hotbarsDB = DB:GetNamespace("PUIHotbars")
+    local isAutoTrack = hotbarsDB and hotbarsDB:Get("autoTrackRep", true)
+    table.insert(items, {
+        text = "Auto-Track on Gain",
+        checked = isAutoTrack,
+        keepShown = true,
+        func = function()
+            if hotbarsDB then
+                hotbarsDB:Set("autoTrackRep", not isAutoTrack)
+                PUIHotbars:ToggleQuickMenu(anchorFrame)
+            end
+        end
+    })
+
+    if Widgets and Widgets.ShowContextMenu then
+        Widgets:ShowContextMenu(anchorFrame or xpBarContainer, items, {
+            point = "BOTTOM",
+            relPoint = "TOP",
+            yOffset = 8,
+            minWidth = 240,
+        })
     end
 end
 

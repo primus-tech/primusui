@@ -368,8 +368,38 @@ function Directory:BuildFrame()
             GameTooltip:Hide()
         end)
 
+        row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
         row:SetScript("OnClick", function()
-            if this.targetPlayerName then
+            if not this.targetPlayerName then return end
+            if arg1 == "RightButton" and Widgets and Widgets.ShowContextMenu then
+                local pName = this.targetPlayerName
+                local charData = PUIRoleplay:GetCharacterData(pName) or {}
+                local displayName = (charData.full_name and charData.full_name ~= "") and charData.full_name or pName
+                local items = {
+                    { text = displayName, isTitle = true },
+                    { isSeparator = true },
+                    { text = "Whisper", icon = "Interface\\Icons\\INV_Misc_Note_01", func = function()
+                        ChatFrame_SendTell(pName)
+                    end },
+                    { text = "Invite to Group", icon = "Interface\\Icons\\INV_Misc_GroupNeedMore", func = function()
+                        InviteByName(pName)
+                    end },
+                    { text = "Target Player", icon = "Interface\\Icons\\Ability_Hunter_MasterMarksman", func = function()
+                        TargetByName(pName, true)
+                    end },
+                    { isSeparator = true },
+                    { text = "Open Discovery Card", func = function()
+                        Directory:ShowPlayerFlyout(pName)
+                    end },
+                    { text = "Open Character Sheet", func = function()
+                        if PUIRoleplay.Sheet then PUIRoleplay.Sheet:Open(pName) end
+                    end },
+                    { text = "View At-a-Glance", func = function()
+                        if PUIRoleplay.Glance then PUIRoleplay.Glance:Open(pName) end
+                    end },
+                }
+                Widgets:ShowContextMenu(this, items, { point = "TOPLEFT", relPoint = "BOTTOMLEFT", yOffset = -2 })
+            else
                 Directory:ShowPlayerFlyout(this.targetPlayerName)
             end
         end)
