@@ -248,6 +248,12 @@ To guarantee 100% interoperability across diverse client localizations (Vanilla 
 - Full multi-byte ANSI (`\167`, `\176`) and UTF-8 (`\194\167`, `\194\176`, `§`, `°`) decoding to fix missing "S" in zone names ("Stormwind City", "Stranglethorn Vale").
 - Loop-safety guard in `SplitString` with a 2000-iteration hard stop.
 
+### 7.4 RP Text Codec & Newline Translation (`@N` / `@J` / `@T` / `@@`)
+To maintain compatibility with WoW 1.12.1 chat transmission constraints where literal `\n` characters are rejected by `SendChatMessage`:
+- **Inbound Decoding (`PUIRoleplay:UnescapeRPText` / `Protocols:UnescapeText`):** Automatically decodes `@N`/`@n` and `@J`/`@j` into `\n`, `@T`/`@t` into 4 spaces, and `@@` into `@` across all UI FontStrings, Lore chapters, mottos, descriptions, card previews, tooltips, and legacy addon imports.
+- **Outbound Encoding (`PUIRoleplay:EscapeRPText` / `Protocols:EscapeText`):** Converts UI line breaks (`\n`) into `@N` and tabs into `@T` before chunking and transmitting profile packets over `#OWPRP` / `#TTRP`.
+- **Dynamic Content Sizing:** Computes text string heights (`GetStringHeight()`) in long-form scroll frames to ensure arbitrarily long backstories can be fully scrolled without truncation.
+
 ---
 
 ## 8. Complete 28-File Modular Subsystem Manifest
@@ -256,7 +262,7 @@ The entire PUIRoleplay suite is constructed across 28 specialized, decoupled sou
 
 1. **`PUIConstants.lua`**: Data model, defaults, 4 profile slots (0..3), and Universal Nomenclature composition (`ComposeFullName`, `ComposeTitle`, `GetCleanDirectoryName`, `SanitizeZoneString`).
 2. **`PUIIcons.lua`**: Indexed library of categorized WoW icons for profile avatars, glance pills, and custom RP items.
-3. **`PUIProtocols.lua`**: Wire serialization, DrunkCodec encoding/decoding, packet packaging, and hardened `SplitString`.
+3. **`PUIProtocols.lua`**: Wire serialization, RP Text Codec (`UnescapeText`/`EscapeText`), DrunkCodec encoding/decoding, packet packaging, and hardened `SplitString`.
 4. **`PUIComms.lua`**: Multi-channel dispatcher, 30s background telemetry ping engine, live typing alerts, and packet ingestion.
 5. **`PUIIconPicker.lua`**: Visual searchable icon browser modal with instant preview and category filtering.
 6. **`PUICardPreview.lua`**: Real-time rendering card preview displayed alongside character profile editors.
@@ -307,7 +313,9 @@ All 5 core development milestones are **100% Implemented, Verified, and Operatio
   - **DiceMaster** D20 dice engine, RP health/resource bars, and custom status buffs.
   - **TRP3 Extended** custom letter/book editor, wax seal renderer, and RP inventory pouch.
 - [x] **Milestone 5: Importer & Hardening QA (COMPLETE)**
-  - **PUIImporter** supporting 1-click import from Total RP 2/3, MyRolePlay, FlagRSP, and character string codes.
+  - **PUIImporter** supporting 1-click import from Total RP 2/3, MyRolePlay, FlagRSP, and character string codes with automatic `@N` translation.
+  - Complete RP Text Codec Pipeline (`@N`, `@J`, `@T`, `@@`) bidirectional translation across UI and wire comms.
+  - Fixed `#OWPRP`/`#TTRP` presence ping routing via `Primus.Chat` and robust 180s online heartbeat tracking.
   - DrunkCodec multi-byte fixes, loop-safe `SplitString` (2000-iteration hard stop), and cycle-safe `Utils.DeepCopy`.
 
 ---

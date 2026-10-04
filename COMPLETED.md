@@ -298,7 +298,13 @@
   - **Extended RP Inventory Pouch & Document/Letter Forge (`PUIExtended.lua`):** Written letters with parchment backgrounds and wax seals, RP bag items, and coordinate stashes.
   - **Multi-Addon Importer & String Backup (`PUIImporter.lua`):** 1-click import from Total RP 2/3, MyRolePlay, FlagRSP, and single-byte `^` string code export/import.
   - **Chat Suite & Immersion Tools:** Long-form Emote Auto-Splitter (`PUIEmotes.lua`), Proximity Mention Radar & Focus Tracker (`PUIListener.lua`), Elephant Story/Scene Archiver (`PUIElephant.lua`), and RP Quick Action Tray (`PUITray.lua`).
-  - **Wire Protocol & Encoding Hardening:** 100% two-way wire-protocol compatibility with TurtleRP over `TTRP` channel. DrunkCodec multi-byte ANSI/UTF-8 decoding fixes restoring missing "S" in zone names ("Stormwind City", "Stranglethorn Vale"). Loop-safe `SplitString` with 2000-iteration hard stop and cycle-safe `Utils.DeepCopy`/`DeepMerge`.
+  - **Wire Protocol, Text Codec & Encoding Hardening:** 
+    - 100% two-way wire-protocol compatibility with TurtleRP and MyRolePlay over `OWPRP` and `TTRP` channels.
+    - Centralized **RP Text Codec Pipeline** (`PUIRoleplay:UnescapeRPText` / `EscapeRPText`) converting `@N`/`@n` and `@J`/`@j` escape tokens to real `\n` line breaks, `@T`/`@t` to 4-space tab indentation, and `@@` to literal `@` across all UI layers, tooltips, character sheet tabs, card previews, and the legacy importer.
+    - Dynamic Lore & Biography scroll frame height calculation (`GetStringHeight()`) supporting arbitrarily long player histories and backstories.
+    - Fixed chat message object routing (`Primus.Chat` &rarr; `PUIRoleplay.Comms`) preserving incoming presence pings and real-time online status detection (`IsPlayerOnline` 180s heartbeat window).
+    - Resolved directory `ComposeFullName` fallback behavior ensuring remote characters without complete profiles display their character name instead of defaulting to the local player's name.
+    - DrunkCodec multi-byte ANSI/UTF-8 decoding fixes restoring missing "S" in zone names ("Stormwind City", "Stranglethorn Vale"). Loop-safe `SplitString` with 2000-iteration hard stop and cycle-safe `Utils.DeepCopy`/`DeepMerge`.
 - [x] **Inspect Suite (`Modules/Utility/Inspect/`):**
   - Throttled inspect queue preventing client lockups, with target gear and talent tree caching.
 - [x] **Master Loot Assistant (`Modules/Social/MasterLoot/`):**
