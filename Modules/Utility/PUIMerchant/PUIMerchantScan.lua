@@ -4,10 +4,11 @@
     
     Provides:
     1. Server-Safe 15.0s Patient AH Scanner Loop (strictly respecting OctoWoW DDoS rate limiters).
-    2. Real-time 1-second countdown updates for UI displays.
-    3. Asynchronous page query watchdog (25.0s timeout with 3 retries).
-    4. Categorized Scanning Scopes (All, Trade Goods, Consumables, Weapons/Armor).
-    5. Tier 2 Passive Browse Sniffer for organic auction browsing.
+    2. Streaming Page-by-Page Ingestion (Zero memory backlog, zero frame freezes at scan finish).
+    3. Real-time 1-second countdown updates for UI displays.
+    4. Asynchronous page query watchdog (25.0s timeout with 3 retries).
+    5. Automatic 3-way economy detection (Alliance / Horde / Neutral).
+    6. Tier 2 Passive Browse Sniffer for organic auction browsing.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -37,9 +38,6 @@ local currentScope = 0 -- 0 = All, 6 = Trade Goods, 4 = Consumables, 1 = Weapons
 
 local PAGE_COOLDOWN = 15.0  -- 15-second inter-page delay to guarantee safety on DDoS-limited servers
 local SCAN_TIMEOUT  = 25.0  -- 25-second watchdog for slow server responses
-
--- In-memory accumulator table for active scan batch
-local scanAccumulator = {}
 
 PUIMerchant.scannerState = {
     isScanning = false,
@@ -106,19 +104,19 @@ function PUIMerchant:StartScan(scopeCategory)
     isWaitingForNextPage = false
     pageRetries = 0
     currentScope = scopeCategory or 0
-    scanAccumulator = {}
 
     lastQueryTime = GetTime()
     pageCooldownEnd = lastQueryTime + PAGE_COOLDOWN
 
+    local ahType = self:GetCurrentAHType()
     local scopeName = "All Categories"
     if currentScope == 6 then scopeName = "Trade Goods"
     elseif currentScope == 4 then scopeName = "Consumables"
     elseif currentScope == 1 then scopeName = "Weapons"
     elseif currentScope == 2 then scopeName = "Armor" end
 
-    UpdateScannerState(string.format("Requesting Page 1 (%s)...", scopeName))
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Starting 15s-Paced Scan [%s]...", scopeName), "69ccf0"))
+    UpdateScannerState(string.format("Requesting Page 1 (%s - %s)...", scopeName, ahType))
+    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Starting 15s-Paced Scan [%s AH - %s]...", ahType, scopeName), "69ccf0"))
 
     QueryAuctionItems("", nil, nil, 0, currentScope, 0, 0, 0, 0, 0)
 end
@@ -149,14 +147,17 @@ function PUIMerchant:StopScan()
     isPaused = false
     isWaitingForNextPage = false
 
-    -- Ingest whatever data was accumulated before stopping
-    self:FlushScanAccumulator()
+    local realm = GetRealmName() or "Default"
+    local ahType = self:GetCurrentAHType()
+    local realmData = self:GetRealmPriceData(realm, ahType)
+    realmData.lastScan = Time:GetServerTimestamp()
+    realmData.totalListings = totalAuctionsCataloged
 
     UpdateScannerState(string.format("Stopped (%d cataloged)", totalAuctionsCataloged))
     DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH scan stopped. %d listings cataloged.", totalAuctionsCataloged), "ffbb33"))
 end
 
--- Process Returned Auction Batch
+-- Process Returned Auction Batch (Streaming Ingestion - Instant per-page processing)
 function PUIMerchant:ProcessScanResults()
     if not isScanning or isPaused then return end
 
@@ -181,6 +182,10 @@ function PUIMerchant:ProcessScanResults()
         totalPages = math.ceil(totalAuctions / (NUM_AUCTION_ITEMS_PER_PAGE or 50))
     end
 
+    local realm = GetRealmName() or "Default"
+    local ahType = self:GetCurrentAHType()
+
+    -- Stream each auction listing directly into daily storage without memory buffering
     if numBatchAuctions and numBatchAuctions > 0 then
         for i = 1, numBatchAuctions do
             local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice = GetAuctionItemInfo("list", i)
@@ -193,21 +198,12 @@ function PUIMerchant:ProcessScanResults()
                 end
 
                 if unitPrice > 0 then
-                    local clean = self:CleanItemName(name)
-                    if clean and clean ~= "" then
-                        if not scanAccumulator[clean] then
-                            scanAccumulator[clean] = {
-                                prices = {},
-                                meta = {
-                                    texture = texture,
-                                    quality = quality or 1,
-                                    itemLevel = level or 1,
-                                }
-                            }
-                        end
-                        table.insert(scanAccumulator[clean].prices, unitPrice)
-                        totalAuctionsCataloged = totalAuctionsCataloged + 1
-                    end
+                    self:RecordAuctionListing(name, unitPrice, {
+                        texture = texture,
+                        quality = quality or 1,
+                        itemLevel = level or 1,
+                    }, realm, ahType)
+                    totalAuctionsCataloged = totalAuctionsCataloged + 1
                 end
             end
         end
@@ -226,32 +222,20 @@ function PUIMerchant:ProcessScanResults()
     end
 end
 
--- Flush Accumulator to Database
-function PUIMerchant:FlushScanAccumulator()
-    local realm = GetRealmName() or "Default"
-    for itemName, acc in pairs(scanAccumulator) do
-        if acc.prices and table.getn(acc.prices) > 0 then
-            self:RecordItemScanBatch(itemName, acc.prices, acc.meta, realm)
-        end
-    end
-    scanAccumulator = {}
-end
-
--- Complete Scan
+-- Complete Scan (Instantaneous - 0ms freeze)
 function PUIMerchant:FinishScan()
     isScanning = false
     isPaused = false
     isWaitingForNextPage = false
 
-    self:FlushScanAccumulator()
-
     local realm = GetRealmName() or "Default"
-    local realmData = self:GetRealmPriceData(realm)
+    local ahType = self:GetCurrentAHType()
+    local realmData = self:GetRealmPriceData(realm, ahType)
     realmData.lastScan = Time:GetServerTimestamp()
     realmData.totalListings = totalAuctionsCataloged
 
     UpdateScannerState(string.format("Scan Complete! (%d cataloged)", totalAuctionsCataloged))
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH Scan Complete! %d listings cataloged across %d pages.", totalAuctionsCataloged, scanPage), "69ccf0"))
+    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH Scan Complete! %d auction listings cataloged across %d pages.", totalAuctionsCataloged, scanPage), "69ccf0"))
 end
 
 -- =========================================================================
@@ -266,6 +250,8 @@ function PUIMerchant:SniffBrowsePage()
     if not numBatchAuctions or numBatchAuctions == 0 then return end
 
     local realm = GetRealmName() or "Default"
+    local ahType = self:GetCurrentAHType()
+
     for i = 1, numBatchAuctions do
         local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice = GetAuctionItemInfo("list", i)
         if name and count and count > 0 then
@@ -277,11 +263,11 @@ function PUIMerchant:SniffBrowsePage()
             end
 
             if unitPrice > 0 then
-                self:RecordSingleAuction(name, unitPrice, {
+                self:RecordAuctionListing(name, unitPrice, {
                     texture = texture,
                     quality = quality or 1,
                     itemLevel = level or 1,
-                }, realm)
+                }, realm, ahType)
             end
         end
     end

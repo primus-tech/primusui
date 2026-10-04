@@ -57,6 +57,8 @@ local CATEGORY_OPTIONS = {
     { text = "Weapons & Armor", value = "Equipment" },
 }
 
+local ahScopeFilter = "CURRENT" -- "CURRENT", "Faction", "Neutral"
+
 -- =========================================================================
 -- FILTERING & DATA REFRESH
 -- =========================================================================
@@ -66,63 +68,83 @@ function PUIMerchant:RefreshExplorerData()
 
     filteredItemList = {}
     local realm = GetRealmName() or "Default"
-    local realmData = self:GetRealmPriceData(realm)
-    if not realmData or not realmData.priceData then return end
+    local targetAHTypes = {}
+
+    if ahScopeFilter == "CURRENT" then
+        table.insert(targetAHTypes, self:GetCurrentAHType())
+    elseif ahScopeFilter == "Neutral" then
+        table.insert(targetAHTypes, "Neutral")
+    elseif ahScopeFilter == "Faction" then
+        table.insert(targetAHTypes, UnitFactionGroup("player") or "Alliance")
+    else
+        table.insert(targetAHTypes, "Alliance")
+        table.insert(targetAHTypes, "Horde")
+        table.insert(targetAHTypes, "Neutral")
+    end
 
     local queryText = searchEditBox and string.lower(Utils.Trim(searchEditBox:GetText() or "")) or ""
+    local seenItems = {}
 
-    for itemName, pData in pairs(realmData.priceData) do
-        local matches = true
+    for _, ahType in ipairs(targetAHTypes) do
+        local realmData = self:GetRealmPriceData(realm, ahType)
+        if realmData and realmData.priceData then
+            for itemName, pData in pairs(realmData.priceData) do
+                if not seenItems[itemName] then
+                    local matches = true
 
-        -- Search Query Filter
-        if queryText ~= "" then
-            local lowerName = string.lower(itemName)
-            if not string.find(lowerName, queryText, 1, true) then
-                matches = false
-            end
-        end
+                    -- Search Query Filter
+                    if queryText ~= "" then
+                        local lowerName = string.lower(itemName)
+                        if not string.find(lowerName, queryText, 1, true) then
+                            matches = false
+                        end
+                    end
 
-        -- Quality Filter
-        if matches and qualityFilter > 0 then
-            local q = pData.quality or 1
-            if q < qualityFilter then matches = false end
-        end
+                    -- Quality Filter
+                    if matches and qualityFilter > 0 then
+                        local q = pData.quality or 1
+                        if q < qualityFilter then matches = false end
+                    end
 
-        -- Category Filter
-        if matches and categoryFilter ~= "All" then
-            local cls = pData.itemClass or "Trade Goods"
-            if categoryFilter == "Equipment" then
-                if cls ~= "Weapon" and cls ~= "Armor" then matches = false end
-            elseif cls ~= categoryFilter then
-                matches = false
-            end
-        end
+                    -- Category Filter
+                    if matches and categoryFilter ~= "All" then
+                        local cls = pData.itemClass or "Trade Goods"
+                        if categoryFilter == "Equipment" then
+                            if cls ~= "Weapon" and cls ~= "Armor" then matches = false end
+                        elseif cls ~= categoryFilter then
+                            matches = false
+                        end
+                    end
 
-        -- Mode Filter: Sniping / Deal Finder Tab
-        if matches and activeTab == "SNIPER" then
-            local isDeal = false
-            local minB = pData.latestMinBuyout or 0
-            local runMed = pData.runningMedian7d or pData.runningAvg7d or 0
+                    -- Mode Filter: Sniping / Deal Finder Tab
+                    if matches and activeTab == "SNIPER" then
+                        local isDeal = false
+                        local minB = pData.latestMinBuyout or 0
+                        local runMed = pData.runningMedian7d or pData.runningAvg7d or 0
 
-            -- Deal criteria 1: Listed at <= 70% of 7-day Running Median
-            if runMed > 0 and minB > 0 and (minB <= (runMed * 0.70)) then
-                isDeal = true
-            end
+                        -- Deal criteria 1: Listed at <= 70% of 7-day Running Median
+                        if runMed > 0 and minB > 0 and (minB <= (runMed * 0.70)) then
+                            isDeal = true
+                        end
 
-            -- Deal criteria 2: Listed below vendor sell price (instant arbitrage)
-            local itemID = Items:GetID(itemName)
-            if itemID and VanillaItemPrices and VanillaItemPrices[itemID] then
-                local vSell = VanillaItemPrices[itemID].s or 0
-                if vSell > 0 and minB > 0 and minB < vSell then
-                    isDeal = true
+                        -- Deal criteria 2: Listed below vendor sell price (instant arbitrage)
+                        local itemID = Items:GetID(itemName)
+                        if itemID and VanillaItemPrices and VanillaItemPrices[itemID] then
+                            local vSell = VanillaItemPrices[itemID].s or 0
+                            if vSell > 0 and minB > 0 and minB < vSell then
+                                isDeal = true
+                            end
+                        end
+
+                        if not isDeal then matches = false end
+                    end
+
+                    if matches then
+                        seenItems[itemName] = true
+                        table.insert(filteredItemList, pData)
+                    end
                 end
             end
-
-            if not isDeal then matches = false end
-        end
-
-        if matches then
-            table.insert(filteredItemList, pData)
         end
     end
 
