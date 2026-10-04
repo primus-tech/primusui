@@ -140,7 +140,7 @@ PrimusUI/
         ├── Mailbox/                   # "Take All" Mass Mail Collection & Cash Summaries
         ├── PUIDock/                   # Sliding Sidebar Utility Panels
         ├── PUIMap/                    # Central World Map & Minimap Pin Management Engine
-        ├── PUIMerchant/               # Auto-Repair & Auto-Sell Grey Junk
+        ├── PUIMerchant/               # 15s Patient AH Scanner, Quantile Market Indexer, Native Bar Graphs, Dockable Flyout & Offline Explorer
         ├── PUIMover/                  # Categorized Floating Control Dock & Magnetic Grid
         └── PUITooltip/                # Universal Tooltip Subsystem & Single-Owner Pipeline
 ```
@@ -300,6 +300,14 @@ Anchored to the center of the screen with customizable center negative space:
 - Unified All-In-One inventory window for Bags 0–4 and Bank with live item search and quality-colored borders.
 - Automated inventory sorting (`[SORT]`) with rule-based priority categorization and cursor swap queue.
 - Persistent offline Bank inventory caching (`PrimusCharDB.PUIBankCache`).
+
+### 4. PUIMerchant: Advanced Economy & Valuation Engine (Auctioneer + TSM Fusion)
+- **15-Second Patient AH Scanner:** Strictly respects private server DDoS rate limiters (15.0s inter-page cooldown) with live 1-second countdown display (`Next query in 14s...`), watchdog timeout recovery, and category scope selectors.
+- **Statistical Quantile Engine:** Calculates daily Mean, Total Volume ($N$), 50th percentile Median, Core Fair Market Cluster ($\pm 15\%$), Low Tier (cheapest 35% sniping floor), High Tier (top 35% ceiling), and volume-weighted 7-Day / 14-Day Running Averages with automated 14-day history pruning.
+- **Auction House Dark Glass Skin & Flyout Drawer:** Replaces default parchment UI with 1-pixel dark glass borders, flat tabs with active cyan underlines, and a dockable control drawer switchable to either the Left or Right side.
+- **Native FrameXML Market Cluster Bar Graphs:** 3-tier box-plot bars (Green = Low 35%, Gold/Cyan = Core Median, Red = High 35%) with Running Average horizontal reference lines and interactive column hover breakdowns.
+- **Offline Market Explorer & TSM Deal Finder (`/pui market`):** Standalone modal to browse cached AH prices anywhere in the world, filter by quality/category, and identify deals ($\le 70\%$ MV) or guaranteed vendor arbitrage opportunities.
+- **1-Click Seller Assistance:** Automatically calculates optimal undercut prices from 7-day medians and prefills buyout and bid inputs when dropping items into the Auctions tab.
 
 ---
 

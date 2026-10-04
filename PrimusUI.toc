@@ -56,6 +56,11 @@ Modules\Utility\PUIMinimapper\PUISideDock.lua
 Modules\Utility\PUIMinimapper\PUIMinimapper.lua
 Modules\Utility\PUIMinimapOrbit\PUIMinimapOrbit.lua
 Modules\Utility\PUIMailbox\PUIMailbox.lua
+Modules\Utility\PUIMerchant\PUIMerchantData.lua
+Modules\Utility\PUIMerchant\PUIMerchantScan.lua
+Modules\Utility\PUIMerchant\PUIMerchantGraph.lua
+Modules\Utility\PUIMerchant\PUIMerchantSkin.lua
+Modules\Utility\PUIMerchant\PUIMerchantExplorer.lua
 Modules\Utility\PUIMerchant\PUIMerchant.lua
 Modules\Utility\PUIInspect\PUIInspect.lua
 Modules\Utility\PUILogViewer\PUILogViewer.lua

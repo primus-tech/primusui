@@ -1,12 +1,14 @@
 --[[
-    PrimusUI Module: PUIMerchant (Auctioneer-Style Market Cataloging & Pricing)
+    PrimusUI Module: PUIMerchant (Economy & Valuation Master Orchestrator)
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides:
-    1. Auction House Economy Scanner: Catalogs all active auctions and price histories.
-    2. Statistical Market Pricing: Tracks Min Buyout, Market Average, and Seen counts.
-    3. Tooltip Integration: Injects real-time market value and min buyout into all GameTooltips.
-    4. Price-Per-Unit display and Shift+Click Quick Buyout on Browse listings.
+    1. Lifecycle Orchestration (OnInitialize, OnEnable, OnDisable).
+    2. 1-Click Seller Assistance & Undercut Calculator on Auction Creation Tab.
+    3. Shift+Click Quick Buyout & Per-Unit Price Overlays on Browse Rows.
+    4. PUITooltip Provider Integration with Shift-Hover Sparklines.
+    5. Console Command Router (/pui market, /pui merchant).
+    6. Module Options Flare Configuration.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -24,271 +26,86 @@ local Media   = Primus.Media
 local Utils   = Primus.Utils
 local Events  = Primus.Events
 local Time    = Primus.Time
+local Items   = Primus.Items
 
-local merchantDB = DB:RegisterNamespace("PUIMerchant", {
-    enabled = true,
-    quickBuyout = true,
-    showTooltipPrices = true,
-    realms = {}, -- [realmName] = { priceData = { [itemName] = { minBuyout = 0, totalBuyout = 0, count = 0, lastSeen = 0 } }, lastScan = 0, totalListings = 0 }
-    priceData = {}, -- fallback global dictionary
-})
-
-local isScanning = false
-local scanPage = 0
-local totalPages = 1
-local totalAuctionsCataloged = 0
-local isWaitingForNextPage = false
-local lastQueryTime = 0
-local pageRetries = 0
-local maxRetries = 3
-local SCAN_TIMEOUT = 11.0
-local scanBtn = nil
-local scanStatusText = nil
 local unitPriceLabels = {}
-
--- Clean Item Name Extractor
-local function CleanItemName(linkOrName)
-    if not linkOrName then return nil end
-    local s, e, name = string.find(linkOrName, "%[(.+)%]")
-    return name or linkOrName
-end
-
--- Get or Initialize Realm Price Data
-function PUIMerchant:GetRealmPriceData(realm)
-    realm = realm or GetRealmName() or "Default"
-    if not merchantDB.data.realms then
-        merchantDB.data.realms = {}
-    end
-    if not merchantDB.data.realms[realm] then
-        merchantDB.data.realms[realm] = {
-            priceData = {},
-            lastScan = 0,
-            totalListings = 0,
-        }
-    end
-    return merchantDB.data.realms[realm]
-end
-
--- Record an Auction Listing into the Market Database (Partitioned by Realm)
-function PUIMerchant:RecordAuction(itemName, unitPrice, realm)
-    if not itemName or not unitPrice or unitPrice <= 0 then return end
-    local clean = CleanItemName(itemName)
-    if not clean or clean == "" then return end
-
-    local realmData = self:GetRealmPriceData(realm)
-    local pData = realmData.priceData[clean]
-    local now = Time:GetServerTimestamp()
-
-    if not pData then
-        pData = {
-            minBuyout = unitPrice,
-            totalBuyout = unitPrice,
-            count = 1,
-            lastSeen = now,
-        }
-        realmData.priceData[clean] = pData
-    else
-        if pData.minBuyout == 0 or unitPrice < pData.minBuyout then
-            pData.minBuyout = unitPrice
-        end
-        pData.totalBuyout = pData.totalBuyout + unitPrice
-        pData.count = pData.count + 1
-        pData.lastSeen = now
-    end
-
-    -- Keep legacy global priceData synchronized
-    if not merchantDB.data.priceData then merchantDB.data.priceData = {} end
-    merchantDB.data.priceData[clean] = pData
-end
-
--- Get Market Price Info for an Item (Partitioned by Realm)
-function PUIMerchant:GetItemPriceInfo(itemName, realm)
-    if not itemName then return nil end
-    local clean = CleanItemName(itemName)
-    if not clean or clean == "" then return nil end
-
-    local realmData = self:GetRealmPriceData(realm)
-    local pData = realmData and realmData.priceData and realmData.priceData[clean]
-
-    if not pData or pData.count == 0 then
-        -- Fallback to global priceData if realm entry is empty
-        pData = merchantDB.data.priceData and merchantDB.data.priceData[clean]
-    end
-
-    if not pData or pData.count == 0 then return nil end
-
-    local avgBuyout = math.floor(pData.totalBuyout / pData.count)
-    return pData.minBuyout, avgBuyout, pData.count, pData.lastSeen
-end
+local lastAuctionedItemName = nil
 
 -- =========================================================================
--- ASYNCHRONOUS FULL AH SCANNER ENGINE
+-- SELLER ASSISTANCE & 1-CLICK UNDERCUT ENGINE
 -- =========================================================================
 
--- Start or Toggle Full AH Scan
-function PUIMerchant:StartScan()
-    if not AuctionFrame or not AuctionFrame:IsShown() then
-        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: Open the Auction House to run a scan.", "ffbb33"))
+function PUIMerchant:UpdateAuctionAutoPricing()
+    if not AuctionFrameAuctions or not AuctionFrameAuctions:IsShown() then return end
+
+    local name, texture, count, quality, canUse, price = GetAuctionSellItemInfo()
+    if not name or name == "" then
+        lastAuctionedItemName = nil
         return
     end
 
-    if isScanning then
-        self:StopScan()
-        return
-    end
+    if name == lastAuctionedItemName then return end
+    lastAuctionedItemName = name
 
-    if not CanSendAuctionQuery() then
-        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: AH query is on cooldown. Please wait 2-3 seconds and click again.", "ffbb33"))
-        return
-    end
+    count = (count and count > 0) and count or 1
+    local pData = self:GetItemMetrics(name)
+    if not pData then return end
 
-    isScanning = true
-    scanPage = 0
-    totalPages = 1
-    totalAuctionsCataloged = 0
-    isWaitingForNextPage = false
-    lastQueryTime = GetTime()
-    pageRetries = 0
+    local targetBuyoutPerUnit = 0
+    local targetBidPerUnit = 0
 
-    if scanBtn then
-        scanBtn:SetText("Stop Scan")
-        scanBtn:SetBackdropBorderColor(1.0, 0.25, 0.25, 1)
-    end
-
-    if scanStatusText then
-        scanStatusText:SetText("Requesting Page 1...")
-        scanStatusText:Show()
-    end
-
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: Starting full AH catalog scan...", "69ccf0"))
-    QueryAuctionItems("", nil, nil, 0, 0, 0, 0, 0, 0, 0)
-end
-
--- Stop Active Scan
-function PUIMerchant:StopScan()
-    if not isScanning then return end
-    isScanning = false
-    isWaitingForNextPage = false
-
-    if scanBtn then
-        scanBtn:SetText("Scan AH")
-        scanBtn:SetBackdropBorderColor(1.0, 0.84, 0.0, 1)
-    end
-
-    if scanStatusText then
-        scanStatusText:SetText(string.format("Scan Stopped (%d cataloged)", totalAuctionsCataloged))
-    end
-
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH scan stopped. %d listings cataloged.", totalAuctionsCataloged), "ffbb33"))
-end
-
--- Process Returned Auction Scan Batch
-function PUIMerchant:ProcessScanResults()
-    if not isScanning then return end
-
-    local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
-
-    -- Initial page latency / empty results fallback with retry
-    if (not totalAuctions or totalAuctions == 0) and numBatchAuctions == 0 and scanPage == 0 then
-        if pageRetries < maxRetries then
-            pageRetries = pageRetries + 1
-            isWaitingForNextPage = true
-            lastQueryTime = GetTime()
-            if scanStatusText then
-                scanStatusText:SetText(string.format("Waiting on AH server (retry %d)...", pageRetries))
-            end
-            return
+    -- Calculate Undercut Buyout Price
+    if pData.runningMedian7d and pData.runningMedian7d > 0 then
+        -- Suggest 98% of 7-day Median or 1c below latest minimum buyout
+        if pData.latestMinBuyout and pData.latestMinBuyout > 100 then
+            targetBuyoutPerUnit = pData.latestMinBuyout - 1
         else
-            self:FinishScan()
-            return
+            targetBuyoutPerUnit = math.floor(pData.runningMedian7d * 0.98)
         end
+    elseif pData.latestMinBuyout and pData.latestMinBuyout > 0 then
+        targetBuyoutPerUnit = pData.latestMinBuyout
     end
 
-    if totalAuctions and totalAuctions > 0 then
-        totalPages = math.ceil(totalAuctions / (NUM_AUCTION_ITEMS_PER_PAGE or 50))
+    -- Calculate Bid Price (Low Tier 35% average or 80% of buyout)
+    local todayKey = self:GetDayKey()
+    local todayStat = pData.history and pData.history[todayKey]
+    if todayStat and todayStat.lowAvg and todayStat.lowAvg > 0 then
+        targetBidPerUnit = todayStat.lowAvg
+    elseif targetBuyoutPerUnit > 0 then
+        targetBidPerUnit = math.floor(targetBuyoutPerUnit * 0.80)
     end
 
-    if numBatchAuctions and numBatchAuctions > 0 then
-        for i = 1, numBatchAuctions do
-            local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice = GetAuctionItemInfo("list", i)
-            if name and count and count > 0 then
-                if buyoutPrice and buyoutPrice > 0 then
-                    local unitPrice = math.floor(buyoutPrice / count)
-                    self:RecordAuction(name, unitPrice)
-                    totalAuctionsCataloged = totalAuctionsCataloged + 1
-                elseif minBid and minBid > 0 then
-                    local unitBid = math.floor(minBid / count)
-                    self:RecordAuction(name, unitBid)
-                    totalAuctionsCataloged = totalAuctionsCataloged + 1
-                end
-            end
-        end
+    -- Apply Stack Total
+    local totalBuyout = targetBuyoutPerUnit * count
+    local totalBid = targetBidPerUnit * count
+
+    if totalBuyout > 0 and BuyoutPrice then
+        MoneyInputFrame_SetCopper(BuyoutPrice, totalBuyout)
+    end
+    if totalBid > 0 and StartPrice then
+        MoneyInputFrame_SetCopper(StartPrice, totalBid)
     end
 
-    scanPage = scanPage + 1
-    pageRetries = 0
-
-    if scanPage >= totalPages or (numBatchAuctions == 0 and scanPage > 1) then
-        self:FinishScan()
-    else
-        isWaitingForNextPage = true
-        lastQueryTime = GetTime()
-        if scanStatusText then
-            scanStatusText:SetText(string.format("Page %d/%d (%d items) - Cooldown...", scanPage, totalPages, totalAuctionsCataloged))
-        end
-    end
+    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Auto-Priced %s (x%d) -> Buyout: %s | Bid: %s", name, count, Utils.FormatMoney(totalBuyout), Utils.FormatMoney(totalBid)), "69ccf0"))
 end
 
--- Complete Scan
-function PUIMerchant:FinishScan()
-    isScanning = false
-    isWaitingForNextPage = false
+local function HookAuctionsTab()
+    if not AuctionsItemButton or AuctionsItemButton.primusHooked then return end
 
-    local realm = GetRealmName() or "Default"
-    local realmData = self:GetRealmPriceData(realm)
-    realmData.lastScan = Time:GetServerTimestamp()
-    realmData.totalListings = totalAuctionsCataloged
+    -- Hook Sell Slot Script
+    local origOnClick = AuctionsItemButton:GetScript("OnClick")
+    AuctionsItemButton:SetScript("OnClick", function()
+        if origOnClick then origOnClick() end
+        PUIMerchant:UpdateAuctionAutoPricing()
+    end)
 
-    if scanBtn then
-        scanBtn:SetText("Scan AH")
-        scanBtn:SetBackdropBorderColor(1.0, 0.84, 0.0, 1)
-        scanBtn:Enable()
-    end
+    local origOnDrag = AuctionsItemButton:GetScript("OnReceiveDrag")
+    AuctionsItemButton:SetScript("OnReceiveDrag", function()
+        if origOnDrag then origOnDrag() end
+        PUIMerchant:UpdateAuctionAutoPricing()
+    end)
 
-    if scanStatusText then
-        scanStatusText:SetText(string.format("Scan Complete! (%d cataloged)", totalAuctionsCataloged))
-    end
-
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH Scan Complete! %d auction listings cataloged across %d pages.", totalAuctionsCataloged, scanPage), "69ccf0"))
-end
-
--- =========================================================================
--- TOOLTIP MARKET PRICE INJECTION (PUITooltip Provider)
--- =========================================================================
-
-local function InjectTooltipPrice(tooltip, itemData)
-    if not merchantDB:Get("showTooltipPrices", true) then return end
-
-    local itemName = nil
-    if itemData and itemData.name then
-        itemName = itemData.name
-    else
-        local name = _G[tooltip:GetName() .. "TextLeft1"]
-        if name and name:GetText() then
-            itemName = name:GetText()
-        end
-    end
-    if not itemName then return end
-
-    local minBuyout, avgBuyout, seenCount = PUIMerchant:GetItemPriceInfo(itemName)
-
-    if minBuyout and avgBuyout then
-        tooltip:AddLine(" ")
-        tooltip:AddDoubleLine("|cffffd100PUIMerchant Market:|r", Utils.FormatMoney(avgBuyout))
-        tooltip:AddDoubleLine("|cffaaaaaaMin Buyout:|r", Utils.FormatMoney(minBuyout))
-        tooltip:AddDoubleLine("|cffaaaaaaSeen in AH:|r", string.format("|cff33ccff%d times|r", seenCount or 1))
-        tooltip:Show()
-    end
+    AuctionsItemButton.primusHooked = true
 end
 
 -- =========================================================================
@@ -340,7 +157,7 @@ local function HookBrowseRows()
             rowBtn.browseIndex = i
             rowBtn.origOnClick = rowBtn:GetScript("OnClick")
             rowBtn:SetScript("OnClick", function()
-                if IsShiftKeyDown() and merchantDB.quickBuyout then
+                if IsShiftKeyDown() and PUIMerchant.db:Get("quickBuyout", true) then
                     local offset = FauxScrollFrame_GetOffset(BrowseScrollFrame) or 0
                     local index = offset + (this.browseIndex or this:GetID() or 1)
                     local name, _, count, _, _, _, _, _, buyoutPrice = GetAuctionItemInfo("list", index)
@@ -361,6 +178,56 @@ local function HookBrowseRows()
 end
 
 -- =========================================================================
+-- TOOLTIP MARKET PRICE INJECTION (PUITooltip Provider)
+-- =========================================================================
+
+local function InjectTooltipPrice(tooltip, itemData)
+    if not PUIMerchant.db:Get("showTooltipPrices", true) then return end
+
+    local itemName = nil
+    if itemData and itemData.name then
+        itemName = itemData.name
+    else
+        local name = _G[tooltip:GetName() .. "TextLeft1"]
+        if name and name:GetText() then
+            itemName = name:GetText()
+        end
+    end
+    if not itemName then return end
+
+    local pData = PUIMerchant:GetItemMetrics(itemName)
+    if not pData then return end
+
+    local minBuyout = pData.latestMinBuyout or 0
+    local runAvg = pData.runningAvg7d or minBuyout
+    local runMed = pData.runningMedian7d or runAvg
+
+    if minBuyout > 0 or runAvg > 0 then
+        tooltip:AddLine(" ")
+        tooltip:AddDoubleLine("|cffffd100PUIMerchant 7d Avg:|r", Utils.FormatMoney(runAvg))
+        tooltip:AddDoubleLine("|cff69ccf0Core Median (±15%):|r", Utils.FormatMoney(runMed))
+        tooltip:AddDoubleLine("|cffaaaaaaLatest Min Buyout:|r", Utils.FormatMoney(minBuyout))
+
+        -- Total Volume
+        local totalVol = 0
+        if pData.history then
+            for _, h in pairs(pData.history) do
+                totalVol = totalVol + (h.totalVolume or 0)
+            end
+        end
+        if totalVol == 0 then totalVol = pData.totalVolume or 1 end
+        tooltip:AddDoubleLine("|cffaaaaaaSeen in AH:|r", string.format("|cff33ccff%d items|r", totalVol))
+
+        -- Shift-Hover Hint
+        if not IsShiftKeyDown() and PUIMerchant.db:Get("showTooltipSparkline", true) then
+            tooltip:AddLine("|cff555555[Hold Shift for Price Trend]|r")
+        end
+
+        tooltip:Show()
+    end
+end
+
+-- =========================================================================
 -- OPTIONS FLARE REGISTRATION
 -- =========================================================================
 
@@ -370,17 +237,32 @@ function PUIMerchant:RegisterOptionsFlare()
 
     Options:RegisterModuleOptions("PUIMerchant", "Utility", {
         title = "PUIMerchant: Economy & Valuation",
-        description = "Auction House scanner, market pricing database, and item tooltip integration.",
+        description = "Auction House 15s scanner, market pricing database, offline catalog, and dark glass skin.",
         fields = {
             {
                 key = "enabled",
                 label = "Enable PUIMerchant Economy Engine",
                 type = "checkbox",
                 default = true,
-                get = function() return merchantDB:Get("enabled", true) end,
+                get = function() return PUIMerchant.db:Get("enabled", true) end,
                 set = function(val)
-                    merchantDB:Set("enabled", val)
+                    PUIMerchant.db:Set("enabled", val)
                     if val then PUIMerchant:OnEnable() else PUIMerchant:OnDisable() end
+                end,
+            },
+            {
+                key = "flyoutSide",
+                label = "AH Control Flyout Docking Side",
+                type = "select",
+                options = {
+                    { label = "Right Side", value = "RIGHT" },
+                    { label = "Left Side",  value = "LEFT" },
+                },
+                default = "RIGHT",
+                get = function() return PUIMerchant.db:Get("flyoutSide", "RIGHT") end,
+                set = function(val)
+                    PUIMerchant.db:Set("flyoutSide", val)
+                    PUIMerchant:UpdateFlyoutAnchor()
                 end,
             },
             {
@@ -388,16 +270,24 @@ function PUIMerchant:RegisterOptionsFlare()
                 label = "Shift+Click Quick Buyout on Browse Rows",
                 type = "checkbox",
                 default = true,
-                get = function() return merchantDB:Get("quickBuyout", true) end,
-                set = function(val) merchantDB:Set("quickBuyout", val) end,
+                get = function() return PUIMerchant.db:Get("quickBuyout", true) end,
+                set = function(val) PUIMerchant.db:Set("quickBuyout", val) end,
             },
             {
                 key = "showTooltipPrices",
                 label = "Inject AH Market Prices into GameTooltips",
                 type = "checkbox",
                 default = true,
-                get = function() return merchantDB:Get("showTooltipPrices", true) end,
-                set = function(val) merchantDB:Set("showTooltipPrices", val) end,
+                get = function() return PUIMerchant.db:Get("showTooltipPrices", true) end,
+                set = function(val) PUIMerchant.db:Set("showTooltipPrices", val) end,
+            },
+            {
+                key = "showTooltipSparkline",
+                label = "Show Trend Breakdown in Tooltips",
+                type = "checkbox",
+                default = true,
+                get = function() return PUIMerchant.db:Get("showTooltipSparkline", true) end,
+                set = function(val) PUIMerchant.db:Set("showTooltipSparkline", val) end,
             },
         },
     })
@@ -418,91 +308,62 @@ function PUIMerchant:OnInitialize()
                 PUIMerchant:StopScan()
             elseif argParam == "scan" or argParam == "" then
                 if AuctionFrame and AuctionFrame:IsShown() then
-                    PUIMerchant:StartScan()
+                    PUIMerchant:StartScan(0)
                 else
                     DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: Open the Auction House to run an AH scan.", "69ccf0"))
                 end
+            elseif argParam == "prune" then
+                local purged = PUIMerchant:PruneOldHistory(nil, 14)
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Pruned %d stale entries older than 14 days.", purged), "69ccf0"))
+            elseif argParam == "market" or argParam == "deals" then
+                PUIMerchant:ToggleMarketExplorer(argParam == "deals")
             else
-                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PrimusUI Merchant & AH Scanner ===", "69ccf0"))
-                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("/pui merchant [scan | stop]", "ffbb33"))
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PrimusUI Merchant & Economy Suite ===", "69ccf0"))
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("/pui merchant [scan | stop | prune | market | deals]", "ffbb33"))
             end
-        end, "PUIMerchant AH price scanner & valuation (/pui merchant [scan|stop])")
+        end, "PUIMerchant AH price scanner & valuation (/pui merchant [scan|stop|prune|market])")
+
+        Primus.Console:RegisterSubCommand("market", function(argParam)
+            argParam = Utils.Trim(argParam or "")
+            PUIMerchant:ToggleMarketExplorer(argParam == "deals" or argParam == "sniper")
+            if argParam ~= "" and argParam ~= "deals" and argParam ~= "sniper" then
+                if searchEditBox then
+                    searchEditBox:SetText(argParam)
+                end
+            end
+        end, "PUIMerchant Offline Market Explorer (/pui market [itemName|deals])")
     end
 end
 
 function PUIMerchant:OnEnable()
-    -- Hook AH Frame Show to inject Scan AH Button
+    -- Initialize asynchronous scanner ticker
+    self:InitScannerTicker()
+
+    -- Hook AH Frame Show to apply skin, dock flyout, and hook rows
     Events:Register("AUCTION_HOUSE_SHOW", "PUIMerchant", function()
+        PUIMerchant:SkinAuctionHouse()
+        PUIMerchant:CreateFlyoutDrawer()
         HookBrowseRows()
+        HookAuctionsTab()
         PUIMerchant:UpdateBrowsePrices()
-
-        if not scanBtn and AuctionFrameBrowse then
-            scanBtn = Widgets:CreateButton(AuctionFrameBrowse, "Scan AH", 74, 22, function()
-                PUIMerchant:StartScan()
-            end)
-            scanBtn:SetPoint("TOPRIGHT", AuctionFrameBrowse, "TOPRIGHT", -25, -42)
-            scanBtn:SetBackdropBorderColor(1.0, 0.84, 0.0, 1)
-
-            scanStatusText = AuctionFrameBrowse:CreateFontString(nil, "OVERLAY")
-            scanStatusText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
-            scanStatusText:SetPoint("RIGHT", scanBtn, "LEFT", -8, 0)
-            scanStatusText:SetTextColor(0.4, 0.8, 1.0)
-            scanStatusText:Hide()
-        end
     end)
 
     Events:Register("AUCTION_ITEM_LIST_UPDATE", "PUIMerchant", function()
-        if isScanning then
+        if PUIMerchant.scannerState and PUIMerchant.scannerState.isScanning then
             PUIMerchant:ProcessScanResults()
         else
+            PUIMerchant:SniffBrowsePage()
             PUIMerchant:UpdateBrowsePrices()
         end
     end)
 
-    -- 0.15s Asynchronous Query Dispatcher & Watchdog
-    Time:Every(0.15, function()
-        if not isScanning then return end
-
-        local now = GetTime()
-
-        -- Auto-abort if player closes AH mid-scan
-        if not AuctionFrame or not AuctionFrame:IsShown() then
+    Events:Register("AUCTION_HOUSE_CLOSED", "PUIMerchant", function()
+        if PUIMerchant.scannerState and PUIMerchant.scannerState.isScanning then
             PUIMerchant:StopScan()
-            return
         end
+    end)
 
-        -- Check cooldown to dispatch next page
-        if isWaitingForNextPage then
-            if CanSendAuctionQuery() then
-                isWaitingForNextPage = false
-                lastQueryTime = now
-                if scanStatusText then
-                    scanStatusText:SetText(string.format("Querying Page %d/%d (%d items)...", scanPage + 1, totalPages, totalAuctionsCataloged))
-                end
-                QueryAuctionItems("", nil, nil, 0, 0, 0, scanPage, 0, 0, 0)
-            end
-        else
-            -- Watchdog: detect dropped packets or stuck queries (> SCAN_TIMEOUT seconds)
-            if (now - lastQueryTime) > SCAN_TIMEOUT then
-                if pageRetries < maxRetries then
-                    pageRetries = pageRetries + 1
-                    lastQueryTime = now
-                    if CanSendAuctionQuery() then
-                        if scanStatusText then
-                            scanStatusText:SetText(string.format("Retrying Page %d/%d (attempt %d)...", scanPage + 1, totalPages, pageRetries))
-                        end
-                        QueryAuctionItems("", nil, nil, 0, 0, 0, scanPage, 0, 0, 0)
-                    else
-                        isWaitingForNextPage = true
-                    end
-                else
-                    PUIMerchant:FinishScan()
-                end
-            end
-        end
-    end, "PUIMerchant")
-
-    -- Register as PUITooltip Item Provider (Priority 20: runs after base vendor sell values)
+    -- Register as PUITooltip Item Provider (Priority 20: runs after vendor base values)
     local Tooltip = Primus.PUITooltip
     if Tooltip and Tooltip.RegisterItemProvider then
         Tooltip:RegisterItemProvider("PUIMerchant", 20, function(tt, data)
@@ -512,15 +373,13 @@ function PUIMerchant:OnEnable()
 end
 
 function PUIMerchant:OnDisable()
-    Time:CancelAll("PUIMerchant")
+    Time:CancelAll("PUIMerchantScanner")
+    Time:CancelAll("PUIMerchantCountdown")
     Events:UnregisterOwner("PUIMerchant")
     self:StopScan()
-    if scanBtn then scanBtn:Hide() end
-    if scanStatusText then scanStatusText:Hide() end
 
     local Tooltip = Primus.PUITooltip
     if Tooltip and Tooltip.UnregisterItemProvider then
         Tooltip:UnregisterItemProvider("PUIMerchant")
     end
 end
-
