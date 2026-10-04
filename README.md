@@ -342,7 +342,7 @@ graph TD
 ### ⚔️ Sprint 2: Tactical Combat & Group Assist Innovation
 1. **ActiveAssist Inter-Client Lockout Protocol (`Primus.Comm`):** Fine-tune `CLAIM:<PlayerName>:<ThreatTarget>` broadcast over addon comms to synchronize aggro claims across multiple raid members using PrimusUI.
 2. **PUIHud Triage Array Reassurance Flash:** Polish emergency visual feedback when MT health rebounds from critical levels.
-3. **PUIUnitFrames Raid Density Presets:** Add 40-man, 20-man, and 5-man quick-switch grid density presets in `/pui config`.
+3. **PUIUnitFrames Raid Density Presets:** Add 40-man, 20-man, 10-man, 5-man, and Auto-Adaptive quick-switch grid density presets in `/pui config`.
 
 ### 💰 Sprint 3: Economy, Professions & Social Polish
 1. **PUIAuctionHouse Integration:** Connect auction search and posting directly with `Primus.Items` and `PUISellValue` for automatic undercut calculations.

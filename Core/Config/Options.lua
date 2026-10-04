@@ -211,6 +211,65 @@ function Options:BuildDeclarativePanel(parent, flare)
                 curY = curY - 38
             end
 
+        elseif oType == "select" or oType == "dropdown" then
+            local label = panel:CreateFontString(nil, "OVERLAY")
+            label:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
+            label:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, curY)
+            label:SetText(opt.label or opt.key or "Setting")
+
+            local curVal = opt.get and opt.get() or opt.default or ""
+            local curText = tostring(curVal)
+            if opt.options then
+                local optCount = table.getn(opt.options)
+                for o = 1, optCount do
+                    if opt.options[o].value == curVal then
+                        curText = opt.options[o].text or opt.options[o].value
+                        break
+                    end
+                end
+            end
+
+            local selectBtn = Widgets:CreateButton(panel, curText .. " ▼", 220, 22)
+            selectBtn:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -4)
+            selectBtn.opt = opt
+            selectBtn:SetScript("OnClick", function()
+                if not this.opt or not this.opt.options then return end
+                local menuItems = {}
+                local currentV = this.opt.get and this.opt.get() or this.opt.default or ""
+                local optCount = table.getn(this.opt.options)
+                for idx = 1, optCount do
+                    local entry = this.opt.options[idx]
+                    local eVal = entry.value
+                    local eText = entry.text or entry.value
+                    local btnSelf = this
+                    local optSelf = this.opt
+                    table.insert(menuItems, {
+                        text = eText,
+                        checked = (eVal == currentV),
+                        onClick = function()
+                            btnSelf.text:SetText(eText .. " ▼")
+                            if optSelf.set then
+                                optSelf.set(eVal)
+                            end
+                        end,
+                    })
+                end
+                if Widgets and Widgets.ShowContextMenu then
+                    Widgets:ShowContextMenu(this, menuItems, 220)
+                end
+            end)
+
+            if opt.desc then
+                local desc = panel:CreateFontString(nil, "OVERLAY")
+                desc:SetFont(Media:Fetch("font", "Default"), 8, "")
+                desc:SetPoint("TOPLEFT", selectBtn, "BOTTOMLEFT", 0, -4)
+                desc:SetTextColor(0.65, 0.65, 0.65)
+                desc:SetText(opt.desc)
+                curY = curY - 56
+            else
+                curY = curY - 46
+            end
+
         elseif oType == "button" then
             local btn = Widgets:CreateButton(panel, opt.buttonText or opt.label or "Action", 140, 22)
             btn.opt = opt

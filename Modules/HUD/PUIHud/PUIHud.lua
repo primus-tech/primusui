@@ -198,6 +198,25 @@ function PUIHud:RegisterOptionsFlare()
                 end,
             },
             {
+                key = "triageSoundAlert",
+                label = "Triage Reassurance Sound Warning",
+                type = "checkbox",
+                default = true,
+                get = function() return hudDB:Get("triageSoundAlert", true) end,
+                set = function(val) hudDB:Set("triageSoundAlert", val) end,
+            },
+            {
+                key = "triageCriticalThreshold",
+                label = "Triage Critical Health Threshold (%)",
+                type = "slider",
+                min = 20,
+                max = 50,
+                step = 5,
+                default = 35,
+                get = function() return hudDB:Get("triageCriticalThreshold", 35) end,
+                set = function(val) hudDB:Set("triageCriticalThreshold", val) end,
+            },
+            {
                 key = "centerGap",
                 label = "Center HUD Gap (px)",
                 type = "slider",
@@ -269,15 +288,18 @@ function PUIHud:OnInitialize()
                     Primus.PUIAuras:UpdateAuras()
                 end
                 DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIHud]: Precision Combat HUD is now " .. (not cur and "ENABLED" or "DISABLED"), "69ccf0"))
+            elseif argParam == "testflash" then
+                PUIHud:FlashRebound(UnitName("player") or "Main Tank", 42, 68)
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIHud]: Simulated MT Reassurance Flash triggered.", "69ccf0"))
             elseif parts and parts[2] == "gap" and parts[3] then
                 local g = tonumber(parts[3]) or 120
                 hudDB:Set("centerGap", g)
                 DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIHud]: Center gap set to %d", g), "69ccf0"))
             else
                 DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PrimusUI PUIHud: Precision Combat HUD ===", "69ccf0"))
-                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("/pui hud [toggle | mover | gap <num>]", "ffbb33"))
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("/pui hud [toggle | mover | gap <num> | testflash]", "ffbb33"))
             end
-        end, "PUIHud Precision Combat HUD (/pui hud [toggle|mover|gap])")
+        end, "PUIHud Precision Combat HUD (/pui hud [toggle|mover|gap|testflash])")
     end
 end
 
@@ -474,6 +496,7 @@ function PUIHud:OnEnable()
     self:UpdateLeftActiveAssist()
     self:UpdateRightActiveAssist()
     self:UpdateTriageArray()
+    self:HookTriageCombatLog()
     self:UpdateAuras()
 
     if Primus.PUIAuras and Primus.PUIAuras.UpdateAuras then
@@ -484,6 +507,7 @@ end
 function PUIHud:OnDisable()
     Time:CancelAll("PUIHud")
     Events:UnregisterOwner("PUIHud")
+    Events:UnregisterOwner("PUITriage")
 
     if hudFrame then
         hudFrame:SetScript("OnUpdate", nil)

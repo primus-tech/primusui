@@ -254,11 +254,17 @@ function PUITactical:ClaimRescue()
 
     currentAlert.stage = 2
     isClaimedByMe = true
+    claimedByOther = nil
     claimExpiryTime = GetTime() + tacDB:Get("claimTimeout", 1.5)
 
     -- Broadcast Claim over Comm
     if Comm and Comm.Send then
-        Comm:Send("PRI_TAC", string.format("CLAIM:%s:%s:%s", UnitName("player"), currentAlert.mob, currentAlert.victim), "RAID")
+        Comm:Send("PRI_TAC", {
+            action = "CLAIM",
+            player = UnitName("player"),
+            mob    = currentAlert.mob or "Target",
+            victim = currentAlert.victim or UnitName("player")
+        }, "RAID")
     end
 
     Events:Fire("PRIMUS_TACTICAL_CLAIMED", currentAlert, UnitName("player"))
@@ -290,7 +296,12 @@ function PUITactical:ExecuteRescue()
 
     -- Broadcast Resolution over Comm
     if Comm and Comm.Send then
-        Comm:Send("PRI_TAC", string.format("RESOLVE:%s:%s:%s", UnitName("player"), currentAlert.mob, currentAlert.victim), "RAID")
+        Comm:Send("PRI_TAC", {
+            action = "RESOLVE",
+            player = UnitName("player"),
+            mob    = currentAlert.mob or "Target",
+            victim = currentAlert.victim or UnitName("player")
+        }, "RAID")
     end
 
     Events:Fire("PRIMUS_TACTICAL_RESOLVED", currentAlert, UnitName("player"))
@@ -409,14 +420,32 @@ function PUITactical:OnInitialize()
                 DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUITactical]: Threat reaction engine is now " .. (not cur and "ENABLED" or "DISABLED"), "69ccf0"))
             elseif argParam == "test" then
                 PUITactical:TriggerAlert("Core Hound", UnitName("player"), nil, true)
-                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUITactical]: Test alert triggered.", "69ccf0"))
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUITactical]: Test alert triggered on self. Click to Claim.", "69ccf0"))
+            elseif argParam == "claim" then
+                PUITactical:TriggerAlert("Ancient Core Hound", UnitName("player"), nil, true)
+                -- Simulate remote party claim
+                claimedByOther = "RaidTank1"
+                isClaimedByMe = false
+                if currentAlert then
+                    currentAlert.stage = 2
+                    claimExpiryTime = GetTime() + tacDB:Get("claimTimeout", 1.5)
+                    Events:Fire("PRIMUS_TACTICAL_CLAIMED", currentAlert, "RaidTank1")
+                end
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUITactical]: Simulated remote claim by RaidTank1 (Button locked).", "69ccf0"))
+            elseif argParam == "resolve" then
+                if currentAlert then
+                    currentAlert.stage = 3
+                    resolveHoldExpiry = GetTime() + tacDB:Get("resolveHold", 1.0)
+                    Events:Fire("PRIMUS_TACTICAL_RESOLVED", currentAlert, claimedByOther or UnitName("player"))
+                    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUITactical]: Alert resolved (Emerald Green hold).", "69ccf0"))
+                end
             else
                 DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PrimusUI PUITactical Reaction Engine ===", "69ccf0"))
                 DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("Status: ", "ffbb33") .. (tacDB:Get("enabled", true) and "|cff33ff33ACTIVE|r" or "|cffff4444DISABLED|r"))
                 DEFAULT_CHAT_FRAME:AddMessage("Provides 2-Click 'Claim & Execute' threat mitigation alerts.")
-                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("Commands: /pui tactical [toggle | test]", "ffd100"))
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("Commands: /pui tactical [toggle | test | claim | resolve]", "ffd100"))
             end
-        end, "PUITactical Reaction Engine (/pui tactical [toggle|test])")
+        end, "PUITactical Reaction Engine (/pui tactical [toggle|test|claim|resolve])")
 
         Console:RegisterSubCommand("cleanse", function()
             PUITactical:CleanseNext()
@@ -463,24 +492,40 @@ function PUITactical:OnEnable()
 
     -- 3. Inter-Client Comm Syncing
     if Comm and Comm.RegisterPrefix then
-        Comm:RegisterPrefix("PRI_TAC", function(sender, payload)
-            if not payload or sender == UnitName("player") then return end
-            local parts = Utils.Split(payload, ":")
-            local actionType = parts[1]
-            local player = parts[2]
-            local mob = parts[3]
-            local victim = parts[4]
+        Comm:RegisterPrefix("PRI_TAC", function(owner, subPrefix, data, sender, channel)
+            if not data or not data.action or sender == UnitName("player") then return end
+            local actionType = data.action
+            local player = data.player or sender
+            local mob = data.mob
+            local victim = data.victim
 
-            if actionType == "CLAIM" and currentAlert then
-                claimedByOther = player
-                currentAlert.stage = 2
-                Events:Fire("PRIMUS_TACTICAL_CLAIMED", currentAlert, player)
-            elseif actionType == "RESOLVE" and currentAlert then
-                currentAlert.stage = 3
-                resolveHoldExpiry = GetTime() + 1.0
-                Events:Fire("PRIMUS_TACTICAL_RESOLVED", currentAlert, player)
+            if actionType == "CLAIM" then
+                if currentAlert then
+                    -- If already claimed by player, apply tie breaker (lexicographical order)
+                    if isClaimedByMe then
+                        if player < UnitName("player") then
+                            isClaimedByMe = false
+                            claimedByOther = player
+                            currentAlert.stage = 2
+                            claimExpiryTime = GetTime() + tacDB:Get("claimTimeout", 1.5)
+                            Events:Fire("PRIMUS_TACTICAL_CLAIMED", currentAlert, player)
+                        end
+                    else
+                        claimedByOther = player
+                        isClaimedByMe = false
+                        currentAlert.stage = 2
+                        claimExpiryTime = GetTime() + tacDB:Get("claimTimeout", 1.5)
+                        Events:Fire("PRIMUS_TACTICAL_CLAIMED", currentAlert, player)
+                    end
+                end
+            elseif actionType == "RESOLVE" then
+                if currentAlert then
+                    currentAlert.stage = 3
+                    resolveHoldExpiry = GetTime() + tacDB:Get("resolveHold", 1.0)
+                    Events:Fire("PRIMUS_TACTICAL_RESOLVED", currentAlert, player)
+                end
             end
-        end)
+        end, "PUITactical")
     end
 
     -- 4. State Machine Expiration Ticker (0.05s)
@@ -499,5 +544,8 @@ end
 function PUITactical:OnDisable()
     Time:CancelAll("PUITactical")
     Events:UnregisterOwner("PUITactical")
+    if Comm and Comm.UnregisterOwner then
+        Comm:UnregisterOwner("PUITactical")
+    end
     self:DismissAlert()
 end

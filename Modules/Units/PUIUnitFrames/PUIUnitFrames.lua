@@ -57,8 +57,68 @@ local unitFramesDB = DB:RegisterNamespace("PUIUnitFrames", {
     showPet = true,
     showParty = true,
     showRaid = true,
+    raidDensity = "AUTO",
     hideBlizzard = true,
 })
+
+-- Raid Density Presets (40 / 20 / 10 / 5 / Auto)
+local RAID_PRESETS = {
+    ["40"] = {
+        cols = 5,
+        rows = 8,
+        btnW = 60,
+        btnH = 28,
+        spacingX = 4,
+        spacingY = 4,
+        showPower = false,
+        powerH = 0,
+        font = 8,
+        maxChars = 6,
+        name = "40-Man Compact",
+    },
+    ["20"] = {
+        cols = 4,
+        rows = 5,
+        btnW = 80,
+        btnH = 34,
+        spacingX = 5,
+        spacingY = 5,
+        showPower = true,
+        powerH = 4,
+        font = 9,
+        maxChars = 9,
+        name = "20-Man Balanced",
+    },
+    ["10"] = {
+        cols = 2,
+        rows = 5,
+        btnW = 100,
+        btnH = 38,
+        spacingX = 6,
+        spacingY = 6,
+        showPower = true,
+        powerH = 5,
+        font = 9,
+        maxChars = 12,
+        name = "10-Man Semi-Expanded",
+    },
+    ["5"] = {
+        cols = 1,
+        rows = 5,
+        btnW = 130,
+        btnH = 42,
+        spacingX = 6,
+        spacingY = 6,
+        showPower = true,
+        powerH = 6,
+        font = 10,
+        maxChars = 15,
+        name = "5-Man Expanded",
+    },
+    ["AUTO"] = {
+        name = "Auto-Adaptive",
+    },
+}
 
 -- Frame Handles
 local playerFrame = nil
@@ -331,8 +391,91 @@ function PUIUnitFrames:CreatePartyFrames()
 end
 
 -- =========================================================================
--- RAID GRID (5 Groups x 8 Members = 40 Units)
+-- RAID GRID (Dynamic Density: 40 / 20 / 10 / 5 / Auto)
 -- =========================================================================
+
+function PUIUnitFrames:ApplyRaidDensity(presetKey)
+    if not presetKey then
+        presetKey = unitFramesDB:Get("raidDensity", "AUTO")
+    end
+
+    local effectivePreset = presetKey
+    if presetKey == "AUTO" then
+        local numRaid = GetNumRaidMembers()
+        if numRaid == 0 or numRaid <= 5 then
+            effectivePreset = "5"
+        elseif numRaid <= 10 then
+            effectivePreset = "10"
+        elseif numRaid <= 20 then
+            effectivePreset = "20"
+        else
+            effectivePreset = "40"
+        end
+    end
+
+    local cfg = RAID_PRESETS[effectivePreset] or RAID_PRESETS["40"]
+    self.activeRaidPreset = effectivePreset
+
+    local cols = cfg.cols
+    local rows = cfg.rows
+    local btnW = cfg.btnW
+    local btnH = cfg.btnH
+    local spX = cfg.spacingX or 4
+    local spY = cfg.spacingY or 4
+    local showPower = cfg.showPower
+    local powerH = cfg.powerH or 0
+    local font = cfg.font or 8
+    local maxChars = cfg.maxChars or 6
+
+    local totalW = cols * (btnW + spX) + spX
+    local totalH = rows * (btnH + spY) + spY
+    if self.raidHeader then
+        self.raidHeader:SetWidth(totalW)
+        self.raidHeader:SetHeight(totalH)
+    end
+
+    for i = 1, 40 do
+        local btn = raidFrames[i]
+        if btn then
+            btn:SetWidth(btnW)
+            btn:SetHeight(btnH)
+            btn.maxChars = maxChars
+
+            local col = math.floor((i - 1) / rows)
+            local row = math.mod(i - 1, rows)
+            btn:ClearAllPoints()
+            btn:SetPoint("TOPLEFT", self.raidHeader, "TOPLEFT", col * (btnW + spX) + spX, -row * (btnH + spY) - spY)
+
+            local healthH = btnH - 4
+            if showPower and powerH > 0 then
+                healthH = btnH - 4 - powerH - 1
+                if btn.powerBar then
+                    btn.powerBar:SetWidth(btnW - 4)
+                    btn.powerBar:SetHeight(powerH)
+                    btn.powerBar:ClearAllPoints()
+                    btn.powerBar:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 2, 2)
+                    btn.powerBar:Show()
+                end
+            else
+                if btn.powerBar then btn.powerBar:Hide() end
+            end
+
+            if btn.healthBar then
+                btn.healthBar:SetWidth(btnW - 4)
+                btn.healthBar:SetHeight(healthH)
+                btn.healthBar:ClearAllPoints()
+                btn.healthBar:SetPoint("TOPLEFT", btn, "TOPLEFT", 2, -2)
+            end
+
+            if btn.nameText then
+                btn.nameText:SetFont(Media:Fetch("font", "Default"), font, "OUTLINE")
+            end
+            if btn.hpText then
+                btn.hpText:SetFont(Media:Fetch("font", "Default"), font, "OUTLINE")
+            end
+        end
+    end
+end
 
 function PUIUnitFrames:CreateRaidGrid()
     local raidHeader = CreateFrame("Frame", "Primus_RaidGrid", UIParent)
@@ -355,6 +498,12 @@ function PUIUnitFrames:CreateRaidGrid()
         health:SetPoint("TOPLEFT", btn, "TOPLEFT", 2, -2)
         health:SetStatusBarColor(0.2, 0.8, 0.2, 1.0)
         btn.healthBar = health
+
+        local power = Widgets:CreateStatusBar(btn, 54, 4, 0, 100)
+        power:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 2, 2)
+        power:SetStatusBarColor(0.2, 0.5, 0.9, 1.0)
+        power:Hide()
+        btn.powerBar = power
 
         local nameText = health:CreateFontString(nil, "OVERLAY")
         nameText:SetFont(Media:Fetch("font", "Default"), 8, "OUTLINE")
@@ -387,8 +536,19 @@ function PUIUnitFrames:CreateRaidGrid()
             self.healthBar:SetMinMaxValues(0, maxHP)
             self.healthBar:SetSmoothValue(curHP)
 
+            if self.powerBar and self.powerBar:IsShown() then
+                local curPower = UnitMana(self.unit) or 0
+                local maxPower = UnitManaMax(self.unit) or 1
+                local pType = UnitPowerType(self.unit)
+                self.powerBar:SetMinMaxValues(0, maxPower)
+                self.powerBar:SetValue(curPower)
+                local pr, pg, pb = Utils.GetPowerColor(pType)
+                self.powerBar:SetStatusBarColor(pr, pg, pb, 1.0)
+            end
+
             local name = UnitName(self.unit) or ""
-            self.nameText:SetText(string.sub(name, 1, 6))
+            local maxChars = self.maxChars or 6
+            self.nameText:SetText(string.sub(name, 1, maxChars))
 
             if UnitIsDead(self.unit) then
                 self.hpText:SetText("DEAD")
@@ -449,18 +609,16 @@ function PUIUnitFrames:CreateRaidGrid()
             end
         end
 
-        -- Layout in 5 columns x 8 rows
-        local col = math.floor((i - 1) / 8)
-        local row = math.mod(i - 1, 8)
-        btn:SetPoint("TOPLEFT", raidHeader, "TOPLEFT", col * 64 + 4, -row * 36 - 4)
         raidFrames[i] = btn
     end
 
     local mover = PUIMover or Primus.PUIMover
     if mover and mover.Register then
-        mover:Register(raidHeader, "RaidGrid", "Compact 40-Man Raid Grid", "UNITS")
+        mover:Register(raidHeader, "RaidGrid", "Raid Grid", "UNITS")
     end
     PUIUnitFrames.raidHeader = raidHeader
+
+    self:ApplyRaidDensity()
 end
 
 -- Update All Units Function
@@ -477,11 +635,17 @@ function PUIUnitFrames:UpdateAll()
     end
 
     local numRaid = GetNumRaidMembers()
+    if unitFramesDB:Get("raidDensity", "AUTO") == "AUTO" then
+        self:ApplyRaidDensity("AUTO")
+    end
+
     if numRaid > 0 and self.raidHeader and unitFramesDB:Get("showRaid", true) then
         self.raidHeader:Show()
         for i = 1, 40 do
             if raidFrames[i] then raidFrames[i]:Update() end
         end
+    elseif self.testRaidMode and self.raidHeader then
+        self.raidHeader:Show()
     elseif self.raidHeader then
         self.raidHeader:Hide()
     end
@@ -545,12 +709,31 @@ function PUIUnitFrames:RegisterOptionsFlare()
             },
             {
                 key = "showRaid",
-                label = "Show 40-Man Compact Raid Grid",
+                label = "Show Compact Raid Grid",
                 type = "checkbox",
                 default = true,
                 get = function() return unitFramesDB:Get("showRaid", true) end,
                 set = function(val)
                     unitFramesDB:Set("showRaid", val)
+                    PUIUnitFrames:UpdateAll()
+                end,
+            },
+            {
+                key = "raidDensity",
+                label = "Raid Grid Density Preset",
+                type = "select",
+                options = {
+                    { value = "AUTO", text = "Auto-Adaptive (Dynamic Size)" },
+                    { value = "40",   text = "40-Man Compact (5x8 Grid)" },
+                    { value = "20",   text = "20-Man Balanced (4x5 Grid)" },
+                    { value = "10",   text = "10-Man Semi-Expanded (2x5 Grid)" },
+                    { value = "5",    text = "5-Man Expanded (1x5 Grid)" },
+                },
+                default = "AUTO",
+                get = function() return unitFramesDB:Get("raidDensity", "AUTO") end,
+                set = function(val)
+                    unitFramesDB:Set("raidDensity", val)
+                    PUIUnitFrames:ApplyRaidDensity(val)
                     PUIUnitFrames:UpdateAll()
                 end,
             },
@@ -580,6 +763,52 @@ function PUIUnitFrames:OnInitialize()
             local mover = PUIMover or Primus.PUIMover
             if mover and mover.Unlock then mover:Unlock("UNITS") end
         end, "Unit Frames management (/pui unitframes)")
+
+        Primus.Console:RegisterSubCommand("raid", function(argParam, parts)
+            argParam = Utils.Trim(argParam or "")
+            if parts and parts[2] == "preset" and parts[3] then
+                local p = string.upper(parts[3])
+                if p == "40" or p == "20" or p == "10" or p == "5" or p == "AUTO" then
+                    unitFramesDB:Set("raidDensity", p)
+                    PUIUnitFrames:ApplyRaidDensity(p)
+                    PUIUnitFrames:UpdateAll()
+                    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIUnitFrames]: Raid density preset set to %s", p), "69ccf0"))
+                else
+                    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIUnitFrames]: Invalid preset. Options: 40, 20, 10, 5, auto", "ff4444"))
+                end
+            elseif argParam == "test" then
+                PUIUnitFrames.testRaidMode = not PUIUnitFrames.testRaidMode
+                if PUIUnitFrames.testRaidMode then
+                    if PUIUnitFrames.raidHeader then
+                        PUIUnitFrames.raidHeader:Show()
+                        for i = 1, 40 do
+                            local btn = raidFrames[i]
+                            if btn then
+                                btn:Show()
+                                btn.healthBar:SetMinMaxValues(0, 100)
+                                btn.healthBar:SetValue(80)
+                                btn.nameText:SetText("Raid" .. i)
+                                btn.hpText:SetText("100%")
+                                btn.healthBar:SetStatusBarColor(0.2, 0.7, 0.3, 1.0)
+                                if btn.powerBar and btn.powerBar:IsShown() then
+                                    btn.powerBar:SetMinMaxValues(0, 100)
+                                    btn.powerBar:SetValue(70)
+                                    btn.powerBar:SetStatusBarColor(0.2, 0.5, 0.9, 1.0)
+                                end
+                            end
+                        end
+                    end
+                    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIUnitFrames]: Test Raid Grid enabled.", "69ccf0"))
+                else
+                    PUIUnitFrames:UpdateAll()
+                    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIUnitFrames]: Test Raid Grid disabled.", "69ccf0"))
+                end
+            else
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PrimusUI Raid Frames ===", "69ccf0"))
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("/pui raid preset <40|20|10|5|auto>", "ffbb33"))
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("/pui raid test (toggle visual grid test)", "ffbb33"))
+            end
+        end, "Raid Frames & Density Presets (/pui raid [preset|test])")
 
         if Primus.Console.RegisterAlias then
             Primus.Console:RegisterAlias("uf", "unitframes")

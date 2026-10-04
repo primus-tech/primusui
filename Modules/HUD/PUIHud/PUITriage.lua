@@ -1,10 +1,11 @@
 --[[
-    PrimusUI Module: PUIHud - Central Triage Array & Heal Flash
+    PrimusUI Module: PUIHud - Central Triage Array & Reassurance Flash
     Target: Vanilla WoW 1.12.1 (Lua 5.0.2)
     
     Provides tactical situational awareness:
     - Top Pins: Real-time MT1, MT2, MA vitals and 1-click targeting
-    - Heal Flash: Emerald green peripheral pulse and toast on incoming heals
+    - Heal Flash & Rebound Engine: Emerald green peripheral pulse and toast
+      when MT health rebounds from critical levels or receives big direct heals.
 --]]
 
 local _G = getglobals and getglobals() or _G or getfenv(0)
@@ -19,10 +20,14 @@ local Media   = Primus.Media
 local Utils   = Primus.Utils
 local DB      = Primus.DB
 local Anim    = Primus.Anim
+local Events  = Primus.Events
 
 local triageContainer = nil
 local triageTopPins   = {}
 local healFlashFrame  = nil
+
+-- Rolling MT Health State Table: [unit] = { prevHP, prevPct, isCritical, lastCritTime, name }
+local tankHealthState = {}
 
 -- =========================================================================
 -- TRIAGE ARRAY BUILDER
@@ -72,17 +77,17 @@ function PUIHud:BuildTriage(parent)
 
     -- 3. Reassurance Emerald Green Flash Frame
     healFlashFrame = CreateFrame("Frame", "Primus_PUIHud_HealFlash", parent)
-    healFlashFrame:SetWidth(gap + 80)
-    healFlashFrame:SetHeight(26)
-    healFlashFrame:SetPoint("CENTER", parent, "CENTER", 0, 20)
+    healFlashFrame:SetWidth(gap + 120)
+    healFlashFrame:SetHeight(28)
+    healFlashFrame:SetPoint("CENTER", parent, "CENTER", 0, 24)
     healFlashFrame:SetBackdrop(Media:Fetch("border", "1Pixel"))
-    healFlashFrame:SetBackdropColor(0.10, 0.75, 0.25, 0.85)
-    healFlashFrame:SetBackdropBorderColor(0.30, 1.00, 0.40, 1.0)
+    healFlashFrame:SetBackdropColor(0.05, 0.20, 0.08, 0.85)
+    healFlashFrame:SetBackdropBorderColor(0.20, 1.00, 0.40, 1.0)
 
     local hfText = healFlashFrame:CreateFontString(nil, "OVERLAY")
     hfText:SetFont(Media:Fetch("font", "Default"), 9, "OUTLINE")
     hfText:SetPoint("CENTER", healFlashFrame, "CENTER", 0, 0)
-    hfText:SetTextColor(1, 1, 1)
+    hfText:SetTextColor(0.4, 1.0, 0.5)
     healFlashFrame.text = hfText
     healFlashFrame:Hide()
 
@@ -92,7 +97,46 @@ function PUIHud:BuildTriage(parent)
 end
 
 -- =========================================================================
--- TRIAGE ARRAY UPDATES
+-- HEAL REASSURANCE FLASH & REBOUND PULSE
+-- =========================================================================
+
+function PUIHud:FlashRebound(tankName, deltaPct, curPct)
+    if not healFlashFrame then return end
+    local hudDB = DB:GetNamespace("PUIHud")
+    if hudDB and not hudDB:Get("showTriageArray", true) then return end
+
+    healFlashFrame.text:SetText(string.format("|cff33ff33✨ MT STABILIZED:|r %s (+%d%% |cff88ff88%d%%|r)", tankName or "Main Tank", deltaPct or 0, curPct or 100))
+    healFlashFrame:SetBackdropBorderColor(0.20, 1.00, 0.40, 1.0)
+    healFlashFrame:SetAlpha(1.0)
+    healFlashFrame:Show()
+
+    if hudDB and hudDB:Get("triageSoundAlert", true) then
+        PlaySound("RaidWarning")
+    end
+
+    if Anim and Anim.Fade then
+        Anim:Fade(healFlashFrame, 1.5, 1.0, 0.0)
+    end
+end
+
+function PUIHud:FlashIncomingHeal(healerName, spellName, victimName, amount)
+    if not healFlashFrame then return end
+    local hudDB = DB:GetNamespace("PUIHud")
+    if hudDB and not hudDB:Get("showTriageArray", true) then return end
+
+    local amtStr = amount and (" (+" .. amount .. ")") or ""
+    healFlashFrame.text:SetText(string.format("|cff33ff33✨ %s:|r %s on %s%s", healerName or "Healer", spellName or "Heal", victimName or "Tank", amtStr))
+    healFlashFrame:SetBackdropBorderColor(0.30, 0.85, 1.00, 1.0)
+    healFlashFrame:SetAlpha(1.0)
+    healFlashFrame:Show()
+
+    if Anim and Anim.Fade then
+        Anim:Fade(healFlashFrame, 1.2, 1.0, 0.0)
+    end
+end
+
+-- =========================================================================
+-- TRIAGE ARRAY UPDATES & HEALTH REBOUND DETECTION
 -- =========================================================================
 
 function PUIHud:UpdateTriageArray()
@@ -104,6 +148,7 @@ function PUIHud:UpdateTriageArray()
         triageContainer:Show()
     end
 
+    local critThreshold = hudDB and hudDB:Get("triageCriticalThreshold", 35) or 35
     local pinIndex = 0
     local raidMembers = GetNumRaidMembers()
 
@@ -121,6 +166,25 @@ function PUIHud:UpdateTriageArray()
                     pin.bar:SetValue(curHP)
                     pin.text:SetText(string.format("%s %d%%", string.sub(rName or "Tank", 1, 8), pctHP))
                     pin:Show()
+
+                    -- Health Rebound State Machine
+                    local state = tankHealthState[unit]
+                    if not state then
+                        state = { prevHP = curHP, prevPct = pctHP, isCritical = false, lastCritTime = 0, name = rName }
+                        tankHealthState[unit] = state
+                    end
+
+                    if pctHP > 0 and pctHP <= critThreshold then
+                        state.isCritical = true
+                        state.lastCritTime = GetTime()
+                    elseif state.isCritical and (pctHP >= 55 or (pctHP - state.prevPct) >= 20) then
+                        state.isCritical = false
+                        PUIHud:FlashRebound(rName, pctHP - state.prevPct, pctHP)
+                    end
+
+                    state.prevHP = curHP
+                    state.prevPct = pctHP
+                    state.name = rName
                 end
             end
             if pinIndex >= 3 then break end
@@ -138,6 +202,25 @@ function PUIHud:UpdateTriageArray()
                 pin.bar:SetValue(curHP)
                 pin.text:SetText(string.format("%s %d%%", string.sub(pName, 1, 8), pctHP))
                 pin:Show()
+
+                -- Health Rebound State Machine
+                local state = tankHealthState[unit]
+                if not state then
+                    state = { prevHP = curHP, prevPct = pctHP, isCritical = false, lastCritTime = 0, name = pName }
+                    tankHealthState[unit] = state
+                end
+
+                if pctHP > 0 and pctHP <= critThreshold then
+                    state.isCritical = true
+                    state.lastCritTime = GetTime()
+                elseif state.isCritical and (pctHP >= 55 or (pctHP - state.prevPct) >= 20) then
+                    state.isCritical = false
+                    PUIHud:FlashRebound(pName, pctHP - state.prevPct, pctHP)
+                end
+
+                state.prevHP = curHP
+                state.prevPct = pctHP
+                state.name = pName
             end
             if pinIndex >= 3 then break end
         end
@@ -149,19 +232,39 @@ function PUIHud:UpdateTriageArray()
 end
 
 -- =========================================================================
--- HEAL REASSURANCE FLASH
+-- COMBAT LOG HEAL SNIFFER HOOK
 -- =========================================================================
 
-function PUIHud:FlashIncomingHeal(healerName, spellName)
-    if not healFlashFrame then return end
-    healFlashFrame.text:SetText(string.format("|cff33ff33✨ Incoming Heal:|r %s from %s", spellName or "Heal", healerName or "Healer"))
-    healFlashFrame:SetAlpha(1.0)
-    healFlashFrame:Show()
+function PUIHud:HookTriageCombatLog()
+    local healEvents = {
+        "CHAT_MSG_SPELL_PARTY_BUFF",
+        "CHAT_MSG_SPELL_FRIENDLYPLAYER_BUFF",
+        "CHAT_MSG_SPELL_HOSTILEPLAYER_BUFF",
+        "CHAT_MSG_SPELL_PERIODIC_PARTY_BUFFS",
+        "CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_BUFFS",
+    }
+    local count = table.getn(healEvents)
+    for k = 1, count do
+        Events:Register(healEvents[k], "PUITriage", function(owner, event, msg)
+            if not msg then return end
+            local _, _, healer, spell, victim, amount = string.find(msg, "(.+)'s (.+) heals (.+) for (%d+)%.")
+            if not healer then
+                _, _, healer, spell, victim, amount = string.find(msg, "(.+)'s (.+) critically heals (.+) for (%d+)%.")
+            end
+            if not healer then
+                _, _, victim, amount, healer, spell = string.find(msg, "(.+) gains (%d+) health from (.+)'s (.+)%.")
+            end
 
-    if Anim and Anim.Fade then
-        Anim:Fade(healFlashFrame, 1.2, 1.0, 0.0)
-    else
-        -- Fallback hide
-        healFlashFrame:Hide()
+            if victim and healer and spell then
+                -- Check if victim is one of our monitored MT units
+                for u, state in pairs(tankHealthState) do
+                    if state.name == victim and state.isCritical then
+                        state.isCritical = false
+                        PUIHud:FlashRebound(victim, 25, 60)
+                        break
+                    end
+                end
+            end
+        end)
     end
 end

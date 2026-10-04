@@ -70,6 +70,23 @@ function Comm:RegisterPrefix(subPrefix, callback, owner)
     registeredPrefixes[subPrefix] = { callback = callback, owner = owner }
 end
 
+-- Unregister a listener for a sub-prefix
+function Comm:UnregisterPrefix(subPrefix)
+    if not subPrefix then return end
+    subPrefix = string.upper(subPrefix)
+    registeredPrefixes[subPrefix] = nil
+end
+
+-- Unregister all listeners owned by a specific module
+function Comm:UnregisterOwner(owner)
+    if not owner then return end
+    for subPrefix, handler in pairs(registeredPrefixes) do
+        if handler.owner == owner then
+            registeredPrefixes[subPrefix] = nil
+        end
+    end
+end
+
 -- Listen for incoming CHAT_MSG_ADDON
 Events:Register("CHAT_MSG_ADDON", Comm, function(owner, event, prefix, message, channel, sender)
     if prefix ~= commPrefix or sender == UnitName("player") then return end
