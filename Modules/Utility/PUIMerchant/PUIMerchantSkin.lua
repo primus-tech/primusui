@@ -24,6 +24,8 @@ local Items   = Primus.Items
 local flyoutFrame = nil
 local flyoutToggleBtn = nil
 local scanActionButton = nil
+local stopScanBtn = nil
+local resetScanBtn = nil
 local scanStatusLabel = nil
 local scanCountdownLabel = nil
 local scanProgressBar = nil
@@ -266,12 +268,20 @@ function PUIMerchant:CreateFlyoutDrawer()
     scanActionButton:SetPoint("TOPLEFT", flyoutFrame, "TOPLEFT", 9, -54)
     scanActionButton:SetBackdropBorderColor(1.0, 0.84, 0.0, 1.0)
 
-    -- Stop Button (Small)
-    local stopScanBtn = Widgets:CreateButton(flyoutFrame, "Stop", 176, 18, function()
+    -- Stop Scan Button (Left)
+    stopScanBtn = Widgets:CreateButton(flyoutFrame, "Stop", 86, 18, function()
         PUIMerchant:StopScan()
     end)
     stopScanBtn:SetPoint("TOPLEFT", flyoutFrame, "TOPLEFT", 9, -82)
     stopScanBtn:SetBackdropBorderColor(0.8, 0.2, 0.2, 0.8)
+
+    -- Start Fresh / New Scan Button (Right)
+    resetScanBtn = Widgets:CreateButton(flyoutFrame, "New Scan", 86, 18, function()
+        PUIMerchant:ClearScanCheckpoint()
+        PUIMerchant:StartScan(0, true)
+    end)
+    resetScanBtn:SetPoint("LEFT", stopScanBtn, "RIGHT", 4, 0)
+    resetScanBtn:SetBackdropBorderColor(0.20, 0.75, 1.0, 0.8)
 
     -- Progress Bar
     scanProgressBar = CreateFrame("StatusBar", nil, flyoutFrame)
@@ -684,11 +694,56 @@ function PUIMerchant:UpdateFlyoutScannerUI()
         end
         scanProgressBar:SetValue(pct)
         scanStatusLabel:SetText(string.format("Page %d/%d (%d items • %d%%)", state.scanPage, state.totalPages, state.totalCataloged, pct))
+
+        if stopScanBtn then
+            stopScanBtn:SetWidth(176)
+            stopScanBtn:SetText("Stop Scan")
+            stopScanBtn:SetScript("OnClick", function()
+                PUIMerchant:StopScan()
+            end)
+            stopScanBtn:Show()
+        end
+        if resetScanBtn then resetScanBtn:Hide() end
     else
-        scanActionButton:SetText("Scan AH (10s)")
-        scanActionButton:SetBackdropBorderColor(1.0, 0.84, 0.0, 1.0)
-        scanCountdownLabel:SetText("")
-        scanStatusLabel:SetText(state.statusText or "Ready to scan")
+        local cp = PUIMerchant.GetScanCheckpoint and PUIMerchant:GetScanCheckpoint()
+        if cp and cp.page and cp.page > 0 then
+            local resumePage = math.max(1, cp.page - 1)
+            scanActionButton:SetText(string.format("Resume (p.%d)", resumePage))
+            scanActionButton:SetBackdropBorderColor(0.20, 0.85, 0.35, 1.0)
+            scanCountdownLabel:SetText("|cff1eff00[Checkpoint Available]|r")
+            scanStatusLabel:SetText(string.format("Saved: Page %d/%d (%s)", cp.page, cp.totalPages or 1, PUIMerchant:GetScopeName(cp.scope or 0)))
+
+            if stopScanBtn then
+                stopScanBtn:SetWidth(86)
+                stopScanBtn:SetText("Clear CP")
+                stopScanBtn:SetScript("OnClick", function()
+                    PUIMerchant:ClearScanCheckpoint()
+                    PUIMerchant:UpdateFlyoutScannerUI()
+                    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: Scan checkpoint cleared.", "ffbb33"))
+                end)
+                stopScanBtn:Show()
+            end
+            if resetScanBtn then
+                resetScanBtn:SetWidth(86)
+                resetScanBtn:SetText("New Scan")
+                resetScanBtn:Show()
+            end
+        else
+            scanActionButton:SetText("Scan AH (10s)")
+            scanActionButton:SetBackdropBorderColor(1.0, 0.84, 0.0, 1.0)
+            scanCountdownLabel:SetText("")
+            scanStatusLabel:SetText(state.statusText or "Ready to scan")
+
+            if stopScanBtn then
+                stopScanBtn:SetWidth(176)
+                stopScanBtn:SetText("Stop")
+                stopScanBtn:SetScript("OnClick", function()
+                    PUIMerchant:StopScan()
+                end)
+                stopScanBtn:Show()
+            end
+            if resetScanBtn then resetScanBtn:Hide() end
+        end
         scanProgressBar:SetValue(0)
     end
 end

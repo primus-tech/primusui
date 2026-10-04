@@ -99,12 +99,65 @@ local function UpdateScannerState(statusMsg)
     end
 end
 
--- =========================================================================
--- SCANNER CONTROL INTERFACE
--- =========================================================================
+-- Get Category Scope Display Name
+function PUIMerchant:GetScopeName(scope)
+    scope = tonumber(scope) or 0
+    if scope == 6 then return "Trade Goods"
+    elseif scope == 4 then return "Consumables"
+    elseif scope == 1 then return "Weapons"
+    elseif scope == 2 then return "Armor"
+    else return "All Categories" end
+end
 
--- Start Full or Scoped AH Scan
-function PUIMerchant:StartScan(scopeCategory)
+-- Retrieve Active Checkpoint (Valid for current Realm & AH Faction within 12 hours)
+function PUIMerchant:GetScanCheckpoint()
+    if not self.db or not self.db.data then return nil end
+    local cp = self.db.data.scanCheckpoint
+    if not cp or not cp.page or cp.page <= 0 then return nil end
+
+    local realm = GetRealmName() or "Default"
+    local ahType = self:GetCurrentAHType()
+    if cp.realm ~= realm or cp.ahType ~= ahType then
+        return nil
+    end
+
+    local now = Time:GetServerTimestamp()
+    -- Checkpoints expire after 12 hours (43,200s)
+    if (now - (cp.timestamp or 0)) > 43200 then
+        self.db.data.scanCheckpoint = nil
+        return nil
+    end
+
+    return cp
+end
+
+-- Save Active Scan Progress to SavedVariables
+function PUIMerchant:SaveScanCheckpoint()
+    if not self.db or not self.db.data then return end
+    if scanPage <= 0 then return end
+
+    local realm = GetRealmName() or "Default"
+    local ahType = self:GetCurrentAHType()
+    self.db.data.scanCheckpoint = {
+        realm = realm,
+        ahType = ahType,
+        page = scanPage,
+        totalPages = totalPages,
+        scope = currentScope or 0,
+        totalCataloged = totalAuctionsCataloged or 0,
+        timestamp = Time:GetServerTimestamp(),
+    }
+end
+
+-- Clear Saved Checkpoint on Full Completion or Fresh Reset
+function PUIMerchant:ClearScanCheckpoint()
+    if self.db and self.db.data then
+        self.db.data.scanCheckpoint = nil
+    end
+end
+
+-- Start, Resume, or Fresh Scan
+function PUIMerchant:StartScan(scopeCategory, forceFresh)
     if not AuctionFrame or not AuctionFrame:IsShown() then
         DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: Open the Auction House to run an AH scan.", "ffbb33"))
         return
@@ -119,33 +172,58 @@ function PUIMerchant:StartScan(scopeCategory)
         return
     end
 
-    currentScope = scopeCategory or 0
-    isScanning = true
-    isPaused = false
-    scanPage = 0
-    totalPages = 1
-    totalAuctionsCataloged = 0
-    pageRetries = 0
-
     local ahType = self:GetCurrentAHType()
-    local scopeName = "All Categories"
-    if currentScope == 6 then scopeName = "Trade Goods"
-    elseif currentScope == 4 then scopeName = "Consumables"
-    elseif currentScope == 1 then scopeName = "Weapons"
-    elseif currentScope == 2 then scopeName = "Armor" end
+    local cp = (not forceFresh) and self:GetScanCheckpoint() or nil
 
-    lastQueryTime = GetTime()
-    pageCooldownEnd = lastQueryTime + PAGE_COOLDOWN
+    if cp and cp.page and cp.page > 0 then
+        -- Resume from checkpoint with a 2-page safety overlap rewind
+        local rewindPage = math.max(0, cp.page - 2)
+        scanPage = rewindPage
+        currentScope = cp.scope or scopeCategory or 0
+        totalPages = cp.totalPages or 1
+        totalAuctionsCataloged = cp.totalCataloged or 0
+        pageRetries = 0
+        isScanning = true
+        isPaused = false
 
-    if CanSendAuctionQuery() then
-        isWaitingForNextPage = false
-        UpdateScannerState(string.format("Requesting Page 1 (%s - %s)...", scopeName, ahType))
-        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Starting 10s-Paced Scan [%s AH - %s]...", ahType, scopeName), "69ccf0"))
-        QueryAuctionItems("", 0, 0, 0, (currentScope and currentScope > 0) and currentScope or 0, 0, 0, 0, 0)
+        lastQueryTime = GetTime()
+        pageCooldownEnd = lastQueryTime + PAGE_COOLDOWN
+
+        local scopeName = self:GetScopeName(currentScope)
+        if CanSendAuctionQuery() then
+            isWaitingForNextPage = false
+            UpdateScannerState(string.format("Resuming at Page %d/%d (%s)...", scanPage + 1, totalPages, scopeName))
+            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Resuming Scan at Page %d/%d (2-page safety rewind) [%s AH - %s]...", scanPage + 1, totalPages, ahType, scopeName), "69ccf0"))
+            QueryAuctionItems("", 0, 0, 0, (currentScope and currentScope > 0) and currentScope or 0, 0, scanPage, 0, 0)
+        else
+            isWaitingForNextPage = true
+            UpdateScannerState(string.format("Queued Resume at Page %d/%d (Cooldown)...", scanPage + 1, totalPages))
+            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Queued resume at page %d as soon as server cooldown clears...", scanPage + 1), "ffbb33"))
+        end
     else
-        isWaitingForNextPage = true
-        UpdateScannerState(string.format("Queueing Scan [%s AH] (Waiting on server cooldown)...", ahType))
-        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH query busy. Queued page 1 to send as soon as cooldown clears...", ahType), "ffbb33"))
+        self:ClearScanCheckpoint()
+        currentScope = scopeCategory or 0
+        isScanning = true
+        isPaused = false
+        scanPage = 0
+        totalPages = 1
+        totalAuctionsCataloged = 0
+        pageRetries = 0
+
+        lastQueryTime = GetTime()
+        pageCooldownEnd = lastQueryTime + PAGE_COOLDOWN
+
+        local scopeName = self:GetScopeName(currentScope)
+        if CanSendAuctionQuery() then
+            isWaitingForNextPage = false
+            UpdateScannerState(string.format("Requesting Page 1 (%s - %s)...", scopeName, ahType))
+            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: Starting 10s-Paced Scan [%s AH - %s]...", ahType, scopeName), "69ccf0"))
+            QueryAuctionItems("", 0, 0, 0, (currentScope and currentScope > 0) and currentScope or 0, 0, 0, 0, 0)
+        else
+            isWaitingForNextPage = true
+            UpdateScannerState(string.format("Queueing Scan [%s AH] (Waiting on server cooldown)...", ahType))
+            DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH query busy. Queued page 1 to send as soon as cooldown clears...", ahType), "ffbb33"))
+        end
     end
 end
 
@@ -153,8 +231,9 @@ end
 function PUIMerchant:PauseScan()
     if not isScanning or isPaused then return end
     isPaused = true
+    self:SaveScanCheckpoint()
     UpdateScannerState("Scan Paused")
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: AH scan paused. Click Resume in the flyout to continue.", "ffbb33"))
+    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: AH scan paused. Checkpoint saved. Click Resume to continue.", "ffbb33"))
 end
 
 -- Resume Paused Scan
@@ -175,14 +254,16 @@ function PUIMerchant:StopScan()
     isPaused = false
     isWaitingForNextPage = false
 
+    self:SaveScanCheckpoint()
+
     local realm = GetRealmName() or "Default"
     local ahType = self:GetCurrentAHType()
     local realmData = self:GetRealmPriceData(realm, ahType)
     realmData.lastScan = Time:GetServerTimestamp()
     realmData.totalListings = totalAuctionsCataloged
 
-    UpdateScannerState(string.format("Stopped (%d cataloged)", totalAuctionsCataloged))
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH scan stopped. %d listings cataloged.", totalAuctionsCataloged), "ffbb33"))
+    UpdateScannerState(string.format("Stopped (Page %d/%d saved)", scanPage, totalPages))
+    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH scan stopped at page %d/%d. %d listings cataloged. Checkpoint saved.", scanPage, totalPages, totalAuctionsCataloged), "ffbb33"))
 end
 
 -- Process Returned Auction Batch (Streaming Ingestion - Instant per-page processing)
@@ -240,6 +321,7 @@ function PUIMerchant:ProcessScanResults()
 
     scanPage = scanPage + 1
     pageRetries = 0
+    self:SaveScanCheckpoint()
 
     if scanPage >= totalPages or (numBatchAuctions == 0 and scanPage > 1) then
         self:FinishScan()
@@ -256,6 +338,8 @@ function PUIMerchant:FinishScan()
     isScanning = false
     isPaused = false
     isWaitingForNextPage = false
+
+    self:ClearScanCheckpoint()
 
     local realm = GetRealmName() or "Default"
     local ahType = self:GetCurrentAHType()
