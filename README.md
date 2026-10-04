@@ -347,15 +347,24 @@ graph TD
     SPRINT 3 --> SPRINT 4
 ```
 
-### ⚔️ Sprint 2: Tactical Combat & Group Assist Innovation
-1. **ActiveAssist Inter-Client Lockout Protocol (`Primus.Comm`):** Fine-tune `CLAIM:<PlayerName>:<ThreatTarget>` broadcast over addon comms to synchronize aggro claims across multiple raid members using PrimusUI.
-2. **PUIHud Triage Array Reassurance Flash:** Polish emergency visual feedback when MT health rebounds from critical levels.
-3. **PUIUnitFrames Raid Density Presets:** Add 40-man, 20-man, 10-man, 5-man, and Auto-Adaptive quick-switch grid density presets in `/pui config`.
+### ⚔️ Sprint 2: Tactical Combat & Assist Innovation (Completed)
+1. **ActiveAssist Inter-Client Lockout Protocol (`Primus.Comm`):** Multi-client `CLAIM:<PlayerName>:<ThreatTarget>` broadcast synchronizing threat claims across raid members.
+2. **PUIHud Triage Array Reassurance Flash:** Emergency visual feedback when MT health rebounds from critical levels.
+3. **PUIUnitFrames Raid Density Presets:** 40-man, 20-man, 10-man, 5-man, and Auto-Adaptive grid density layouts in `/pui config`.
+4. **PUIMerchant 15s Patient AH Scanner & Quantile Engine:** Server-safe 15s query loop, live 1s countdown, 14-day Box-Plot bar graphs, offline market explorer (`/pui market`), and 1-click seller assistance.
 
-### 💰 Sprint 3: Economy, Professions & Social Polish
-1. **PUIAuctionHouse Integration:** Connect auction search and posting directly with `Primus.Items` and `PUISellValue` for automatic undercut calculations.
-2. **Crafting & TradeSkill Assistant (`PUIProfession`):** Provide reagent inventory availability badges and total recipe material cost summaries.
-3. **Tabletop & Tavern Expansion:** Add interactive tavern games (e.g. Tavern Chess / Dice duels) inside `PUIDice.lua`.
+### 🔮 Sprint 3: Unified Minimap Orbit Command Hub & Economy Expansion
+1. **Unified Minimap Orbit Command Hub (`PUIMinimapOrbit` & `PUISideDock`):**
+   - **Retire Floating RP Tray (`PUITray`):** Absorb all 12 floating RP actions directly into the Minimap Orbit System to eliminate screen clutter.
+   - **Level-1 Arc/Radial Category Flyout:** Expanding outward from `Primus_MinimapOrbitBtn` on the Minimap Side Dock into 6 Core Domain Nodes: 🎭 *Roleplay & Persona*, 💰 *Economy & Valuation*, ⚔️ *Combat & Tactical*, 🗺️ *World & Quests*, 🛠️ *Professions & Gathering*, 🧩 *3rd-Party Addon Bag*, and ⚙️ *System & Profiles*.
+   - **Level-2 Dark Glass Dropdowns:** Dynamic module registration pipeline with live badge pings (threat alerts, unread RP letters, active sniping deals, and cooldown timers).
+2. **PUIMerchant 3-Way Economy Partitioning (Faction vs Neutral AH):**
+   - Autonomous detection of Alliance Capital, Horde Capital, and Steamwheedle Neutral (Booty Bay, Gadgetzan, Everlook) auction houses.
+   - Dedicated Cross-Faction Arbitrage Sniper tab calculating profit margins after the Goblin 15% cut.
+3. **Crafting & TradeSkill Assistant (`PUIProfessions`):**
+   - Real-time reagent inventory availability badges and recipe profitability summaries.
+4. **Tabletop & Tavern Expansion (`PUIDice`):**
+   - Interactive tavern dice duels and character sheet stat sync.
 
 ### 🧪 Sprint 4: Performance Profiling & Documentation
 1. **Endurance GC Profiling:** Run memory benchmarks across 2+ hour 40-man raid sessions to ensure zero heap leaks.
