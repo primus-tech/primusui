@@ -32,7 +32,7 @@ local function CleanStr(val)
     if not val then return "" end
     local s = tostring(val)
     if s == "nil" or s == "NO_KEY" then return "" end
-    return s
+    return PUIRoleplay.UnescapeRPText and PUIRoleplay:UnescapeRPText(s) or s
 end
 
 local function MapScale(val, oldMin, oldMax, newMin, newMax)

@@ -187,8 +187,10 @@ function Glance:RenderTargetData(targetName)
     for i = 1, 5 do
         local btn = f.glanceBtns[i]
         local glance = (charData.glances and charData.glances[i]) or {}
-        local title = glance.title or charData["atAGlance" .. i .. "Title"] or ""
-        local desc = glance.text or charData["atAGlance" .. i] or ""
+        local rawTitle = glance.title or charData["atAGlance" .. i .. "Title"] or ""
+        local rawDesc = glance.text or charData["atAGlance" .. i] or ""
+        local title = PUIRoleplay.UnescapeRPText and PUIRoleplay:UnescapeRPText(rawTitle) or rawTitle
+        local desc = PUIRoleplay.UnescapeRPText and PUIRoleplay:UnescapeRPText(rawDesc) or rawDesc
         local iconName = glance.icon or ""
         local iconIdx = tonumber(charData["atAGlance" .. i .. "Icon"]) or 0
 

@@ -355,7 +355,8 @@ function Sheet:SelectLoreChapter(idx)
 
     local target = targetPlayerName or UnitName("player")
     local data = (target == UnitName("player")) and PUIRoleplay:GetMyProfile() or PUIRoleplay:GetCharacterData(target)
-    local histText = (data and data.history and data.history["chapter" .. idx]) or ""
+    local rawHist = (data and data.history and data.history["chapter" .. idx]) or ""
+    local histText = PUIRoleplay:UnescapeRPText(rawHist)
     p4.chEB:SetText(histText)
     p4.chCount:SetText(string.len(histText) .. " / 1000")
 end
@@ -451,15 +452,18 @@ function Sheet:Refresh()
         p2.wEB:SetText(charData.weight or "")
         p2.bEB:SetText(charData.body_build or "")
         p2.emoEB:SetText(charData.current_emotion or "Calm")
-        local appDesc = charData.appearance_desc or charData.description or ""
+        local rawAppDesc = charData.appearance_desc or charData.description or ""
+        local appDesc = PUIRoleplay:UnescapeRPText(rawAppDesc)
         p2.descEB:SetText(appDesc)
         p2.descCount:SetText(string.len(appDesc) .. " / 1000")
 
         for i = 1, 5 do
             local card = p2.glanceCards[i]
             local glance = (charData.glances and charData.glances[i]) or {}
-            local gTitle = glance.title or charData["atAGlance" .. i .. "Title"] or ""
-            local gText = glance.text or charData["atAGlance" .. i] or ""
+            local rawTitle = glance.title or charData["atAGlance" .. i .. "Title"] or ""
+            local rawText = glance.text or charData["atAGlance" .. i] or ""
+            local gTitle = PUIRoleplay:UnescapeRPText(rawTitle)
+            local gText = PUIRoleplay:UnescapeRPText(rawText)
             local gIcon = glance.icon or ""
             local gIconIdx = tonumber(charData["atAGlance" .. i .. "Icon"]) or 0
 
@@ -485,10 +489,10 @@ function Sheet:Refresh()
     -- Tab 4: Lore & Origins
     local p4 = f.panel4
     if p4 then
-        p4.bCityEB:SetText(charData.birth_city or "")
-        p4.hCityEB:SetText(charData.home_city or "")
-        p4.mottoEB:SetText(charData.motto or "")
-        p4.facEB:SetText(charData.faction_clan or "")
+        p4.bCityEB:SetText(PUIRoleplay:UnescapeRPText(charData.birth_city or ""))
+        p4.hCityEB:SetText(PUIRoleplay:UnescapeRPText(charData.home_city or ""))
+        p4.mottoEB:SetText(PUIRoleplay:UnescapeRPText(charData.motto or ""))
+        p4.facEB:SetText(PUIRoleplay:UnescapeRPText(charData.faction_clan or ""))
         Sheet:SelectLoreChapter(Sheet.activeLoreChapter or 1)
     end
 
@@ -512,7 +516,7 @@ function Sheet:Refresh()
         end
         p6.adultFlagCB:SetChecked(charData.adult_18plus_flag == true)
         p6.erpDropdown:SetSelected(charData.erp_preference or "No Adult Content (Clean RP)")
-        p6.bndEB:SetText(charData.ooc_boundaries or "")
+        p6.bndEB:SetText(PUIRoleplay:UnescapeRPText(charData.ooc_boundaries or ""))
     end
 
     -- Tab 7: Profiles & Notes
@@ -531,8 +535,8 @@ function Sheet:Refresh()
                 pBtn.text:SetTextColor(0.90, 0.90, 0.95)
             end
         end
-        p7.oocEB:SetText(charData.ooc_notes or charData.ooc_info or "")
-        p7.notesEB:SetText(PUIRoleplay:GetCharacterNote(target) or "")
+        p7.oocEB:SetText(PUIRoleplay:UnescapeRPText(charData.ooc_notes or charData.ooc_info or ""))
+        p7.notesEB:SetText(PUIRoleplay:UnescapeRPText(PUIRoleplay:GetCharacterNote(target) or ""))
     end
 
     f.isRefreshing = false

@@ -223,6 +223,35 @@ function PUIRoleplay:ComposeFullName(p)
     return nameComposite
 end
 
+function PUIRoleplay:UnescapeRPText(text)
+    if self.Protocols and self.Protocols.UnescapeText then
+        return self.Protocols:UnescapeText(text)
+    end
+    if not text then return "" end
+    text = tostring(text)
+    text = string.gsub(text, "\r\n", "\n")
+    text = string.gsub(text, "\r", "\n")
+    text = string.gsub(text, "@[Nn]", "\n")
+    text = string.gsub(text, "@[Jj]", "\n")
+    text = string.gsub(text, "@[Tt]", "    ")
+    text = string.gsub(text, "@@", "@")
+    return text
+end
+
+function PUIRoleplay:EscapeRPText(text)
+    if self.Protocols and self.Protocols.EscapeText then
+        return self.Protocols:EscapeText(text)
+    end
+    if not text then return "" end
+    text = tostring(text)
+    text = string.gsub(text, "\r\n", "@N")
+    text = string.gsub(text, "\r", "@N")
+    text = string.gsub(text, "\n", "@N")
+    text = string.gsub(text, "\t", "@T")
+    text = string.gsub(text, "~", "-")
+    return text
+end
+
 function PUIRoleplay:ComposeTitle(charData)
     if not charData then return "" end
     local pfx = charData.prefix or ""

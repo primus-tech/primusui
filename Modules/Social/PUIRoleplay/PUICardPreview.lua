@@ -163,11 +163,10 @@ function Sheet:OpenCardPreviewModal(targetName)
     if lfStr == "" then lfStr = "|cff888888No preferences listed|r" end
     p.lfBadges:SetText(lfStr)
 
-    local snippet = data.current_emotion and ("Expression: \"" .. data.current_emotion .. "\"\n") or ""
-    if data.appearance_desc and data.appearance_desc ~= "" then
-        snippet = snippet .. string.sub(data.appearance_desc, 1, 200) .. "..."
-    elseif data.description and data.description ~= "" then
-        snippet = snippet .. string.sub(data.description, 1, 200) .. "..."
+    local rawDesc = (data.appearance_desc and data.appearance_desc ~= "") and data.appearance_desc or (data.description or "")
+    local cleanDesc = PUIRoleplay.UnescapeRPText and PUIRoleplay:UnescapeRPText(rawDesc) or rawDesc
+    if cleanDesc ~= "" then
+        snippet = snippet .. string.sub(cleanDesc, 1, 200) .. (string.len(cleanDesc) > 200 and "..." or "")
     else
         snippet = snippet .. "No description provided."
     end

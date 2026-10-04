@@ -123,7 +123,8 @@ function Tooltip:EnhancePlayerTooltip(tooltip, unit, playerName)
         for i = 1, 5 do
             local g = charData.glances[i]
             if g and g.active and g.title and g.title ~= "" then
-                table.insert(glanceSnippets, "|cffffd100[" .. g.title .. "]|r")
+                local gT = PUIRoleplay.UnescapeRPText and PUIRoleplay:UnescapeRPText(g.title) or g.title
+                table.insert(glanceSnippets, "|cffffd100[" .. gT .. "]|r")
             end
         end
         if table.getn(glanceSnippets) > 0 then
@@ -134,16 +135,18 @@ function Tooltip:EnhancePlayerTooltip(tooltip, unit, playerName)
     -- 6. IC / OOC Summary
     local icInfo = charData.ic_info
     if icInfo and icInfo ~= "" then
+        local cleanIC = PUIRoleplay.UnescapeRPText and PUIRoleplay:UnescapeRPText(icInfo) or icInfo
         tooltip:AddLine(" ")
         tooltip:AddLine("IC Status:", 0.25, 0.85, 0.45)
-        tooltip:AddLine(icInfo, 0.85, 0.85, 0.85, true)
+        tooltip:AddLine(cleanIC, 0.85, 0.85, 0.85, true)
     end
 
     local oocInfo = charData.ooc_notes or charData.ooc_info
     if oocInfo and oocInfo ~= "" then
+        local cleanOOC = PUIRoleplay.UnescapeRPText and PUIRoleplay:UnescapeRPText(oocInfo) or oocInfo
         tooltip:AddLine(" ")
         tooltip:AddLine("OOC Notes:", 0.85, 0.55, 0.2)
-        tooltip:AddLine(oocInfo, 0.85, 0.85, 0.85, true)
+        tooltip:AddLine(cleanOOC, 0.85, 0.85, 0.85, true)
     end
 
     tooltip:Show()

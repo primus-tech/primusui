@@ -60,6 +60,48 @@ function Protocols:DrunkDecode(text)
 end
 
 --------------------------------------------------------------------------------
+-- RP Text Codec (@N Newline & Escape Sequence Translation)
+--------------------------------------------------------------------------------
+function Protocols:UnescapeText(text)
+    if not text then return "" end
+    text = tostring(text)
+    if text == "" or text == "nil" or text == "NO_KEY" then return "" end
+
+    -- Normalize CRLF and CR if any slipped in
+    text = string.gsub(text, "\r\n", "\n")
+    text = string.gsub(text, "\r", "\n")
+
+    -- Replace wire tokens with natural characters
+    -- @N / @n -> newline
+    text = string.gsub(text, "@[Nn]", "\n")
+    -- @J / @j -> newline (soft return / paragraph)
+    text = string.gsub(text, "@[Jj]", "\n")
+    -- @T / @t -> tab indentation (4 spaces)
+    text = string.gsub(text, "@[Tt]", "    ")
+    -- @@ -> literal @
+    text = string.gsub(text, "@@", "@")
+
+    return text
+end
+
+function Protocols:EscapeText(text)
+    if not text then return "" end
+    text = tostring(text)
+    if text == "" or text == "nil" then return "" end
+
+    -- Replace line breaks with @N
+    text = string.gsub(text, "\r\n", "@N")
+    text = string.gsub(text, "\r", "@N")
+    text = string.gsub(text, "\n", "@N")
+    text = string.gsub(text, "\t", "@T")
+
+    -- Remove any ~ delimiters so they don't break wire chunk boundaries
+    text = string.gsub(text, "~", "-")
+
+    return text
+end
+
+--------------------------------------------------------------------------------
 -- String Splitting Utility (Safe for Lua 5.0.2 / Vanilla WoW 1.12.1)
 --------------------------------------------------------------------------------
 function Protocols:SplitString(str, delimiter, targetTable)
@@ -164,6 +206,16 @@ function Protocols:BuildPayload(dataPrefix, profile)
         elseif strVal == "false" then strVal = "0"
         end
 
+        -- Escape multi-line / special text fields for wire transmission
+        if key == "description" or key == "appearance_desc" or key == "motto" or
+           key == "ooc_info" or key == "ic_info" or key == "ooc_boundaries" or
+           string.find(key, "^history%d$") or string.find(key, "^atAGlance%d$") or
+           string.find(key, "^atAGlance%dTitle$") then
+            strVal = self:EscapeText(strVal)
+        else
+            strVal = string.gsub(strVal, "~", "-")
+        end
+
         payload = payload .. strVal
         if i < count then
             payload = payload .. "~"
@@ -216,6 +268,15 @@ function Protocols:ParsePayload(dataPrefix, chunks, playerName, targetChar)
         if key then
             local val = chunks[i]
             if val == "nil" or val == "NO_KEY" then val = "" end
+
+            -- Unescape multi-line fields on wire receipt
+            if key == "description" or key == "appearance_desc" or key == "motto" or
+               key == "birth_city" or key == "home_city" or
+               key == "ooc_info" or key == "ic_info" or key == "ooc_boundaries" or
+               string.find(key, "^history%d$") or string.find(key, "^atAGlance%d$") or
+               string.find(key, "^atAGlance%dTitle$") then
+                val = self:UnescapeText(val)
+            end
 
             targetChar[key] = val
 

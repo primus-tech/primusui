@@ -517,8 +517,10 @@ function Directory:RefreshFlyout()
     for i = 1, 5 do
         local gCard = flyout.p1.glanceCards[i]
         local glance = (data.glances and data.glances[i]) or {}
-        local gTitle = glance.title or data["atAGlance" .. i .. "Title"] or ""
-        local gText = glance.text or data["atAGlance" .. i] or ""
+        local rawTitle = glance.title or data["atAGlance" .. i .. "Title"] or ""
+        local rawText = glance.text or data["atAGlance" .. i] or ""
+        local gTitle = PUIRoleplay:UnescapeRPText(rawTitle)
+        local gText = PUIRoleplay:UnescapeRPText(rawText)
         local gIcon = glance.icon or ""
         local gIconIdx = tonumber(data["atAGlance" .. i .. "Icon"]) or 0
 
@@ -662,29 +664,34 @@ function Directory:RefreshFlyout()
     -- Tab 3: Style
     for _, sCard in ipairs(flyout.p3.styleRows) do
         local val = data[sCard.key] or "Not Specified"
-        sCard.valTxt:SetText("|cffffffff" .. tostring(val) .. "|r")
+        sCard.valTxt:SetText("|cffffffff" .. PUIRoleplay:UnescapeRPText(tostring(val)) .. "|r")
     end
 
     -- Tab 4: Lore
     local bioStr = ""
     if data.motto and data.motto ~= "" then
-        bioStr = bioStr .. "|cffffd100Motto:|r \"" .. data.motto .. "\"\n\n"
+        bioStr = bioStr .. "|cffffd100Motto:|r \"" .. PUIRoleplay:UnescapeRPText(data.motto) .. "\"\n\n"
     end
     if data.birth_city and data.birth_city ~= "" then
-        bioStr = bioStr .. "|cff00e5ffBirthplace:|r " .. data.birth_city .. "    |cff00e5ffHome:|r " .. (data.home_city or "") .. "\n\n"
+        bioStr = bioStr .. "|cff00e5ffBirthplace:|r " .. PUIRoleplay:UnescapeRPText(data.birth_city) .. "    |cff00e5ffHome:|r " .. PUIRoleplay:UnescapeRPText(data.home_city or "") .. "\n\n"
     end
     if data.history then
         for chIdx = 1, 6 do
             local chText = data.history["chapter" .. chIdx]
             if chText and chText ~= "" then
-                bioStr = bioStr .. "|cff00e5ff--- Chapter " .. chIdx .. " ---|r\n" .. chText .. "\n\n"
+                bioStr = bioStr .. "|cff00e5ff--- Chapter " .. chIdx .. " ---|r\n" .. PUIRoleplay:UnescapeRPText(chText) .. "\n\n"
             end
         end
     end
     if bioStr == "" then
-        bioStr = data.description or "No detailed biography recorded."
+        bioStr = PUIRoleplay:UnescapeRPText(data.description or "No detailed biography recorded.")
     end
     flyout.p4.bioText:SetText(bioStr)
+    if flyout.p4.bioText.GetStringHeight then
+        local neededH = math.max(400, flyout.p4.bioText:GetStringHeight() + 40)
+        local bioChild = flyout.p4.bioText:GetParent()
+        if bioChild then bioChild:SetHeight(neededH) end
+    end
 
     -- Tab 5: Notes
     flyout.p5.notesEB:SetText(PUIRoleplay:GetCharacterNote(name) or "")
