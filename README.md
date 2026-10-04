@@ -384,7 +384,10 @@ graph TD
 | **`/pui quest turtle`** | *(no args)* | Toggles Turtle WoW custom database delta-patching on/off |
 | **`/puiurl`** | `[url]` | Opens the standardized 1-pixel dark glass URL Copy Dialog |
 | **`/pui memory`** | *(no args)* | Prints table pool diagnostics and executes a garbage collection cycle |
-| **`/pui errors`** | *(no args)* | Opens the Primus Error Trap session error log |
+| **`/pui market`** | `[itemName \| deals \| sniper]` | Opens the Offline Market Explorer, searches an item, or opens the Deal Finder |
+| **`/pui merchant`** | `[scan \| stop \| prune \| market]` | AH Scanner controller, database pruner, and market tools |
+| **`/pui tactical`** | `[toggle \| test \| claim \| resolve]` | Inter-client threat claim & lockout protocol and focus-fire assist |
+| **`/pui hud`** | `[testflash]` | Triggers PUIHud MT triage health rebound reassurance flash test |
 | **`/rp`** or **`/ttrp`** or **`/pui rp`** | *(no args)* | Opens the 7-Tab Master Character Sheet |
 | **`/rp dir`** | `[query]` | Opens the Roleplay Matchmaking Directory & Discovery Matrix |
 | **`/rp dice`** | `[expression]` | Opens the DiceMaster D20 Tabletop & Combat Engine |
