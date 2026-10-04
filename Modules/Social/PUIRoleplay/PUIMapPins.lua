@@ -21,7 +21,7 @@ local function RenderRPPins(mapContext)
     if not mapContext then return end
 
     local currentZoneName = mapContext.zoneName or ""
-    local allChars = PUIRoleplay:GetAllKnownCharacters and PUIRoleplay:GetAllKnownCharacters() or {}
+    local allChars = (PUIRoleplay.GetAllKnownCharacters and PUIRoleplay:GetAllKnownCharacters()) or {}
 
     for name, data in pairs(allChars) do
         if name ~= UnitName("player") and data.zoneX and data.zoneY then
