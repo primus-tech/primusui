@@ -43,8 +43,10 @@ function PUIRoleplay:ComposeFullName(p)
         end
     elseif p.full_name and p.full_name ~= "" then
         nameComposite = p.full_name
+    elseif p.name and p.name ~= "" then
+        nameComposite = p.name
     else
-        nameComposite = UnitName("player") or ""
+        nameComposite = ""
     end
     return nameComposite
 end

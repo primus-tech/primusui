@@ -215,8 +215,10 @@ function PUIRoleplay:ComposeFullName(p)
         end
     elseif p.full_name and p.full_name ~= "" then
         nameComposite = p.full_name
+    elseif p.name and p.name ~= "" then
+        nameComposite = p.name
     else
-        nameComposite = UnitName("player") or ""
+        nameComposite = ""
     end
     return nameComposite
 end
@@ -363,7 +365,7 @@ function PUIRoleplay:IsPlayerOnline(name)
     local gData = self:GetGlobalData()
     if gData and gData.queryable_players and gData.queryable_players[name] then
         local lastSeen = gData.queryable_players[name]
-        if type(lastSeen) == "number" and lastSeen > (time() - 90) then
+        if type(lastSeen) == "number" and lastSeen > (time() - 180) then
             return true
         end
     end
@@ -502,26 +504,28 @@ function PUIRoleplay:OnEnable()
         Primus.Chat:RegisterConsumer("PUIRoleplayComms", 5, function(msgObj)
             if msgObj.event == "CHAT_MSG_CHANNEL" then
                 local ch = string.lower(msgObj.channelName or "")
-                local cs = string.lower(msgObj.target or "")
-                if ch == "owprp" or string.find(ch, "owprp") or
-                   ch == "ttrp" or string.find(ch, "ttrp") or
-                   ch == "xtensionxtooltip2" or string.find(ch, "xtensionxtooltip2") or
-                   ch == "myroleplay" or string.find(ch, "myroleplay") then
-                    PUIRoleplay.Comms:OnChatMessage(msgObj.message, msgObj.sender)
+                local chBase = string.lower(msgObj.channelNameBase or "")
+                local msgText = msgObj.message or msgObj.text
+                if ch == "owprp" or string.find(ch, "owprp") or chBase == "owprp" or string.find(chBase, "owprp") or
+                   ch == "ttrp" or string.find(ch, "ttrp") or chBase == "ttrp" or string.find(chBase, "ttrp") or
+                   ch == "xtensionxtooltip2" or string.find(ch, "xtensionxtooltip2") or chBase == "xtensionxtooltip2" or string.find(chBase, "xtensionxtooltip2") or
+                   ch == "myroleplay" or string.find(ch, "myroleplay") or chBase == "myroleplay" or string.find(chBase, "myroleplay") then
+                    PUIRoleplay.Comms:OnChatMessage(msgText, msgObj.sender)
                 end
             end
         end)
 
         Primus.Chat:RegisterConsumer("PUIRoleplayDialogue", 20, function(msgObj)
             local event = msgObj.event
+            local msgText = msgObj.message or msgObj.text
             if event == "CHAT_MSG_SAY" or event == "CHAT_MSG_EMOTE" or event == "CHAT_MSG_TEXT_EMOTE" or
                event == "CHAT_MSG_YELL" or event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_PARTY" or
                event == "CHAT_MSG_RAID" then
                 if PUIRoleplay.Listener then
-                    PUIRoleplay.Listener:ProcessMessage(event, msgObj.message, msgObj.sender)
+                    PUIRoleplay.Listener:ProcessMessage(event, msgText, msgObj.sender)
                 end
                 if PUIRoleplay.Elephant then
-                    PUIRoleplay.Elephant:LogMessage(event, msgObj.message, msgObj.sender)
+                    PUIRoleplay.Elephant:LogMessage(event, msgText, msgObj.sender)
                 end
             end
         end)

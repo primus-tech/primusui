@@ -99,8 +99,10 @@ local recycledMsgObj = {}
 local function BuildMessageObject(event, text, sender, lang, channelName, target, flags, zoneID, channelNumber, channelNameBase)
     recycledMsgObj.event = event
     recycledMsgObj.text = text or ""
+    recycledMsgObj.message = text or ""
     recycledMsgObj.sender = sender or ""
     recycledMsgObj.lang = lang or ""
+    recycledMsgObj.channel = channelName or ""
     recycledMsgObj.channelName = channelName or ""
     recycledMsgObj.channelNameBase = channelNameBase or channelName or ""
     recycledMsgObj.channelNumber = tonumber(channelNumber) or 0
@@ -110,6 +112,7 @@ local function BuildMessageObject(event, text, sender, lang, channelName, target
     recycledMsgObj.time = time()
     recycledMsgObj.timeShort = date("%H:%M")
     recycledMsgObj.timeFull = date("%H:%M:%S")
+    recycledMsgObj.type = string.gsub(event or "", "^CHAT_MSG_", "")
 
     -- Detect Category
     if event == "CHAT_MSG_SAY" or event == "CHAT_MSG_YELL" or event == "CHAT_MSG_EMOTE" or event == "CHAT_MSG_TEXT_EMOTE" then
