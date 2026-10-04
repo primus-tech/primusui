@@ -35,7 +35,12 @@ local merchantDB = DB:RegisterNamespace("PUIMerchant", {
 
 local isScanning = false
 local scanPage = 0
+local totalPages = 1
 local totalAuctionsCataloged = 0
+local isWaitingForNextPage = false
+local lastQueryTime = 0
+local pageRetries = 0
+local maxRetries = 3
 local scanBtn = nil
 local scanStatusText = nil
 local unitPriceLabels = {}
@@ -116,37 +121,64 @@ function PUIMerchant:GetItemPriceInfo(itemName, realm)
 end
 
 -- =========================================================================
--- FULL AH SCANNER ENGINE
+-- ASYNCHRONOUS FULL AH SCANNER ENGINE
 -- =========================================================================
 
--- Start Full AH Scan
+-- Start or Toggle Full AH Scan
 function PUIMerchant:StartScan()
     if not AuctionFrame or not AuctionFrame:IsShown() then
         DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: Open the Auction House to run a scan.", "ffbb33"))
         return
     end
 
+    if isScanning then
+        self:StopScan()
+        return
+    end
+
     if not CanSendAuctionQuery() then
-        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: AH query is on cooldown. Try again in a moment.", "ffbb33"))
+        DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: AH query is on cooldown. Please wait 2-3 seconds and click again.", "ffbb33"))
         return
     end
 
     isScanning = true
     scanPage = 0
+    totalPages = 1
     totalAuctionsCataloged = 0
+    isWaitingForNextPage = false
+    lastQueryTime = GetTime()
+    pageRetries = 0
 
     if scanBtn then
-        scanBtn:SetText("Scanning...")
-        scanBtn:Disable()
+        scanBtn:SetText("Stop Scan")
+        scanBtn:SetBackdropBorderColor(1.0, 0.25, 0.25, 1)
     end
 
     if scanStatusText then
-        scanStatusText:SetText("Scanning page 0...")
+        scanStatusText:SetText("Requesting Page 1...")
         scanStatusText:Show()
     end
 
     DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: Starting full AH catalog scan...", "69ccf0"))
-    QueryAuctionItems("", nil, nil, 0, 0, 0, scanPage, 0, 0, 0)
+    QueryAuctionItems("", nil, nil, 0, 0, 0, 0, 0, 0, 0)
+end
+
+-- Stop Active Scan
+function PUIMerchant:StopScan()
+    if not isScanning then return end
+    isScanning = false
+    isWaitingForNextPage = false
+
+    if scanBtn then
+        scanBtn:SetText("Scan AH")
+        scanBtn:SetBackdropBorderColor(1.0, 0.84, 0.0, 1)
+    end
+
+    if scanStatusText then
+        scanStatusText:SetText(string.format("Scan Stopped (%d cataloged)", totalAuctionsCataloged))
+    end
+
+    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH scan stopped. %d listings cataloged.", totalAuctionsCataloged), "ffbb33"))
 end
 
 -- Process Returned Auction Scan Batch
@@ -154,45 +186,79 @@ function PUIMerchant:ProcessScanResults()
     if not isScanning then return end
 
     local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
-    if numBatchAuctions == 0 then
-        self:FinishScan()
-        return
-    end
 
-    for i = 1, numBatchAuctions do
-        local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice = GetAuctionItemInfo("list", i)
-        if name and count and count > 0 and buyoutPrice and buyoutPrice > 0 then
-            local unitPrice = math.floor(buyoutPrice / count)
-            self:RecordAuction(name, unitPrice)
-            totalAuctionsCataloged = totalAuctionsCataloged + 1
+    -- Initial page latency / empty results fallback with retry
+    if (not totalAuctions or totalAuctions == 0) and numBatchAuctions == 0 and scanPage == 0 then
+        if pageRetries < maxRetries then
+            pageRetries = pageRetries + 1
+            isWaitingForNextPage = true
+            lastQueryTime = GetTime()
+            if scanStatusText then
+                scanStatusText:SetText(string.format("Waiting on AH server (retry %d)...", pageRetries))
+            end
+            return
+        else
+            self:FinishScan()
+            return
         end
     end
 
-    local totalPages = math.ceil(totalAuctions / NUM_AUCTION_ITEMS_PER_PAGE)
-    scanPage = scanPage + 1
-
-    if scanStatusText then
-        scanStatusText:SetText(string.format("Page %d / %d (%d items)", scanPage, totalPages, totalAuctionsCataloged))
+    if totalAuctions and totalAuctions > 0 then
+        totalPages = math.ceil(totalAuctions / (NUM_AUCTION_ITEMS_PER_PAGE or 50))
     end
 
-    if scanPage < totalPages and CanSendAuctionQuery() then
-        QueryAuctionItems("", nil, nil, 0, 0, 0, scanPage, 0, 0, 0)
-    else
+    if numBatchAuctions and numBatchAuctions > 0 then
+        for i = 1, numBatchAuctions do
+            local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice = GetAuctionItemInfo("list", i)
+            if name and count and count > 0 then
+                if buyoutPrice and buyoutPrice > 0 then
+                    local unitPrice = math.floor(buyoutPrice / count)
+                    self:RecordAuction(name, unitPrice)
+                    totalAuctionsCataloged = totalAuctionsCataloged + 1
+                elseif minBid and minBid > 0 then
+                    local unitBid = math.floor(minBid / count)
+                    self:RecordAuction(name, unitBid)
+                    totalAuctionsCataloged = totalAuctionsCataloged + 1
+                end
+            end
+        end
+    end
+
+    scanPage = scanPage + 1
+    pageRetries = 0
+
+    if scanPage >= totalPages or (numBatchAuctions == 0 and scanPage > 1) then
         self:FinishScan()
+    else
+        isWaitingForNextPage = true
+        lastQueryTime = GetTime()
+        if scanStatusText then
+            scanStatusText:SetText(string.format("Page %d/%d (%d items) - Cooldown...", scanPage, totalPages, totalAuctionsCataloged))
+        end
     end
 end
 
 -- Complete Scan
 function PUIMerchant:FinishScan()
     isScanning = false
+    isWaitingForNextPage = false
+
+    local realm = GetRealmName() or "Default"
+    local realmData = self:GetRealmPriceData(realm)
+    realmData.lastScan = Time:GetServerTimestamp()
+    realmData.totalListings = totalAuctionsCataloged
+
     if scanBtn then
         scanBtn:SetText("Scan AH")
+        scanBtn:SetBackdropBorderColor(1.0, 0.84, 0.0, 1)
         scanBtn:Enable()
     end
+
     if scanStatusText then
         scanStatusText:SetText(string.format("Scan Complete! (%d cataloged)", totalAuctionsCataloged))
     end
-    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH Scan Complete! %d auction listings cataloged.", totalAuctionsCataloged), "69ccf0"))
+
+    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText(string.format("[PUIMerchant]: AH Scan Complete! %d auction listings cataloged across %d pages.", totalAuctionsCataloged, scanPage), "69ccf0"))
 end
 
 -- =========================================================================
@@ -345,13 +411,21 @@ function PUIMerchant:OnInitialize()
 
     -- Subcommand registration via Console Router
     if Primus.Console and Primus.Console.RegisterSubCommand then
-        Primus.Console:RegisterSubCommand("merchant", function()
-            if AuctionFrame and AuctionFrame:IsShown() then
-                PUIMerchant:StartScan()
+        Primus.Console:RegisterSubCommand("merchant", function(argParam)
+            argParam = Utils.Trim(argParam or "")
+            if argParam == "stop" then
+                PUIMerchant:StopScan()
+            elseif argParam == "scan" or argParam == "" then
+                if AuctionFrame and AuctionFrame:IsShown() then
+                    PUIMerchant:StartScan()
+                else
+                    DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: Open the Auction House to run an AH scan.", "69ccf0"))
+                end
             else
-                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("[PUIMerchant]: Auction & market valuation active. Open the AH and click 'Scan AH' or hover over items to see market value.", "69ccf0"))
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("=== PrimusUI Merchant & AH Scanner ===", "69ccf0"))
+                DEFAULT_CHAT_FRAME:AddMessage(Utils.ColorText("/pui merchant [scan | stop]", "ffbb33"))
             end
-        end, "PUIMerchant AH price scanner & valuation (/pui merchant)")
+        end, "PUIMerchant AH price scanner & valuation (/pui merchant [scan|stop])")
     end
 end
 
@@ -384,6 +458,49 @@ function PUIMerchant:OnEnable()
         end
     end)
 
+    -- 0.15s Asynchronous Query Dispatcher & Watchdog
+    Time:Every(0.15, function()
+        if not isScanning then return end
+
+        local now = GetTime()
+
+        -- Auto-abort if player closes AH mid-scan
+        if not AuctionFrame or not AuctionFrame:IsShown() then
+            PUIMerchant:StopScan()
+            return
+        end
+
+        -- Check cooldown to dispatch next page
+        if isWaitingForNextPage then
+            if CanSendAuctionQuery() then
+                isWaitingForNextPage = false
+                lastQueryTime = now
+                if scanStatusText then
+                    scanStatusText:SetText(string.format("Querying Page %d/%d (%d items)...", scanPage + 1, totalPages, totalAuctionsCataloged))
+                end
+                QueryAuctionItems("", nil, nil, 0, 0, 0, scanPage, 0, 0, 0)
+            end
+        else
+            -- Watchdog: detect dropped packets or stuck queries (> 7 seconds)
+            if (now - lastQueryTime) > 7.0 then
+                if pageRetries < maxRetries then
+                    pageRetries = pageRetries + 1
+                    lastQueryTime = now
+                    if CanSendAuctionQuery() then
+                        if scanStatusText then
+                            scanStatusText:SetText(string.format("Retrying Page %d/%d (attempt %d)...", scanPage + 1, totalPages, pageRetries))
+                        end
+                        QueryAuctionItems("", nil, nil, 0, 0, 0, scanPage, 0, 0, 0)
+                    else
+                        isWaitingForNextPage = true
+                    end
+                else
+                    PUIMerchant:FinishScan()
+                end
+            end
+        end
+    end, "PUIMerchant")
+
     -- Register as PUITooltip Item Provider (Priority 20: runs after base vendor sell values)
     local Tooltip = Primus.PUITooltip
     if Tooltip and Tooltip.RegisterItemProvider then
@@ -394,7 +511,9 @@ function PUIMerchant:OnEnable()
 end
 
 function PUIMerchant:OnDisable()
+    Time:CancelAll("PUIMerchant")
     Events:UnregisterOwner("PUIMerchant")
+    self:StopScan()
     if scanBtn then scanBtn:Hide() end
     if scanStatusText then scanStatusText:Hide() end
 
