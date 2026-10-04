@@ -665,14 +665,14 @@ function PUIMerchant:UpdateFlyoutScannerUI()
         if state.isPaused then
             scanActionButton:SetText("Resume Scan")
             scanActionButton:SetBackdropBorderColor(1.0, 0.84, 0.0, 1.0)
-            scanCountdownLabel:SetText("|cffffbb33[Paused]|r")
+            scanCountdownLabel:SetText(string.format("|cffffbb33[Paused]|r • ETA: |cff69ccf0%s|r", state.etaText or "--"))
         else
             scanActionButton:SetText("Pause Scan")
             scanActionButton:SetBackdropBorderColor(0.20, 0.75, 1.0, 1.0)
             if state.remainingCooldown > 0 then
-                scanCountdownLabel:SetText(string.format("Next query: |cffffd100%ds|r", state.remainingCooldown))
+                scanCountdownLabel:SetText(string.format("Next: |cffffd100%ds|r • ETA: |cff69ccf0%s|r", state.remainingCooldown, state.etaText or "--"))
             else
-                scanCountdownLabel:SetText("|cff1eff00Dispatching...|r")
+                scanCountdownLabel:SetText(string.format("|cff1eff00Querying...|r • ETA: |cff69ccf0%s|r", state.etaText or "--"))
             end
         end
 
@@ -682,7 +682,7 @@ function PUIMerchant:UpdateFlyoutScannerUI()
             if pct > 100 then pct = 100 end
         end
         scanProgressBar:SetValue(pct)
-        scanStatusLabel:SetText(string.format("Page %d/%d (%d items)", state.scanPage, state.totalPages, state.totalCataloged))
+        scanStatusLabel:SetText(string.format("Page %d/%d (%d items • %d%%)", state.scanPage, state.totalPages, state.totalCataloged, pct))
     else
         scanActionButton:SetText("Scan AH (10s)")
         scanActionButton:SetBackdropBorderColor(1.0, 0.84, 0.0, 1.0)

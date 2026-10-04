@@ -46,8 +46,27 @@ PUIMerchant.scannerState = {
     totalPages = 1,
     totalCataloged = 0,
     remainingCooldown = 0,
+    etaSeconds = 0,
+    etaText = "--",
     statusText = "Ready",
 }
+
+-- Format Seconds into Human-Readable ETA (e.g., 2h 15m or 4m 30s)
+function PUIMerchant:FormatETA(seconds)
+    seconds = seconds or 0
+    if seconds <= 0 then return "0s" end
+    if seconds >= 3600 then
+        local hours = math.floor(seconds / 3600)
+        local mins = math.floor(math.mod(seconds, 3600) / 60)
+        return string.format("%dh %02dm", hours, mins)
+    elseif seconds >= 60 then
+        local mins = math.floor(seconds / 60)
+        local secs = math.mod(seconds, 60)
+        return string.format("%dm %02ds", mins, secs)
+    else
+        return string.format("%ds", seconds)
+    end
+end
 
 -- Update scanner state snapshot for UI components
 local function UpdateScannerState(statusMsg)
@@ -61,6 +80,15 @@ local function UpdateScannerState(statusMsg)
     local rem = math.floor(pageCooldownEnd - now)
     if rem < 0 then rem = 0 end
     PUIMerchant.scannerState.remainingCooldown = rem
+
+    -- Dynamic ETA Estimation
+    local remainingPages = totalPages - scanPage
+    if remainingPages < 0 then remainingPages = 0 end
+    local totalEtaSeconds = (remainingPages * PAGE_COOLDOWN) + rem
+    if not isScanning or scanPage == 0 then totalEtaSeconds = 0 end
+
+    PUIMerchant.scannerState.etaSeconds = totalEtaSeconds
+    PUIMerchant.scannerState.etaText = PUIMerchant:FormatETA(totalEtaSeconds)
 
     if statusMsg then
         PUIMerchant.scannerState.statusText = statusMsg
