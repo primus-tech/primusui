@@ -239,28 +239,31 @@ Primus.Widgets:ShowContextMenu(anchorFrame, {
 
 ---
 
-## 4. Prioritization & Recommended Roadmap
+## 4. Implementation Status & Verification Matrix
 
 ```mermaid
 graph LR
-    A[Phase 1: High Impact Performance] --> B[Domain 4: Unit Aura Scanner]
-    A --> C[Domain 3: Chat Ingestion Stream]
+    A[Phase 1: High Impact Performance] -->|✅ Complete| B[Domain 4: Unit Aura Scanner]
+    A -->|✅ Complete| C[Domain 3: Chat Ingestion Stream]
     
-    D[Phase 2: UI & UX Consistency] --> E[Domain 1: PUIMap Pin Service]
-    D --> F[Domain 7: Context Dropdowns]
+    D[Phase 2: UI & UX Consistency] -->|✅ Complete| E[Domain 1: PUIMap Pin Service]
+    D -->|✅ Complete| F[Domain 7: Context Dropdowns]
     
-    G[Phase 3: Core Utility Refinements] --> H[Domain 2: URL Copy Dialog]
-    G --> I[Domain 5: Item Link Unpacker]
-    G --> J[Domain 6: Audio Dispatcher]
+    G[Phase 3: Core Utility Refinements] -->|✅ Complete| H[Domain 2: URL Copy Dialog]
+    G -->|✅ Complete| I[Domain 5: Item Link Unpacker]
+    G -->|✅ Complete| J[Domain 6: Audio Dispatcher]
 ```
 
-1. **Phase 1 (High Impact Performance):**
-   - Centralize **Unit Aura Scanning** (`Primus.Auras`) and **Chat Ingestion** (`Primus.Chat`) to drastically cut combat CPU overhead and GC stutter.
-2. **Phase 2 (UI & UX Consistency):**
-   - Implement **`PUIMap` Pin Service** to unify World Map and Minimap overlays.
-   - Implement **`Primus.Widgets:CreateContextMenu`** to eliminate Blizzard `UIDropDownMenu` dependencies.
-3. **Phase 3 (Core Utility Refinements):**
-   - Unify **URL Copy Dialog**, **Item Link Unpacking**, and **Audio Dispatching**.
+- [x] **Phase 1 (High Impact Performance) — COMPLETE:**
+  - ✅ **Unit Aura Scanning (`Primus.Auras`):** 100ms cached scanner in `Core/Auras/Auras.lua` serving `PUIUnitBase`, `PUIWings`, `PUIAuras`, and group cleansing.
+  - ✅ **Chat Ingestion Stream (`Primus.Chat`):** Master listener for all 38 chat events in `Core/Chat/Chat.lua` with zero-allocation message object pooling serving `PUITalk`, `PUILogViewer`, `PUIRoleplay`, `PUIListener`, and `PUIElephant`.
+- [x] **Phase 2 (UI & UX Consistency) — COMPLETE:**
+  - ✅ **`PUIMap` Pin Service (`PUIMap`):** Reusable pin pool with radial clustering in `Modules/Utility/PUIMap/PUIMap.lua` serving `PUIQuest`, `PUIRoleplay`, and `PUIGathering`.
+  - ✅ **Context Menu Framework (`Primus.Widgets:ShowContextMenu`):** 1-pixel dark glass context menu in `Core/Widgets/ContextMenu.lua` serving `PUIXPBar`, `PUISpellbook`, and `PUIDirectory`.
+- [x] **Phase 3 (Core Utility Refinements) — COMPLETE:**
+  - ✅ **URL Copy Dialog (`Primus.Utils.ExtractURLs` & `ShowURLDialog`):** Unified URL regex and interactive copy dialog in `Core/Utils/Utils.lua` serving `PUITalkCopy` and `PUILogViewer`.
+  - ✅ **Item Link Unpacker (`Primus.Items`):** Single-call query and price resolver in `Core/Utils/Items.lua` serving bags, merchant, bank, and item comparison.
+  - ✅ **Audio Dispatcher (`Primus.Audio`):** 100ms sound throttle and governor in `Core/Media/Audio.lua` serving `PUISpellbook` and `PUIListener`.
 
 ---
 *End of Blueprint Document.*
